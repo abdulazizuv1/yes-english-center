@@ -1,4 +1,4 @@
-echo "---
+---
 deployment:
   tasks:
     - export DEPLOYPATH=/home/goodw790/public_html
