@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select Full Mock Test</title>
+    <link rel="stylesheet" href="./select-test.css" />
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+    <style>
+      .test-card {
+        position: relative;
+        padding-bottom: 90px; /* Make room for result section */
+      }
+
+      .user-result {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .user-result:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-result.no-result {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #fde68a;
+        cursor: default;
+        justify-content: center;
+      }
+
+      .user-result.no-result:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .result-score {
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .no-result-text {
+        font-size: 14px;
+        color: red;
+        font-weight: 500;
+      }
+
+      .band-badge {
+        padding: 8px 16px;
+        border-radius: 24px;
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .band-9 {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+      .band-8 {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+      }
+      .band-7 {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      }
+      .band-6 {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .band-5 {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+      .band-low {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+      }
+
+      .loading-result {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      .spinner-small {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <span
+        >🎯
+        <h1>Full Mock Tests</h1></span
+      >
+      <a href="/pages/mock.html" class="back-btn">🔙 Back to Mock</a>
+    </div>
+
+    <div class="subtitle">
+      <p>
+        Complete IELTS practice with Listening, Reading, and Writing sections
+      </p>
+    </div>
+
+    <div class="tests-grid" id="test-buttons">
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>Loading full mock tests...</div>
+      </div>
+    </div>
+
+    <script type="module" src="./select-test.js"></script>
+  </body>
+</html>

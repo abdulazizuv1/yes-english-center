@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Test</title>
+    <link rel="icon" href="../image/Logo.ver1.2.png" />
+    <link rel="stylesheet" href="./mock.css" />
+  </head>
+  <body>
+    <div class="header">
+      <span><img src="/image/logo.png" alt=""><h1>IELTS Mock Tests</h1></span>
+      <a href="/" class="back-btn">🔙 Back to Home</a>
+    </div>
+    
+    <div class="subtitle">
+      <p>Choose your test type and challenge yourself with authentic IELTS practice materials</p>
+      <p>If there are mistakes or errors in the tests contact to admin via telegram: @abz_uv</p>
+    </div>
+    
+    <div class="tests-grid">
+      <button class="test-card active" onclick="location.href='/pages/mock/reading/select-test.html'">
+        <span class="test-icon">📖</span>
+        <div class="test-title">Reading</div>
+        <p class="test-subtitle">60 minutes • 40 questions</p>
+        <span class="test-status available">Available</span>
+      </button>
+      
+      <button class="test-card active" onclick="location.href='/pages/mock/listening/select-test.html'">
+        <span class="test-icon">🎧</span>
+        <div class="test-title">Listening</div>
+        <p class="test-subtitle">30 minutes • 40 questions</p>
+        <span class="test-status available">Available</span>
+      </button>
+      
+      <button class="test-card active" onclick="location.href='/pages/mock/writing/select-test.html'">
+        <span class="test-icon">✍️</span>
+        <div class="test-title">Writing</div>
+        <p class="test-subtitle">60 minutes • 2 tasks</p>
+        <span class="test-status available">Available</span>
+      </button>
+      
+      <button class="test-card active full-mock" onclick="location.href='/pages/mock/full/select-test.html'">
+        <span class="test-icon">📝</span>
+        <div class="test-title">Full Mock Test</div>
+        <p class="test-subtitle">3 hours • Complete IELTS</p>
+        <span class="test-status available">Available</span>
+      </button>
+    </div>
+    
+    <div class="info-section">
+      <div class="info-card">
+        <h3>💡 Test Tips</h3>
+        <ul>
+          <li>Ensure stable internet connection</li>
+          <li>Find a quiet environment</li>
+          <li>Have pen and paper ready</li>
+          <li>Read instructions carefully</li>
+        </ul>
+      </div>
+      
+      <div class="info-card">
+        <h3>⏱️ Time Management</h3>
+        <ul>
+          <li>Reading: 20 min per passage</li>
+          <li>Listening: Follow audio pace</li>
+          <li>Review answers if time permits</li>
+          <li>Don't spend too long on one question</li>
+        </ul>
+      </div>
+    </div>
+    
+    <script type="module" src="mock.js"></script>
+  </body>
+</html>

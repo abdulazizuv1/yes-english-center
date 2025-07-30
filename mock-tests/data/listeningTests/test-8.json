@@ -1,0 +1,450 @@
+{
+  "title": "IELTS Listening Test 8",
+  "parts": {
+    "testId": "ielts-listening-8",
+    "title": "IELTS Listening Practice Test 8",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Damaged Fridge Report",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart1.mp3?alt=media&token=ede31d7a-376a-41b0-b878-4ab0e762db68",
+        "content": [
+          {
+            "type": "table",
+            "title": "Damaged ( Fridge Report)",
+            "groupInstruction": "Questions 1-6\nComplete the table below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "columns": [
+              "Field",
+              "Information"
+            ],
+            "rows": [
+              {
+                "field": "• Warranty:",
+                "information": "3 years"
+              },
+              {
+                "field": "• Model:",
+                "information": "1 ___q1___ Mount"
+              },
+              {
+                "field": "• Colour:",
+                "information": "2 ___q2___"
+              },
+              {
+                "field": "• Date of purchase:",
+                "information": "3 ___q3___"
+              },
+              {
+                "field": "• Problems:",
+                "information": "the non- stop 4 ___q4___<br>5 ___q5___ degrees"
+              },
+              {
+                "field": "• The repair shop",
+                "information": "Ken's appliance ( near to the 6 ___q6___)"
+              },
+              {
+                "field": "• The customer needs to store food for her 7 ___q7___ shop.",
+                "information": ""
+              },
+              {
+                "field": "• Total value of loss:",
+                "information": "8 $___q8___"
+              },
+              {
+                "field": "• Things to do:  <br>• Ask the ",
+                "information": "• Ask the 9 ___q9___ To call back"
+              },
+              {
+                "field": "• Replace the damaged",
+                "information": "10 ___q10___"
+              }
+            ],
+            "answer": {
+              "q1": "Top",
+              "q2": "Silver",
+              "q3": "January 12(th)",
+              "q4": "alarm",
+              "q5": "10/ ten",
+              "q6": "station",
+              "q7": "sandwich",
+              "q8": "180",
+              "q9": "manager",
+              "q10": "door"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the table below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Tourist Attractions",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart2.mp3?alt=media&token=7b9e8fc3-9003-42c4-b86e-7fa7467dbbf1",
+        "content": [
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q11_12_13_14_15_16",
+            "text": "What tourist attraction does each of the following locations have?",
+            "instructions": "Choose six answers from the box and write the correct letter, A-I, next to Questions 11-16",
+            "questions": [
+              {
+                "questionId": "q11",
+                "text": "sheepfoul",
+                "correctAnswer": "I"
+              },
+              {
+                "questionId": "q12",
+                "text": "Brown Mare",
+                "correctAnswer": "H"
+              },
+              {
+                "questionId": "q13",
+                "text": "doris",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q14",
+                "text": "Lodge Estate",
+                "correctAnswer": "E"
+              },
+              {
+                "questionId": "q15",
+                "text": "Aurden",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q16",
+                "text": "Eastlake",
+                "correctAnswer": "F"
+              }
+            ],
+            "options": {
+              "A": "farming life in the past",
+              "B": "Nature reserve",
+              "C": "canoes",
+              "D": "old ruins",
+              "E": "newly born deer",
+              "F": "birds",
+              "G": "waterfalls",
+              "H": "wild flowers",
+              "I": "hills"
+            }
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q17_18",
+            "text": "Which TWO types of accommodation are available on a weekly basis?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q17",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q18",
+                "correctAnswer": "D"
+              }
+            ],
+            "options": {
+              "A": "lighthouse",
+              "B": "hostel",
+              "C": "castle",
+              "D": "cottages",
+              "E": "bed and breakfast"
+            }
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q19_20",
+            "text": "Which TWO benefits can all the members get?",
+            "instructions": "Choose TWO letter, A-E",
+            "questions": [
+              {
+                "questionId": "q19",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q20",
+                "correctAnswer": "D"
+              }
+            ],
+            "options": {
+              "A": "free entry to some castles",
+              "B": "subscription of Scottish magazines",
+              "C": "discount of apartment rent",
+              "D": "free visitor guide",
+              "E": "free parking."
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "SUVs (Sport Utility Vehicles)",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart3.mp3?alt=media&token=6c148324-6588-4b52-a74a-f55548903f65",
+        "content": [
+          {
+            "type": "text",
+            "value": "Purposes"
+          },
+          {
+            "type": "text",
+            "value": "• Initially made for off-road driving in remote areas"
+          },
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "gap-fill",
+            "text": "• Now often found in",
+            "postfix": "",
+            "correctAnswer": "cities",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "Advantages"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "gap-fill",
+            "text": "• Available for",
+            "postfix": "Purpose",
+            "correctAnswer": "commercial",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "gap-fill",
+            "text": "• Larger",
+            "postfix": "Capacity",
+            "correctAnswer": "engine",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "• Can haul heavy cargo"
+          },
+          {
+            "type": "text",
+            "value": "Reasons for popularity"
+          },
+          {
+            "type": "text",
+            "value": "• Due to their image"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "gap-fill",
+            "text": "• Seen as",
+            "postfix": "By mothers",
+            "correctAnswer": "safe",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "• Greater seating capacity"
+          },
+          {
+            "type": "question",
+            "questionId": "q25",
+            "format": "gap-fill",
+            "text": "• Drivers like their",
+            "postfix": "",
+            "correctAnswer": "higher seats",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "Disadvantages"
+          },
+          {
+            "type": "question",
+            "questionId": "q26",
+            "format": "gap-fill",
+            "text": "• SUVs can be",
+            "postfix": "in urban centres beacause of their",
+            "correctAnswer": "harmful",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q27",
+            "format": "gap-fill",
+            "text": "",
+            "postfix": "",
+            "correctAnswer": "weight",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "• The bodywork won't deform in the collision to absorb impact energy"
+          },
+          {
+            "type": "question",
+            "questionId": "q28",
+            "format": "gap-fill",
+            "text": "• They are liable to",
+            "postfix": "",
+            "correctAnswer": "roll over",
+            "wordLimit": 2
+          },
+          {
+            "type": "text",
+            "value": "How to limit the use of SUVs"
+          },
+          {
+            "type": "question",
+            "questionId": "q29",
+            "format": "gap-fill",
+            "text": "• Limit use to those people who need them ( e.g.",
+            "postfix": ")",
+            "correctAnswer": "farmers",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q30",
+            "format": "gap-fill",
+            "text": "• Raise cost of",
+            "postfix": "For drivers",
+            "correctAnswer": "insurance",
+            "wordLimit": 2
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Complete the notes below.",
+          "note": "Write NO MORE THAN TWO WORDS for each answer."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "Learner Persistence Study",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart4.mp3?alt=media&token=86ac8ed7-c62f-4a68-9191-022177b54659",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "multiple-choice",
+            "text": "participants in the learner persistence study were all drawn from the same",
+            "options": {
+              "A": "age",
+              "B": "geographical area",
+              "C": "socio- economic level"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "multiple-choice",
+            "text": "the study showed that when starting their course, older students were worried about",
+            "options": {
+              "A": "effects on their home life",
+              "B": "implications for their future career",
+              "C": "financial constraints"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "table",
+            "title": "Research findings",
+            "groupInstruction": "Complete the notes below.\nWrite ONE WORD ONLY for each answer.",
+            "columns": [
+              "Social and Environmental Factors",
+              "Other Factors",
+              "Personal Characteristics"
+            ],
+            "rows": [
+              {
+                "socialandenvironmentalfactors": "Effective support",
+                "otherfactors": "Perceived success in study",
+                "personalcharacteristics": "Enjoyment of a 33 ___q33___"
+              },
+              {
+                "socialandenvironmentalfactors": "Positive experience at 34 ___q34___",
+                "otherfactors": "Good 35 ___q35___",
+                "personalcharacteristics": "Many 36 ___q36___ in daily life"
+              },
+              {
+                "socialandenvironmentalfactors": "Good interaction with the 37 ___q37___",
+                "otherfactors": "No family problems",
+                "personalcharacteristics": "Capacity for multi-tasking"
+              }
+            ],
+            "answer": {
+              "q33": "challenge",
+              "q34": "school",
+              "q35": "health",
+              "q36": "interests",
+              "q37": "tutors"
+            }
+          },
+          {
+            "type": "text",
+            "value": "Recommendations"
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "• Ask new students to complete questionnaires to gauge their level of",
+            "postfix": "",
+            "correctAnswer": "maturity",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "• Train the selected students to act as",
+            "postfix": "",
+            "correctAnswer": "advisors",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "• Outside office hours, offer",
+            "postfix": "help",
+            "correctAnswer": "online",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "• Follow up students who miss deadlines"
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Answer the questions and complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 30,
+      "version": "1.0",
+      "createdAt": "2024-01-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753633730,
+    "_nanoseconds": 681000000
+  }
+}

@@ -1,0 +1,523 @@
+{
+  "title": "IELTS Listening Test 2",
+  "parts": {
+    "testId": "ielts-listening-2",
+    "title": "IELTS Listening Practice Test 2",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Beechen Festival",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-2%2Fpart1.mp3?alt=media&token=ab9112f0-9313-477d-96ac-e5489364f8f4",
+        "content": [
+          {
+            "type": "table",
+            "title": "Beechen Festival",
+            "groupInstruction": "Questions 1-6\nComplete the table below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "columns": [
+              "Date",
+              "Time",
+              "Activity",
+              "Place",
+              "Comments"
+            ],
+            "rows": [
+              {
+                "date": "June 19th",
+                "time": "7 p.m.",
+                "activity": "Example<br>Concert",
+                "place": "the 1 ___q1___",
+                "comments": ""
+              },
+              {
+                "date": "June 20th",
+                "time": "2 ___q2___ p.m.",
+                "activity": "tour",
+                "place": "meet at<br>the 3 ___q3___",
+                "comments": "includes a visit to an<br>old flour mill"
+              },
+              {
+                "date": "June 21st",
+                "time": "all day",
+                "activity": "children's<br> 4 ___q4___ competition",
+                "place": "Beechen<br>Community<br>Centre",
+                "comments": "bring a 5 ___q5___"
+              },
+              {
+                "date": "June 21st",
+                "time": "evening",
+                "activity": "fireworks",
+                "place": "by the 6 ___q6___",
+                "comments": ""
+              }
+            ],
+            "answer": {
+              "q1": "theatre",
+              "q2": "4.30",
+              "q3": "station",
+              "q4": "cooking",
+              "q5": "plate",
+              "q6": "river"
+            }
+          },
+          {
+            "type": "question",
+            "questionId": "q7",
+            "format": "gap-fill",
+            "text": "This year, activities end by",
+            "postfix": "p.m.",
+            "correctAnswer": "11.15",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q8",
+            "format": "gap-fill",
+            "text": "There won't be any",
+            "postfix": "in the town centre this year.",
+            "correctAnswer": "parking",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q9",
+            "format": "gap-fill",
+            "text": "The festival's web address is www.",
+            "postfix": ".com.",
+            "correctAnswer": "events",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q10",
+            "format": "gap-fill",
+            "text": "Festival organisers would like to receive",
+            "postfix": "online.",
+            "correctAnswer": "feedback",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Walking Holiday",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-2%2Fpart2.mp3?alt=media&token=ae8ac6c8-096c-4270-90d9-eb320fc2b5a3",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "text": "Approximately how many passengers does the ferry hold?",
+            "options": {
+              "A": "160",
+              "B": "600",
+              "C": "2000"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "Which items should the tourists pack in a separate bag?",
+            "options": {
+              "A": "food",
+              "B": "reading material",
+              "C": "medicines"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "The hostel in La Vega de Liebana has",
+            "options": {
+              "A": "good washing facilities.",
+              "B": "a games room.",
+              "C": "a number of single bedrooms."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "multiple-choice",
+            "text": "Residents at the hostel are not allowed to",
+            "options": {
+              "A": "take furniture out of the hostel building.",
+              "B": "enter the hostel after a certain time.",
+              "C": "smoke in the hostel gardens."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "text",
+            "value": "Clothes and equipment"
+          },
+          {
+            "type": "text",
+            "value": "Bring:"
+          },
+          {
+            "type": "text",
+            "value": "boots with thick soles"
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "gap-fill",
+            "text": "spare",
+            "postfix": "",
+            "correctAnswer": "socks",
+            "wordLimit": 3
+          },
+          {
+            "type": "text",
+            "value": "light waterproofs"
+          },
+          {
+            "type": "question",
+            "questionId": "q16",
+            "format": "gap-fill",
+            "text": "suncream: strength",
+            "postfix": "",
+            "correctAnswer": "total block",
+            "wordLimit": 3
+          },
+          {
+            "type": "question",
+            "questionId": "q17",
+            "format": "gap-fill",
+            "text": "a",
+            "postfix": "folder for map, etc.",
+            "correctAnswer": "plastic",
+            "wordLimit": 3
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q18_19_20",
+            "text": "Which THREE of the following features of the area in Spain does the speaker talk about?",
+            "instructions": "Choose THREE letters, A-G",
+            "questions": [
+              {
+                "questionId": "q18",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q19",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q20",
+                "correctAnswer": "G"
+              }
+            ],
+            "options": {
+              "A": "altitude",
+              "B": "coastline",
+              "C": "economy",
+              "E": "temperatures",
+              "F": "vegetation",
+              "G": "wildlife"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Peer Assessment",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-2%2Fpart3.mp3?alt=media&token=a0c762c2-27cc-4628-92be-dcafaada2b76",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "multiple-choice",
+            "text": "Sally says many students see peer assessment as",
+            "options": {
+              "A": "a way for tutors to save time.",
+              "B": "a useful learning tool.",
+              "C": "a valuable form of assessment."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "multiple-choice",
+            "text": "What do Steve and Sally agree is an advantage of peer assessment?",
+            "options": {
+              "A": "It's more reliable than self-assessment.",
+              "B": "It increases students' self-awareness.",
+              "C": "It builds rapport between students."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "multiple-choice",
+            "text": "If the peer assessment marks seem incorrect,",
+            "options": {
+              "A": "students should mark the assignments again.",
+              "B": "the tutor should check those assignments.",
+              "C": "the marking criteria should be rewritten."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "multiple-choice",
+            "text": "How were the presentations in the research project marked?",
+            "options": {
+              "A": "Students and lecturers marked all the presentations.",
+              "B": "Students chose which presentations they wanted to mark.",
+              "C": "Lecturers marked a selection of presentations."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "text",
+            "value": "Categories of student markers"
+          },
+          {
+            "type": "question",
+            "questionId": "q25",
+            "format": "gap-fill",
+            "text": "male students marking female presenters",
+            "postfix": "",
+            "correctAnswer": "B",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q26",
+            "format": "gap-fill",
+            "text": "female students marking male presenters",
+            "postfix": "",
+            "correctAnswer": "C",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q27",
+            "format": "gap-fill",
+            "text": "female students marking female presenters",
+            "postfix": "",
+            "correctAnswer": "C",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q28",
+            "format": "gap-fill",
+            "text": "younger students marking older presenters",
+            "postfix": "",
+            "correctAnswer": "A",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q29",
+            "format": "gap-fill",
+            "text": "students marking presenters from a different university",
+            "postfix": "",
+            "correctAnswer": "C",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q30",
+            "format": "gap-fill",
+            "text": "students who had helped set criteria",
+            "postfix": "",
+            "correctAnswer": "B",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "Bislama - The Pidgin English Language of Vanuatu",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-2%2Fpart4.mp3?alt=media&token=47be4460-7b91-40e5-967c-881f808916a5",
+        "content": [
+          {
+            "type": "text",
+            "value": "Languages in Vanuatu"
+          },
+          {
+            "type": "text",
+            "value": "Local languages: Actively spoken languages: 81"
+          },
+          {
+            "type": "text",
+            "value": "Declining languages: 17"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "",
+            "postfix": "languages: 8",
+            "correctAnswer": "extinct",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Total: 106"
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "Foreign languages: English is used in the",
+            "postfix": "system",
+            "correctAnswer": "education",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Bislama"
+          },
+          {
+            "type": "text",
+            "value": "• It is spoken by 90% of the population today."
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "• In the past this language was described as",
+            "postfix": "",
+            "correctAnswer": "broken",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "History of Bislama"
+          },
+          {
+            "type": "text",
+            "value": "• Around 1800 it was used as a common language on many ships."
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "• After 1860 Vanuatu people worked in Australian",
+            "postfix": "",
+            "correctAnswer": "plantation",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "• After 1950 people moved to the",
+            "postfix": "",
+            "correctAnswer": "city",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Description of Bislama"
+          },
+          {
+            "type": "text",
+            "value": "General"
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "• Bislama should be called a",
+            "postfix": "pidgin.",
+            "correctAnswer": "developed",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Vocabulary"
+          },
+          {
+            "type": "text",
+            "value": "• Most words come from English."
+          },
+          {
+            "type": "question",
+            "questionId": "q37",
+            "format": "gap-fill",
+            "text": "• Words such as 'from' may have more",
+            "postfix": "in Bislama.",
+            "correctAnswer": "meanings",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "• Less than 10% of words are of",
+            "postfix": "origin.",
+            "correctAnswer": "French",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "• Pacific words describe the natural world and also local",
+            "postfix": "",
+            "correctAnswer": "culture",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Grammar"
+          },
+          {
+            "type": "text",
+            "value": "• It is based on Vanuatu languages."
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "• The word 'long' acts as an important",
+            "postfix": "in Bislama.",
+            "correctAnswer": "preposition",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 40,
+      "version": "1.0",
+      "createdAt": "2024-01-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753610715,
+    "_nanoseconds": 607000000
+  }
+}

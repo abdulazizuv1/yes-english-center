@@ -1,0 +1,419 @@
+{
+  "title": "IELTS Listening Test 5",
+  "parts": {
+    "testId": "ielts-listening-5",
+    "title": "IELTS Listening Practice Test 5",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Medical Consultation",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart1.mp3?alt=media&token=1f37ede7-ca3d-4941-8afc-e5a5026813f0",
+        "content": [
+          {
+            "type": "table",
+            "title": "Consultation",
+            "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "columns": [
+              "Section",
+              "Information"
+            ],
+            "rows": [
+              {
+                "section": "Patient Information",
+                "information": "Name: Anu 1 ___q1___<br>Post code: 2 ___q2___<br>Current address: 3 ___q3___ Avenue<br>Birthday: October 1st 4 ___q4___<br>Phone number: 875934"
+              },
+              {
+                "section": "Health Condition",
+                "information": "Background: Illness has lasted for 5 ___q5___ days<br>Symptom: see 6 ___q6___ lights<br>Possible cause: the room was too 7 ___q7___<br>Previous hospital: 8 ___q8___ Hospital"
+              },
+              {
+                "section": "Suggestions",
+                "information": "Have a good rest after staring at a 9 ___q9___ for a long time<br>Use some medicine to ease eye 10 ___q10___"
+              }
+            ],
+            "answer": {
+              "q1": "Atkinson",
+              "q2": "EL14 2BF",
+              "q3": "Queens",
+              "q4": "1986",
+              "q5": "5",
+              "q6": "Flashing",
+              "q7": "Bright",
+              "q8": "Central",
+              "q9": "Screen",
+              "q10": "strain"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Davison Wildlife Park",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart2.mp3?alt=media&token=aa6a29e6-5847-4d28-85cd-5ba69f178209",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "text": "Where is the information board?",
+            "options": {
+              "A": "At the reception",
+              "B": "Inside the cottage",
+              "C": "On the beach"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "Which sport do customers have to book in advance?",
+            "options": {
+              "A": "Beach soccer",
+              "B": "Water-skiing",
+              "C": "Scuba diving"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "What does the cave tour ticket price include",
+            "options": {
+              "A": "shoes",
+              "B": "a map of cave",
+              "C": "Safety helmet"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "gap-fill",
+            "text": "Davison Wildlife Park is a great place for",
+            "postfix": "",
+            "correctAnswer": "family",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "gap-fill",
+            "text": "Children are allowed to",
+            "postfix": "",
+            "correctAnswer": "feed the animals",
+            "wordLimit": 3
+          },
+          {
+            "type": "question",
+            "questionId": "q16",
+            "format": "gap-fill",
+            "text": "Red kangaroos are larger than",
+            "postfix": "",
+            "correctAnswer": "adults",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q17",
+            "format": "gap-fill",
+            "text": "Crocodiles can live for at least",
+            "postfix": "",
+            "correctAnswer": "50 years",
+            "wordLimit": 2
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q18_19_20",
+            "text": "Which THREE activities are popular now for tourists in inland region?",
+            "instructions": "Choose THREE correct answers.",
+            "questions": [
+              {
+                "questionId": "q18",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q19",
+                "correctAnswer": "E"
+              },
+              {
+                "questionId": "q20",
+                "correctAnswer": "G"
+              }
+            ],
+            "options": {
+              "A": "hill hiking",
+              "B": "barbecue and bonfire",
+              "C": "buying souvenirs",
+              "D": "visiting EMU farm",
+              "E": "visiting cheese factory",
+              "F": "following nature trails",
+              "G": "fruit picking",
+              "H": "staff"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Research Project Discussion",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart3.mp3?alt=media&token=b1980274-6773-40eb-a07f-43f08e8f1de2",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "multiple-choice",
+            "text": "Why did they do it as a team?",
+            "options": {
+              "A": "They needed to do a lot of research.",
+              "B": "They had worked together before.",
+              "C": "The research was very complicated."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "multiple-choice",
+            "text": "Who will be the interviewees at the first stage?",
+            "options": {
+              "A": "manufacturers",
+              "B": "shoppers",
+              "C": "managers"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "multiple-choice",
+            "text": "What is the manufacturers' top priority on the labels?",
+            "options": {
+              "A": "the weight",
+              "B": "the ingredients",
+              "C": "the price"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "multiple-choice",
+            "text": "What result surprised them?",
+            "options": {
+              "A": "There are a lot of additives in food.",
+              "B": "The cost of food is much higher than before.",
+              "C": "Fast food is popular among customers."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q25",
+            "format": "multiple-choice",
+            "text": "What does Jack worry about most regarding the project?",
+            "options": {
+              "A": "They don't have enough respondents.",
+              "B": "There is not enough time.",
+              "C": "Some important data is not available."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q26_27_28_29_30",
+            "text": "What does the tutor suggest doing with Jack's research regarding each of the following tasks?",
+            "instructions": "Choose FIVE answers from the box and write the correct letter, A-E, next to Questions 26-30.",
+            "questions": [
+              {
+                "questionId": "q26",
+                "text": "sort out recorded content",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q27",
+                "text": "collect and analyse some specific data",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q28",
+                "text": "do research on ingredients of well-done beef",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q29",
+                "text": "interview customers when they shop",
+                "correctAnswer": "E"
+              },
+              {
+                "questionId": "q30",
+                "text": "decide on the format of the presentation",
+                "correctAnswer": "D"
+              }
+            ],
+            "options": {
+              "A": "do it with a partner",
+              "B": "not worthy of doing",
+              "C": "leave it to others",
+              "D": "do it later",
+              "E": "need special training beforehand"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "Study of Fossil Park",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart4.mp3?alt=media&token=93c0a37e-e981-464b-8bb9-b952b5f380b9",
+        "content": [
+          {
+            "type": "text",
+            "value": "Types of fossils:"
+          },
+          {
+            "type": "text",
+            "value": "- transitional fossils: rare, show evidence of evolutionary change"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "-",
+            "postfix": "fossils: more common, actual fossilised remains",
+            "correctAnswer": "preserved",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "-",
+            "postfix": "fossils: indirect evidence of animals, such as footprints or tunnels",
+            "correctAnswer": "trace",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Fossilisation processes:"
+          },
+          {
+            "type": "text",
+            "value": "Organism trapped in volcanic ash"
+          },
+          {
+            "type": "text",
+            "value": "Petrification"
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "- An animal is",
+            "postfix": "in the mud after death.",
+            "correctAnswer": "buried",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "- Mud dries and hardens."
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "-",
+            "postfix": "replace the bones leaving a stone shape.",
+            "correctAnswer": "mineral",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Purchasing fossils:"
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "- Site: Shop outside the park or from the park's",
+            "postfix": "",
+            "correctAnswer": "affordable",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "- Prices: generally",
+            "postfix": "",
+            "correctAnswer": "flashing",
+            "wordLimit": 1
+          },
+          {
+            "type": "table",
+            "title": "Tools and Functions",
+            "groupInstruction": "Questions 37-40\nComplete the table below. Write NO MORE THAN TWO WORDS for each answer.",
+            "columns": [
+              "Tools",
+              "Function or purpose"
+            ],
+            "rows": [
+              {
+                "tools": "A tape measure",
+                "functionorpurpose": "Record the 37 ___q37___ of each fossil"
+              },
+              {
+                "tools": "A notebook",
+                "functionorpurpose": "Record the types of 38 ___q38___"
+              },
+              {
+                "tools": "A camera",
+                "functionorpurpose": "Record the 39 ___q39___ of each fossil"
+              },
+              {
+                "tools": "A compass",
+                "functionorpurpose": "Detect 40 ___q40___ the fossils to locate"
+              }
+            ],
+            "answer": {
+              "q37": "dimension",
+              "q38": "rocks",
+              "q39": "images",
+              "q40": "sediments"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 30,
+      "version": "1.0",
+      "createdAt": "2024-01-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753632831,
+    "_nanoseconds": 386000000
+  }
+}

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Writing Results</title>
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background: linear-gradient(135deg, #1763e1 0%, #5089e3 100%);
+        margin: 0;
+        padding: 40px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 20px 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        font-size: 32px;
+        color: #2d3748;
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .res_back {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+        border: none;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
+      .res_back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+      }
+
+      .table-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 18px 24px;
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      th {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      tbody tr {
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: rgba(248, 250, 252, 0.8);
+      }
+
+      tbody tr:hover {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+      }
+
+      .email-cell {
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .test-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .test-1 {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .test-2 {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+      }
+
+      .test-3 {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+
+      .test-4 {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .test-unknown {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+      }
+
+      .word-count-cell {
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .word-count-badge {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 800;
+        min-width: 60px;
+        text-align: center;
+      }
+
+      .tasks-info {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .completion-status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .status-complete {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .status-partial {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+      }
+
+      .status-incomplete {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .deleteBtn {
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      .deleteBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+      }
+
+      .no-results-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+
+      .no-results h3 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .no-results p {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      /* Loader Styles */
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-family: "Montserrat", sans-serif;
+        transition: all 0.5s ease;
+      }
+
+      #loader.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .loader-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .loader-content .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      .loader-content p {
+        font-size: 18px;
+        color: #374151;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        body {
+          padding: 20px;
+        }
+
+        .header {
+          flex-direction: column;
+          gap: 20px;
+          text-align: center;
+        }
+
+        h2 {
+          font-size: 24px;
+        }
+
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead tr {
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+        }
+
+        tbody tr {
+          margin-bottom: 20px;
+          border-radius: 15px;
+          padding: 20px;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          background: white;
+        }
+
+        tbody tr:hover {
+          transform: none;
+        }
+
+        td {
+          border: none;
+          position: relative;
+          padding: 12px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        td::before {
+          content: attr(data-label);
+          font-weight: 700;
+          color: #374151;
+          text-transform: uppercase;
+          font-size: 12px;
+          letter-spacing: 0.5px;
+        }
+
+        .word-count-cell {
+          justify-content: flex-end;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>✍️ Writing Results</h2>
+        <button class="res_back" onclick="location.href='results-select.html'">
+          🔙 Back
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table id="resultsTable"></table>
+      </div>
+    </div>
+
+    <div id="loader">
+      <div class="loader-content">
+        <div class="spinner"></div>
+        <p>Loading Results...</p>
+      </div>
+    </div>
+
+    <script type="module" src="./results-writing.js"></script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Writing Tests</title>
+    <link rel="icon" href="/image/Logo.ver1.2.png">
+    <link rel="stylesheet" href="./select-test.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo_span"><img src="/image/logo.png" alt=""><h1> IELTS Writing Tests</h1></span>
+            </div>
+            <button class="back-btn" onclick="location.href='/pages/mock.html'">
+                🏠 Back to Tests
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Title -->
+        <div class="page-title">
+            <h2>Choose Your Writing Test</h2>
+            <p>Practice your academic writing skills with authentic IELTS tasks</p>
+        </div>
+
+        <!-- Tests Grid -->
+        <div class="tests-grid" id="testsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <h3>Loading Writing Tests...</h3>
+                <p>Please wait while we fetch available tests</p>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <h3 class="info-title">
+                📋 Writing Test Information
+            </h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>⏱️ Time Limit</h4>
+                    <p>You have 60 minutes total to complete both writing tasks. We recommend spending 20 minutes on Task 1 and 40 minutes on Task 2.</p>
+                </div>
+                <div class="info-item">
+                    <h4>📝 Task 1</h4>
+                    <p>Write at least 150 words describing visual information such as charts, graphs, tables, or diagrams. Focus on key trends and comparisons.</p>
+                </div>
+                <div class="info-item">
+                    <h4>📖 Task 2</h4>
+                    <p>Write at least 250 words in response to an argument, problem, or point of view. Present clear arguments with examples and evidence.</p>
+                </div>
+                <div class="info-item">
+                    <h4>📧 Submission</h4>
+                    <p>Your completed essays will be automatically sent to your teacher for evaluation and feedback upon submission.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./select-test.js"></script>
+</body>
+</html>

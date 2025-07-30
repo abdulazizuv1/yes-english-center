@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Reading Test</title>
+    <link rel="stylesheet" href="./test.css" />
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="test-header">
+      <div class="test-title">IELTS Academic Reading</div>
+      <div class="timer-section">
+        <div id="timer">Time left: <span id="time">60:00</span></div>
+        <button class="pause-btn" id="pauseBtn" onclick="togglePause()">
+          Pause
+        </button>
+        <button class="review-btn" onclick="openReview()">Review</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Passage Panel -->
+      <div class="passage-panel">
+        <div class="passage-title" id="passageTitle">Loading...</div>
+        <div class="passage-instructions" id="passageInstructions">
+          Loading instructions...
+        </div>
+        <div class="passage-text" id="passageText">Loading passage...</div>
+      </div>
+
+      <!-- Questions Panel -->
+      <div class="questions-panel">
+        <div id="questionsList">Loading questions...</div>
+      </div>
+    </div>
+
+    <!-- Question Navigation -->
+    <div class="question-nav" id="questionNav">
+      <div class="nav-section">
+        <span class="nav-label">Part 1:</span>
+        <div class="nav-numbers" id="part1Numbers"></div>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Part 2:</span>
+        <div class="nav-numbers" id="part2Numbers"></div>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Part 3:</span>
+        <div class="nav-numbers" id="part3Numbers"></div>
+      </div>
+    </div>
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+      <button class="control-btn btn-back" id="backBtn" style="display: none">
+        ← Back
+      </button>
+      <div>
+        <button class="control-btn btn-next" id="nextBtn">Next →</button>
+        <button
+          class="control-btn btn-finish"
+          id="finishBtn"
+          style="display: none"
+        >
+          Finish Test
+        </button>
+      </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="highlightSelection()">
+        📝 Highlight
+      </div>
+      <div class="context-menu-item" onclick="removeHighlight()">
+        🗑️ Remove Highlight
+      </div>
+    </div>
+    <div class="loading-modal" id="loadingModal">
+      <div class="loading-modal-content">
+        <div class="loading-spinner"></div>
+        <h2>Submitting Your Results</h2>
+        <p>Please wait while we process your test...</p>
+      </div>
+    </div>
+    <script type="module" src="test.js"></script>
+  </body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Full Mock Test</title>
+    <link rel="stylesheet" href="./fullMock.css" />
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="test-header">
+      <div class="test-title" id="testTitle">
+        IELTS Full Mock Test - Listening
+      </div>
+      <div class="timer-section">
+        <div id="timer">Time left: <span id="time">30:00</span></div>
+        <div class="stage-indicator" id="stageIndicator">Stage 1 of 3</div>
+        <button class="review-btn" onclick="openReview()">Review</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Listening Stage -->
+      <div class="stage-content" id="listeningStage">
+        <!-- Audio Panel -->
+        <div class="audio-panel">
+          <div class="audio-container" id="audio-container">
+            <div class="audio-placeholder">
+              🎧 Audio will appear here when section loads
+            </div>
+          </div>
+          <div class="audio-instructions">
+            <h4>📝 Listening Instructions:</h4>
+            <ul>
+              <li>You will hear each recording <strong>only once</strong></li>
+              <li>Write your answers while listening</li>
+              <li>You have time at the end to transfer answers</li>
+              <li>Use headphones for better audio quality</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Questions Panel -->
+        <div class="questions-panel">
+          <div id="listening-questions">Loading questions...</div>
+        </div>
+      </div>
+
+      <!-- Reading Stage -->
+      <div class="stage-content" id="readingStage" style="display: none">
+        <!-- Passage Panel -->
+        <div class="passage-panel">
+          <h2 class="passage-title" id="passageTitle">Passage Title</h2>
+          <div class="passage-instructions" id="passageInstructions">
+            Instructions
+          </div>
+          <div class="passage-text" id="passageText">Passage content...</div>
+        </div>
+        <!-- Questions Panel -->
+        <div class="questions-panel">
+          <div id="reading-questions">Loading questions...</div>
+        </div>
+      </div>
+
+      <!-- Writing Stage -->
+      <div class="stage-content" id="writingStage" style="display: none">
+        <div class="writing-container">
+          <!-- Task 1 -->
+          <div class="writing-task" id="task1Container">
+            <div class="task-header">
+              <h3>Writing Task 1</h3>
+              <div class="task-timer">Recommended time: 20 minutes</div>
+            </div>
+            <div class="task-content">
+              <div class="task-question" id="task1Question">
+                Task 1 question will appear here
+              </div>
+              <div class="task-image" id="task1Image"></div>
+              <div class="writing-area">
+                <div class="word-count">
+                  Words: <span id="task1WordCount">0</span>
+                </div>
+                <textarea
+                  id="task1Answer"
+                  placeholder="Write your response here..."
+                  rows="15"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="writing-task" id="task2Container">
+            <div class="task-header">
+              <h3>Writing Task 2</h3>
+              <div class="task-timer">Recommended time: 40 minutes</div>
+            </div>
+            <div class="task-content">
+              <div class="task-question" id="task2Question">
+                Task 2 question will appear here
+              </div>
+              <div class="writing-area">
+                <div class="word-count">
+                  Words: <span id="task2WordCount">0</span>
+                </div>
+                <textarea
+                  id="task2Answer"
+                  placeholder="Write your response here..."
+                  rows="20"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Navigation - MOVED TO BOTTOM -->
+    <div class="question-nav" id="questionNav">
+      <!-- Navigation will be dynamically generated -->
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+      <button class="control-btn btn-back" id="backBtn" style="display: none">
+        ← Back
+      </button>
+      <div class="stage-info">
+        <span id="sectionIndicator">Section 1 of 4</span>
+      </div>
+      <div class="control-buttons">
+        <button class="control-btn btn-next" id="nextBtn">Next →</button>
+        <button
+          class="control-btn btn-finish-stage"
+          id="finishStageBtn"
+          style="display: none"
+        >
+          Finish Listening
+        </button>
+        <button
+          class="control-btn btn-finish"
+          id="finishBtn"
+          style="display: none"
+        >
+          Finish Test
+        </button>
+      </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="highlightSelection()">
+        📝 Highlight
+      </div>
+      <div class="context-menu-item" onclick="removeHighlight()">
+        🗑️ Remove Highlight
+      </div>
+    </div>
+
+    <!-- Stage Transition Modal -->
+    <div class="modal-overlay" id="stageTransitionModal" style="display: none">
+      <div class="modal-content">
+        <h3 id="modalTitle">Listening Complete!</h3>
+        <p id="modalMessage">
+          You have completed the listening section. Ready to start reading?
+        </p>
+        <div class="modal-buttons">
+          <button class="control-btn btn-next" id="continueToNextStage">
+            Continue to Reading
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="loading-modal" id="loadingModal">
+      <div class="loading-modal-content">
+        <div class="loading-spinner"></div>
+        <h2>Submitting Your Results</h2>
+        <p>Please wait while we process your full mock test...</p>
+      </div>
+    </div>
+    <script type="module" src="fullMock.js"></script>
+  </body>
+</html>

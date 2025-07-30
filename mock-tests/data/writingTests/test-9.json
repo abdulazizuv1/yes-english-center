@@ -1,0 +1,11 @@
+{
+  "testId": "test-9",
+  "title": "IELTS Academic Writing Test 9",
+  "task1": {
+    "question": "The graphs below show the different resons of two group of students to choose Dorrifod University.\n\nSummarize the information by selecting and reporting the main features and mae comparisons with relevant.",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/writing-tasks%2Ftest-9%2FScreenshot%202025-07-26%20at%2017.40.19.png?alt=media&token=d3091186-3303-4081-90e5-57dbb940bc21"
+  },
+  "task2": {
+    "question": "Some people believe the range of technology available to individuals today is increasing the gap between poor people and rich people.\n\nOthers think it is having an opposite effect. Discuss both views and give your opinion?"
+  }
+}

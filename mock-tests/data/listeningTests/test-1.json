@@ -1,0 +1,536 @@
+{
+  "title": "IELTS Listening Test 1",
+  "parts": {
+    "testId": "ielts-listening-1",
+    "title": "IELTS Listening Practice Test 1",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Transport survey",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-1%2Fpart1.mp3?alt=media&token=202c1221-ebec-4a06-843e-1af94536a254",
+        "content": [
+          {
+            "type": "text",
+            "value": "Name: Sadie Jones"
+          },
+          {
+            "type": "text",
+            "value": "Year of birth: 1991"
+          },
+          {
+            "type": "question",
+            "questionId": "q1",
+            "format": "gap-fill",
+            "text": "Postcode:",
+            "postfix": "",
+            "correctAnswer": "DW30 7YZ",
+            "wordLimit": 1
+          },
+          {
+            "type": "subheading",
+            "value": "Travelling by bus"
+          },
+          {
+            "type": "question",
+            "questionId": "q2",
+            "format": "gap-fill",
+            "text": "Date of bus journey:",
+            "postfix": "",
+            "correctAnswer": "24th April",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q3",
+            "format": "gap-fill",
+            "text": "Reason for trip: shopping and visit to the",
+            "postfix": "",
+            "correctAnswer": "dentist",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q4",
+            "format": "gap-fill",
+            "text": "Travelled by bus because cost of",
+            "postfix": "too high",
+            "correctAnswer": "parking",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q5",
+            "format": "gap-fill",
+            "text": "Got on bus at",
+            "postfix": "Street",
+            "correctAnswer": "Claxby",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Complaints about bus service:"
+          },
+          {
+            "type": "question",
+            "questionId": "q6",
+            "format": "gap-fill",
+            "text": "- bus today was",
+            "postfix": "",
+            "correctAnswer": "late",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q7",
+            "format": "gap-fill",
+            "text": "- frequency of buses in the",
+            "postfix": "",
+            "correctAnswer": "evening",
+            "wordLimit": 1
+          },
+          {
+            "type": "subheading",
+            "value": "Travelling by car"
+          },
+          {
+            "type": "question",
+            "questionId": "q8",
+            "format": "gap-fill",
+            "text": "Goes to the",
+            "postfix": "by car",
+            "correctAnswer": "supermarket",
+            "wordLimit": 1
+          },
+          {
+            "type": "subheading",
+            "value": "Travelling by bicycle"
+          },
+          {
+            "type": "question",
+            "questionId": "q9",
+            "format": "gap-fill",
+            "text": "Dislikes travelling by bike in the city centre because of the",
+            "postfix": "",
+            "correctAnswer": "pollution",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q10",
+            "format": "gap-fill",
+            "text": "Doesn't own a bike because of a lack of",
+            "postfix": "",
+            "correctAnswer": "storage",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Becoming a volunteer for ACE",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-1%2Fpart2.mp3?alt=media&token=f12a867c-3d3b-4b9b-baa7-b34c180c0b5f",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "text": "Why does the speaker apologise about the seats?",
+            "options": {
+              "A": "They are too small.",
+              "B": "There are not enough of them.",
+              "C": "Some of them are very close together."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "What does the speaker say about the age of volunteers?",
+            "options": {
+              "A": "The age of volunteers is less important than other factors.",
+              "B": "Young volunteers are less reliable than older ones.",
+              "C": "Most volunteers are about 60 years old."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "What does the speaker say about training?",
+            "options": {
+              "A": "It is continuous.",
+              "B": "It is conducted by a manager.",
+              "C": "It takes place online."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q14_15",
+            "text": "Which TWO issues does the speaker ask the audience to consider before they apply to be volunteers?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q14",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q15",
+                "correctAnswer": "E"
+              }
+            ],
+            "options": {
+              "A": "their financial situation",
+              "B": "their level of commitment",
+              "C": "their work experience",
+              "D": "their ambition",
+              "E": "their availability"
+            }
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q16_20",
+            "text": "What does the speaker suggest would be helpful for each of the following areas of voluntary work?",
+            "instructions": "Choose FIVE answers from the box and write the correct letter, A-G, next to questions 16-20",
+            "questions": [
+              {
+                "questionId": "q16",
+                "text": "Fundraising",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q17",
+                "text": "Litter collection",
+                "correctAnswer": "G"
+              },
+              {
+                "questionId": "q18",
+                "text": "Playmates",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q19",
+                "text": "Story club",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q20",
+                "text": "First aid",
+                "correctAnswer": "D"
+              }
+            ],
+            "options": {
+              "A": "experience on stage",
+              "B": "original, new ideas",
+              "C": "parenting skills",
+              "D": "an understanding of food and diet",
+              "E": "retail experience",
+              "F": "a good memory",
+              "G": "a good level of fitness"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Talk on jobs in fashion design",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-1%2Fpart3.mp3?alt=media&token=42c5f23c-59a3-43a3-97db-ec1dad309eb3",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "multiple-choice",
+            "text": "What problem did Chantal have at the start of the talk?",
+            "options": {
+              "A": "Her view of the speaker was blocked.",
+              "B": "She was unable to find an empty seat.",
+              "C": "The students next to her were talking."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "multiple-choice",
+            "text": "What were Hugo and Chantal surprised to hear about the job market?",
+            "options": {
+              "A": "It has become more competitive than it used to be.",
+              "B": "There is more variety in it than they had realised.",
+              "C": "Some areas of it are more exciting than others."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "multiple-choice",
+            "text": "Hugo and Chantal agree that the speaker's message was",
+            "options": {
+              "A": "unfair to them at times.",
+              "B": "hard for them to follow.",
+              "C": "critical of the industry."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "multiple-choice",
+            "text": "What do Hugo and Chantal criticise about their school careers advice?",
+            "options": {
+              "A": "when they received the advice",
+              "B": "how much advice was given",
+              "C": "who gave the advice"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q25",
+            "format": "multiple-choice",
+            "text": "When discussing their future, Hugo and Chantal disagree on",
+            "options": {
+              "A": "which is the best career in fashion.",
+              "B": "when to choose a career in fashion.",
+              "C": "why they would like a career in fashion."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q26",
+            "format": "multiple-choice",
+            "text": "How does Hugo feel about being an unpaid assistant?",
+            "options": {
+              "A": "He is realistic about the practice.",
+              "B": "He feels the practice is dishonest.",
+              "C": "He thinks others want to change the practice."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q27_28",
+            "text": "Which TWO mistakes did the speaker admit she made in her first job?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q27",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q28",
+                "correctAnswer": "E"
+              }
+            ],
+            "options": {
+              "A": "being dishonest to her employer",
+              "B": "paying too much attention to how she looked",
+              "C": "expecting to become well known",
+              "D": "trying to earn a lot of money",
+              "E": "openly disliking her client"
+            }
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q29_30",
+            "text": "Which TWO pieces of retail information do Hugo and Chantal agree would be useful?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q29",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q30",
+                "correctAnswer": "C"
+              }
+            ],
+            "options": {
+              "A": "the reasons people return fashion items",
+              "B": "how much time people have to shop for clothes",
+              "C": "fashion designs people want but can't find",
+              "D": "the best time of year for fashion buying",
+              "E": "the most popular fashion sizes"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "Elephant translocation",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-1%2Fpart4.mp3?alt=media&token=0bd5489a-759c-4e07-8fe9-07a1c3fb8ad9",
+        "content": [
+          {
+            "type": "subheading",
+            "value": "Reasons for overpopulation at Majete National Park"
+          },
+          {
+            "type": "text",
+            "value": "- strict enforcement of anti-poaching laws"
+          },
+          {
+            "type": "text",
+            "value": "- successful breeding"
+          },
+          {
+            "type": "subheading",
+            "value": "Problems caused by elephant overpopulation"
+          },
+          {
+            "type": "text",
+            "value": "- greater competition, causing hunger for elephants"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "- damage to",
+            "postfix": "in the park",
+            "correctAnswer": "fences",
+            "wordLimit": 1
+          },
+          {
+            "type": "subheading",
+            "value": "The translocation process"
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "- a suitable group of elephants from the same",
+            "postfix": "was selected",
+            "correctAnswer": "family",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "- vets and park staff made use of",
+            "postfix": "to help guide the elephants into an open plain",
+            "correctAnswer": "helicopters",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "- elephants were immobilised with tranquilisers"
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "- this process had to be completed quickly to reduce",
+            "postfix": "",
+            "correctAnswer": "stress",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "- elephants had to be turned on their",
+            "postfix": "to avoid damage to their lungs",
+            "correctAnswer": "sides",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "- elephants'",
+            "postfix": "had to be monitored constantly",
+            "correctAnswer": "breathing",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "- tracking devices were fitted to the matriarchs"
+          },
+          {
+            "type": "question",
+            "questionId": "q37",
+            "format": "gap-fill",
+            "text": "- data including the size of their tusks and",
+            "postfix": "was taken",
+            "correctAnswer": "feet",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "- elephants were taken by truck to their new reserve"
+          },
+          {
+            "type": "subheading",
+            "value": "Advantages of translocation at Nkhotakota Wildlife Park"
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "-",
+            "postfix": "opportunities",
+            "correctAnswer": "employment",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "- a reduction in the number of poachers and",
+            "postfix": "",
+            "correctAnswer": "weapons",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "- an example of conservation that other parks can follow"
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "- an increase in",
+            "postfix": "as a contributor to GDP",
+            "correctAnswer": "tourism",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 30,
+      "version": "1.0",
+      "createdAt": "2023-10-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753204430,
+    "_nanoseconds": 57000000
+  }
+}

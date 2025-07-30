@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Academic Writing</title>
+    <link rel="icon" href="/image/Logo.ver1.2.png">
+    <link rel="stylesheet" href="./test.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>✍️ IELTS Academic Writing</h1>
+            </div>
+            <div class="test-info">
+                <span class="test-badge" id="testBadge">Test 1</span>
+                <span class="task-badge" id="taskBadge">Task 1</span>
+                <button class="pause-btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+            </div>
+            <div class="timer-section">
+                
+                <div class="timer-display" id="timer">60:00</div>
+                <div class="timer-label">Time Remaining</div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Panel - Question -->
+        <div class="question-panel">
+            <div class="task-header">
+                <h2 id="taskTitle">Writing Task 1</h2>
+                <div class="task-instructions">
+                    <p id="taskInstructions">
+                        You should spend about 20 minutes on this task.<br>
+                        Write at least 150 words.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="question-content">
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+                
+                <!-- Image for Task 1 -->
+                <div class="question-image" id="questionImage" style="display: none;">
+                    <img id="taskImage" src="" alt="Task Image" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Answer -->
+        <div class="answer-panel">
+            <!-- Writing Area -->
+            <div class="writing-section">
+                <label for="answerText" id="writingLabel">Your Answer:</label>
+                <textarea 
+                    id="answerText" 
+                    placeholder="Start writing your answer here..."
+                    rows="20"
+                ></textarea>
+            </div>
+
+            <!-- Word Count -->
+            <div class="word-count-section">
+                <div class="word-count">
+                    <span class="count-label">Word Count:</span>
+                    <span class="count-number" id="wordCount">0</span>
+                    <span class="count-minimum" id="wordMinimum">/ 150 minimum</span>
+                </div>
+                <div class="word-status" id="wordStatus">
+                    <span class="status-icon">⚠️</span>
+                    <span class="status-text">Below minimum word count</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn secondary" id="backBtn" onclick="location.href='/pages/mock.html'">
+            🏠 Back to Tests
+        </button>
+        
+        <div class="nav-center">
+            <div class="task-progress">
+                <div class="progress-step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Task 1</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Task 2</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="nav-btn primary" id="nextBtn">
+            Next Task ➡️
+        </button>
+        
+        <button class="nav-btn primary" id="finishBtn" style="display: none;">
+            📧 Finish & Submit
+        </button>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading Writing Test...</h2>
+            <p>Please wait while we prepare your test</p>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="success-icon">✅</div>
+            <h2>Test Submitted Successfully!</h2>
+            <p>Your writing test has been sent to your teacher for evaluation.</p>
+            <div class="submission-details">
+                <div class="detail-item">
+                    <strong>Student:</strong> <span id="submittedName"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Test:</strong> <span id="submittedTest"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Task 1 Words:</strong> <span id="submittedTask1Words"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Task 2 Words:</strong> <span id="submittedTask2Words"></span>
+                </div>
+            </div>
+            <button class="modal-btn" onclick="location.href='/pages/mock.html'">
+                Return to Tests
+            </button>
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div class="pause-modal" id="pauseModal">
+        <div class="pause-modal-content">
+            <h2>Writing Test Paused</h2>
+            <p>Your test has been paused. Click resume when you're ready to continue.</p>
+            <button class="resume-btn" onclick="togglePause()">Resume Test</button>
+        </div>
+    </div>
+
+    <script type="module" src="./test.js"></script>
+</body>
+</html>

@@ -1,0 +1,809 @@
+{
+  "passages": [
+    {
+      "title": "The Wonder Plant",
+      "instructions": "You should spend about 20 minutes on Question 1-13, which are based on Reading Passage 1.",
+      "text": "Bamboo is used for a wide range of purposes, but now it seems it may be under threat.\n\nEvery year, during the rainy season, the mountain gorillas of central Africa migrate to the lower slopes of the Virunga Mountains to graze on bamboo. For the 650 or so that remain in the wild, it's a vital food source. Without it, says Ian Redmond, chairman of the Ape Alliance, their chances of survival would be reduced significantly.\n\nGorillas aren't the only local keen on bamboo. For the people who live close to the Virungas, it's a valuable and versatile raw material. But in the past 100 years or so, resources have come under increasing pressure as populations have exploded and large areas of bamboo forest have been cleared to make way for commercial plantations. Sadly, this isn't an isolated story. All over the world, the ranges of many bamboo species appear to be shrinking, endangering the people and animals that depend upon them.\n\nDespite bamboo's importance, we know surprisingly little about it. A recent report published by the UN Environment Programme (UNEP) and the International Network for Bamboo and Rattan (INBAR) has revealed just how profound our ignorance of global bamboo resources is, particularly in relation to conservation.\n\nThere are almost 1,600 recognised species of bamboo, but the report concentrated on the 1,200 or so woody varieties distinguished by the strong stems, or 'culms', that most people associate with this versatile plant. Of these, only 38 'priority species' identified for their commercial value have been the subject of any real scientific research to date.\n\nThis problem isn't confined to bamboo. Compared to the work carried out on animals, the science of assessing the conservation status of plants is still in its infancy. 'People have only started looking at this during the past 10-15 years, and only now are they understanding how to go about it systematically,' says Dr Valerie Kapos, one of the report's authors.\n\nBamboo tends to grow in 'stands' (or groups) made up of individual plants that grow from roots known as rhizomes. It is the world's fastest-growing woody plant and some species grow over a meter in one day. But the plant's ecological role extends beyond providing food for wildlife. Its rhizome systems, which lie in the top layers of the soil, are crucial in preventing soil erosion. And there is growing evidence that bamboo plays an important part in determining forest structure and dynamics. 'Bamboo's pattern of mass flowering and mass death leaves behind large areas of dry biomass that attract wildfire,' says Kapos. 'When these burn, they create patches of open ground far bigger than would be left by a fallen tree. Patchiness helps to preserve diversity because certain plant species do better during the early stages of regeneration when there are gaps in the canopy.'\n\nHowever, bamboo's most immediate significance lies in its economic value. Many countries, particularly in Asia, are involved in the trade of bamboo products. Modern processing techniques mean it can be used in a variety of ways, for example as flooring and laminates. Traditionally it is used in construction, but one of the fastest growing bamboo products is paper – 25 per cent of paper produced in India is made from bamboo fibre.\n\nOf course, bamboo's main function has always been in domestic applications, and as a locally traded product it is worth about US$4.5 billion annually. Bamboo is often the only readily available raw material for people in many developing countries, says Chris Stapleton, a research associate at the UK's Royal Botanic Gardens. 'Bamboo can be harvested from forest areas or grown quickly elsewhere, and then converted simply without expensive machinery or facilities,' he says. 'In this way, it contributes substantially to poverty alleviation.'\n\nKeen horticulturists will spot an apparent contradiction in the worrying picture painted by the UNEP-INBAR report. Those in the West who've followed the recent vogue for cultivating exotic species in their gardens will point out that, if it isn't kept in check, bamboo can cause real problems. 'In a lot of places, the people who live with bamboo don't perceive it as being under threat in any way,' says Kapos. 'In fact, a lot of bamboo species are very invasive if they've been introduced.' So why are so many species endangered?\n\nThere are two separate issues here, says Ray Townsend, arboretum manager at the Royal Botanic Gardens. 'Some plants are threatened because they can't survive in the habitat – they aren't strong enough or there aren't enough of them, perhaps. But bamboo can take care of itself – it's strong enough to survive if left alone. What is under threat is its habitat. When forest goes, it's converted into something else: then there isn't anywhere for forest plants such as bamboo to grow.'\n\nAround the world, bamboo species are routinely protected as part of forest ecosystem in national parks and reserves, but there is next to nothing that protects bamboo in the wild for its own sake. The UNEP-INBAR report will help conservationists to establish effective measures aimed at protecting valuable wild bamboo species.\n\nTownsend, too, sees the UNEP-INBAR report as an important step forward in promoting the cause of bamboo conservation. 'Until now, bamboo has been perceived as a second-class plant. When you talk about places like the Amazon, everyone always thinks about hardwoods. Of course, these are significant but there's a tendency to overlook the plants they are associated with, which are often bamboo species.'",
+      "questions": [
+        {
+          "groupInstruction": "Questions 1 – 7\nReading Passage 1 has six sections, A-F.\nWhich section contains the following information?\nWrite the correct letter, A-F, in boxes 1-7 on your answer sheet.\nNB You may use any letter more than once.",
+          "type": "paragraph-matching",
+          "question": "1 an assessment of current levels of knowledge about bamboo",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "2 a comparison between bamboo and more fragile plants",
+          "answer": "E",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "3 details of the commercial significance of bamboo",
+          "answer": "D",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "4 a human development that is threatening the availability of bamboo",
+          "answer": "A",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "5 a description of the limited extent of existing research on bamboo",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "6 examples of the uses to which bamboo is put",
+          "answer": "D",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "7 an explanation of how bamboo may contribute to the survival of range of plants",
+          "answer": "C",
+          "options": [
+            {
+              "label": "A",
+              "text": "Section A"
+            },
+            {
+              "label": "B",
+              "text": "Section B"
+            },
+            {
+              "label": "C",
+              "text": "Section C"
+            },
+            {
+              "label": "D",
+              "text": "Section D"
+            },
+            {
+              "label": "E",
+              "text": "Section E"
+            },
+            {
+              "label": "F",
+              "text": "Section F"
+            }
+          ]
+        },
+        {
+          "groupInstruction": "Questions 8 – 11\nLook at the following statements (Questions 8-11) and the list of people below.\nMatch each statement with the correct person, A-D.\nWrite the correct letter, A-D, in boxes 8-11 on your answer sheet.\nNB You may use any letter more than once.",
+          "type": "match-person",
+          "question": "8 Some people do not regard bamboo as an endangered plant species.",
+          "answer": "E",
+          "options": [
+            {
+              "label": "A",
+              "text": "Ian Redmond"
+            },
+            {
+              "label": "B",
+              "text": "Valerie Kapos"
+            },
+            {
+              "label": "C",
+              "text": "Chris Stapleton"
+            },
+            {
+              "label": "D",
+              "text": "Ray Townsend"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "9 A scarcity of bamboo places certain wildlife under threat.",
+          "answer": "A",
+          "options": [
+            {
+              "label": "A",
+              "text": "Ian Redmond"
+            },
+            {
+              "label": "B",
+              "text": "Valerie Kapos"
+            },
+            {
+              "label": "C",
+              "text": "Chris Stapleton"
+            },
+            {
+              "label": "D",
+              "text": "Ray Townsend"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "10 Research methods investigating endangered plants have yet to be fully developed.",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Ian Redmond"
+            },
+            {
+              "label": "B",
+              "text": "Valerie Kapos"
+            },
+            {
+              "label": "C",
+              "text": "Chris Stapleton"
+            },
+            {
+              "label": "D",
+              "text": "Ray Townsend"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "11 The greatest danger to bamboo is disturbance of the places it grows in.",
+          "answer": "D",
+          "options": [
+            {
+              "label": "A",
+              "text": "Ian Redmond"
+            },
+            {
+              "label": "B",
+              "text": "Valerie Kapos"
+            },
+            {
+              "label": "C",
+              "text": "Chris Stapleton"
+            },
+            {
+              "label": "D",
+              "text": "Ray Townsend"
+            }
+          ]
+        },
+        {
+          "groupInstruction": "Questions 12 and 13\nAnswer the questions below.\nChoose NO MORE THAN TWO WORDS from the passage for each answer.\nWrite your answers in boxes 12 and 13 on your answer sheet.",
+          "type": "gap-fill",
+          "question": "12 What ecological problem do the roots of bamboo help to control? __________",
+          "answer": [
+            "soil erosion"
+          ]
+        },
+        {
+          "type": "gap-fill",
+          "question": "13 Which bamboo product is undergoing market expansion? __________",
+          "answer": [
+            "paper"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Renewable Energy",
+      "instructions": "You should spend about 20 minutes on Question 14-26, which are based on Reading Passage 2.",
+      "text": "An insight into the progress in renewable energy research\n\nThe race is on for the ultimate goal of renewable energy: electricity production at prices that are competitive with coal-fired power stations, but without coal's pollution. Some new technologies are aiming to be the first to push coal from its position as Australia's chief source of electricity.\n\nAt the moment the front-runner in renewable energy is wind technology. According to Peter Bergin of Australian Hydro, one of Australia's leading wind energy companies, there have been no dramatic changes in windmill design for many years, but the cumulative effects of numerous small improvements have had a major impact on cost. 'We're reaping the benefits of 30 years of research in Europe, without having to make the same mistakes that they did,' Mr. Bergin says.\n\nElectricity can be produced from coal at around 4 cents per kilowatt-hour, but only if the environmental costs are ignored. 'Australia has the second cheapest electricity in the world, and this makes it difficult for renewable to compete,' says Richard Hunter of the Australian Ecogeneration Association (AEA). Nevertheless, the AEA reports: 'The production cost of a kilowatt-hour of wind power is one fifth of what it was 20 years ago,' or around 7 cents per kilowatt-hour.\n\nAustralian Hydro has dozens of wind monitoring stations across Australia as part of its aim to become Australia's pre-eminent renewable energy company. Despite all these developments, wind power remains one of the few forms of alternative energy where Australia is nowhere near the global cutting edge, mostly just replicating European designs.\n\nWhile wind may currently lead the way, some consider a number of technologies under development have more potential. In several cases, Australia is at the forefront of global research in the area. Some of them are very site-specific, ensuring that they may never become dominant market players. On the other hand, these newer developments are capable of providing more reliable power, avoiding the major criticism of windmills – the need for back-up on a calm day.\n\nOne such development uses hot, dry rocks. Deep beneath South Australia, radiation from elements contained in granite heats the rocks. Layers of insulating sedimentation raise the temperatures in some location to 250° centigrade. An Australian firm, Geoenergy, is proposing to pump water 3.5 kilometres into the earth, where it will travel through tiny fissures in the granite, heating up as it goes, until it escapes as steam through another drilled hole.\n\nNo greenhouse gases are produced, but the system needs some additional features if it is to be environmentally friendly. Dr Prue Chopra, a geophysicist at the Australian National University and one of the founders of Geoenergy, note that the steam will bring with it radon gas, along through a heat exchanger and then sent back underground for another cycle. Technically speaking, hot dry rocks are not a renewable source of energy. However, the Australian source is so large it could supply the entire country's needs for thousands of years at current rates of consumption.\n\nTwo other proposals for very different ways to harness sun and wind energy have surfaced recently. Progress continues with Australian company EnviroPower's plans for Australia's first solar chimney near Mildura, in Victoria. Under this scheme, a tall tower will draw hot air from a greenhouse built to cover the surrounding 5km². As the air rises, it will drive a turbine* to produce electricity. The solar tower combines three very old technologies – the chimney, the turbine and the greenhouse – to produce something quite new. It is this reliance on proven engineering principles that led Enviropower's CEO, Richard Davies, to state: ' There is no doubt this technology will work, none at all.'\n\nThis year, Enviropower recognized that the quality of sunlight in the Mildura district will require a substantially larger collecting area than was previously thought. However, spokesperson Kay Firth says that a new location closer to Mildura will enable Enviropower to balance the increased costs with extra revenue. Besides saving in transmission costs, the new site 'will mean increased revenue from tourism and use of power for telecommunications. We'll also be able to use the outer 500 metres for agribusiness.' Wind speeds closer to the tower will be too high for farming.\n\nAnother Australian company, Wavetech, is achieving success with ways of harvesting the energy in waves. Wavetech's invention uses a curved surface to push waves into a chamber, where the flowing water column pushes air back and forth through a turbine. Wavetech was created when Dr. Tim Devine offered the idea to the world leader in wave generator manufacturers, who rather surprisingly rejected it. Dr. Devine responded by establishing Wavetech, and making a number of other improvements to generator design. Wavetech claims that, at appropriate sites, 'the cost of electricity produced with our technology should be below 4 cents per kilowatt-hour.\n\nThe diversity of forms of greenhouse –friendly energy under development in Australia is remarkable. However, support on a national level is disappointing. According to Richard Hunter of the AEA, 'Australia has huge potential for wind, sun and wave technology. We should really be at the forefront, but the reality is we are a long way behind.'",
+      "questions": [
+        {
+          "groupInstruction": "Question 14 – 20\nDo the following statements agree with the information given in Reading Passage 2?\nIn boxes 14-20 on your answer sheet, write\n\nTRUE if the statement agrees with the information\nFALSE if the statement contradicts the information\nNOT GIVEN if there is no information on this",
+          "type": "true-false-notgiven",
+          "question": "14 In Australia, alternative energies are less expensive than conventional electricity.",
+          "answer": "FALSE"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "15 Geoenergy needs to adapt its system to make it less harmful to the environment.",
+          "answer": "TRUE"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "16 Dr. Prue Chopra has studied the effects of radon gas on the environment.",
+          "answer": "NOT GIVEN"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "17 Hot, dry rocks could provide enough power for the whole of Australia.",
+          "answer": "TRUE"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "18 The new Enviropower facility will keep tourists away.",
+          "answer": "FALSE"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "19 Wavetech was established when its founders were turned down by another company.",
+          "answer": "TRUE"
+        },
+        {
+          "type": "true-false-notgiven",
+          "question": "20 According to the AEA, Australia is a world leader in developing renewable energy.",
+          "answer": "FALSE"
+        },
+        {
+          "groupInstruction": "Question 21 – 26\nLook at the following statements (Questions 21-26) and the list of companies below.\nMatch each statement with the correct company, A-D.\nWrite the correct letter, A-D, in boxes 21-26 on your answer sheet.\nNB You may use any letter more than once.",
+          "type": "match-person",
+          "question": "21 During the process, harmful substances are prevented from escaping.",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "22 Water is used to force air through a special device.",
+          "answer": "D",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "23 Techniques used by other countries are being copied.",
+          "answer": "A",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "24 The system can provide services other than energy production.",
+          "answer": "C",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "25 It is planned to force water deep under the ground.",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        },
+        {
+          "type": "match-person",
+          "question": "26 Original estimates for part of the project have been revised.",
+          "answer": "C",
+          "options": [
+            {
+              "label": "A",
+              "text": "Australian Hydro"
+            },
+            {
+              "label": "B",
+              "text": "Geoenergy"
+            },
+            {
+              "label": "C",
+              "text": "Enviropower"
+            },
+            {
+              "label": "D",
+              "text": "Wavetech"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Inside the mind of a fan",
+      "instructions": "You should spend about 20 minutes on Questions 27-40, which is based on Reading Passage 3.",
+      "text": "How watching sport affects the brain\n\nAt about the same time that the poet Homer invented the epic hero, the ancient Greeks started a festival in which men competed in a single race, about 200 metres long. The winner received a branch of wild olives. The Greeks called this celebration the Olympics. Through the ancient sprint remains, today the Olympics are far more than that. Indeed, the Games seem to celebrate the dream of progress as embodied in the human form. That the Games are intoxicating to watch is beyond question. During the Athens Olympics in 2004, 3.4 billion people, half the world, watched them on television. Certainly, being a spectator is a thrilling experience: but why?\n\nIn 1996, three Italian neuroscientists, Giacomo Rizzolatti, Leonardo Fogassi and Vittorio Gallese, examined the premotor cortex of monkeys. They discovered that inside these primate brains there were groups of cells that 'store vocabularies of motor actions'. Just as there are grammars of movement. These networks of cells are the bodily 'sentences' we use every day, the ones our brain has chosen to retain and refine. Think, for example, about a golf swing. To those who have only watched the Masters' Tournament on TV, golfing seems easy. To the novice, however, the skill of casting a smooth arc with a lop-side metal stick is virtually impossible. This is because most novices swing with their consciousness, using an area of brain next to the premotor cortex. To the expert, on the other hand, a perfectly balanced stroke is second nature. For him, the motor action has become memorized, and the movements are embedded in the neurons of his premotor cortex. He hits the ball with the tranquility of his perfected autopilot.\n\nThese neurons in the premotor cortex, besides explaining why certain athletes seem to possess almost unbelievable levels of skill, have an even more amazing characteristic, one that caused Rizzolatti, Fogassi and Gallese to give them the lofty title 'mirror neurons'. They note, 'The main functional characteristic of mirror neurons is that they become active both when the monkey performs a particular action (for example, grasping an object or holding it) and, astonishingly, when it sees another individual performing a similar action.' Humans have an even more elaborate mirror neuron system. These peculiar cells mirror, inside the brain, the outside world: they enable us to internalise the actions of another. In order to be activated, though, these cells require what the scientists call 'goal-orientated movements'. If we are staring at a photograph, a fixed image of a runner mid-stride, our mirror neurons are totally silent. They only fire when the runner is active: running, moving or sprinting.\n\nWhat these electrophysiological studies indicate is that when we watch a golfer or a runner in action, the mirror neurons in our own premotor cortex light up as if we were the ones competing. This phenomenon of neural mirror was first discovered in 1954, when two French physiologists, Gastaut and Berf, found that the brains of humans vibrate with two distinct wavelengths, alpha and mu. The mu system is involved in neural mirroring. It is active when your bodies are still, and disappears whenever we do something active, like playing sport or changing the TV channel. The surprising fact is that the mu signal is also quiet when we watch someone else being active, as on TV, these results are the effect of mirror neurons.\n\nRizzolatti, Fogassi and Gallese call the idea of mirror neurons the 'direct matching hypothesis'. They believe that we only understand the movement of sports stars when we 'map the visual representation of the observed action onto our motor representation of the same action'. According to this theory, watching an Olympic athlete 'causes the motor system of the observer to resonate. The \"motor knowledge\" of the observer is used to understand the observed action.' But mirror neurons are more than just the neural basis for our attitude to sport. It turns out that watching a great golfer makes us better golfers, and watching a great sprinter actually makes us run faster. This ability to learn by watching is a crucial skill. From the acquisition of language as infants to learning facial expressions, mimesis (copying) is an essential part of being conscious. The best athletes are those with a premotor cortex capable of imagining the movements of victory, together with the physical properties to make those movements real.\n\nBut how many of us regularly watch sports in order to be a better athlete? Rather, we watch sport for the feeling, the human drama. This feeling also derives from mirror neurons. By letting spectators share in the motions of victory, they also allow us to share in its feelings. This is because they are directly connected to the amygdalae, one of the main brain regions involved in emotion. During the Olympics, the mirror neurons of whole nations will be electrically identical, their athletes causing spectators to feel, just for a second or two, the same thing. Watching sports brings people together. Most of us will never run a mile in under four minutes, or hit a home run. Our consolation comes in watching, when we gather around the TV, we all feel, just for a moment, what it is to do something perfectly.",
+      "questions": [
+        {
+          "groupInstruction": "Questions 27 – 32\nReading Passage 3 has six paragraphs, A-F.\nWhich paragraph contains the following information?\nWrite the correct letter, A-F, in boxes 27-32 on your answer sheet.\nNB You may use any letter more than once.",
+          "type": "paragraph-matching",
+          "question": "27 an explanation of why watching sport may be emotionally satisfying",
+          "answer": "F",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "28 an explanation of why beginners find sporting tasks difficult",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "29 a factor that needs to combine with mirroring to attain sporting excellence",
+          "answer": "E",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "30 a comparison of human and animal mirror neurons",
+          "answer": "C",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "31 the first discovery of brain activity related to mirror neurons",
+          "answer": "D",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "type": "paragraph-matching",
+          "question": "32 a claim linking observation to improvement in performance",
+          "answer": "E",
+          "options": [
+            {
+              "label": "A",
+              "text": "Paragraph A"
+            },
+            {
+              "label": "B",
+              "text": "Paragraph B"
+            },
+            {
+              "label": "C",
+              "text": "Paragraph C"
+            },
+            {
+              "label": "D",
+              "text": "Paragraph D"
+            },
+            {
+              "label": "E",
+              "text": "Paragraph E"
+            },
+            {
+              "label": "F",
+              "text": "Paragraph F"
+            }
+          ]
+        },
+        {
+          "groupInstruction": "Questions 33 – 35\nChoose the correct letter, A, B, C or D.\nWrite the correct letter in boxes 33-35 on your answer sheet.",
+          "type": "multiple-choice",
+          "question": "33 The writer uses the term 'grammar of movement' to mean",
+          "answer": "B",
+          "options": [
+            {
+              "label": "A",
+              "text": "a level of sporting skill."
+            },
+            {
+              "label": "B",
+              "text": "a system of words about movement."
+            },
+            {
+              "label": "C",
+              "text": "a pattern of connected cells."
+            },
+            {
+              "label": "D",
+              "text": "a type of golf swing."
+            }
+          ]
+        },
+        {
+          "type": "multiple-choice",
+          "question": "34 The writer states that expert players perform their actions",
+          "answer": "A",
+          "options": [
+            {
+              "label": "A",
+              "text": "without conscious thought."
+            },
+            {
+              "label": "B",
+              "text": "by planning each phase of movement."
+            },
+            {
+              "label": "C",
+              "text": "without regular practice."
+            },
+            {
+              "label": "D",
+              "text": "by thinking about the actions of others."
+            }
+          ]
+        },
+        {
+          "type": "multiple-choice",
+          "question": "35 The writer states that the most common motive for watching sport is to",
+          "answer": "C",
+          "options": [
+            {
+              "label": "A",
+              "text": "improve personal performance."
+            },
+            {
+              "label": "B",
+              "text": "feel linked with people of different nationalities."
+            },
+            {
+              "label": "C",
+              "text": "experience strong positive emotions."
+            },
+            {
+              "label": "D",
+              "text": "realize what skill consists of."
+            }
+          ]
+        },
+        {
+          "groupInstruction": "Questions 36 – 40\nDo the following statements agree with the views of the writer in Reading Passage 3?\nIn boxes 36-40 on your answer sheet, write\n\nYES if the statement agrees with the views of the writer\nNO if the statement contradicts the views of the writer\nNOT GIVEN if it is impossible to say what the writer thinks about this",
+          "type": "yes-no-notgiven",
+          "question": "36 Inexpert sports players are too aware of what they are doing.",
+          "answer": "YES"
+        },
+        {
+          "type": "yes-no-notgiven",
+          "question": "37 Monkeys have a more complex mirror neuron system than humans.",
+          "answer": "NO"
+        },
+        {
+          "type": "yes-no-notgiven",
+          "question": "38 Looking at a photograph can activate mirror neurons.",
+          "answer": "NO"
+        },
+        {
+          "type": "yes-no-notgiven",
+          "question": "39 Gastaut and Bert were both researchers and sports players.",
+          "answer": "NOT GIVEN"
+        },
+        {
+          "type": "yes-no-notgiven",
+          "question": "40 The mu system is at rest when we are engaged in an activity.",
+          "answer": "NO"
+        }
+      ]
+    }
+  ]
+}

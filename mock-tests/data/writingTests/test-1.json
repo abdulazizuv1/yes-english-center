@@ -1,0 +1,11 @@
+{
+  "testId": "test-1",
+  "title": "IELTS Academic Writing Test 1",
+  "task1": {
+    "question": "The charts below shows the number of working hours per week, in industrial sector, in four European countries in 2002.\n\nSummarize the information by selecting and reporting the main features and mae comparisons with relevant.",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/writing-tasks%2Ftest-1%2FScreenshot%202025-07-25%20at%2011.05.53.png?alt=media&token=3a314019-b10d-413b-b78f-d10718640c81"
+  },
+  "task2": {
+    "question": "More and more measures to improve the security in large urban areas have been introduced in many countries because of the increased crime.\n\nDo the benefits of these measure outweigh the drawbacks"
+  }
+}

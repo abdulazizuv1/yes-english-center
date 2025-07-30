@@ -1,0 +1,417 @@
+{
+  "title": "IELTS Listening Test 7",
+  "parts": {
+    "testId": "ielts-listening-7",
+    "title": "IELTS Listening Practice Test 7",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Washing Machine Warranty",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart1.mp3?alt=media&token=bbf6163c-3dc3-40b3-9414-f392cd414570",
+        "content": [
+          {
+            "type": "table",
+            "title": "Washing Machine Warranty",
+            "groupInstruction": "Questions 1-6\nComplete the table below.\nWrite ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer.",
+            "columns": [
+              "Section",
+              "Details"
+            ],
+            "rows": [
+              {
+                "section": "Personal details",
+                "details": "• Name: Judie Smith<br>• Reference number: 1 ___q1___<br>• Time of purchase: 2 ___q2___<br>• Current address: 120 3 ___q3___, Oxford<br>• Postcode: 4 ___q4___"
+              },
+              {
+                "section": "Problems",
+                "details": "• The floor was wet because of the 5 ___q5___<br>• The washing machine was out of control and the woman 6 ___q6___ Immediately<br>• The floor is made of 7 ___q7___"
+              },
+              {
+                "section": "Arrangement for the repair work",
+                "details": "• Ask a 8 ___q8___ to repair the washing machine<br>• The repairman is available 9 ___q9___<br>• The woman's house is oppsite the 10 ___q10___"
+              }
+            ],
+            "answer": {
+              "q1": "CWX576884",
+              "q2": "9/nine moth",
+              "q3": "Middle Street",
+              "q4": "Go194KE",
+              "q5": "Water",
+              "q6": "Switched off",
+              "q7": "wood",
+              "q8": "Client engineer",
+              "q9": "next Tuesday",
+              "q10": "Post Office"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the table below.",
+          "note": "Write ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Driving license in UK",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart2.mp3?alt=media&token=593ffdc0-6323-4fc9-9543-0e62e944df20",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "text": "What is the basic requirement for applying for a UK driving licence?",
+            "options": {
+              "A": "a medical report.",
+              "B": "a valid licence from another country.",
+              "C": "Current residency in the UK."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "What is true about the translation of original licences?",
+            "options": {
+              "A": "Applicants need to go to a recognised organisation.",
+              "B": "It is not always necessary for foreigners when applying for a UK licence.",
+              "C": "Applicants need to pay an extra fee for translation services."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "When applying for a UK licence, which type of photos will NOT be approved?",
+            "options": {
+              "A": "Photos in which the applicant is wearing glasses.",
+              "B": "Photos with a cream background.",
+              "C": "Photos that are undersized."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "multiple-choice",
+            "text": "What does the speaker think of the licence checking service?",
+            "options": {
+              "A": "The process is too slow.",
+              "B": "The application form is confusing.",
+              "C": "Some of the steps are unnecessary."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "multiple-choice",
+            "text": "What does the speaker recommend about making an application?",
+            "options": {
+              "A": "Choosing a quiet location.",
+              "B": "Visiting the nearest branch.",
+              "C": "Completing the forms online."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q16_17_18_19_20",
+            "text": "What is the current feature of traffic management in each of the following cities",
+            "instructions": "Write the correct letter, A-H, next to Question 16-20",
+            "questions": [
+              {
+                "questionId": "q16",
+                "text": "London",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q17",
+                "text": "Edinburgh",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q18",
+                "text": "Cardiff",
+                "correctAnswer": "G"
+              },
+              {
+                "questionId": "q19",
+                "text": "manchester",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q20",
+                "text": "oxford",
+                "correctAnswer": "B"
+              }
+            ],
+            "options": {
+              "A": "good signage",
+              "B": "multiple access roads",
+              "C": "police control points",
+              "D": "ring roads",
+              "E": "one- way streets",
+              "F": "Effective traffic lights",
+              "G": "Additional lanes",
+              "H": "Pedestrianised areas"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Hotel Internship Discussion",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart3.mp3?alt=media&token=022c643b-7e2a-4656-87f5-06ef92e0d90c",
+        "content": [
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q21_22_23_24_25_26",
+            "text": "What problem does Mona point out about each part of the hotel where she interned?",
+            "instructions": "Write the correct letter, A-F, next to Question 21-26",
+            "questions": [
+              {
+                "questionId": "q21",
+                "text": "reception",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q22",
+                "text": "restaurant",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q23",
+                "text": "coffee bar",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q24",
+                "text": "shop",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q25",
+                "text": "personal office",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q26",
+                "text": "cleaning",
+                "correctAnswer": "E"
+              }
+            ],
+            "options": {
+              "A": "it lacks patience.",
+              "B": "it is very strict",
+              "C": "it is a daily routine",
+              "D": "it lacks sufficient staff",
+              "E": "it is noisy",
+              "F": "it is very tiring"
+            }
+          },
+          {
+            "type": "question",
+            "questionId": "q27",
+            "format": "multiple-choice",
+            "text": "how does the experience benefit Mona?",
+            "options": {
+              "A": "It is good for her future job",
+              "B": "It is good for her dissertation.",
+              "C": "It can let her know something about the specific job."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q28",
+            "format": "multiple-choice",
+            "text": "Why does the tutor want Mona to do the presentation?",
+            "options": {
+              "A": "Because she can do it skilfully.",
+              "B": "Because she wants to do it herself",
+              "C": "Because she can show other students how to do a presentation"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q29",
+            "format": "multiple-choice",
+            "text": "what does Mona suggest Tom do?",
+            "options": {
+              "A": "Talk to the university's career centre",
+              "B": "talk to his tutor",
+              "C": "contact the hotel manager"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q30",
+            "format": "multiple-choice",
+            "text": "what is Tom's plan for his own essay?",
+            "options": {
+              "A": "To study about the rise of five- star hotels",
+              "B": "to use a video approach",
+              "C": "To do research into how the hotel industry works"
+            },
+            "correctAnswer": "A"
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "The Early History of Salt",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart4.mp3?alt=media&token=0f722947-4c95-47a9-b52a-b606a5771cb5",
+        "content": [
+          {
+            "type": "text",
+            "value": "Introduction"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "• Salt is essential for human",
+            "postfix": "",
+            "correctAnswer": "health",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Ancient Rome"
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "• The word",
+            "postfix": "comes from the Latin word's solarium argetum, which was used to describe the payment to Roman soldiers.",
+            "correctAnswer": "salary",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Ancient Sweden"
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "• Animals were kept in the local",
+            "postfix": "at the right time of year.",
+            "correctAnswer": "forest",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "• Fresh meat was only available in",
+            "postfix": "",
+            "correctAnswer": "October",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "• Salt has been used widely: we can tell from the diet of the",
+            "postfix": "in Sweden.",
+            "correctAnswer": "king",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "•",
+            "postfix": "Consumption increased rapidly because the food was much too salty.",
+            "correctAnswer": "beer",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Salt source"
+          },
+          {
+            "type": "question",
+            "questionId": "q37",
+            "format": "gap-fill",
+            "text": "• People mainly extract salt from oceans and",
+            "postfix": "in the basins.",
+            "correctAnswer": "deserts",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "• Salt from spring water is more",
+            "postfix": "And purer compared to that from sea water",
+            "correctAnswer": "concentrated",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Salt distribution"
+          },
+          {
+            "type": "text",
+            "value": "• In ancient Sweden"
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "- Locals needed to protect the",
+            "postfix": "By which they imported salt.",
+            "correctAnswer": "shipping",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "• In other ancient countries"
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "- People carrying salt around were seen as a natural means of",
+            "postfix": "",
+            "correctAnswer": "transport",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 30,
+      "version": "1.0",
+      "createdAt": "2024-01-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753632805,
+    "_nanoseconds": 322000000
+  }
+}

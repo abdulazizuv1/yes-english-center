@@ -1,0 +1,442 @@
+{
+  "title": "IELTS Listening Test 4",
+  "parts": {
+    "testId": "ielts-listening-4",
+    "title": "IELTS Listening Practice Test 4",
+    "sections": [
+      {
+        "sectionNumber": 1,
+        "title": "Riverdale Pre-school",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart1.mp3?alt=media&token=de9d5085-a790-4603-9ea6-abbd0f136473",
+        "content": [
+          {
+            "type": "table",
+            "title": "Riverdale Pre-school",
+            "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "columns": [
+              "Field",
+              "Information"
+            ],
+            "rows": [
+              {
+                "field": "Example<br>Children:",
+                "information": "20 in a class"
+              },
+              {
+                "field": "Classes:",
+                "information": "First group - Mrs. Oliver<br>Second group - Mrs. 1 ___q1___"
+              },
+              {
+                "field": "Hours & Days:",
+                "information": "Suzie will attend 3 days a week for a total of 2 ___q2___ hours"
+              },
+              {
+                "field": "Activities:",
+                "information": "Outside time<br>- running, playing, or something quieter<br>- just got a new piece of equipment<br>- intend to make a 3 ___q3___<br><br>Indoors<br>- this year, 4 ___q4___ activities are popular<br>- they hear a 5 ___q5___ every day"
+              },
+              {
+                "field": "Fees:",
+                "information": "Now costs 6$ ___q6___ per term<br>Fees include:<br>- a trip to a 7 ___q7___ this year<br>- chance to take home a 8 ___q8___ every week"
+              },
+              {
+                "field": "Do not forget:",
+                "information": "• Put a 9 ___q9___ in Suzie's bag<br>• Arrange a visit; phone number: 10 ___q10___"
+              }
+            ],
+            "answer": {
+              "q1": "keogh",
+              "q2": "15",
+              "q3": "garden",
+              "q4": "music",
+              "q5": "story",
+              "q6": "470",
+              "q7": "farm",
+              "q8": "toy",
+              "q9": "pillow",
+              "q10": "0914638520"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 2,
+        "title": "University Job Centre",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart2.mp3?alt=media&token=52fca5d3-9789-4b22-b09b-5bbc112142f9",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "gap-fill",
+            "text": "Special conditions may apply to",
+            "postfix": "students looking for a job.",
+            "correctAnswer": "overseas",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "gap-fill",
+            "text": "The university Job Centre is located on the",
+            "postfix": "Campus.",
+            "correctAnswer": "WOODSIDE",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "gap-fill",
+            "text": "The Job Centre remains open until",
+            "postfix": "every evening.",
+            "correctAnswer": "8",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "gap-fill",
+            "text": "The only day the employment lawyer is available is",
+            "postfix": "",
+            "correctAnswer": "tuesday",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "gap-fill",
+            "text": "The university",
+            "postfix": "regularly advertises new jobs.",
+            "correctAnswer": "website",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q16",
+            "format": "multiple-choice",
+            "text": "At present, the university is offering part-time work in",
+            "options": {
+              "A": "its offices.",
+              "B": "the IT centre.",
+              "C": "the car parks."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q17",
+            "format": "multiple-choice",
+            "text": "Local employers visit the university",
+            "options": {
+              "A": "only in the first term.",
+              "B": "twice a term.",
+              "C": "throughout the year."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q18",
+            "format": "multiple-choice",
+            "text": "According to the speaker, a part-time job can",
+            "options": {
+              "A": "lead to a full-time job after graduation.",
+              "B": "provide a useful work record for the future.",
+              "C": "give the chance to develop team-work skills"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q19",
+            "format": "multiple-choice",
+            "text": "Students who work part-time",
+            "options": {
+              "A": "will be taxed.",
+              "B": "will be paid every week.",
+              "C": "will need private insurance."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q20",
+            "format": "multiple-choice",
+            "text": "Part-time student workers are advised to",
+            "options": {
+              "A": "give notice in writing.",
+              "B": "communicate by email.",
+              "C": "have a mobile phone."
+            },
+            "correctAnswer": "C"
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Complete the sentences below and answer the questions.",
+          "note": "Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Research Project",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart3.mp3?alt=media&token=6b7d4fd6-8ddb-4a71-b3dc-57d712be7b20",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "multiple-choice",
+            "text": "How did John choose the topic of his research project?",
+            "options": {
+              "A": "He thought the information would be useful for town planning.",
+              "B": "He has a special interest in the use of public services.",
+              "C": "He read about a similar study which had been done earlier."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "multiple-choice",
+            "text": "During his research, John is expecting to find that",
+            "options": {
+              "A": "The use of public services has altered very little.",
+              "B": "A group of people has changed its habits.",
+              "C": "The most frequently used facility is the library."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "multiple-choice",
+            "text": "What is the problem with using official records?",
+            "options": {
+              "A": "They may be lacking in detail.",
+              "B": "They may not be readily available.",
+              "C": "They may be difficult to analyse."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "multiple-choice",
+            "text": "What does the tutor think about John using a questionnaire to get information?",
+            "options": {
+              "A": "He needs to do a course in questionnaire design first.",
+              "B": "He should use this method instead of looking at public records.",
+              "C": "He will find the practice he gets useful the following year."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q25",
+            "format": "multiple-choice",
+            "text": "Which new variable does John agree to add to his investigation?",
+            "options": {
+              "A": "Occupation",
+              "B": "Income group",
+              "C": "Qualifications"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q26",
+            "format": "multiple-choice",
+            "text": "How many questionnaires will John distribute?",
+            "options": {
+              "A": "The same number as in the previous study",
+              "B": "A greater number than he needs for analysis",
+              "C": "The number recommended in the project guidelines"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q27_28",
+            "text": "Which TWO strategies will John use to encourage people to fill out his questionnaire?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q27",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q28",
+                "correctAnswer": "E"
+              }
+            ],
+            "options": {
+              "A": "Using simple language",
+              "B": "Delivering the questionnaires in person",
+              "C": "Making the questionnaires anonymous",
+              "D": "Providing return envelopes",
+              "E": "Trialing the questionnaire on friends"
+            }
+          },
+          {
+            "type": "question-group",
+            "groupType": "multi-select",
+            "questionId": "q29_30",
+            "text": "Which TWO pieces of advice does the tutor give John about his questionnaire?",
+            "instructions": "Choose TWO letters, A-E",
+            "questions": [
+              {
+                "questionId": "q29",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q30",
+                "correctAnswer": "C"
+              }
+            ],
+            "options": {
+              "A": "There should be a mixture of question types.",
+              "B": "Some questions should elicit personal information.",
+              "C": "There should be an introduction to explain the survey's purpose.",
+              "D": "A telephone number should be provided for queries.",
+              "E": "The questions should only take a few minutes to answer."
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "Driverless vehicle competition",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart4.mp3?alt=media&token=ffc5c736-e61c-4d42-b37f-2a4c776af83c",
+        "content": [
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "Undergraduates from both the engineering school and the",
+            "postfix": "department can definitely take part in the project.",
+            "correctAnswer": "computer science",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "The automated vehicles will have to avoid obstacles such as",
+            "postfix": "",
+            "correctAnswer": "rocks",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "The tutor mentions one vehicle which used technology such as",
+            "postfix": ", lasers, and laptops to measure its surroundings.",
+            "correctAnswer": "video cameras",
+            "wordLimit": 2
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "multiple-choice",
+            "text": "The purpose of holding the race is to",
+            "options": {
+              "A": "Interest students in careers in industry.",
+              "B": "Help provide finance for universities.",
+              "C": "Find useful new design features."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "multiple-choice",
+            "text": "The tutor says success will depend on",
+            "options": {
+              "A": "The software design.",
+              "B": "Good, solid construction.",
+              "C": "Sophisticated mechanisms."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "multiple-choice",
+            "text": "This year's competitors were surprised that the vehicles",
+            "options": {
+              "A": "Were so easy to design.",
+              "B": "Were as successful as they were.",
+              "C": "Took such a short time to construct."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "table",
+            "title": "Schedule",
+            "groupInstruction": "Questions 37-40\nComplete the table below.\nWrite ONE WORD ONLY for each answer.",
+            "columns": [
+              "Time",
+              "Activity"
+            ],
+            "rows": [
+              {
+                "time": "Early May",
+                "activity": "Introductory 37 ___q37___ about the project"
+              },
+              {
+                "time": "Late May",
+                "activity": "Essay giving information about relevant 38 ___q38___ and experience"
+              },
+              {
+                "time": "June",
+                "activity": "Visit to a factory"
+              },
+              {
+                "time": "September",
+                "activity": "Workshop<br>• discuss 39 ___q39___<br>• learn to use design package"
+              },
+              {
+                "time": "December",
+                "activity": "Submission of initial designs"
+              },
+              {
+                "time": "January",
+                "activity": "Selection of the 40 ___q40___"
+              }
+            ],
+            "answer": {
+              "q37": "seminar",
+              "q38": "skills",
+              "q39": "ideas",
+              "q40": "team"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the sentences below and the table.",
+          "note": "Write NO MORE THAN TWO WORDS for each answer."
+        }
+      }
+    ],
+    "metadata": {
+      "totalQuestions": 40,
+      "timeLimit": 30,
+      "version": "1.0",
+      "createdAt": "2024-01-15"
+    }
+  },
+  "createdAt": {
+    "_seconds": 1753623415,
+    "_nanoseconds": 779000000
+  }
+}

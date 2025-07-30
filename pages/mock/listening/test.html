@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening Test</title>
+    <link rel="stylesheet" href="./test.css" />
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="test-header">
+      <div class="test-title">IELTS Academic Listening</div>
+      <div class="timer-section">
+        <div id="timer">Time left: <span id="time">40:00</span></div>
+        <button class="pause-btn" id="pauseBtn" onclick="togglePause()">
+          Pause
+        </button>
+        <button class="review-btn" onclick="openReview()">Review</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Audio Panel -->
+      <div class="audio-panel">
+        <div class="audio-container" id="audio-container">
+          <div class="audio-placeholder">
+            🎧 Audio will appear here when section loads
+          </div>
+        </div>
+        <div class="audio-instructions">
+          <h4>📝 Listening Instructions:</h4>
+          <ul>
+            <li>You will hear each recording <strong>only once</strong></li>
+            <li>Write your answers while listening</li>
+            <li>You have time at the end to transfer answers</li>
+            <li>Use headphones for better audio quality</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Questions Panel -->
+      <div class="questions-panel">
+        <div id="question-list">Loading questions...</div>
+      </div>
+    </div>
+
+    <!-- Question Navigation -->
+    <div class="question-nav" id="questionNav">
+      <div class="nav-section">
+        <span class="nav-label">Section 1:</span>
+        <div class="nav-numbers" id="section1Numbers"></div>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Section 2:</span>
+        <div class="nav-numbers" id="section2Numbers"></div>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Section 3:</span>
+        <div class="nav-numbers" id="section3Numbers"></div>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Section 4:</span>
+        <div class="nav-numbers" id="section4Numbers"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+      <button class="control-btn btn-back" id="backBtn" style="display: none">
+        ← Back
+      </button>
+      <div class="section-indicator">
+        <span id="sectionIndicator">Section 1 of 4</span>
+      </div>
+      <div>
+        <button class="control-btn btn-next" id="nextBtn">Next →</button>
+        <button
+          class="control-btn btn-finish"
+          id="finishBtn"
+          style="display: none"
+        >
+          Finish Test
+        </button>
+      </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="highlightSelection()">
+        📝 Highlight
+      </div>
+      <div class="context-menu-item" onclick="removeHighlight()">
+        🗑️ Remove Highlight
+      </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div class="pause-modal" id="pauseModal">
+      <div class="pause-modal-content">
+        <h2>Listening Test Paused</h2>
+        <p>
+          Your test has been paused. Click resume when you're ready to continue.
+        </p>
+        <button class="resume-btn" onclick="togglePause()">Resume Test</button>
+      </div>
+    </div>
+    <div class="loading-modal" id="loadingModal">
+      <div class="loading-modal-content">
+        <div class="loading-spinner"></div>
+        <h2>Submitting Your Results</h2>
+        <p>Please wait while we process your test...</p>
+      </div>
+    </div>
+    <script type="module" src="test.js"></script>
+  </body>
+</html>

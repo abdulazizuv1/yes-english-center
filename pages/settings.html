@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Settings</title>
+    <link rel="stylesheet" href="settings.css" />
+    <link rel="icon" href="../image/Logo.ver1.2.png" />
+  </head>
+  <body>
+    <div class="set_top">
+      <h1>Settings</h1>
+      <button style="color: white;" onclick="location.href='/'">Back</button>
+    </div>
+    <button class="res_set_btn" onclick="location.href='results-select.html'">📊 Results</button>
+    <p id="result"></p>
+    <div class="forms_add">
+      <form id="add-group-form">
+        <h2 class="set_h2">Add Group</h2>
+        <input type="text" id="group-name" placeholder="Group Name" required />
+        <input type="file" id="group-photo" accept="image/*" required />
+        <button class="set_add_btn" type="submit">Add Group</button>
+        <p id="group-result"></p>
+      </form>
+      <form id="add-result-form">
+        <h2 class="set_h2">Add Result</h2>
+        <input
+          type="text"
+          id="result-name"
+          placeholder="Student Name"
+          required
+        />
+        <input
+          type="number"
+          id="result-band"
+          placeholder="Band (e.g. 7.5)"
+          step="0.1"
+          required
+        />
+        <input
+          type="text"
+          id="result-group"
+          placeholder="Group (e.g. IELTS)"
+          required
+        />
+        <input type="file" id="result-photo" accept="image/*" required />
+        <button class="set_add_btn" type="submit">Add Result</button>
+        <p id="result-message"></p>
+      </form>
+      <form id="add-feedback-form">
+        <h2 class="set_h2">Add New Feedback</h2>
+        <input
+          type="text"
+          id="feedback-name"
+          placeholder="Имя ученика"
+          required
+        />
+        <input
+          type="text"
+          id="feedback-group"
+          placeholder="Название группы"
+          required
+        />
+        <textarea id="feedback-text" placeholder="Отзыв" required></textarea>
+        <button class="set_add_btn" type="submit">Добавить отзыв</button>
+        <p id="feedback-message"></p>
+      </form>
+    </div>
+    <h2 class="set_h2">Add and Delete users</h2>
+    <form id="create-user-form">
+      <input type="email" id="new-email" placeholder="Email" required />
+      <input
+        type="password"
+        id="new-password"
+        placeholder="Password"
+        required
+      />
+      <select id="new-role">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button class="set_add_btn" type="submit">Create User</button>
+    </form>
+    <script type="module" src="settings.js"></script>
+  </body>
+</html>
