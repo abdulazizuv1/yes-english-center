@@ -22,15 +22,16 @@ const listeningTest = JSON.parse(rawData);
 const docId = "test-5";
 
 // 🔥 Загрузка в Firestore: коллекция "listeningTests"
+// ИСПРАВЛЕНИЕ: Сохраняем данные напрямую без дополнительной обертки
 db.collection("listeningTests")
   .doc(docId)
   .set({
-    title: "IELTS Listening Test 5",
-    parts: listeningTest,
+    ...listeningTest,  // Распаковываем все поля из JSON (title, parts, etc.)
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   })
   .then(() => {
     console.log(`✅ Listening test ${docId} успешно загружен.`);
+    console.log("Структура загруженных данных:", Object.keys(listeningTest));
     process.exit(0);
   })
   .catch((error) => {
