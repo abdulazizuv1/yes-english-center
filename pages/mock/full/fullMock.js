@@ -44,6 +44,8 @@ let pausedTime = 0;
 let timerStartTime = null;
 let audioWasPaused = false;
 let audioCurrentTime = 0;
+let currentAudioSection = 0; // Какая секция аудио сейчас играет
+let audioInitialized = false; // Было ли аудио инициализировано
 
 // Функция для полной остановки аудио
 function stopAllAudio() {
@@ -460,6 +462,8 @@ function showStageContent(stageName) {
 function initializeListening() {
   const sections = stageData.listening.sections;
   currentSectionIndex = 0;
+  audioInitialized = false; // Сбрасываем флаг аудио
+  currentAudioSection = 0;   // Сбрасываем текущую секцию аудио
   renderListeningSection(0);
 }
 
@@ -506,37 +510,55 @@ function renderListeningSection(index) {
   updateNavigationButtons();
 }
 function handleSectionAudio(section, index) {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
-
+  // Если аудио уже инициализировано, не трогаем его при навигации
+  if (audioInitialized) return;
+  
   const container = document.getElementById("audio-container");
   if (!container) return;
+  
+  // Инициализируем аудио только один раз - начинаем с первой секции
+  initializeSequentialAudio();
+  audioInitialized = true;
+}
 
-  if (section.audioUrl) {
-    container.innerHTML = `
-            <audio controls autoplay style="width:100%; margin-bottom: 20px;" id="sectionAudio">
-                <source src="${section.audioUrl}" type="audio/mpeg" />
-                Your browser does not support the audio element.
-            </audio>
-        `;
-
-    currentAudio = document.getElementById("sectionAudio");
+function initializeSequentialAudio() {
+  const container = document.getElementById("audio-container");
+  playAudioForSection(0); // Всегда начинаем с первой секции
+  
+  function playAudioForSection(sectionIndex) {
+    if (sectionIndex >= stageData.listening.sections.length) return; // Все аудио проиграно
+    
+    const section = stageData.listening.sections[sectionIndex];
+    if (!section.audioUrl) {
+      // Если у секции нет аудио, переходим к следующей
+      setTimeout(() => playAudioForSection(sectionIndex + 1), 100);
+      return;
+    }
+    
     if (currentAudio) {
-      currentAudio.addEventListener("ended", () => {
-        if (index < stageData.length - 1 && !isPaused) {
-          setTimeout(() => {
-            currentSectionIndex++;
-            renderListeningSection(currentSectionIndex);
-            updateQuestionNav();
-          }, 1000);
-        }
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    
+    container.innerHTML = `
+      <audio controls autoplay style="width:100%; margin-bottom: 20px;" id="sectionAudio">
+        <source src="${section.audioUrl}" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+      <div style="text-align: center; margin-top: 10px; color: #6b7280;">
+        Playing: Section ${sectionIndex + 1} Audio
+      </div>
+    `;
+    
+    currentAudio = document.getElementById('sectionAudio');
+    currentAudioSection = sectionIndex;
+    
+    if (currentAudio) {
+      currentAudio.addEventListener('ended', () => {
+        // После окончания текущего аудио, играем следующее
+        setTimeout(() => playAudioForSection(sectionIndex + 1), 1000);
       });
     }
-  } else {
-    container.innerHTML =
-      '<div style="padding: 20px; text-align: center;">🎧 No audio available</div>';
   }
 }
 
@@ -644,12 +666,12 @@ function renderListeningMultiSelectGroup(group) {
   // ✅ ИСПРАВЛЕНО: Получаем реальные номера вопросов
   let questionIds = [];
   if (group.questions && Array.isArray(group.questions)) {
-    questionIds = group.questions.map(q => q.questionId);
+    questionIds = group.questions.map((q) => q.questionId);
   } else {
     // Если нет group.questions, генерируем нужное количество ID
     // На основе maxSelections, а не количества опций
     const sectionStart = currentSectionIndex * 10 + 1;
-    
+
     for (let i = 0; i < maxSelections; i++) {
       questionIds.push(`q${sectionStart + i}`);
     }
@@ -671,7 +693,7 @@ function renderListeningMultiSelectGroup(group) {
             // Проверяем, есть ли ответ для этого ключа среди наших questionIds
             let isChecked = false;
             let linkedQuestionId = null;
-            
+
             // Ищем, есть ли ответ с этим значением среди наших вопросов
             for (const qId of questionIds) {
               if (answersSoFar[qId] === key) {
@@ -680,7 +702,7 @@ function renderListeningMultiSelectGroup(group) {
                 break;
               }
             }
-            
+
             return `
             <label class="radio-option">
               <input type="checkbox" 
@@ -699,20 +721,23 @@ function renderListeningMultiSelectGroup(group) {
   `;
 
   questionList.appendChild(groupDiv);
-  
+
   // ✅ Подсчитываем уже выбранные элементы
   setTimeout(() => {
-    const groupContainer = document.querySelector(`[data-group-id="${groupQId}"]`);
+    const groupContainer = document.querySelector(
+      `[data-group-id="${groupQId}"]`
+    );
     if (groupContainer) {
       const counter = document.getElementById(`counter-${groupQId}`);
-      const checkedBoxes = groupContainer.querySelectorAll('input[type="checkbox"]:checked');
+      const checkedBoxes = groupContainer.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
       if (counter) {
         counter.textContent = checkedBoxes.length;
       }
     }
   }, 100);
 }
-
 
 function renderListeningMatchingGroup(group) {
   const groupQId = group.questionId; // ✅ БЕЗ префикса listening_
@@ -792,11 +817,10 @@ function renderListeningTable(table) {
       const key = col.toLowerCase().replace(/\s+/g, "");
       let content = row[key] || "";
 
-
       // ✅ ИСПРАВЛЕНО: Обрабатываем паттерн ___qX___
       content = content.replace(/___q(\d+)___/g, (match, num) => {
         const qId = `q${num}`;
-        
+
         return `<span style="font-weight: bold; color: #1976d2;">${num}:</span> <input type="text" data-qid="${qId}" class="gap-fill table-input" style="border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; margin-left: 5px; min-width: 120px;" value="${
           answersSoFar[qId] || ""
         }" placeholder="Your answer..." />`;
@@ -810,13 +834,12 @@ function renderListeningTable(table) {
 
   tableDiv.innerHTML = tableHtml;
   questionList.appendChild(tableDiv);
-  
+
   // ✅ ДОБАВЛЕНО: Проверяем что input поля действительно созданы
   setTimeout(() => {
-    const createdInputs = tableDiv.querySelectorAll('input[data-qid]');
-    
-    createdInputs.forEach(input => {
-    });
+    const createdInputs = tableDiv.querySelectorAll("input[data-qid]");
+
+    createdInputs.forEach((input) => {});
   }, 100);
 }
 // Initialize Reading
@@ -1228,6 +1251,19 @@ function initializeWriting() {
   // Set up word count functionality
   setupWordCount("task1Answer", "task1WordCount");
   setupWordCount("task2Answer", "task2WordCount");
+  // Restore saved writing answers
+  const savedTask1 = localStorage.getItem("fullmock_task1Answer");
+  const savedTask2 = localStorage.getItem("fullmock_task2Answer");
+
+  if (savedTask1) {
+    document.getElementById("task1Answer").value = savedTask1;
+    answersSoFar["task1Answer"] = savedTask1;
+  }
+
+  if (savedTask2) {
+    document.getElementById("task2Answer").value = savedTask2;
+    answersSoFar["task2Answer"] = savedTask2;
+  }
 
   updateNavigationButtons();
 }
@@ -1246,8 +1282,9 @@ function setupWordCount(textareaId, counterId) {
     const wordCount = text === "" ? 0 : text.split(/\s+/).length;
     counter.textContent = wordCount;
 
-    // Save answer
+    // Save answer В ОБЪЕКТ answersSoFar И в локальное хранилище
     answersSoFar[textareaId] = textarea.value;
+    localStorage.setItem(`fullmock_${textareaId}`, textarea.value);
   }
 
   textarea.addEventListener("input", updateWordCount);
@@ -1338,29 +1375,34 @@ document.addEventListener("change", (e) => {
     const groupId = input.dataset.groupId;
     const maxSelections = parseInt(input.dataset.maxSelections) || 3;
     const optionKey = input.dataset.optionKey || input.value;
-    
+
     if (groupId) {
-      const groupContainer = document.querySelector(`[data-group-id="${groupId}"]`);
-      const checkedBoxes = groupContainer.querySelectorAll('input[type="checkbox"]:checked');
-      
+      const groupContainer = document.querySelector(
+        `[data-group-id="${groupId}"]`
+      );
+      const checkedBoxes = groupContainer.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+
       // ✅ Получаем questionIds для этой группы
       let questionIds = [];
-      
+
       // Находим группу в данных
       let groupData = null;
       for (const section of stageData.listening.sections) {
         if (section.content) {
-          groupData = section.content.find(item => 
-            item.type === "question-group" && 
-            item.groupType === "multi-select" && 
-            item.questionId === groupId
+          groupData = section.content.find(
+            (item) =>
+              item.type === "question-group" &&
+              item.groupType === "multi-select" &&
+              item.questionId === groupId
           );
           if (groupData) break;
         }
       }
-      
+
       if (groupData && groupData.questions) {
-        questionIds = groupData.questions.map(q => q.questionId);
+        questionIds = groupData.questions.map((q) => q.questionId);
       } else {
         // Fallback
         const sectionStart = currentSectionIndex * 10 + 1;
@@ -1368,7 +1410,7 @@ document.addEventListener("change", (e) => {
           questionIds.push(`q${sectionStart + i}`);
         }
       }
-      
+
       if (input.checked) {
         // Проверяем лимит
         if (checkedBoxes.length > maxSelections) {
@@ -1376,7 +1418,7 @@ document.addEventListener("change", (e) => {
           alert(`You can only select ${maxSelections} options.`);
           return;
         }
-        
+
         // Находим первый свободный questionId
         let assignedQuestionId = null;
         for (const qId of questionIds) {
@@ -1385,12 +1427,11 @@ document.addEventListener("change", (e) => {
             break;
           }
         }
-        
+
         if (assignedQuestionId) {
           answersSoFar[assignedQuestionId] = optionKey;
           console.log(`✅ Assigned ${optionKey} to ${assignedQuestionId}`);
         }
-        
       } else {
         // Удаляем ответ
         for (const qId of questionIds) {
@@ -1401,13 +1442,15 @@ document.addEventListener("change", (e) => {
           }
         }
       }
-      
+
       // ✅ Обновляем счетчик
       const counter = document.getElementById(`counter-${groupId}`);
       if (counter) {
-        const newCheckedBoxes = groupContainer.querySelectorAll('input[type="checkbox"]:checked');
+        const newCheckedBoxes = groupContainer.querySelectorAll(
+          'input[type="checkbox"]:checked'
+        );
         counter.textContent = newCheckedBoxes.length;
-        
+
         if (newCheckedBoxes.length === maxSelections) {
           counter.style.color = "#059669";
           counter.style.fontWeight = "bold";
@@ -1416,7 +1459,7 @@ document.addEventListener("change", (e) => {
           counter.style.fontWeight = "600";
         }
       }
-      
+
       // ✅ Обновляем стили лейблов
       const label = input.closest("label");
       if (input.checked) {
@@ -1428,12 +1471,11 @@ document.addEventListener("change", (e) => {
         label.style.borderColor = "#d1d5db";
         label.style.borderWidth = "1px";
       }
-      
+
       updateQuestionNav();
     }
   }
 });
-
 
 // Navigation button handlers
 document.getElementById("nextBtn").onclick = () => {
@@ -1539,9 +1581,13 @@ async function handleFinishTest() {
   const listeningCorrectAnswers = {};
   const readingAnswers = {};
   const readingCorrectAnswers = {};
+  // Получаем значения напрямую из textarea элементов
+  const task1Textarea = document.getElementById("task1Answer");
+  const task2Textarea = document.getElementById("task2Answer");
+
   const writingAnswers = {
-    task1: answersSoFar["task1Answer"] || "",
-    task2: answersSoFar["task2Answer"] || "",
+    task1: task1Textarea ? task1Textarea.value : "",
+    task2: task2Textarea ? task2Textarea.value : "",
   };
 
   // Process listening answers
@@ -1554,85 +1600,95 @@ async function handleFinishTest() {
   for (const section of stageData.listening.sections) {
     if (section.content) {
       section.content.forEach((item) => {
-        
         // ✅ 1. ОБЫЧНЫЕ ВОПРОСЫ
         if (item.type === "question") {
           const qId = item.questionId;
           const userAns = answersSoFar[qId];
-          const saveKey = qId.replace('q', '');
-          
+          const saveKey = qId.replace("q", "");
+
           listeningAnswers[saveKey] = userAns !== undefined ? userAns : null;
           listeningCorrectAnswers[saveKey] = item.correctAnswer;
 
-          const isCorrect = checkAnswerCorrectness(userAns, [item.correctAnswer]);
+          const isCorrect = checkAnswerCorrectness(userAns, [
+            item.correctAnswer,
+          ]);
           if (isCorrect) listeningCorrect++;
           listeningTotal++;
-          
-          console.log(`✅ Question ${qId}: user="${userAns}", correct="${item.correctAnswer}", isCorrect=${isCorrect}`);
-          
-        // ✅ 2. QUESTION GROUPS (multi-select, matching)
+
+          console.log(
+            `✅ Question ${qId}: user="${userAns}", correct="${item.correctAnswer}", isCorrect=${isCorrect}`
+          );
+
+          // ✅ 2. QUESTION GROUPS (multi-select, matching)
         } else if (item.type === "question-group") {
-          
           // Multi-select группы
           if (item.groupType === "multi-select" && item.questions) {
             item.questions.forEach((q) => {
               const qId = q.questionId;
               const userAns = answersSoFar[qId];
-              const saveKey = qId.replace('q', '');
-              
+              const saveKey = qId.replace("q", "");
+
               listeningAnswers[saveKey] = userAns || null;
               listeningCorrectAnswers[saveKey] = q.correctAnswer;
 
-              const isCorrect = checkAnswerCorrectness(userAns, [q.correctAnswer]);
+              const isCorrect = checkAnswerCorrectness(userAns, [
+                q.correctAnswer,
+              ]);
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
-              
-              console.log(`✅ Multi-select ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`);
+
+              console.log(
+                `✅ Multi-select ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
+              );
             });
           }
-          
+
           // ✅ Matching группы
           if (item.groupType === "matching" && item.questions) {
             item.questions.forEach((q) => {
               const qId = q.questionId;
               const userAns = answersSoFar[qId];
-              const saveKey = qId.replace('q', '');
-              
+              const saveKey = qId.replace("q", "");
+
               listeningAnswers[saveKey] = userAns || null;
               listeningCorrectAnswers[saveKey] = q.correctAnswer;
 
-              const isCorrect = checkAnswerCorrectness(userAns, [q.correctAnswer]);
+              const isCorrect = checkAnswerCorrectness(userAns, [
+                q.correctAnswer,
+              ]);
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
-              
-              console.log(`✅ Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`);
+
+              console.log(
+                `✅ Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
+              );
             });
           }
-          
-        // ✅ 3. ИСПРАВЛЕНО: TABLE ВОПРОСЫ - обрабатываем ОБА формата
+
+          // ✅ 3. ИСПРАВЛЕНО: TABLE ВОПРОСЫ - обрабатываем ОБА формата
         } else if (item.type === "table") {
           console.log("🔍 Processing table:", item);
-          
-          if (item.answer && typeof item.answer === 'object') {
+
+          if (item.answer && typeof item.answer === "object") {
             Object.keys(item.answer).forEach((key) => {
               let qNum;
               let qId;
-              
+
               // ✅ ИСПРАВЛЕНО: Обрабатываем ОБА формата ключей
-              if (key.startsWith('qq')) {
+              if (key.startsWith("qq")) {
                 // Формат: qq37, qq38, qq39, qq40
-                qNum = key.replace('qq', ''); // qq37 -> 37
-                qId = `q${qNum}`;             // -> q37
-              } else if (key.startsWith('q')) {
+                qNum = key.replace("qq", ""); // qq37 -> 37
+                qId = `q${qNum}`; // -> q37
+              } else if (key.startsWith("q")) {
                 // Формат: q1, q2, q3, q4, q5, q6, q7, q8, q9, q10
-                qNum = key.replace('q', '');  // q1 -> 1
-                qId = key;                    // -> q1 (уже правильный)
+                qNum = key.replace("q", ""); // q1 -> 1
+                qId = key; // -> q1 (уже правильный)
               } else {
                 // Формат: просто число 1, 2, 3...
-                qNum = key;                   // 1 -> 1
-                qId = `q${key}`;              // -> q1
+                qNum = key; // 1 -> 1
+                qId = `q${key}`; // -> q1
               }
-              
+
               const userAns = answersSoFar[qId];
               const expected = item.answer[key];
 
@@ -1642,46 +1698,59 @@ async function handleFinishTest() {
               const isCorrect = checkAnswerCorrectness(userAns, [expected]);
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
-              
-              console.log(`✅ Table ${qId} (from key "${key}" -> qNum=${qNum}): user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`);
+
+              console.log(
+                `✅ Table ${qId} (from key "${key}" -> qNum=${qNum}): user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`
+              );
             });
           }
-          
+
           // ✅ Дополнительно: обрабатываем rows если нет answer
           else if (item.rows && Array.isArray(item.rows)) {
             item.rows.forEach((row, rowIndex) => {
-              Object.keys(row).forEach(key => {
+              Object.keys(row).forEach((key) => {
                 const cellContent = row[key];
-                if (typeof cellContent === 'string' && cellContent.includes('___q')) {
+                if (
+                  typeof cellContent === "string" &&
+                  cellContent.includes("___q")
+                ) {
                   const matches = cellContent.match(/___q(\d+)___/g);
                   if (matches) {
-                    matches.forEach(match => {
+                    matches.forEach((match) => {
                       const qNum = match.match(/\d+/)[0];
                       const qId = `q${qNum}`;
                       const userAns = answersSoFar[qId];
-                      
-                      // Пытаемся найти правильный ответ в разных форматах
-                      const expected = item.answer?.[`qq${qNum}`] ||  // qq37 формат
-                                     item.answer?.[`q${qNum}`] ||   // q37 формат  
-                                     item.answer?.[qNum] ||         // 37 формат
-                                     item.correctAnswers?.[qNum] || 
-                                     item.answers?.[qNum] ||
-                                     null;
 
-                      listeningAnswers[qNum] = userAns !== undefined ? userAns : null;
+                      // Пытаемся найти правильный ответ в разных форматах
+                      const expected =
+                        item.answer?.[`qq${qNum}`] || // qq37 формат
+                        item.answer?.[`q${qNum}`] || // q37 формат
+                        item.answer?.[qNum] || // 37 формат
+                        item.correctAnswers?.[qNum] ||
+                        item.answers?.[qNum] ||
+                        null;
+
+                      listeningAnswers[qNum] =
+                        userAns !== undefined ? userAns : null;
                       if (expected) {
                         listeningCorrectAnswers[qNum] = expected;
                       }
 
                       if (expected) {
-                        const isCorrect = checkAnswerCorrectness(userAns, [expected]);
+                        const isCorrect = checkAnswerCorrectness(userAns, [
+                          expected,
+                        ]);
                         if (isCorrect) listeningCorrect++;
                         listeningTotal++;
-                        
-                        console.log(`✅ Table row ${qId}: user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`);
+
+                        console.log(
+                          `✅ Table row ${qId}: user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`
+                        );
                       } else {
                         listeningTotal++;
-                        console.log(`⚠️ Table row ${qId}: user="${userAns}", correct=MISSING`);
+                        console.log(
+                          `⚠️ Table row ${qId}: user="${userAns}", correct=MISSING`
+                        );
                       }
                     });
                   }
@@ -1689,28 +1758,31 @@ async function handleFinishTest() {
               });
             });
           }
-          
-        // ✅ 4. MATCHING ВОПРОСЫ (отдельные, не в группах)
+
+          // ✅ 4. MATCHING ВОПРОСЫ (отдельные, не в группах)
         } else if (item.groupType === "matching" && item.questions) {
           item.questions.forEach((q) => {
             const qId = q.questionId;
             const userAns = answersSoFar[qId];
-            const saveKey = qId.replace('q', '');
-            
+            const saveKey = qId.replace("q", "");
+
             listeningAnswers[saveKey] = userAns || null;
             listeningCorrectAnswers[saveKey] = q.correctAnswer;
 
-            const isCorrect = checkAnswerCorrectness(userAns, [q.correctAnswer]);
+            const isCorrect = checkAnswerCorrectness(userAns, [
+              q.correctAnswer,
+            ]);
             if (isCorrect) listeningCorrect++;
             listeningTotal++;
-            
-            console.log(`✅ Standalone Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`);
+
+            console.log(
+              `✅ Standalone Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
+            );
           });
         }
       });
     }
   }
-
 
   // Process reading answers (оставляем как есть)
   let readingCorrect = 0;
@@ -1819,6 +1891,9 @@ async function handleFinishTest() {
     console.error("❌ Error saving result:", e);
     alert("Error submitting your result. Please try again.");
   }
+  // Clear saved writing data
+  localStorage.removeItem("fullmock_task1Answer");
+  localStorage.removeItem("fullmock_task2Answer");
 }
 
 // Helper functions
@@ -1868,8 +1943,14 @@ async function sendWritingToTelegram(data) {
     const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
     const CHAT_ID = "53064348";
 
-    const task1Preview = data.task1
-    const task2Preview = data.task2
+    const task1Preview =
+      data.task1.length > 300
+        ? data.task1.substring(0, 300) + "..."
+        : data.task1;
+    const task2Preview =
+      data.task2.length > 300
+        ? data.task2.substring(0, 300) + "..."
+        : data.task2;
 
     const message = `🎓 *IELTS FULL MOCK TEST SUBMISSION*
 

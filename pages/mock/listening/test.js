@@ -15,6 +15,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
+let currentAudioSection = 0; // Какая секция аудио сейчас играет
+let audioInitialized = false;
 
 // Global variables
 let sections = [], currentSectionIndex = 0, answersSoFar = {}, currentAudio = null;
@@ -241,7 +243,9 @@ async function loadTest() {
 
 function initializeTest() {
     generateQuestionNav();
-    currentQuestionNumber = 1; // Set initial question
+    currentQuestionNumber = 1;
+    audioInitialized = false; // Сбрасываем флаг аудио
+    currentAudioSection = 0;   // Сбрасываем текущую секцию аудио
     renderSection(0);
     updateQuestionNav();
     startTimer(40 * 60, document.getElementById("time"));
@@ -258,36 +262,54 @@ function renderSection(index) {
 }
 
 function handleAudio(section, index) {
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-    }
+    // Если аудио уже инициализировано, не трогаем его при навигации
+    if (audioInitialized) return;
     
     const container = document.getElementById("audio-container");
     if (!container) return;
     
-    if (section.audioUrl) {
+    // Инициализируем аудио только один раз - начинаем с первой секции
+    initializeSequentialAudio();
+    audioInitialized = true;
+}
+function initializeSequentialAudio() {
+    const container = document.getElementById("audio-container");
+    playAudioForSection(0); // Всегда начинаем с первой секции
+    
+    function playAudioForSection(sectionIndex) {
+        if (sectionIndex >= sections.length) return; // Все аудио проиграно
+        
+        const section = sections[sectionIndex];
+        if (!section.audioUrl) {
+            // Если у секции нет аудио, переходим к следующей
+            setTimeout(() => playAudioForSection(sectionIndex + 1), 100);
+            return;
+        }
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
         container.innerHTML = `
             <audio controls autoplay style="width:100%; margin-bottom: 20px;" id="sectionAudio">
                 <source src="${section.audioUrl}" type="audio/mpeg" />
                 Your browser does not support the audio element.
             </audio>
+            <div style="text-align: center; margin-top: 10px; color: #6b7280;">
+                Playing: Section ${sectionIndex + 1} Audio
+            </div>
         `;
         
         currentAudio = document.getElementById('sectionAudio');
+        currentAudioSection = sectionIndex;
+        
         if (currentAudio) {
             currentAudio.addEventListener('ended', () => {
-                if (index < sections.length - 1 && !isPaused) {
-                    setTimeout(() => {
-                        currentSectionIndex++;
-                        renderSection(currentSectionIndex);
-                        updateQuestionNav();
-                    }, 1000);
-                }
+                // После окончания текущего аудио, играем следующее
+                setTimeout(() => playAudioForSection(sectionIndex + 1), 1000);
             });
         }
-    } else {
-        container.innerHTML = '<div style="padding: 20px; text-align: center;">🎧 No audio available</div>';
     }
 }
 
