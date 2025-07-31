@@ -522,15 +522,9 @@ async function sendEmailNotification(data) {
     const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
     const CHAT_ID = "53064348";
 
-    const task1Preview =
-      data.task1Content.length > 300
-        ? data.task1Content.substring(0, 300) + "..."
-        : data.task1Content;
+    const task1Preview = data.task1Content
 
-    const task2Preview =
-      data.task2Content.length > 300
-        ? data.task2Content.substring(0, 300) + "..."
-        : data.task2Content;
+    const task2Preview = data.task2Content
 
     const message = `🎓 *IELTS Writing Test Submission*
 
