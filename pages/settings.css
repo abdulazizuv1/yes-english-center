@@ -293,3 +293,38 @@ p[id$="-message"] {
 .loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
+.test-management-section {
+  display: flex;
+  justify-content: left;
+}
+
+.add-tests-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 18px 45px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
+}
+
+.add-tests-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5);
+}
+
+.add-tests-btn:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.add-tests-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.5;
+}

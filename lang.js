@@ -127,6 +127,21 @@ const langArr = {
     "lng_about_us_info": {
         "en": "Founded in 2015, YES English Center has become one of the      leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams. We proudly hold a record of outstanding student achievements, with our highest IELTS score reaching 8.5. At YES, we believe in personalized learning, discipline, and constant progress — helping each student unlock their true potential.Join us and take your first step toward international success.",
         "ru": "YES English Center был основан в 2015 году и с тех пор стал одним из ведущих центров изучения английского языка в регионе. Наш центр известен высоким качеством обучения, профессиональными преподавателями и эффективной подготовкой к международным экзаменам. Мы гордимся успехами наших учеников — наш наивысший результат IELTS составляет 8.5 баллов. В YES мы придерживаемся индивидуального подхода, дисциплины и постоянного развития. Начни свой путь к международному успеху вместе с нами!",
-        "uz": "YES English Center 2015-yilda tashkil etilgan bo‘lib, mintaqadagi eng yetakchi ingliz tili o‘quv markazlaridan biriga aylangan. Markazimiz yuqori sifatli ta’lim, professional o‘qituvchilar va xalqaro imtihonlarga tayyorlovda samarali metodikasi bilan mashhur. O‘quvchilarimizning yutuqlari biz uchun faxrdir — eng yuqori IELTS natijamiz 8.5 ballni tashkil qiladi. YESda biz individual yondashuv, tartib-intizom va doimiy taraqqiyot tamoyillariga amal qilamiz.Kelajakdagi muvaffaqiyatingizni biz bilan boshlang!:"
+        "uz": "YES English Center 2015-yilda tashkil etilgan bo‘lib, mintaqadagi eng yetakchi ingliz tili o‘quv markazlaridan biriga aylangan. Markazimiz yuqori sifatli ta’lim, professional o‘qituvchilar va xalqaro imtihonlarga tayyorlovda samarali metodikasi bilan mashhur. O‘quvchilarimizning yutuqlari biz uchun faxrdir — eng yuqori IELTS natijamiz 8.5 ballni tashkil qiladi. YESda biz individual yondashuv, tartib-intizom va doimiy taraqqiyot tamoyillariga amal qilamiz.Kelajakdagi muvaffaqiyatingizni biz bilan boshlang!"
+    },
+    "lng_feadback_sub":{
+        "en":"Real feedback from real students",
+        "ru":"Настоящие отзывы от настоящих учеников",
+        "uz":"Haqiqiy ...",
+    },
+     "lng_results_sub":{
+        "en":"See how our students achieve their goals",
+        "ru":"Настоящие отзывы от настоящих учеников",
+        "uz":"Haqiqiy ...",
+    },
+     "lng_groups_sub":{
+        "en":"Experienced teachers dedicated to your success",
+        "ru":"Настоящие отзывы от настоящих учеников",
+        "uz":"Haqiqiy ...",
     },
 };

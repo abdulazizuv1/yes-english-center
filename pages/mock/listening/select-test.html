@@ -69,13 +69,25 @@
         text-align: center;
       }
 
-      .band-9 { background: linear-gradient(135deg, #10b981, #059669); }
-      .band-8 { background: linear-gradient(135deg, #3b82f6, #1e40af); }
-      .band-7 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-      .band-6 { background: linear-gradient(135deg, #f59e0b, #d97706); }
-      .band-5 { background: linear-gradient(135deg, #ef4444, #dc2626); }
-      .band-low { background: linear-gradient(135deg, #6b7280, #4b5563); }
-      .result-score{
+      .band-9 {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+      .band-8 {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+      }
+      .band-7 {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      }
+      .band-6 {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .band-5 {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+      .band-low {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+      }
+      .result-score {
         font-size: 14px;
       }
       .loading-result {
@@ -97,28 +109,35 @@
       }
 
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body>
     <div class="header">
-      <span><img src="/image/logo.png" alt=""><h1>Listening Tests</h1></span>
+      <span
+        ><img src="/image/logo.png" alt="" />
+        <h1>Listening Tests</h1></span
+      >
       <a href="/pages/mock.html" class="back-btn">🔙 Back to Mock</a>
     </div>
-    
+
     <div class="subtitle">
       <p>Improve your listening skills with real IELTS audio materials</p>
     </div>
-    
+
     <div class="tests-grid" id="test-buttons">
       <div id="loading" class="loading">
         <div class="spinner"></div>
         <div>Loading listening tests...</div>
       </div>
     </div>
-    
+
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import {
@@ -148,7 +167,12 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const auth = getAuth();
-      
+      function extractNumber(str) {
+        // Ищем первое число в строке
+        const match = str.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0;
+      }
+
       const container = document.getElementById("test-buttons");
       const loading = document.getElementById("loading");
 
@@ -170,18 +194,23 @@
 
       function getBandClass(band) {
         const score = parseFloat(band);
-        if (score >= 9.0) return 'band-9';
-        if (score >= 8.0) return 'band-8';
-        if (score >= 7.0) return 'band-7';
-        if (score >= 6.0) return 'band-6';
-        if (score >= 5.0) return 'band-5';
-        return 'band-low';
+        if (score >= 9.0) return "band-9";
+        if (score >= 8.0) return "band-8";
+        if (score >= 7.0) return "band-7";
+        if (score >= 6.0) return "band-6";
+        if (score >= 5.0) return "band-5";
+        return "band-low";
       }
 
       async function getUserLatestResult(userId, testId) {
         try {
-          console.log("Searching for listening results - userId:", userId, "testId:", testId);
-          
+          console.log(
+            "Searching for listening results - userId:",
+            userId,
+            "testId:",
+            testId
+          );
+
           // First try with userId
           let resultsQuery = query(
             collection(db, "resultsListening"),
@@ -190,14 +219,17 @@
             orderBy("createdAt", "desc"),
             limit(1)
           );
-          
+
           let snapshot = await getDocs(resultsQuery);
-          
+
           // If no results with userId, try with email in name field
           if (snapshot.empty) {
             const user = auth.currentUser;
             if (user && user.email) {
-              console.log("No results with userId, trying with email:", user.email);
+              console.log(
+                "No results with userId, trying with email:",
+                user.email
+              );
               resultsQuery = query(
                 collection(db, "resultsListening"),
                 where("name", "==", user.email),
@@ -208,52 +240,78 @@
               snapshot = await getDocs(resultsQuery);
             }
           }
-          
+
           // Debug: Check all user's results if none found for this test
           if (snapshot.empty) {
-            console.log("No results found with testId filter. Checking all user results...");
+            console.log(
+              "No results found with testId filter. Checking all user results..."
+            );
             const allResultsQuery = query(
               collection(db, "resultsListening"),
               where("userId", "==", userId),
               orderBy("createdAt", "desc")
             );
             const allResults = await getDocs(allResultsQuery);
-            
+
             if (!allResults.empty) {
-              console.log("User has listening results, but not for this testId. User's test IDs:");
-              allResults.forEach(doc => {
-                console.log("- testId:", doc.data().testId, "score:", doc.data().score);
+              console.log(
+                "User has listening results, but not for this testId. User's test IDs:"
+              );
+              allResults.forEach((doc) => {
+                console.log(
+                  "- testId:",
+                  doc.data().testId,
+                  "score:",
+                  doc.data().score
+                );
               });
             } else {
               // Try with name field
-              const allResultsByName = await getDocs(query(
-                collection(db, "resultsListening"),
-                where("name", "==", auth.currentUser?.email || ""),
-                orderBy("createdAt", "desc")
-              ));
-              
+              const allResultsByName = await getDocs(
+                query(
+                  collection(db, "resultsListening"),
+                  where("name", "==", auth.currentUser?.email || ""),
+                  orderBy("createdAt", "desc")
+                )
+              );
+
               if (!allResultsByName.empty) {
                 console.log("User has results by email, test IDs:");
-                allResultsByName.forEach(doc => {
-                  console.log("- testId:", doc.data().testId, "score:", doc.data().score);
+                allResultsByName.forEach((doc) => {
+                  console.log(
+                    "- testId:",
+                    doc.data().testId,
+                    "score:",
+                    doc.data().score
+                  );
                 });
               }
             }
           }
-          
+
           if (!snapshot.empty) {
             const doc = snapshot.docs[0];
-            console.log("Found result for listening test", testId, ":", doc.data());
+            console.log(
+              "Found result for listening test",
+              testId,
+              ":",
+              doc.data()
+            );
             return {
               id: doc.id,
-              ...doc.data()
+              ...doc.data(),
             };
           }
-          
+
           console.log("No result found for listening test", testId);
           return null;
         } catch (error) {
-          console.error("Error fetching user result for listening test", testId, ":", error);
+          console.error(
+            "Error fetching user result for listening test",
+            testId,
+            ":",
+            error
+          );
           return null;
         }
       }
@@ -269,22 +327,25 @@
 
         const band = convertToIELTS(result.score, result.total || 40);
         const bandClass = getBandClass(band);
-        
+
         return `
           <div class="user-result" data-result-id="${result.id}">
-            <div class="result-score">${result.score}/${result.total || 40} correct</div>
+            <div class="result-score">${result.score}/${
+          result.total || 40
+        } correct</div>
             <div class="band-badge ${bandClass}">Band ${band}</div>
           </div>
         `;
       }
-      
+
       async function loadListeningTests() {
         try {
-          // Check authentication before loading tests
           const user = await new Promise((resolve) => {
             onAuthStateChanged(auth, (user) => {
               if (!user) {
-                console.log("❌ User not authenticated, redirecting to home page");
+                console.log(
+                  "❌ User not authenticated, redirecting to home page"
+                );
                 alert("🔒 Please login first to access listening tests");
                 window.location.href = "/";
                 return;
@@ -293,19 +354,29 @@
               resolve(user);
             });
           });
-          
+
           const testsSnapshot = await getDocs(collection(db, "listeningTests"));
           const tests = [];
-          
+
           testsSnapshot.forEach((doc) => {
             tests.push({
               id: doc.id,
-              data: doc.data()
+              data: doc.data(),
             });
           });
-          
-          loading.style.display = 'none';
-          
+
+          tests.sort((a, b) => {
+            const aId = a.data.testId || a.data.title || a.id;
+            const bId = b.data.testId || b.data.title || b.id;
+
+            const aNumber = extractNumber(aId);
+            const bNumber = extractNumber(bId);
+
+            return aNumber - bNumber;
+          });
+
+          loading.style.display = "none";
+
           if (tests.length === 0) {
             container.innerHTML = `
               <div class="no-tests">
@@ -315,15 +386,17 @@
             `;
             return;
           }
-          
+
           // Load all test cards first
           for (const [index, test] of tests.entries()) {
             const btn = document.createElement("button");
             btn.className = "test-card";
-            
+
             const testTitle = test.data.title || `Listening Test ${index + 1}`;
-            const testDescription = test.data.description || "Complete IELTS listening practice with 4 sections and 40 questions.";
-            
+            const testDescription =
+              test.data.description ||
+              "Complete IELTS listening practice with 4 sections and 40 questions.";
+
             btn.innerHTML = `
               <span class="test-icon">🎧</span>
               <div class="test-title">${testTitle}</div>
@@ -340,28 +413,37 @@
                 </div>
               </div>
             `;
-            
+
             // Main button click - navigate to test
             btn.addEventListener("click", (e) => {
               // Check if click is on the result section
-              if (!e.target.closest('.user-result') || e.target.closest('.user-result.no-result')) {
+              if (
+                !e.target.closest(".user-result") ||
+                e.target.closest(".user-result.no-result")
+              ) {
                 console.log(`🎯 Starting listening test: ${test.id}`);
                 window.location.href = `test.html?testId=${test.id}`;
               }
             });
-            
+
             container.appendChild(btn);
 
             // Load user result asynchronously
-            getUserLatestResult(user.uid, test.id).then(result => {
-              const resultContainer = document.getElementById(`result-${test.id}`);
+            getUserLatestResult(user.uid, test.id).then((result) => {
+              const resultContainer = document.getElementById(
+                `result-${test.id}`
+              );
               if (resultContainer) {
-                resultContainer.innerHTML = createResultSection(result, test.id);
-                
+                resultContainer.innerHTML = createResultSection(
+                  result,
+                  test.id
+                );
+
                 // Add click handler for result section if result exists
                 if (result) {
-                  const resultElement = resultContainer.querySelector('.user-result');
-                  resultElement.addEventListener('click', (e) => {
+                  const resultElement =
+                    resultContainer.querySelector(".user-result");
+                  resultElement.addEventListener("click", (e) => {
                     e.stopPropagation();
                     window.location.href = `/pages/mock/listening/resultListening.html?id=${result.id}`;
                   });
@@ -369,7 +451,6 @@
               }
             });
           }
-          
         } catch (error) {
           console.error("Error loading listening tests:", error);
           loading.innerHTML = `
@@ -380,7 +461,7 @@
           `;
         }
       }
-      
+
       // Initialize when page loads
       window.addEventListener("load", () => {
         console.log("🌐 Listening test selection page loaded");

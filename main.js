@@ -32,140 +32,229 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-async function ensureCreatedAt(collectionName) {
-  const snap = await getDocs(collection(db, collectionName));
-  for (const docSnap of snap.docs) {
-    const data = docSnap.data();
-    if (!data.createdAt) {
-      await updateDoc(doc(db, collectionName, docSnap.id), {
-        createdAt: new Date(),
-      });
-    }
+// Make auth available globally for glass-effects.js
+window.auth = auth;
+
+// Cache for Firebase data to avoid repeated calls
+const dataCache = {
+  groups: null,
+  results: null,
+  feedbacks: null
+};
+
+// Optimized loader management
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.classList.add("hidden");
+    setTimeout(() => loader.remove(), 500);
   }
 }
 
-function initGroups() {
-  const wrapper = document.querySelector("#groups .swiper-wrapper");
-  const loader = document.getElementById("loader");
-  if (!wrapper || !loader) return;
-
-  (async () => {
-    try {
-      await ensureCreatedAt("groups");
-
-      const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      const imgElements = [];
-
-      snapshot.forEach((doc) => {
-        const group = doc.data();
-
-        const slide = document.createElement("div");
-        slide.className = "swiper-slide swiper-slide1";
-
-        slide.innerHTML = `
-          <img src="${group.photoURL}" alt="${group.name}" />
-          <h3>${group.name}</h3>
-        `;
-
-        const img = slide.querySelector("img");
-        imgElements.push(img);
-
-        wrapper.appendChild(slide);
-      });
-
-      let loaded = 0;
-      const checkAndHideLoader = () => {
-        loaded++;
-        if (loaded === imgElements.length) {
-          loader.remove();
-        }
-      };
-
-      if (imgElements.length === 0) {
-        loader.remove();
-      } else {
-        imgElements.forEach((img) => {
-          if (img.complete && img.naturalHeight !== 0) {
-            checkAndHideLoader();
-          } else {
-            img.addEventListener("load", checkAndHideLoader);
-            img.addEventListener("error", checkAndHideLoader);
-          }
-        });
-      }
-    } catch (err) {
-      console.error("❌ Ошибка при загрузке групп:", err);
-      loader.textContent = "❌ Ошибка загрузки данных!";
-    }
-  })();
+// Show initial content immediately, load data progressively
+function showInitialContent() {
+  // Hide loader after a short delay to show immediate response
+  setTimeout(hideLoader, 800);
+  
+  // Initialize swipers with empty content first
+  initSwipers();
+  
+  // Load data progressively in background
+  loadAllData();
 }
 
-function initResults() {
-  const resultsWrapper = document.querySelector("#results .swiper-wrapper");
-  if (!resultsWrapper) return;
+// Load all Firebase data in parallel
+async function loadAllData() {
+  try {
+    // Run all Firebase calls in parallel instead of sequentially
+    const [groupsData, resultsData, feedbacksData] = await Promise.allSettled([
+      loadGroupsData(),
+      loadResultsData(), 
+      loadFeedbacksData()
+    ]);
 
-  (async () => {
-    await ensureCreatedAt("results");
+    // Process successful data loads
+    if (groupsData.status === 'fulfilled') {
+      populateGroups(groupsData.value);
+    }
+    if (resultsData.status === 'fulfilled') {
+      populateResults(resultsData.value);
+    }
+    if (feedbacksData.status === 'fulfilled') {
+      populateFeedbacks(feedbacksData.value);
+    }
 
-    const q = query(collection(db, "results"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-    snapshot.forEach((doc) => {
-      const result = doc.data();
+    // Update swipers after content is loaded
+    updateSwipers();
 
-      const slide = document.createElement("div");
-      slide.className = "swiper-slide swiper-slide3";
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
+}
 
-      slide.innerHTML = `
-      <img src="${result.photoURL}" alt="${result.name}" />
+// Separate data loading functions
+async function loadGroupsData() {
+  if (dataCache.groups) return dataCache.groups;
+  
+  const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  
+  const groups = [];
+  snapshot.forEach((doc) => {
+    groups.push({ id: doc.id, ...doc.data() });
+  });
+  
+  dataCache.groups = groups;
+  return groups;
+}
+
+async function loadResultsData() {
+  if (dataCache.results) return dataCache.results;
+  
+  const q = query(collection(db, "results"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  
+  const results = [];
+  snapshot.forEach((doc) => {
+    results.push({ id: doc.id, ...doc.data() });
+  });
+  
+  dataCache.results = results;
+  return results;
+}
+
+async function loadFeedbacksData() {
+  if (dataCache.feedbacks) return dataCache.feedbacks;
+  
+  const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  
+  const feedbacks = [];
+  snapshot.forEach((doc) => {
+    feedbacks.push({ id: doc.id, ...doc.data() });
+  });
+  
+  dataCache.feedbacks = feedbacks;
+  return feedbacks;
+}
+
+// Populate functions with lazy image loading
+function populateGroups(groups) {
+  const wrapper = document.querySelector("#groups .swiper-wrapper");
+  if (!wrapper) return;
+
+  groups.forEach((group, index) => {
+    const slide = document.createElement("div");
+    slide.className = "swiper-slide swiper-slide1";
+    
+    // Add loading state and lazy loading
+    slide.innerHTML = `
+      <div class="image-placeholder">
+        <img 
+          data-src="${group.photoURL}" 
+          alt="${group.name}"
+          loading="lazy"
+          style="opacity: 0; transition: opacity 0.3s ease;"
+        />
+      </div>
+      <h3>${group.name}</h3>
+    `;
+
+    const img = slide.querySelector("img");
+    
+    // Lazy load images with intersection observer
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.onload = () => {
+            img.style.opacity = "1";
+          };
+          imageObserver.unobserve(img);
+        }
+      });
+    });
+    
+    imageObserver.observe(img);
+    wrapper.appendChild(slide);
+  });
+}
+
+function populateResults(results) {
+  const wrapper = document.querySelector("#results .swiper-wrapper");
+  if (!wrapper) return;
+
+  results.forEach((result) => {
+    const slide = document.createElement("div");
+    slide.className = "swiper-slide swiper-slide3";
+
+    slide.innerHTML = `
+      <img 
+        alt="${result.name}"
+        loading="lazy"
+        style="opacity: 0; transition: opacity 0.3s ease;"
+      />
       <h3>${result.name}</h3>
       <p>Band: <a>${result.band}</a></p>
       <p class="lng_results_group">Group: ${result.group}</p>
     `;
 
-      resultsWrapper.appendChild(slide);
+    const img = slide.querySelector("img");
+    
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          loadImageWithCorsHandling(img, result.photoURL);
+          imageObserver.unobserve(img);
+        }
+      });
     });
-  })();
+    
+    imageObserver.observe(img);
+    wrapper.appendChild(slide);
+  });
 }
 
-function initFeedbacks() {
-  const feedbacksWrapper = document.querySelector("#feedbacks .swiper-wrapper");
-  if (!feedbacksWrapper) return;
+function populateFeedbacks(feedbacks) {
+  const wrapper = document.querySelector("#feedbacks .swiper-wrapper");
+  if (!wrapper) return;
 
-  (async () => {
-    const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
+  feedbacks.forEach((feedback) => {
+    const slide = document.createElement("div");
+    slide.className = "swiper-slide swiper-slide2";
 
-    snapshot.forEach((doc) => {
-      const feedback = doc.data();
-
-      const slide = document.createElement("div");
-      slide.className = "swiper-slide swiper-slide2";
-
-      slide.innerHTML = `
-        <div class="feedback_info">
-          <img src="./image/no_user.webp" alt=""> 
-          <div class="feedback_info_detail">
-            <h3>${feedback.name}</h3> 
-            <p class="lng_feedbacks_group">Group: ${feedback.group}</p>
-          </div>
+    slide.innerHTML = `
+      <div class="feedback_info">
+        <img src="./image/no_user.webp" alt="" loading="lazy"> 
+        <div class="feedback_info_detail">
+          <h3>${feedback.name}</h3> 
+          <p class="lng_feedbacks_group">Group: ${feedback.group}</p>
         </div>
-        <div class="text-container">
-          <p class="text-content lng_feedbacks">${feedback.feedback}</p>
-        </div>
-      `;
+      </div>
+      <div class="text-container">
+        <p class="text-content lng_feedbacks">${feedback.feedback}</p>
+      </div>
+    `;
 
-      feedbacksWrapper.appendChild(slide);
-    });
-  })();
+    wrapper.appendChild(slide);
+  });
 }
+
+// Swiper instances storage
+let swiperInstances = {};
 
 function createSwiper(selector, options) {
-  if (!document.querySelector(selector)) return;
-  return new Swiper(selector, options);
+  if (!document.querySelector(selector)) return null;
+  
+  const swiper = new Swiper(selector, options);
+  swiperInstances[selector] = swiper;
+  return swiper;
 }
 
 function initSwipers() {
+  // Initialize swipers with empty content first
   createSwiper(".mySwiper", {
     slidesPerView: 3,
     spaceBetween: 30,
@@ -179,18 +268,9 @@ function initSwipers() {
       clickable: true,
     },
     breakpoints: {
-      0: {
-        slidesPerView: 1,
-        spaceBetween: 20,
-      },
-      769: {
-        slidesPerView: 2,
-        spaceBetween: 25,
-      },
-      1024: {
-        slidesPerView: 3,
-        spaceBetween: 30,
-      },
+      0: { slidesPerView: 1, spaceBetween: 20 },
+      769: { slidesPerView: 2, spaceBetween: 25 },
+      1024: { slidesPerView: 3, spaceBetween: 30 },
     },
   });
 
@@ -207,18 +287,9 @@ function initSwipers() {
       clickable: true,
     },
     breakpoints: {
-      0: {
-        slidesPerView: 1,
-        spaceBetween: 20,
-      },
-      769: {
-        slidesPerView: 2,
-        spaceBetween: 25,
-      },
-      1024: {
-        slidesPerView: 3,
-        spaceBetween: 30,
-      },
+      0: { slidesPerView: 1, spaceBetween: 20 },
+      769: { slidesPerView: 2, spaceBetween: 25 },
+      1024: { slidesPerView: 3, spaceBetween: 30 },
     },
   });
 
@@ -235,61 +306,36 @@ function initSwipers() {
       clickable: true,
     },
     breakpoints: {
-      0: {
-        slidesPerView: 1,
-        spaceBetween: 20,
-      },
-      769: {
-        slidesPerView: 2,
-        spaceBetween: 30,
-      },
+      0: { slidesPerView: 1, spaceBetween: 20 },
+      769: { slidesPerView: 2, spaceBetween: 30 },
     },
   });
 }
 
-function initNavLinks() {
-  const navLinks = document.querySelectorAll(".nav_info ul li a");
-  if (!navLinks || navLinks.length === 0) return;
-
-  function setActiveLinkOnClick() {
-    navLinks.forEach((link) => {
-      link.addEventListener("click", (e) => {
-        // Close mobile menu when link is clicked
-        const nav = document.querySelector("nav");
-        if (nav.classList.contains("active")) {
-          nav.classList.remove("active");
-        }
-        
-        navLinks.forEach((el) => el.classList.remove("active"));
-        link.classList.add("active");
-      });
-    });
-  }
-
-  function setDefaultActiveOnLoad() {
-    const hash = window.location.hash;
-    if (!hash || hash === "#home") {
-      const homeLink = document.querySelector('.nav_info ul li a[href="#home"]');
-      if (homeLink) {
-        homeLink.classList.add("active");
-      }
+function updateSwipers() {
+  // Update all swiper instances after content is loaded
+  Object.values(swiperInstances).forEach(swiper => {
+    if (swiper && swiper.update) {
+      swiper.update();
     }
-  }
-
-  setActiveLinkOnClick();
-  setDefaultActiveOnLoad();
+  });
 }
 
+// Language initialization (работает с glass-effects.js)
+let langChangeTimeout;
 function initLang() {
-  const select = document.querySelector("select");
-  if (!select) return;
+  const selects = document.querySelectorAll(".lang_change");
+  if (!selects.length) return;
+  
   const allLang = ["en", "ru", "uz"];
 
-  function changeURLlang() {
-    let lang = select.value;
-    location.href = window.location.pathname + "#" + lang;
-    location.reload();
-    console.log(lang);
+  function changeURLlang(select) {
+    clearTimeout(langChangeTimeout);
+    langChangeTimeout = setTimeout(() => {
+      let lang = select.value;
+      location.href = window.location.pathname + "#" + lang;
+      location.reload();
+    }, 100);
   }
 
   function changeLang() {
@@ -300,190 +346,89 @@ function initLang() {
       location.reload();
       return;
     }
-    select.value = hash;
     
-    // Check if langArr is defined before using it
+    // Update all language selectors
+    selects.forEach(select => {
+      select.value = hash;
+    });
+    
     if (typeof langArr !== 'undefined') {
-      for (let key in langArr) {
-        let elements = document.querySelectorAll(`.${key}`);
-        if (elements) {
-          elements.forEach((elem) => {
-            elem.innerHTML = langArr[key][hash];
-          });
+      requestAnimationFrame(() => {
+        for (let key in langArr) {
+          let elements = document.querySelectorAll(`.${key}`);
+          if (elements) {
+            elements.forEach((elem) => {
+              elem.innerHTML = langArr[key][hash];
+            });
+          }
         }
-      }
+      });
     }
   }
 
-  select.addEventListener("change", changeURLlang);
+  // Add event listeners to all language selectors
+  selects.forEach(select => {
+    select.addEventListener("change", () => changeURLlang(select));
+  });
+  
   changeLang();
 }
 
-function initLoginPanel() {
-  const closeBtn = document.querySelector(".close_btn");
-  const loginPanel = document.querySelector(".login_panel");
-  if (!closeBtn || !loginPanel) return;
-
-  closeBtn.addEventListener("click", () => {
-    loginPanel.style.display = "none";
-  });
-
-  // Close login panel when clicking outside
-  loginPanel.addEventListener("click", (e) => {
-    if (e.target === loginPanel) {
-      loginPanel.style.display = "none";
-    }
-  });
-}
-
-function initMockRedirect() {
-  const mockLink = document.querySelector("#mockLink");
-  if (!mockLink) return;
-
-  mockLink.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    const user = auth.currentUser;
-
-    if (user) {
-      window.location.href = "pages/mock.html";
-    } else {
-      if (typeof toggleLogin === "function") {
-        toggleLogin();
-      } else {
-        console.error("toggleLogin не определён!");
-      }
-    }
-  });
-}
-
-// Improved mobile menu toggle function
-function toggleMenu() {
-    const nav = document.querySelector("nav");
-    const navRight = document.querySelector(".nav_right");
-    
-    nav.classList.toggle("active");
-    
-    if (nav.classList.contains("active")) {
-        // Показать элементы в мобильном меню
-        navRight.style.display = "flex";
-    } else {
-        // Скрыть элементы когда меню закрыто
-        setTimeout(() => {
-            navRight.style.display = "none";
-        }, 300);
-    }
-}
-
-function toggleLogin() {
-  const loginPanel = document.querySelector(".login_panel");
-  if (loginPanel) {
-    loginPanel.style.display = "flex";
-    
-    // Focus on email input
-    setTimeout(() => {
-      const emailInput = document.querySelector("#login_email");
-      if (emailInput) emailInput.focus();
-    }, 100);
-  }
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener("click", (e) => {
-  const nav = document.querySelector("nav");
-  const toggle = document.querySelector(".toggle");
-  const navInfo = document.querySelector(".nav_info");
-  const navRight = document.querySelector(".nav_right");
-  
-  if (nav && nav.classList.contains("active")) {
-    if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-      nav.classList.remove("active");
-      if (navInfo) navInfo.style.display = "none";
-      if (navRight) navRight.style.display = "none";
-    }
-  }
-});
-
-// Close mobile menu on window resize
-window.addEventListener("resize", () => {
-  if (window.innerWidth > 768) {
-    const nav = document.querySelector("nav");
-    const navInfo = document.querySelector(".nav_info");
-    const navRight = document.querySelector(".nav_right");
-    
-    if (nav && nav.classList.contains("active")) {
-      nav.classList.remove("active");
-      if (navInfo) navInfo.style.display = "";
-      if (navRight) navRight.style.display = "";
-    }
-  }
-});
-
-// Make functions globally available
-window.toggleMenu = toggleMenu;
-window.toggleLogin = toggleLogin;
-
+// OPTIMIZED INITIALIZATION - Show content first, load data after
 document.addEventListener("DOMContentLoaded", () => {
-  initGroups();
-  initResults();
-  initFeedbacks();
-  initSwipers();
-  initNavLinks();
+  // Initialize language functionality
   initLang();
-  initLoginPanel();
-  initMockRedirect();
+  
+  // Show initial content and start loading data
+  showInitialContent();
+  
 });
 
-// Firebase Authentication
+// Firebase Authentication with glass-effects.js integration
 onAuthStateChanged(auth, async (user) => {
-  const loginBtn = document.querySelector("#loginBtn");
-  const logoutBtn = document.querySelector("#logoutBtn");
-  const settingsLink = document.querySelector(".settings-link");
-
-  if (!loginBtn || !logoutBtn) return;
 
   if (user) {
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "block";
-    logoutBtn.textContent = "Logout";
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userDocRef);
 
-    const userDocRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      console.log("Роль пользователя:", userData.role);
-
-      if (userData.role === "admin") {
-        if (settingsLink) {
-          console.log("Показываем settings");
-          settingsLink.style.display = "block";
-        }
+      let userData = null;
+      if (docSnap.exists()) {
+        userData = docSnap.data();
+        console.log("👤 User role:", userData.role);
       } else {
-        if (settingsLink) {
-          console.log("Скрываем settings");
-          settingsLink.style.display = "none";
-        }
+        // Create new user document
+        userData = {
+          name: "No name",
+          email: user.email,
+          role: "student",
+        };
+        await setDoc(userDocRef, userData);
+        console.log("✅ New user document created");
       }
-    } else {
-      console.log("Документа нет, создаём student");
-      await setDoc(userDocRef, {
-        name: "No name",
-        email: user.email,
-        role: "student",
-      });
 
-      if (settingsLink) settingsLink.style.display = "none";
+      // Update UI through glass-effects.js
+      if (typeof window.updateAuthUI === 'function') {
+        window.updateAuthUI(user, userData);
+      }
+
+    } catch (error) {
+      console.error("❌ Error handling user data:", error);
+      
+      // Still update UI even if there's an error
+      if (typeof window.updateAuthUI === 'function') {
+        window.updateAuthUI(user, null);
+      }
     }
   } else {
-    loginBtn.style.display = "block";
-    logoutBtn.style.display = "none";
-    loginBtn.textContent = "Login";
-    if (settingsLink) settingsLink.style.display = "none";
+    // User not logged in
+    if (typeof window.updateAuthUI === 'function') {
+      window.updateAuthUI(null, null);
+    }
   }
 });
 
-// Login function
+// Enhanced Login function (replaces the one in glass-effects.js)
 window.loginUser = async function () {
   const email = document.querySelector("#login_email").value.trim();
   const password = document.querySelector("#login_password").value.trim();
@@ -494,22 +439,24 @@ window.loginUser = async function () {
     return;
   }
 
-  // Show loading state
   const originalText = loginBtn.textContent;
   loginBtn.textContent = "Logging in...";
   loginBtn.disabled = true;
 
   try {
+    console.log('🔐 Attempting login for:', email);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const loginPanel = document.querySelector(".login_panel");
     
-    if (loginPanel) {
-      loginPanel.style.display = "none";
-      document.querySelector("#login_email").value = "";
-      document.querySelector("#login_password").value = "";
+    // Close login panel using glass-effects function
+    if (typeof window.closeLogin === 'function') {
+      window.closeLogin();
     }
+    
+    // Clear form fields
+    document.querySelector("#login_email").value = "";
+    document.querySelector("#login_password").value = "";
 
-    // Save to Firestore if document doesn't exist
+    // Check/create user document
     const userDocRef = doc(db, "users", userCredential.user.uid);
     const docSnap = await getDoc(userDocRef);
 
@@ -520,19 +467,22 @@ window.loginUser = async function () {
         role: "student",
       });
     }
+
+    console.log('✅ Login successful');
+
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("❌ Login error:", err);
     alert("Login failed: " + err.message);
   } finally {
-    // Reset button state
     loginBtn.textContent = originalText;
     loginBtn.disabled = false;
   }
 };
 
-// Logout function
+// Enhanced Logout function
 window.logoutUser = async function () {
   try {
+    console.log('🔐 Logging out user');
     await signOut(auth);
     
     // Clear form fields
@@ -541,9 +491,72 @@ window.logoutUser = async function () {
     if (emailInput) emailInput.value = "";
     if (passwordInput) passwordInput.value = "";
     
-    console.log("User logged out successfully");
+    console.log("✅ User logged out successfully");
   } catch (err) {
-    console.error("Logout error:", err);
+    console.error("❌ Logout error:", err);
     alert("Logout failed: " + err.message);
   }
 };
+
+// Mock redirect functionality (enhanced version)
+function initMockRedirect() {
+  const mockLinks = document.querySelectorAll("#mockLink, #mobileTokenLink");
+  
+  mockLinks.forEach(mockLink => {
+    if (mockLink) {
+      mockLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        console.log('🎯 Mock test link clicked, user:', user ? 'authenticated' : 'not authenticated');
+        
+        if (user) {
+          window.location.href = "pages/mock.html";
+        } else {
+          if (typeof window.toggleLogin === 'function') {
+            window.toggleLogin();
+          }
+        }
+      });
+    }
+  });
+}
+
+// Initialize mock redirect when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  initMockRedirect();
+});
+
+// Функция загрузки изображений с обходом CORS
+function loadImageWithCorsHandling(imgElement, originalUrl) {
+  // Сначала пробуем оригинальный URL
+  imgElement.src = originalUrl;
+  
+  imgElement.onload = () => {
+    imgElement.style.opacity = "1";
+  };
+  
+  imgElement.onerror = () => {
+    console.warn('Failed to load image:', originalUrl);
+    
+    // Пробуем добавить alt=media
+    if (!originalUrl.includes('alt=media')) {
+      const newUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'alt=media';
+      imgElement.src = newUrl;
+      
+      imgElement.onload = () => imgElement.style.opacity = "1";
+      imgElement.onerror = () => {
+        // Fallback изображение
+        imgElement.src = './image/placeholder.jpg';
+        imgElement.style.opacity = "1";
+        console.error('All loading attempts failed for:', originalUrl);
+      };
+    } else {
+      // Fallback изображение
+      imgElement.src = './image/placeholder.jpg';
+      imgElement.style.opacity = "1";
+    }
+  };
+}
+
+
