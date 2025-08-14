@@ -38,7 +38,7 @@
         },
         {
           "groupInstruction": "Questions 7-13\nComplete the notes below.\nChoose NO MORE THAN TWO WORDS AND/OR A NUMBER from the passage for each answer.\nWrite your answers in boxes 7-13 on your answer sheet.",
-          "type": "gap-fill",
+          "type": "text-question",
           "title": "Fishbourne Palace"
         },
         {
@@ -427,7 +427,7 @@
         },
         {
           "groupInstruction": "Questions 24-26\nComplete the summary below.\nChoose ONE WORD ONLY from the passage for each answer.\nWrite your answers in boxes 24-26 on your answer sheet.",
-          "type": "gap-fill",
+          "type": "text-question",
           "title": "A study of insect decision-making"
         },
         {

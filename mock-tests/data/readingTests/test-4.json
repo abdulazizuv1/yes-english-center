@@ -33,9 +33,12 @@
         },
         {
           "groupInstruction": "Questions 6–13\nComplete the notes below.\nChoose ONE WORD ONLY from the passage for each answer.\nWrite your answers in boxes 6–13 on your answer sheet.",
-          "type": "gap-fill",
+          "type": "text-question",
           "title": "The development and translation of cuneiform",
-          "subheading": "Before cuneiform",
+          "subheading": "Before cuneiform"
+        },
+        {
+          "type": "gap-fill",
           "question": "tokens, for example, 6 __________ were often used",
           "answer": [
             "stones"

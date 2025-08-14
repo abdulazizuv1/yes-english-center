@@ -38,7 +38,7 @@
         },
         {
           "groupInstruction": "Questions 7-13\nComplete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer\nWrite your answers in boxes 7-13 on your answer sheet.",
-          "type": "gap-fill",
+          "type": "text-question",
           "title": "The tuatara"
         },
         {

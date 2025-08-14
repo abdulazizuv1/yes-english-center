@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Reading Test - YES English Center</title>
+    <link rel="stylesheet" href="reading.css">
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="location.href='../addTests.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </button>
+            <h1>Add New Reading Test</h1>
+            <p>Create a new IELTS Academic Reading test</p>
+        </div>
+
+        <div class="test-info-bar">
+            <div class="info-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span id="testNumber">Loading test number...</span>
+            </div>
+            <div class="progress-indicator">
+                <span id="passageCount">0</span> / 3 Passages
+            </div>
+        </div>
+
+        <form id="readingTestForm">
+            <!-- Passages Container -->
+            <div id="passagesContainer">
+                <!-- Passages will be added here dynamically -->
+            </div>
+
+            <!-- Add Passage Button -->
+            <button type="button" class="add-passage-btn" id="addPassageBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Add Passage
+            </button>
+
+            <!-- Submit Section -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="location.href='../addTests.html'">
+                    Cancel
+                </button>
+                <button type="button" class="btn-preview" id="previewBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Preview
+                </button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span id="submitText">Add Reading Test</span>
+                    <div class="loader" id="loader" style="display: none;"></div>
+                </button>
+            </div>
+        </form>
+
+        <!-- Preview Modal -->
+        <div class="preview-modal" id="previewModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Test Preview</h2>
+                    <button class="close-btn" onclick="closePreview()">×</button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="success-modal" id="successModal" style="display: none;">
+            <div class="modal-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="9 12 12 15 16 11"></polyline>
+                </svg>
+                <h3>Test Added Successfully!</h3>
+                <p id="successMessage"></p>
+                <button class="btn-primary" onclick="resetForm()">Add Another Test</button>
+            </div>
+        </div>
+
+        <!-- Question Templates (Hidden) -->
+        <div id="templates" style="display: none;">
+            <!-- Gap Fill Template -->
+            <div class="question-template" data-type="gap-fill">
+                <div class="question-header">
+                    <span class="question-type-badge gap-fill">Gap Fill</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text">
+                <input type="text" placeholder="Answer(s) - separate multiple with comma" class="question-answer">
+            </div>
+
+            <!-- True/False/Not Given Template -->
+            <div class="question-template" data-type="true-false-notgiven">
+                <div class="question-header">
+                    <span class="question-type-badge tfng">True/False/Not Given</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="Statement" class="question-text">
+                <select class="question-answer">
+                    <option value="">Select answer</option>
+                    <option value="TRUE">TRUE</option>
+                    <option value="FALSE">FALSE</option>
+                    <option value="NOT GIVEN">NOT GIVEN</option>
+                </select>
+            </div>
+
+            <!-- Yes/No/Not Given Template -->
+            <div class="question-template" data-type="yes-no-notgiven">
+                <div class="question-header">
+                    <span class="question-type-badge ynng">Yes/No/Not Given</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="Statement" class="question-text">
+                <select class="question-answer">
+                    <option value="">Select answer</option>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                    <option value="NOT GIVEN">NOT GIVEN</option>
+                </select>
+            </div>
+
+            <!-- Multiple Choice Template -->
+            <div class="question-template" data-type="multiple-choice">
+                <div class="question-header">
+                    <span class="question-type-badge mc">Multiple Choice</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="Question" class="question-text">
+                <div class="mc-options">
+                    <div class="mc-option">
+                        <input type="radio" name="mc-answer" value="A">
+                        <label>A</label>
+                        <input type="text" placeholder="Option A text" class="option-text">
+                    </div>
+                    <div class="mc-option">
+                        <input type="radio" name="mc-answer" value="B">
+                        <label>B</label>
+                        <input type="text" placeholder="Option B text" class="option-text">
+                    </div>
+                    <div class="mc-option">
+                        <input type="radio" name="mc-answer" value="C">
+                        <label>C</label>
+                        <input type="text" placeholder="Option C text" class="option-text">
+                    </div>
+                    <div class="mc-option">
+                        <input type="radio" name="mc-answer" value="D">
+                        <label>D</label>
+                        <input type="text" placeholder="Option D text" class="option-text">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paragraph Matching Template -->
+            <div class="question-template" data-type="paragraph-matching">
+                <div class="question-header">
+                    <span class="question-type-badge pm">Paragraph Matching</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="What information to find" class="question-text">
+                <select class="question-answer">
+                    <option value="">Select paragraph</option>
+                    <option value="A">Paragraph A</option>
+                    <option value="B">Paragraph B</option>
+                    <option value="C">Paragraph C</option>
+                    <option value="D">Paragraph D</option>
+                    <option value="E">Paragraph E</option>
+                    <option value="F">Paragraph F</option>
+                    <option value="G">Paragraph G</option>
+                </select>
+            </div>
+
+            <div class="question-template" data-type="match-person">
+                <div class="question-header">
+                    <span class="question-type-badge mp">Match Person/Feature</span>
+                    <button type="button" class="remove-btn" onclick="removeQuestion(this)">Remove</button>
+                </div>
+                <input type="text" placeholder="Statement to match" class="question-text">
+                <input type="text" placeholder="Correct match (e.g., person name or letter)" class="question-answer">
+                <textarea placeholder="List of options (one per line)" class="match-options" rows="4"></textarea>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="reading.js"></script>
+</body>
+</html>

@@ -252,24 +252,6 @@ body {
     line-height: 1.5;
 }
 
-/* Input Styles */
-.gap-fill-input {
-    background: white;
-    border: 2px solid #d1d5db;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 14px;
-    width: 120px;
-    margin: 0 4px;
-    transition: all 0.2s;
-}
-
-.gap-fill-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
 .radio-group {
     margin-top: 12px;
     display: flex;
@@ -609,4 +591,414 @@ body {
 .loading-modal p {
   margin: 0;
   color: #666;
+}
+
+/* Gap-Fill Section Styles */
+.gap-fill-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Gap-Fill Title - как в Cambridge */
+.gap-fill-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Gap-Fill Subtitle */
+.gap-fill-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    padding-left: 8px;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Gap-Fill Info Text */
+.gap-fill-info {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+/* Gap-Fill Questions Container */
+.gap-fill-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Individual Gap-Fill Question */
+.gap-fill-question {
+    display: flex;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.gap-fill-question:last-child {
+    border-bottom: none;
+}
+
+/* Question Number для Gap-Fill */
+.gap-fill-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e40af;
+    color: white;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+/* Question Text для Gap-Fill */
+.gap-fill-text {
+    flex: 1;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.8;
+}
+
+/* Улучшенный стиль для Gap-Fill инпутов */
+.gap-fill-input {
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    width: auto;
+    min-width: 100px;
+    max-width: 180px;
+    margin: 0 6px;
+    transition: all 0.2s;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.gap-fill-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #f0f9ff;
+}
+
+.gap-fill-input:not(:placeholder-shown) {
+    background: #f0fdf4;
+    border-color: #10b981;
+}
+
+/* Стиль для маркеров в тексте */
+.gap-fill-bullet {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #64748b;
+    border-radius: 50%;
+    margin: 0 8px 2px 0;
+    vertical-align: middle;
+}
+
+/* Группировка вопросов с bullet points */
+.gap-fill-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.gap-fill-list-item {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.gap-fill-list-bullet {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #64748b;
+    border-radius: 50%;
+    margin: 8px 12px 0 4px;
+    flex-shrink: 0;
+}
+
+/* Hover эффект для всей секции */
+.gap-fill-section:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    border-color: #3b82f6;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .gap-fill-section {
+        padding: 16px;
+    }
+    
+    .gap-fill-title {
+        font-size: 18px;
+    }
+    
+    .gap-fill-input {
+        min-width: 80px;
+        max-width: 140px;
+    }
+}
+/* Добавьте эти стили в ваш test.css */
+
+/* Убираем старые стили номеров в кружочках */
+.question-number {
+  display: none !important;
+}
+
+/* Стили для интегрированных номеров вопросов */
+.question-text strong {
+  color: #1e40af;
+  font-size: 16px;
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+/* Улучшенные стили для gap-fill секции */
+.gap-fill-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.gap-fill-section:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #3b82f6;
+}
+
+/* Стиль для заголовка gap-fill */
+.gap-fill-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+/* Информационный текст */
+.gap-fill-info {
+  font-size: 14px;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+/* Подзаголовок */
+.gap-fill-subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  padding-left: 12px;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Буллеты для списков */
+.gap-fill-bullet {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #64748b;
+  border-radius: 50%;
+  margin: 8px 12px 0 0;
+  flex-shrink: 0;
+}
+
+/* Улучшенные инпуты для gap-fill */
+.gap-fill-input {
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 120px;
+  max-width: 180px;
+  margin: 0 6px;
+  transition: all 0.2s;
+  vertical-align: baseline;
+}
+
+.gap-fill-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #f0f9ff;
+}
+
+.gap-fill-input:not(:placeholder-shown) {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+/* Обновленные стили для question-item */
+.question-item {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.question-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Стиль для текста вопроса */
+.question-text {
+  font-size: 15px;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+/* Группа радио-кнопок */
+.radio-group {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.radio-option:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+}
+
+.radio-option input[type="radio"] {
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Select input улучшения */
+.select-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.select-input:hover {
+  border-color: #3b82f6;
+}
+
+/* Таблицы с gap-fill */
+.question-table input {
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 14px;
+  min-width: 100px;
+  transition: all 0.2s;
+}
+
+.question-table input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.question-table input:not(:placeholder-shown) {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+/* Анимации для плавного появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gap-fill-section,
+.question-item {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .gap-fill-section {
+    padding: 16px;
+  }
+  
+  .gap-fill-title {
+    font-size: 18px;
+  }
+  
+  .gap-fill-input {
+    min-width: 100px;
+    max-width: 150px;
+  }
+  
+  .question-text strong {
+    font-size: 15px;
+  }
 }
