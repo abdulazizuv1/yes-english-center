@@ -288,9 +288,16 @@ function assignQuestionIds() {
   }
 }
 
-// Load test function
+// Load test function with cache busting for CSS
 async function loadTest() {
   try {
+    // Add version to CSS to force reload
+    const cssLink = document.querySelector('link[href*="test.css"]');
+    if (cssLink) {
+      const timestamp = new Date().getTime();
+      cssLink.href = `./test.css?v=${timestamp}`;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const testId = urlParams.get("testId") || "test-1";
     currentTestId = testId;
@@ -319,7 +326,6 @@ async function loadTest() {
   }
 }
 
-
 function renderPassage(index) {
   const passage = passages[index];
 
@@ -333,12 +339,10 @@ function renderPassage(index) {
     .join("");
   document.getElementById("passageText").innerHTML = formattedText;
 
-  // Render questions с группировкой gap-fill
   const questionsList = document.getElementById("questionsList");
   questionsList.innerHTML = "";
   let lastInstruction = null;
   
-  // Буфер для группировки gap-fill вопросов
   let gapFillGroup = {
     title: null,
     subtitle: null,
@@ -348,9 +352,7 @@ function renderPassage(index) {
   };
 
   passage.questions.forEach((q, i) => {
-    // Show group instructions
     if (q.groupInstruction && q.groupInstruction !== lastInstruction) {
-      // Сначала рендерим накопленную gap-fill группу если есть
       if (gapFillGroup.questions.length > 0) {
         renderGapFillGroupComplete(gapFillGroup, questionsList);
         gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
@@ -369,27 +371,21 @@ function renderPassage(index) {
     const qDiv = document.createElement("div");
     qDiv.className = "question-item";
 
-    // Обработка gap-fill вопросов с группировкой
     if (q.type === "gap-fill") {
-      // Если это заголовок/подзаголовок без вопроса
       if (!q.question && (q.title || q.subheading || q.text)) {
-        // Если уже есть накопленные вопросы, рендерим их
         if (gapFillGroup.questions.length > 0) {
           renderGapFillGroupComplete(gapFillGroup, questionsList);
           gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
         }
         
-        // Начинаем новую группу
         if (q.title) gapFillGroup.title = q.title;
         if (q.subheading) gapFillGroup.subtitle = q.subheading;
         if (q.text) gapFillGroup.info = q.text;
         gapFillGroup.startDiv = qDiv;
       } 
-      // Если это вопрос с qId
       else if (q.question && q.qId) {
         gapFillGroup.questions.push(q);
         
-        // Проверяем, не последний ли это gap-fill вопрос
         const isLastGapFill = 
           i === passage.questions.length - 1 || 
           passage.questions[i + 1]?.type !== "gap-fill" ||
@@ -452,404 +448,156 @@ function renderPassage(index) {
   document.getElementById("finishBtn").style.display = index === passages.length - 1 ? "inline-block" : "none";
 }
 
-// Функция для рендеринга полной группы Gap-Fill вопросов
 function renderGapFillGroupComplete(group, container) {
   if (!group.questions.length) return;
-  
-  // Создаем единую секцию
+
+  // Create a single section container for the gap fill group
   const section = document.createElement('div');
-  section.className = 'question-item gap-fill-section';
-  
-  // Добавляем заголовок
+  section.className = 'gap-fill-section';
+
+  // Add title
   if (group.title) {
     const titleDiv = document.createElement('div');
     titleDiv.className = 'gap-fill-title';
     titleDiv.textContent = group.title;
     section.appendChild(titleDiv);
   }
-  
-  // Добавляем информационный текст
+
+  // Add info
   if (group.info) {
     const infoDiv = document.createElement('div');
     infoDiv.className = 'gap-fill-info';
     infoDiv.textContent = group.info;
     section.appendChild(infoDiv);
   }
-  
-  // Добавляем подзаголовок
+
+  // Add subtitle
   if (group.subtitle) {
     const subtitleDiv = document.createElement('div');
     subtitleDiv.className = 'gap-fill-subtitle';
     subtitleDiv.textContent = group.subtitle;
     section.appendChild(subtitleDiv);
   }
-  
-  // Контейнер для вопросов
+
+  // Container for all questions
   const questionsContainer = document.createElement('div');
   questionsContainer.className = 'gap-fill-questions';
-  
-  // Определяем формат (с bullet points или без)
-  const hasBullets = group.questions.some(q => 
-    q.question && (q.question.includes('•') || 
-                   q.question.includes('●') || 
-                   q.question.includes('diet consists') ||
-                   q.question.includes('nests are created'))
+
+  // Determine if bullets are used
+  const hasBullets = group.questions.some(q =>
+    q.question && (
+      q.question.includes('•') ||
+      q.question.includes('●') ||
+      q.question.includes('diet consists') ||
+      q.question.includes('nests are created')
+    )
   );
-  
+
   group.questions.forEach(q => {
     const questionDiv = document.createElement('div');
     questionDiv.className = hasBullets ? 'gap-fill-list-item' : 'gap-fill-question';
     questionDiv.id = q.qId;
-    
-    // Если есть буллеты
+
     if (hasBullets) {
-      // Добавляем bullet
+      // Add bullet
       const bullet = document.createElement('span');
       bullet.className = 'gap-fill-list-bullet';
       questionDiv.appendChild(bullet);
-      
+
+      // Content wrapper
       const textWrapper = document.createElement('div');
-      textWrapper.style.flex = '1';
-      textWrapper.style.display = 'flex';
-      textWrapper.style.alignItems = 'baseline';
-      textWrapper.style.gap = '8px';
-      
-      // Номер вопроса
-      const numberSpan = document.createElement('span');
-      numberSpan.className = 'gap-fill-number';
-      numberSpan.textContent = q.qId.replace('q', '');
-      
-      // Текст с инпутом
+      textWrapper.className = 'gap-fill-content-wrapper';
+
+      // Text with input (no number span!)
       const textSpan = document.createElement('span');
       textSpan.className = 'gap-fill-text';
-      textSpan.style.flex = '1';
-      
-      // Очищаем текст от символов буллетов
+
+      // Clean bullet symbol
       let cleanText = q.question.replace(/^[•●]\s*/, '');
-      
-      // Заменяем placeholder на input
+
+      // Replace blank with input, placeholder set to question number
       const inputHtml = cleanText.replace(
         /\.{3,}|_{3,}|…+|__________+/g,
-        `<input type="text" 
-                id="input-${q.qId}" 
-                class="gap-fill-input" 
-                placeholder="type here" />`
+        `<input type="text"
+                id="input-${q.qId}"
+                class="gap-fill-input"
+                placeholder="${q.qId.replace('q','')}"
+                data-question-id="${q.qId}" />`
       );
-      
+
       textSpan.innerHTML = inputHtml;
-      
-      textWrapper.appendChild(numberSpan);
+
       textWrapper.appendChild(textSpan);
       questionDiv.appendChild(textWrapper);
     } else {
-      // Обычный формат без буллетов
-      const numberSpan = document.createElement('span');
-      numberSpan.className = 'gap-fill-number';
-      numberSpan.textContent = q.qId.replace('q', '');
-      
+      // No bullets, just the text with input (no number span!)
       const textSpan = document.createElement('span');
       textSpan.className = 'gap-fill-text';
-      
+
       const inputHtml = q.question.replace(
         /\.{3,}|_{3,}|…+|__________+/g,
-        `<input type="text" 
-                id="input-${q.qId}" 
-                class="gap-fill-input" 
-                placeholder="type here" />`
+        `<input type="text"
+                id="input-${q.qId}"
+                class="gap-fill-input"
+                placeholder="${q.qId.replace('q','')}"
+                data-question-id="${q.qId}" />`
       );
-      
+
       textSpan.innerHTML = inputHtml;
-      
-      questionDiv.appendChild(numberSpan);
       questionDiv.appendChild(textSpan);
     }
-    
+
     questionsContainer.appendChild(questionDiv);
   });
-  
+
   section.appendChild(questionsContainer);
   container.appendChild(section);
-  
-  // Добавляем обработчики событий
+
+  // Add input event listeners
   setTimeout(() => {
     group.questions.forEach(q => {
       const input = document.getElementById(`input-${q.qId}`);
       if (input) {
+        // Set saved value
         input.value = answersSoFar[q.qId] || "";
-        
-        // Обработчик ввода
+
+        // Add class if value exists
+        if (input.value) {
+          input.classList.add('has-value');
+        }
+
         input.addEventListener("input", (e) => {
           answersSoFar[q.qId] = e.target.value;
           updateQuestionNav();
-          
-          // Автоматическая ширина
-          const minWidth = 100;
-          const maxWidth = 180;
-          const textLength = e.target.value.length;
-          const newWidth = Math.min(Math.max(minWidth, textLength * 9), maxWidth);
-          e.target.style.width = newWidth + 'px';
+
+          if (e.target.value.trim()) {
+            input.classList.add('has-value');
+            // Size classes
+            const textLength = e.target.value.length;
+            input.classList.remove('input-small', 'input-medium', 'input-large');
+            if (textLength > 15) {
+              input.classList.add('input-large');
+            } else if (textLength > 8) {
+              input.classList.add('input-medium');
+            } else {
+              input.classList.add('input-small');
+            }
+          } else {
+            input.classList.remove('has-value', 'input-small', 'input-medium', 'input-large');
+          }
         });
-        
-        // Инициализация ширины если есть значение
-        if (input.value) {
-          const textLength = input.value.length;
-          const newWidth = Math.min(Math.max(100, textLength * 9), 180);
-          input.style.width = newWidth + 'px';
-        }
+        input.addEventListener('focus', (e) => {
+          input.classList.add('focused');
+        });
+        input.addEventListener('blur', (e) => {
+          input.classList.remove('focused');
+        });
       }
     });
   }, 0);
 }
 
-function renderGapFillQuestion(q, qDiv) {
-  // Обработка заголовков и подзаголовков
-  if (!q.question && (q.title || q.subheading || q.text)) {
-    // Создаем контейнер для структурных элементов
-    const structureDiv = document.createElement('div');
-    structureDiv.style.marginBottom = '20px';
-    
-    if (q.title) {
-      const titleElement = document.createElement('h3');
-      titleElement.style.cssText = `
-        font-size: 20px;
-        font-weight: 700;
-        color: #1a1a1a;
-        text-align: center;
-        margin: 25px 0 20px 0;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #e9ecef;
-      `;
-      titleElement.textContent = q.title;
-      structureDiv.appendChild(titleElement);
-    }
-    
-    if (q.text) {
-      const infoElement = document.createElement('div');
-      infoElement.style.cssText = `
-        font-size: 14px;
-        color: #6c757d;
-        font-style: italic;
-        margin: 15px 0;
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-      `;
-      infoElement.textContent = q.text;
-      structureDiv.appendChild(infoElement);
-    }
-    
-    if (q.subheading) {
-      const subheadingElement = document.createElement('h4');
-      subheadingElement.style.cssText = `
-        font-size: 16px;
-        font-weight: 600;
-        color: #495057;
-        margin: 20px 0 15px 0;
-        padding-left: 12px;
-        border-left: 3px solid #3b82f6;
-      `;
-      subheadingElement.textContent = q.subheading;
-      structureDiv.appendChild(subheadingElement);
-    }
-    
-    qDiv.appendChild(structureDiv);
-    // Убираем стандартные стили question-item для структурных элементов
-    qDiv.style.background = 'transparent';
-    qDiv.style.border = 'none';
-    qDiv.style.padding = '0';
-    return;
-  }
-
-  // Обработка реальных вопросов с qId
-  if (!q.question || !q.qId) return;
-
-  // Создаем контейнер для вопроса
-  const questionContainer = document.createElement('div');
-  questionContainer.id = q.qId;
-  questionContainer.style.cssText = `
-    display: flex;
-    align-items: baseline;
-    padding: 12px 0;
-    border-bottom: 1px solid #e9ecef;
-  `;
-  
-  // Проверяем наличие буллетов в тексте
-  const hasBullet = q.question.includes('•') || 
-                    q.question.includes('●') || 
-                    q.question.includes('diet consists') ||
-                    q.question.includes('nests are created') ||
-                    q.question.includes('the Recovery Plan');
-  
-  // Если есть буллеты, добавляем визуальный буллет
-  if (hasBullet) {
-    const bulletSpan = document.createElement('span');
-    bulletSpan.style.cssText = `
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #64748b;
-      border-radius: 50%;
-      margin: 8px 12px 0 4px;
-      flex-shrink: 0;
-    `;
-    questionContainer.appendChild(bulletSpan);
-  }
-  
-  // Контейнер для номера и текста
-  const contentWrapper = document.createElement('div');
-  contentWrapper.style.cssText = `
-    flex: 1;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  `;
-  
-  // Номер вопроса
-  const numberSpan = document.createElement('span');
-  numberSpan.style.cssText = `
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #1e40af;
-    color: white;
-    min-width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-weight: 600;
-    font-size: 14px;
-    flex-shrink: 0;
-    line-height: 28px;
-    text-align: center;
-  `;
-  numberSpan.textContent = q.qId.replace('q', '');
-  
-  // Текст вопроса
-  const textSpan = document.createElement('span');
-  textSpan.style.cssText = `
-    flex: 1;
-    font-size: 15px;
-    color: #374151;
-    line-height: 1.8;
-  `;
-  
-  // Очищаем текст от символов буллетов
-  let cleanText = q.question.replace(/^[•●]\s*/, '');
-  
-  // Создаем HTML с инпутом
-  const questionHtml = cleanText.replace(
-    /\.{3,}|_{3,}|…+|__________+/g,
-    () => {
-      const inputId = `${q.qId}`;
-      return `<input type="text" 
-              id="${inputId}" 
-              class="gap-fill-input"
-              style="
-                background: white;
-                border: 2px solid #cbd5e1;
-                border-radius: 4px;
-                padding: 6px 10px;
-                font-size: 14px;
-                font-weight: 500;
-                min-width: 100px;
-                max-width: 180px;
-                margin: 0 6px;
-                transition: all 0.2s;
-                vertical-align: baseline;
-              "
-              placeholder="type here" />`;
-    }
-  );
-  
-  textSpan.innerHTML = questionHtml;
-  
-  contentWrapper.appendChild(numberSpan);
-  contentWrapper.appendChild(textSpan);
-  questionContainer.appendChild(contentWrapper);
-  
-  // Очищаем qDiv и добавляем новое содержимое
-  qDiv.innerHTML = '';
-  qDiv.appendChild(questionContainer);
-  
-  // Улучшаем стиль контейнера вопроса
-  qDiv.style.cssText = `
-    margin-bottom: 8px;
-    padding: 12px 20px;
-    background: #fafafa;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    transition: all 0.2s;
-  `;
-  
-  // Добавляем hover эффект
-  qDiv.addEventListener('mouseenter', () => {
-    qDiv.style.borderColor = '#3b82f6';
-    qDiv.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.1)';
-  });
-  
-  qDiv.addEventListener('mouseleave', () => {
-    qDiv.style.borderColor = '#e5e7eb';
-    qDiv.style.boxShadow = 'none';
-  });
-  
-  // Добавляем обработчики событий для инпута
-  setTimeout(() => {
-    const input = document.getElementById(q.qId);
-    if (input) {
-      // Устанавливаем сохраненное значение
-      input.value = answersSoFar[q.qId] || "";
-      
-      // Обработчик ввода
-      input.addEventListener("input", (e) => {
-        answersSoFar[q.qId] = e.target.value;
-        updateQuestionNav();
-        
-        // Автоматическая подстройка ширины
-        const minWidth = 100;
-        const maxWidth = 180;
-        const textLength = e.target.value.length;
-        const newWidth = Math.min(Math.max(minWidth, textLength * 9), maxWidth);
-        e.target.style.width = newWidth + 'px';
-        
-        // Изменение стиля при заполнении
-        if (e.target.value.trim()) {
-          e.target.style.background = '#f0fdf4';
-          e.target.style.borderColor = '#10b981';
-        } else {
-          e.target.style.background = 'white';
-          e.target.style.borderColor = '#cbd5e1';
-        }
-      });
-      
-      // Обработчик фокуса
-      input.addEventListener('focus', (e) => {
-        e.target.style.borderColor = '#3b82f6';
-        e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-        if (!e.target.value.trim()) {
-          e.target.style.background = '#f0f9ff';
-        }
-      });
-      
-      input.addEventListener('blur', (e) => {
-        e.target.style.boxShadow = 'none';
-        if (!e.target.value.trim()) {
-          e.target.style.background = 'white';
-          e.target.style.borderColor = '#cbd5e1';
-        }
-      });
-      
-      // Инициализация ширины если есть значение
-      if (input.value) {
-        const textLength = input.value.length;
-        const newWidth = Math.min(Math.max(100, textLength * 9), 180);
-        input.style.width = newWidth + 'px';
-        input.style.background = '#f0fdf4';
-        input.style.borderColor = '#10b981';
-      }
-    }
-  }, 0);
-}
-
+// Остальные функции рендеринга вопросов остаются без изменений
 function renderTextQuestion(q, qDiv) {
   if (q.title) {
     qDiv.innerHTML += `<h3>${q.title}</h3>`;
@@ -858,7 +606,7 @@ function renderTextQuestion(q, qDiv) {
     qDiv.innerHTML += `<h4>${q.subheading}</h4>`;
   }
   if (q.text) {
-    qDiv.innerHTML += `<p><em>${q.text}</em></p>`;
+    qDiv.innerHTML += `<p>${q.text}</p>`;
   }
 }
 
@@ -999,6 +747,7 @@ function renderYesNoQuestion(q, qDiv) {
   }, 0);
 }
 
+// Table function остается без изменений как просили
 function renderTableQuestion(q, qDiv) {
   // Add title before table if exists
   if (q.title) {
@@ -1156,7 +905,6 @@ function findQuestionByQId(qId) {
   return { answer: [] };
 }
 
-// Handle finish function
 // Handle finish function
 async function handleFinish() {
   // Disable finish button to prevent multiple clicks

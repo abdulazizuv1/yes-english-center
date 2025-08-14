@@ -1,5 +1,3 @@
-// reading-add.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -250,72 +248,75 @@ window.addQuestion = function (passageNumber, type) {
 
     case "true-false-notgiven":
       questionHTML = `
-        <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-          <div class="question-header">
-            <span class="question-type-badge tfng">True/False/Not Given</span>
-            <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-          </div>
-          <input type="text" placeholder="Statement" class="question-text">
-          <select class="question-answer">
-            <option value="">Select answer</option>
-            <option value="TRUE">TRUE</option>
-            <option value="FALSE">FALSE</option>
-            <option value="NOT GIVEN">NOT GIVEN</option>
-          </select>
-        </div>
-      `;
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+      <div class="question-header">
+        <span class="question-type-badge tfng">True/False/Not Given</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
+      </div>
+      <textarea placeholder="Group instruction (optional, e.g., 'Questions 8-13\nDo the following statements agree with the information given in Reading Passage 1?')" class="group-instruction" rows="2"></textarea>
+      <input type="text" placeholder="Statement" class="question-text">
+      <select class="question-answer">
+        <option value="">Select answer</option>
+        <option value="TRUE">TRUE</option>
+        <option value="FALSE">FALSE</option>
+        <option value="NOT GIVEN">NOT GIVEN</option>
+      </select>
+    </div>
+  `;
       break;
 
     case "yes-no-notgiven":
       questionHTML = `
-        <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-          <div class="question-header">
-            <span class="question-type-badge ynng">Yes/No/Not Given</span>
-            <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-          </div>
-          <input type="text" placeholder="Statement" class="question-text">
-          <select class="question-answer">
-            <option value="">Select answer</option>
-            <option value="YES">YES</option>
-            <option value="NO">NO</option>
-            <option value="NOT GIVEN">NOT GIVEN</option>
-          </select>
-        </div>
-      `;
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+      <div class="question-header">
+        <span class="question-type-badge ynng">Yes/No/Not Given</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
+      </div>
+      <textarea placeholder="Group instruction (optional, e.g., 'Questions 31-36\nDo the following statements agree with the claims of the writer?')" class="group-instruction" rows="2"></textarea>
+      <input type="text" placeholder="Statement" class="question-text">
+      <select class="question-answer">
+        <option value="">Select answer</option>
+        <option value="YES">YES</option>
+        <option value="NO">NO</option>
+        <option value="NOT GIVEN">NOT GIVEN</option>
+      </select>
+    </div>
+  `;
       break;
 
     case "multiple-choice":
       questionHTML = `
-        <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-          <div class="question-header">
-            <span class="question-type-badge mc">Multiple Choice</span>
-            <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-          </div>
-          <input type="text" placeholder="Question" class="question-text">
-          <div class="mc-options">
-            <div class="mc-option">
-              <input type="radio" name="mc-answer-${questionId}" value="A">
-              <label>A</label>
-              <input type="text" placeholder="Option A text" class="option-text" data-option="A">
-            </div>
-            <div class="mc-option">
-              <input type="radio" name="mc-answer-${questionId}" value="B">
-              <label>B</label>
-              <input type="text" placeholder="Option B text" class="option-text" data-option="B">
-            </div>
-            <div class="mc-option">
-              <input type="radio" name="mc-answer-${questionId}" value="C">
-              <label>C</label>
-              <input type="text" placeholder="Option C text" class="option-text" data-option="C">
-            </div>
-            <div class="mc-option">
-              <input type="radio" name="mc-answer-${questionId}" value="D">
-              <label>D</label>
-              <input type="text" placeholder="Option D text" class="option-text" data-option="D">
-            </div>
-          </div>
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+      <div class="question-header">
+        <span class="question-type-badge mc">Multiple Choice</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
+      </div>
+      <textarea placeholder="Group instruction (optional, e.g., 'Questions 27-30\nChoose the correct letter, A, B, C or D.')" class="group-instruction" rows="2"></textarea>
+      <input type="text" placeholder="Question" class="question-text">
+      <div class="mc-options">
+        <div class="mc-option">
+          <input type="radio" name="mc-answer-${questionId}" value="A">
+          <label>A</label>
+          <input type="text" placeholder="Option A text" class="option-text" data-option="A">
         </div>
-      `;
+        <div class="mc-option">
+          <input type="radio" name="mc-answer-${questionId}" value="B">
+          <label>B</label>
+          <input type="text" placeholder="Option B text" class="option-text" data-option="B">
+        </div>
+        <div class="mc-option">
+          <input type="radio" name="mc-answer-${questionId}" value="C">
+          <label>C</label>
+          <input type="text" placeholder="Option C text" class="option-text" data-option="C">
+        </div>
+        <div class="mc-option">
+          <input type="radio" name="mc-answer-${questionId}" value="D">
+          <label>D</label>
+          <input type="text" placeholder="Option D text" class="option-text" data-option="D">
+        </div>
+      </div>
+    </div>
+  `;
       break;
 
     case "paragraph-matching":

@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Reading Test</title>
-    <link rel="stylesheet" href="./test.css" />
+    <!-- CSS с версионированием для предотвращения кэширования -->
+    <link rel="stylesheet" href="./test.css?v=2.0" />
     <link rel="icon" href="/image/Logo.ver1.2.png" />
   </head>
   <body>
@@ -52,6 +53,7 @@
         <div class="nav-numbers" id="part3Numbers"></div>
       </div>
     </div>
+    
     <!-- Bottom Controls -->
     <div class="bottom-controls">
       <button class="control-btn btn-back" id="backBtn" style="display: none">
@@ -78,6 +80,8 @@
         🗑️ Remove Highlight
       </div>
     </div>
+    
+    <!-- Loading Modal -->
     <div class="loading-modal" id="loadingModal">
       <div class="loading-modal-content">
         <div class="loading-spinner"></div>
@@ -85,6 +89,9 @@
         <p>Please wait while we process your test...</p>
       </div>
     </div>
-    <script type="module" src="test.js"></script>
+    
+    <!-- Pause Modal (будет создан через JS) -->
+    
+    <script type="module" src="test.js?v=2.0"></script>
   </body>
 </html>
