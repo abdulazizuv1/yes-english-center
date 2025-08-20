@@ -2,7 +2,6 @@ const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
 
-// 🔐 Инициализация Firebase Admin
 const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
@@ -11,22 +10,17 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// 📁 Путь к JSON файлу
-const filePath = path.join(__dirname, "data", "listeningTests", "test-5.json");
+const filePath = path.join(__dirname, "data", "listeningTests", "test-1.json");
 
-// 📥 Чтение JSON файла
 const rawData = fs.readFileSync(filePath);
 const listeningTest = JSON.parse(rawData);
 
-// 🆔 Название документа
-const docId = "test-5";
+const docId = "test-1";
 
-// 🔥 Загрузка в Firestore: коллекция "listeningTests"
-// ИСПРАВЛЕНИЕ: Сохраняем данные напрямую без дополнительной обертки
 db.collection("listeningTests")
   .doc(docId)
   .set({
-    ...listeningTest,  // Распаковываем все поля из JSON (title, parts, etc.)
+    ...listeningTest,  
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   })
   .then(() => {

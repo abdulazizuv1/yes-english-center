@@ -63,8 +63,8 @@
             "type": "question",
             "questionId": "q7",
             "format": "gap-fill",
-            "text": "This year, activities end by",
-            "postfix": "p.m.",
+            "groupInstruction": "Questions 7-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "text": "This year, activities end by _____ p.m.",
             "correctAnswer": "11.15",
             "wordLimit": 2
           },
@@ -72,8 +72,7 @@
             "type": "question",
             "questionId": "q8",
             "format": "gap-fill",
-            "text": "There won't be any",
-            "postfix": "in the town centre this year.",
+            "text": "There won't be any _____ in the town centre this year.",
             "correctAnswer": "parking",
             "wordLimit": 1
           },
@@ -81,8 +80,7 @@
             "type": "question",
             "questionId": "q9",
             "format": "gap-fill",
-            "text": "The festival's web address is www.",
-            "postfix": ".com.",
+            "text": "The festival's web address is www._____.com.",
             "correctAnswer": "events",
             "wordLimit": 1
           },
@@ -90,8 +88,7 @@
             "type": "question",
             "questionId": "q10",
             "format": "gap-fill",
-            "text": "Festival organisers would like to receive",
-            "postfix": "online.",
+            "text": "Festival organisers would like to receive _____ online.",
             "correctAnswer": "feedback",
             "wordLimit": 1
           }
@@ -111,6 +108,7 @@
             "type": "question",
             "questionId": "q11",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 11-14\nChoose the correct letter, A, B or C.",
             "text": "Approximately how many passengers does the ferry hold?",
             "options": {
               "A": "160",
@@ -157,7 +155,8 @@
           },
           {
             "type": "text",
-            "value": "Clothes and equipment"
+            "title": "Clothes and equipment",
+            "groupInstruction": "Questions 15-17\nComplete the notes below.\nWrite NO MORE THAN THREE WORDS for each answer."
           },
           {
             "type": "text",
@@ -171,8 +170,7 @@
             "type": "question",
             "questionId": "q15",
             "format": "gap-fill",
-            "text": "spare",
-            "postfix": "",
+            "text": "spare _____",
             "correctAnswer": "socks",
             "wordLimit": 3
           },
@@ -184,8 +182,7 @@
             "type": "question",
             "questionId": "q16",
             "format": "gap-fill",
-            "text": "suncream: strength",
-            "postfix": "",
+            "text": "suncream: strength _____",
             "correctAnswer": "total block",
             "wordLimit": 3
           },
@@ -193,8 +190,7 @@
             "type": "question",
             "questionId": "q17",
             "format": "gap-fill",
-            "text": "a",
-            "postfix": "folder for map, etc.",
+            "text": "a _____ folder for map, etc.",
             "correctAnswer": "plastic",
             "wordLimit": 3
           },
@@ -202,8 +198,8 @@
             "type": "question-group",
             "groupType": "multi-select",
             "questionId": "q18_19_20",
+            "groupInstruction": "Questions 18-20\nChoose THREE letters, A-G.",
             "text": "Which THREE of the following features of the area in Spain does the speaker talk about?",
-            "instructions": "Choose THREE letters, A-G",
             "questions": [
               {
                 "questionId": "q18",
@@ -222,6 +218,7 @@
               "A": "altitude",
               "B": "coastline",
               "C": "economy",
+              "D": "history",
               "E": "temperatures",
               "F": "vegetation",
               "G": "wildlife"
@@ -242,6 +239,7 @@
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 21-24\nChoose the correct letter, A, B or C.",
             "text": "Sally says many students see peer assessment as",
             "options": {
               "A": "a way for tutors to save time.",
@@ -287,62 +285,46 @@
             "correctAnswer": "A"
           },
           {
-            "type": "text",
-            "value": "Categories of student markers"
-          },
-          {
-            "type": "question",
-            "questionId": "q25",
-            "format": "gap-fill",
-            "text": "male students marking female presenters",
-            "postfix": "",
-            "correctAnswer": "B",
-            "wordLimit": 1
-          },
-          {
-            "type": "question",
-            "questionId": "q26",
-            "format": "gap-fill",
-            "text": "female students marking male presenters",
-            "postfix": "",
-            "correctAnswer": "C",
-            "wordLimit": 1
-          },
-          {
-            "type": "question",
-            "questionId": "q27",
-            "format": "gap-fill",
-            "text": "female students marking female presenters",
-            "postfix": "",
-            "correctAnswer": "C",
-            "wordLimit": 1
-          },
-          {
-            "type": "question",
-            "questionId": "q28",
-            "format": "gap-fill",
-            "text": "younger students marking older presenters",
-            "postfix": "",
-            "correctAnswer": "A",
-            "wordLimit": 1
-          },
-          {
-            "type": "question",
-            "questionId": "q29",
-            "format": "gap-fill",
-            "text": "students marking presenters from a different university",
-            "postfix": "",
-            "correctAnswer": "C",
-            "wordLimit": 1
-          },
-          {
-            "type": "question",
-            "questionId": "q30",
-            "format": "gap-fill",
-            "text": "students who had helped set criteria",
-            "postfix": "",
-            "correctAnswer": "B",
-            "wordLimit": 1
+            "type": "matching",
+            "title": "Categories of student markers",
+            "groupInstruction": "Questions 25-30\nHow did the following categories of student markers compare with the rest of the group when marking student presentations?\nWrite the correct letter, A, B or C, next to questions 25-30.",
+            "options": {
+              "A": "They gave higher marks.",
+              "B": "They gave lower marks.",
+              "C": "Their marks were not significantly different."
+            },
+            "questions": [
+              {
+                "questionId": "q25",
+                "text": "male students marking female presenters",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q26",
+                "text": "female students marking male presenters",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q27",
+                "text": "female students marking female presenters",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q28",
+                "text": "younger students marking older presenters",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q29",
+                "text": "students marking presenters from a different university",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q30",
+                "text": "students who had helped set criteria",
+                "correctAnswer": "B"
+              }
+            ]
           }
         ],
         "instructions": {
@@ -355,6 +337,10 @@
         "title": "Bislama - The Pidgin English Language of Vanuatu",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-2%2Fpart4.mp3?alt=media&token=47be4460-7b91-40e5-967c-881f808916a5",
         "content": [
+          {
+            "type": "text",
+            "title": "Bislama - The Pidgin English Language of Vanuatu"
+          },
           {
             "type": "text",
             "value": "Languages in Vanuatu"
@@ -371,8 +357,7 @@
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "",
-            "postfix": "languages: 8",
+            "text": "_____ languages: 8",
             "correctAnswer": "extinct",
             "wordLimit": 1
           },
@@ -384,8 +369,7 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "Foreign languages: English is used in the",
-            "postfix": "system",
+            "text": "Foreign languages: English is used in the _____ system",
             "correctAnswer": "education",
             "wordLimit": 1
           },
@@ -401,8 +385,7 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "• In the past this language was described as",
-            "postfix": "",
+            "text": "• In the past this language was described as _____",
             "correctAnswer": "broken",
             "wordLimit": 1
           },
@@ -418,8 +401,7 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "• After 1860 Vanuatu people worked in Australian",
-            "postfix": "",
+            "text": "• After 1860 Vanuatu people worked in Australian _____",
             "correctAnswer": "plantation",
             "wordLimit": 1
           },
@@ -427,8 +409,7 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "• After 1950 people moved to the",
-            "postfix": "",
+            "text": "• After 1950 people moved to the _____",
             "correctAnswer": "city",
             "wordLimit": 1
           },
@@ -444,8 +425,7 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "• Bislama should be called a",
-            "postfix": "pidgin.",
+            "text": "• Bislama should be called a _____ pidgin.",
             "correctAnswer": "developed",
             "wordLimit": 1
           },
@@ -461,8 +441,7 @@
             "type": "question",
             "questionId": "q37",
             "format": "gap-fill",
-            "text": "• Words such as 'from' may have more",
-            "postfix": "in Bislama.",
+            "value": "• Words such as 'from' may have more _____ in Bislama.",
             "correctAnswer": "meanings",
             "wordLimit": 1
           },
@@ -470,8 +449,7 @@
             "type": "question",
             "questionId": "q38",
             "format": "gap-fill",
-            "text": "• Less than 10% of words are of",
-            "postfix": "origin.",
+            "value": "• Less than 10% of words are of _____ origin.",
             "correctAnswer": "French",
             "wordLimit": 1
           },
@@ -479,8 +457,7 @@
             "type": "question",
             "questionId": "q39",
             "format": "gap-fill",
-            "text": "• Pacific words describe the natural world and also local",
-            "postfix": "",
+            "value": "• Pacific words describe the natural world and also local _____",
             "correctAnswer": "culture",
             "wordLimit": 1
           },
@@ -496,8 +473,7 @@
             "type": "question",
             "questionId": "q40",
             "format": "gap-fill",
-            "text": "• The word 'long' acts as an important",
-            "postfix": "in Bislama.",
+            "text": "• The word 'long' acts as an important _____ in Bislama.",
             "correctAnswer": "preposition",
             "wordLimit": 1
           }
