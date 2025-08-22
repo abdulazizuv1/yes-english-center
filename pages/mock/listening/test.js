@@ -15,15 +15,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
-let currentAudioSection = 0; // Какая секция аудио сейчас играет
+let currentAudioSection = 0;
 let audioInitialized = false;
 
-// Global variables
 let sections = [], currentSectionIndex = 0, answersSoFar = {}, currentAudio = null;
 let isPaused = false, pausedTime = 0, timerStartTime = null, audioCurrentTime = 0;
-let currentQuestionNumber = 1; // Add current question tracking
+let currentQuestionNumber = 1;
 
-// Pause functionality
 window.togglePause = function() {
     const pauseBtn = document.getElementById('pauseBtn');
     const pauseModal = document.getElementById('pauseModal');
@@ -54,7 +52,6 @@ window.togglePause = function() {
     }
 };
 
-// Улучшенная функция для отключения/включения интерфейса
 function toggleTestInteraction(enable) {
     const selectors = [
         '.main-content',
@@ -78,10 +75,7 @@ function toggleTestInteraction(enable) {
         });
     });
     
-    // Дополнительно меняем курсор для всего body
     document.body.style.cursor = enable ? 'auto' : 'wait';
-    
-    console.log(`Test interaction ${enable ? 'enabled' : 'disabled'}`);
 }
 
 function getCurrentRemainingTime() {
@@ -90,7 +84,6 @@ function getCurrentRemainingTime() {
     return Math.max(0, (40 * 60) - elapsed);
 }
 
-// Navigation
 function generateQuestionNav() {
     [1,2,3,4].forEach(section => {
         const container = document.getElementById(`section${section}Numbers`);
@@ -117,7 +110,6 @@ function updateQuestionNav() {
         
         num.className = 'nav-number';
         
-        // Check if this is the current selected question
         if (questionNumber === currentQuestionNumber) {
             num.style.background = '#3b82f6';
             num.style.color = 'white';
@@ -140,7 +132,7 @@ function jumpToQuestion(questionNum) {
     const shouldRender = targetSection !== currentSectionIndex;
     
     currentSectionIndex = targetSection;
-    currentQuestionNumber = questionNum; // Update current question
+    currentQuestionNumber = questionNum;
     
     if (shouldRender) renderSection(currentSectionIndex);
     updateQuestionNav();
@@ -169,7 +161,6 @@ function updateSectionIndicator() {
     `;
 }
 
-// Text highlighting
 let selectedRange = null;
 document.addEventListener('mouseup', () => {
     const selection = window.getSelection();
@@ -211,10 +202,8 @@ window.highlightSelection = () => {
     document.getElementById('contextMenu').style.display = 'none';
 };
 
-
 window.removeHighlight = function() {
     if (selectedRange) {
-        // Найти все highlighted элементы в выделенном диапазоне
         const container = selectedRange.commonAncestorContainer;
         const highlighted = container.nodeType === Node.TEXT_NODE ? 
             container.parentElement.closest('.highlighted') ? [container.parentElement.closest('.highlighted')] : [] :
@@ -234,7 +223,6 @@ window.removeHighlight = function() {
     document.getElementById('contextMenu').style.display = 'none';
 };
 
-// Authentication and loading
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         alert("Please log in to take the test.");
@@ -244,7 +232,6 @@ onAuthStateChanged(auth, (user) => {
 
 async function loadTest() {
     try {
-        console.log("Loading test...");
         const testId = new URLSearchParams(window.location.search).get('testId') || 'test-1';
         const docSnap = await getDoc(doc(db, "listeningTests", testId));
         
@@ -267,14 +254,13 @@ async function loadTest() {
 function initializeTest() {
     generateQuestionNav();
     currentQuestionNumber = 1;
-    audioInitialized = false; // Сбрасываем флаг аудио
-    currentAudioSection = 0;   // Сбрасываем текущую секцию аудио
+    audioInitialized = false;
+    currentAudioSection = 0;
     renderSection(0);
     updateQuestionNav();
     startTimer(40 * 60, document.getElementById("time"));
 }
 
-// Section rendering
 function renderSection(index) {
     const section = sections[index];
     if (!section) return;
@@ -285,26 +271,24 @@ function renderSection(index) {
 }
 
 function handleAudio(section, index) {
-    // Если аудио уже инициализировано, не трогаем его при навигации
     if (audioInitialized) return;
     
     const container = document.getElementById("audio-container");
     if (!container) return;
     
-    // Инициализируем аудио только один раз - начинаем с первой секции
     initializeSequentialAudio();
     audioInitialized = true;
 }
+
 function initializeSequentialAudio() {
     const container = document.getElementById("audio-container");
-    playAudioForSection(0); // Всегда начинаем с первой секции
+    playAudioForSection(0); 
     
     function playAudioForSection(sectionIndex) {
-        if (sectionIndex >= sections.length) return; // Все аудио проиграно
+        if (sectionIndex >= sections.length) return; 
         
         const section = sections[sectionIndex];
         if (!section.audioUrl) {
-            // Если у секции нет аудио, переходим к следующей
             setTimeout(() => playAudioForSection(sectionIndex + 1), 100);
             return;
         }
@@ -329,7 +313,6 @@ function initializeSequentialAudio() {
         
         if (currentAudio) {
             currentAudio.addEventListener('ended', () => {
-                // После окончания текущего аудио, играем следующее
                 setTimeout(() => playAudioForSection(sectionIndex + 1), 1000);
             });
         }
@@ -346,15 +329,71 @@ function renderContent(section, index) {
         </div>
     `;
     
-    // Render section-level instructions
     if (section.instructions) {
         renderInstructions(section.instructions);
     }
     
     if (section.content) {
-        section.content.forEach(item => renderContentItem(item));
+        let currentGroupInstruction = null;
+        let gapFillContainer = null;
+        
+        section.content.forEach((item, itemIndex) => {
+            if (item.groupInstruction) {
+                currentGroupInstruction = item.groupInstruction;
+            }
+            
+            if (item.type === "text") {
+                if (gapFillContainer) {
+                    questionList.appendChild(gapFillContainer);
+                    gapFillContainer = null;
+                }
+                
+                if (currentGroupInstruction) {
+                    const instructionDiv = document.createElement('div');
+                    instructionDiv.className = 'group-instruction';
+                    instructionDiv.style.cssText = 'background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;';
+                    instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
+                    questionList.appendChild(instructionDiv);
+                    currentGroupInstruction = null;
+                }
+                
+                renderTextItem(item);
+                
+            } else if (item.type === "question" && item.format === "gap-fill") {
+                if (!gapFillContainer) {
+                    if (currentGroupInstruction) {
+                        const instructionDiv = document.createElement('div');
+                        instructionDiv.className = 'group-instruction';
+                        instructionDiv.style.cssText = 'background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;';
+                        instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
+                        questionList.appendChild(instructionDiv);
+                        currentGroupInstruction = null;
+                    }
+                    
+                    gapFillContainer = document.createElement('div');
+                    gapFillContainer.style.cssText = 'background: #fafafa; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;';
+                }
+                renderGapFillQuestion(item, gapFillContainer);
+                
+            } else {
+                if (gapFillContainer) {
+                    questionList.appendChild(gapFillContainer);
+                    gapFillContainer = null;
+                }
+                
+                if (currentGroupInstruction && item.type === "question") {
+                    item.groupInstruction = currentGroupInstruction;
+                    currentGroupInstruction = null;
+                }
+                
+                renderContentItem(item);
+            }
+        });
+        
+        if (gapFillContainer) {
+            questionList.appendChild(gapFillContainer);
+        }
     } else {
-        // Legacy format
         ["multiSelect", "multiSelect1", "multiSelect2", "matching"].forEach(key => {
             if (section[key]) renderLegacyGroup(section[key], key);
         });
@@ -382,27 +421,60 @@ function renderInstructions(instructions) {
     questionList.innerHTML += instructionHtml;
 }
 
+function renderTextItem(item) {
+    const questionList = document.getElementById('question-list');
+    const text = item.value || item.title || item.text || "";
+    
+    if (item.title && !item.value) {
+        questionList.innerHTML += `<h4 style="text-align: center; margin: 20px 0; color: #1f2937; font-weight: 600;">${text}</h4>`;
+    } else {
+        questionList.innerHTML += `<p style="margin: 10px 0; padding: 0 20px; color: #4b5563;">${text}</p>`;
+    }
+}
+
+function renderGapFillQuestion(question, container) {
+    const qId = question.questionId;
+    const number = qId.replace(/\D/g, '');
+    
+    const questionDiv = document.createElement('div');
+    questionDiv.id = qId;
+    questionDiv.style.cssText = 'display: flex; align-items: center; margin: 12px 0;';
+    
+    let textContent = question.title || question.text || question.value || "";
+    
+    textContent = textContent.replace(/_____/g, `<input type="text" value="${answersSoFar[qId] || ""}" data-qid="${qId}" class="gap-fill" style="min-width: 120px; padding: 6px 10px; border: 2px solid #d1d5db; border-radius: 6px; margin: 0 5px;" placeholder="Answer"/>`);
+    
+    questionDiv.innerHTML = `
+        <div style="background: #3b82f6; color: white; min-width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; margin-right: 12px; font-size: 12px;">${number}</div>
+        <div style="flex: 1;">${textContent}</div>
+    `;
+    
+    container.appendChild(questionDiv);
+}
+
 function renderContentItem(item) {
     const questionList = document.getElementById('question-list');
     
-    // Render groupInstruction if it exists for this item
-    
-    
     switch (item.type) {
         case "text":
-            questionList.innerHTML += `<p style="margin: 15px 0; color: #4b5563;">${item.value || item.text}</p>`;
+            renderTextItem(item);
             break;
         case "subheading":
             questionList.innerHTML += `<h4 style="margin: 20px 0 10px; color: #dc2626; font-weight: 600;">${item.value || item.text}</h4>`;
             break;
         case "question":
-            renderQuestion(item);
+            if (item.format !== "gap-fill") {
+                renderQuestion(item);
+            }
             break;
         case "question-group":
             renderQuestionGroup(item);
             break;
         case "table":
             renderTable(item);
+            break;
+        case "matching":
+            renderMatchingQuestion(item);
             break;
     }
 }
@@ -416,14 +488,15 @@ function renderQuestion(question) {
     
     const number = qId.replace(/\D/g, '');
     
-    if (question.format === "gap-fill") {
-        questionDiv.innerHTML = `
-            <div class="question-number" style="display: inline-block; background: #3b82f6; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; margin-right: 10px;">${number}</div>
-            <div class="question-text" style="display: inline;">
-                ${question.text || ""} <input type="text" value="${answersSoFar[qId] || ""}" data-qid="${qId}" class="gap-fill" style="min-width: 120px; padding: 8px 12px; border: 2px solid #d1d5db; border-radius: 6px;" placeholder="Your answer"/> ${question.postfix || ""}
-            </div>
-        `;
-    } else if (question.format === "multiple-choice") {
+    if (question.groupInstruction) {
+        const instructionDiv = document.createElement('div');
+        instructionDiv.className = 'group-instruction';
+        instructionDiv.style.cssText = 'background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;';
+        instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${question.groupInstruction}</p>`;
+        document.getElementById('question-list').appendChild(instructionDiv);
+    }
+    
+    if (question.format === "multiple-choice") {
         const optionsHtml = Object.keys(question.options || {}).sort().map(key => `
             <label style="display: block; margin: 8px 0; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
                 <input type="radio" name="${qId}" value="${key}" ${answersSoFar[qId] === key ? "checked" : ""} style="margin-right: 8px;"/> 
@@ -447,7 +520,6 @@ function renderQuestionGroup(group) {
     const questionList = document.getElementById('question-list');
     const groupDiv = document.createElement('div');
     
-    // Render groupInstruction if it exists
     let instructionsHtml = '';
     if (group.groupInstruction) {
         instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
@@ -456,7 +528,6 @@ function renderQuestionGroup(group) {
     }
     
     if (group.groupType === "multi-select") {
-        // Определяем количество вопросов
         let questionCount = 0;
         let questionIds = [];
         
@@ -467,12 +538,6 @@ function renderQuestionGroup(group) {
             questionIds = group.questionId.split('_').map(num => `q${num}`);
             questionCount = questionIds.length;
         }
-        
-        console.log(`Rendering multi-select group ${group.questionId}:`, {
-            questionCount,
-            questionIds,
-            hasQuestions: !!group.questions
-        });
         
         groupDiv.innerHTML = `
             ${instructionsHtml}
@@ -516,9 +581,41 @@ function renderQuestionGroup(group) {
     questionList.appendChild(groupDiv);
 }
 
-// Вспомогательная функция для проверки выбранных опций в multi-select группе
+function renderMatchingQuestion(item) {
+    const questionList = document.getElementById('question-list');
+    const matchDiv = document.createElement('div');
+    
+    let instructionsHtml = '';
+    if (item.groupInstruction) {
+        instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
+            <p style="white-space: pre-line;">${item.groupInstruction}</p>
+        </div>`;
+    }
+    
+    matchDiv.innerHTML = `
+        ${instructionsHtml}
+        <div style="margin: 25px 0; padding: 20px; border: 2px solid #10b981; border-radius: 10px; background: #f0fdf4;">
+            ${item.title ? `<h4 style="text-align: center; margin-bottom: 20px;">${item.title}</h4>` : ''}
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                ${Object.keys(item.options || {}).sort().map(key => `<p style="margin: 5px 0;"><strong>${key}</strong> ${item.options[key]}</p>`).join("")}
+            </div>
+            ${(item.questions || []).map(q => `
+                <div id="${q.questionId}" style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 6px;">
+                    <div style="background: #10b981; color: white; min-width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; margin-right: 15px; font-size: 12px;">${q.questionId.replace("q", "")}</div>
+                    <div style="flex: 1; margin-right: 15px;">${q.text}</div>
+                    <select data-qid="${q.questionId}" style="padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                        <option value="">Select...</option>
+                        ${Object.keys(item.options || {}).sort().map(key => `<option value="${key}" ${answersSoFar[q.questionId] === key ? "selected" : ""}>${key}</option>`).join("")}
+                    </select>
+                </div>
+            `).join("")}
+        </div>
+    `;
+    
+    questionList.appendChild(matchDiv);
+}
+
 function isOptionSelectedInMultiGroup(group, optionKey, questionIds) {
-    // Проверяем, выбрана ли эта опция в любом из вопросов группы
     return questionIds.some(qId => {
         return answersSoFar[qId] === optionKey;
     });
@@ -528,9 +625,12 @@ function renderTable(table) {
     const questionList = document.getElementById('question-list');
     const tableDiv = document.createElement('div');
     
-    // Render table instructions if they exist
     let instructionsHtml = '';
-    
+    if (table.groupInstruction) {
+        instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
+            <p style="white-space: pre-line;">${table.groupInstruction}</p>
+        </div>`;
+    }
     
     let tableHtml = `${instructionsHtml}<h4 style="margin-bottom: 15px;">${table.title}</h4><table style="width: 100%; border-collapse: collapse;">`;
     tableHtml += `<thead><tr>${table.columns.map(col => `<th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">${col}</th>`).join("")}</tr></thead><tbody>`;
@@ -591,7 +691,6 @@ function updateNavButtons(index) {
     if (finishBtn) finishBtn.style.display = index === sections.length - 1 ? 'inline-block' : 'none';
 }
 
-// Event handlers
 document.addEventListener("input", (e) => {
     const qId = e.target.dataset.qid;
     if (e.target.classList.contains("gap-fill") && qId) {
@@ -603,7 +702,7 @@ document.addEventListener("input", (e) => {
 
 document.addEventListener("change", (e) => {
     const qId = e.target.name || e.target.dataset.qid;
-    const groupId = e.target.dataset.groupId; // Для специальных multi-select групп
+    const groupId = e.target.dataset.groupId;
     
     if (!qId && !groupId) return;
     
@@ -611,10 +710,8 @@ document.addEventListener("change", (e) => {
         answersSoFar[qId] = e.target.value;
     } else if (e.target.type === "checkbox") {
         if (groupId && groupId.includes('_')) {
-            // Специальная обработка для групп типа "q18_19_20"
             handleMultiSelectGroupChange(e.target, groupId);
         } else if (qId) {
-            // Стандартная обработка checkbox
             const checked = Array.from(document.querySelectorAll(`input[type="checkbox"][data-qid="${qId}"]`))
                 .filter(cb => cb.checked).map(cb => cb.value);
             answersSoFar[qId] = checked;
@@ -626,15 +723,14 @@ document.addEventListener("change", (e) => {
     updateQuestionNav();
     localStorage.setItem('listeningTestAnswers', JSON.stringify(answersSoFar));
 });
+
 function handleMultiSelectGroupChange(checkbox, groupId) {
     const allCheckboxes = document.querySelectorAll(`input[type="checkbox"][data-group-id="${groupId}"]`);
     const selectedOptions = Array.from(allCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
     
-    // Определяем количество вопросов в группе из структуры данных
     let maxAllowed = 0;
     let questionIds = [];
     
-    // Найдем группу в данных теста
     sections.forEach(section => {
         if (section.content) {
             section.content.forEach(item => {
@@ -646,7 +742,6 @@ function handleMultiSelectGroupChange(checkbox, groupId) {
                         maxAllowed = item.questions.length;
                         questionIds = item.questions.map(q => q.questionId);
                     } else if (groupId.includes('_')) {
-                        // Если нет массива questions, используем questionId
                         questionIds = groupId.split('_').map(num => `q${num}`);
                         maxAllowed = questionIds.length;
                     }
@@ -655,36 +750,23 @@ function handleMultiSelectGroupChange(checkbox, groupId) {
         }
     });
     
-    console.log(`Multi-select group ${groupId}:`, {
-        questionIds,
-        selectedOptions,
-        maxAllowed
-    });
-    
-    // Ограничиваем количество выбранных опций
     if (selectedOptions.length > maxAllowed) {
         checkbox.checked = false;
         alert(`You can only select ${maxAllowed} options for this question.`);
         return;
     }
     
-    // Очищаем предыдущие ответы для этой группы
     questionIds.forEach(qId => {
         delete answersSoFar[qId];
     });
     
-    // Присваиваем выбранные опции вопросам по порядку
     selectedOptions.forEach((option, index) => {
         if (questionIds[index]) {
             answersSoFar[questionIds[index]] = option;
-            console.log(`Assigned ${option} to ${questionIds[index]}`);
         }
     });
-    
-    console.log('Updated answers:', answersSoFar);
 }
 
-// Navigation handlers
 document.addEventListener('DOMContentLoaded', () => {
     const nextBtn = document.getElementById('nextBtn');
     const backBtn = document.getElementById('backBtn');
@@ -693,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nextBtn) nextBtn.onclick = () => {
         if (currentSectionIndex < sections.length - 1) {
             currentSectionIndex++;
-            currentQuestionNumber = currentSectionIndex * 10 + 1; // Update to first question of next section
+            currentQuestionNumber = currentSectionIndex * 10 + 1;
             renderSection(currentSectionIndex);
             updateQuestionNav();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -703,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backBtn) backBtn.onclick = () => {
         if (currentSectionIndex > 0) {
             currentSectionIndex--;
-            currentQuestionNumber = currentSectionIndex * 10 + 1; // Update to first question of previous section
+            currentQuestionNumber = currentSectionIndex * 10 + 1;
             renderSection(currentSectionIndex);
             updateQuestionNav();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -712,14 +794,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (finishBtn) finishBtn.onclick = handleFinishTest;
     
-    // Load saved answers
     try {
         const saved = localStorage.getItem('listeningTestAnswers');
         if (saved) answersSoFar = JSON.parse(saved);
     } catch (e) { answersSoFar = {}; }
 });
 
-// Test completion
 async function handleFinishTest() {
     const user = auth.currentUser;
     if (!user) {
@@ -731,25 +811,16 @@ async function handleFinishTest() {
         return;
     }
     
-    // Показываем loading модал
     const loadingModal = document.getElementById('loadingModal');
     if (loadingModal) {
         loadingModal.style.display = 'flex';
     }
     
-    // Отключаем все интерфейсы
     toggleTestInteraction(false);
     
     try {
         const results = calculateResults();
         const testId = new URLSearchParams(window.location.search).get('testId') || 'test-1';
-        
-        console.log("Submitting results:", {
-            testId,
-            score: results.correct,
-            total: results.total,
-            percentage: Math.round((results.correct / results.total) * 100)
-        });
         
         const docRef = await addDoc(collection(db, "resultsListening"), {
             userId: user.uid,
@@ -764,31 +835,23 @@ async function handleFinishTest() {
             completedAt: new Date().toISOString(),
         });
         
-        // Очищаем сохраненные ответы
         localStorage.removeItem('listeningTestAnswers');
-        
-        // Останавливаем таймер
         clearInterval(window.listeningTimerInterval);
         
-        // Скрываем loading модал перед переходом
         if (loadingModal) {
             loadingModal.style.display = 'none';
         }
         
-        // Переходим к результатам
         window.location.href = `/pages/mock/listening/resultListening.html?id=${docRef.id}`;
         
     } catch (error) {
         console.error("Error saving result:", error);
         
-        // Скрываем loading модал
         if (loadingModal) {
             loadingModal.style.display = 'none';
         }
         
-        // Включаем интерфейсы обратно
         toggleTestInteraction(true);
-        
         alert("Error submitting test. Please try again.");
     }
 }
@@ -797,16 +860,9 @@ function calculateResults() {
     const answers = {}, correctAnswers = {};
     let correct = 0, total = 0;
     
-    console.log("Starting result calculation...");
-    console.log("Current answers:", answersSoFar);
-    
     sections.forEach((section, sectionIndex) => {
-        console.log(`Processing section ${sectionIndex + 1}:`, section.title);
-        
         if (section.content) {
             section.content.forEach((item, itemIndex) => {
-                console.log(`Processing item ${itemIndex}:`, item.type, item.questionId || 'no ID');
-                
                 if (item.type === "question") {
                     const qId = item.questionId;
                     const userAns = answersSoFar[qId];
@@ -819,11 +875,8 @@ function calculateResults() {
                     if (isCorrect) correct++;
                     total++;
                     
-                    console.log(`Question ${qId}: user="${userAns}", expected="${expected[0]}", correct=${isCorrect}`);
-                    
                 } else if (item.type === "question-group") {
                     if (item.groupType === "multi-select" && item.questions && Array.isArray(item.questions)) {
-                        // Обрабатываем все вопросы в группе
                         item.questions.forEach((question, qIndex) => {
                             const qId = question.questionId;
                             const userAns = answersSoFar[qId];
@@ -835,12 +888,9 @@ function calculateResults() {
                             const isCorrect = checkAnswerCorrectness(userAns, [expectedAnswer]);
                             if (isCorrect) correct++;
                             total++;
-                            
-                            console.log(`Multi-select question ${qId}: user="${userAns}", expected="${expectedAnswer}", correct=${isCorrect}`);
                         });
                         
                     } else if (item.questions) {
-                        // Обычные вопросы в группе (matching, стандартные multi-select)
                         item.questions.forEach(q => {
                             const qId = q.questionId;
                             const userAns = answersSoFar[qId];
@@ -852,12 +902,22 @@ function calculateResults() {
                             const isCorrect = checkAnswerCorrectness(userAns, expected);
                             if (isCorrect) correct++;
                             total++;
-                            
-                            console.log(`Group question ${qId}: user="${userAns}", expected="${expected[0]}", correct=${isCorrect}`);
                         });
                     }
+                } else if (item.type === "matching" && item.questions) {
+                    item.questions.forEach(q => {
+                        const qId = q.questionId;
+                        const userAns = answersSoFar[qId];
+                        const expected = [q.correctAnswer];
+                        
+                        answers[qId] = userAns || null;
+                        correctAnswers[qId] = expected;
+                        
+                        const isCorrect = checkAnswerCorrectness(userAns, expected);
+                        if (isCorrect) correct++;
+                        total++;
+                    });
                 } else if (item.type === "table" && item.answer) {
-                    // Handle table questions
                     Object.keys(item.answer).forEach(qId => {
                         const userAns = answersSoFar[qId];
                         const expected = [item.answer[qId]];
@@ -868,24 +928,14 @@ function calculateResults() {
                         const isCorrect = checkAnswerCorrectness(userAns, expected);
                         if (isCorrect) correct++;
                         total++;
-                        
-                        console.log(`Table question ${qId}: user="${userAns}", expected="${expected[0]}", correct=${isCorrect}`);
                     });
                 }
             });
         }
     });
     
-    console.log("Final calculation results:", { 
-        totalQuestions: total, 
-        correctAnswers: correct, 
-        percentage: Math.round((correct / total) * 100),
-        answers: Object.keys(answers).length 
-    });
-    
     return { answers, correctAnswers, correct, total };
 }
-
 
 function checkAnswerCorrectness(userAns, expected) {
     if (!expected || expected.length === 0 || userAns === null || userAns === undefined) {
@@ -903,18 +953,20 @@ function checkAnswerCorrectness(userAns, expected) {
     const expectedAnswers = expected.map(a => String(a).toLowerCase().trim());
     
     return expectedAnswers.some(exp => {
-        if (userAnswer === exp) return true;
-        
+        // Сначала проверяем наличие слеша
         if (exp.includes('/')) {
+            // Разбиваем по слешу и проверяем каждую альтернативу
             const alternatives = exp.split('/').map(alt => alt.trim().toLowerCase());
             return alternatives.some(alt => {
+                // Убираем скобки и лишние пробелы
                 const cleanAlt = alt.replace(/[()]/g, '').trim();
                 const cleanUser = userAnswer.replace(/[()]/g, '').trim();
                 return cleanUser === cleanAlt;
             });
         }
         
-        return false;
+        // Если нет слеша, просто сравниваем
+        return userAnswer === exp;
     });
 }
 
@@ -936,6 +988,11 @@ function analyzeTestProgress() {
                         total++;
                         if (isAnswerValid(answersSoFar[q.questionId])) answered++;
                     });
+                } else if (item.type === "matching" && item.questions) {
+                    item.questions.forEach(q => {
+                        total++;
+                        if (isAnswerValid(answersSoFar[q.questionId])) answered++;
+                    });
                 } else if (item.type === "table" && item.answer) {
                     Object.keys(item.answer).forEach(qId => {
                         total++;
@@ -949,7 +1006,6 @@ function analyzeTestProgress() {
     return { total, answered };
 }
 
-// Timer
 function startTimer(duration, display) {
     if (!display) return;
     clearInterval(window.listeningTimerInterval);
@@ -980,7 +1036,6 @@ function startTimer(duration, display) {
     }, 1000);
 }
 
-// Review function
 window.openReview = () => {
     const progress = analyzeTestProgress();
     alert(`Progress: ${progress.answered}/${progress.total} questions answered (${Math.round(progress.answered/progress.total*100)}%)`);
