@@ -6,19 +6,23 @@
     "sections": [
       {
         "sectionNumber": 1,
-        "title": "Travel Insurance",
+        "title": "",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-9%2Fpart1.mp3?alt=media&token=9770ed0c-e258-4b16-a05c-59e552f981c6",
         "content": [
           {
             "type": "text",
-            "value": "Travel Insurance"
+            "groupInstruction": "Questions 1-6\nComplete the sentences below.\nWrite NO MORE THAN ONE WORDS AND/OR A NUMBER for each answer."
+          },
+          {
+            "type": "text",
+            "title": "Travel Insurance"
           },
           {
             "type": "question",
             "questionId": "q1",
             "format": "gap-fill",
-            "text": "Type:",
-            "postfix": "Comprehensive",
+            "text": "Type: _____ Comprehensive",
+            "postfix": "",
             "correctAnswer": "Individual",
             "wordLimit": 1
           },
@@ -30,8 +34,8 @@
             "type": "question",
             "questionId": "q2",
             "format": "gap-fill",
-            "text": "- single",
-            "postfix": ": $1,500",
+            "text": "- single _____ : $1,500",
+            "postfix": "",
             "correctAnswer": "item",
             "wordLimit": 1
           },
@@ -39,8 +43,8 @@
             "type": "question",
             "questionId": "q3",
             "format": "gap-fill",
-            "text": "- cameras and portable electronic",
-            "postfix": ": $2,500",
+            "text": "- cameras and portable electronic _____ : $2,500",
+            "postfix": "",
             "correctAnswer": "equipment",
             "wordLimit": 1
           },
@@ -48,7 +52,7 @@
             "type": "question",
             "questionId": "q4",
             "format": "gap-fill",
-            "text": "- money: $",
+            "text": "- money: $ _____",
             "postfix": "",
             "correctAnswer": "700",
             "wordLimit": 1
@@ -57,7 +61,7 @@
             "type": "question",
             "questionId": "q5",
             "format": "gap-fill",
-            "text": "- disrupted travel: rational",
+            "text": "- disrupted travel: rational _____",
             "postfix": "",
             "correctAnswer": "costs",
             "wordLimit": 1
@@ -66,8 +70,8 @@
             "type": "question",
             "questionId": "q6",
             "format": "gap-fill",
-            "text": "(missed connections or early return (as verified by the",
-            "postfix": "))",
+            "text": "(missed connections or early return (as verified by the _____))",
+            "postfix": "",
             "correctAnswer": "airline",
             "wordLimit": 1
           },
@@ -76,6 +80,7 @@
             "questionId": "q7",
             "format": "multiple-choice",
             "text": "The woman will buy",
+            "groupInstruction": "Questions 7-8.\nChoose the correct letter, A, B or C.",
             "options": {
               "A": "a new motorbike.",
               "B": "an old car.",
@@ -100,7 +105,8 @@
             "groupType": "multi-select",
             "questionId": "q9_10",
             "text": "Which TWO of the following relate to the Top Cover policy?",
-            "instructions": "Choose TWO letter, A-E",
+            "groupInstruction": "Questions 9-10.\nChoose TWO correct answers.",
+
             "questions": [
               {
                 "questionId": "q9",
@@ -122,8 +128,7 @@
         ],
         "instructions": {
           "heading": "Questions 1-10",
-          "details": "Complete the notes below.",
-          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+          "details": "Complete the notes below."
         }
       },
       {
@@ -132,10 +137,15 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-9%2Fpart2.mp3?alt=media&token=fc0034af-488f-469a-80d6-e8f6f1ba99b9",
         "content": [
           {
+            "type": "text",
+            "title": "Eyesaver Program"
+          },
+          {
             "type": "question",
             "questionId": "q11",
             "format": "multiple-choice",
             "text": "When was Eyesaver founded?",
+            "groupInstruction": "Questions 11 and 16\nChoose the correct letter, A, B or C.",
             "options": {
               "A": "15 years ago",
               "B": "30 years ago",
@@ -208,7 +218,8 @@
             "groupType": "matching",
             "questionId": "q17_18_19_20",
             "text": "What role does each of the following organisations play for the development of Eyesaver?",
-            "instructions": "Write the correct letter, A-F, next to Question 17-20.",
+            "groupInstruction": "Questions 17-20.\nChoose FOUR correct answers.",
+
             "questions": [
               {
                 "questionId": "q17",
@@ -252,10 +263,15 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-9%2Fpart3.mp3?alt=media&token=69cd18da-f70e-4bd7-baa1-c563190687d8",
         "content": [
           {
+            "type": "text",
+            "title": "Learner Persistence Study"
+          },
+          {
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
             "text": "What was the Professor attending in Massachusetts and New York?",
+            "groupInstruction": "Questions 21 and 30\nChoose the correct letter, A, B or C.",
             "options": {
               "A": "Physics Conferences",
               "B": "Physics Class",
@@ -384,14 +400,18 @@
         "content": [
           {
             "type": "text",
+            "title": "Leatherback Turtles"
+          },
+          {
+            "type": "text",
             "value": "Background:"
           },
           {
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "The advantageous",
-            "postfix": "of leatherback turtles makes them swim efficiently than others.",
+            "text": "The advantageous _____ of leatherback turtles makes them swim efficiently than others.",
+            "postfix": "",
             "correctAnswer": "shape",
             "wordLimit": 1
           },
@@ -399,8 +419,8 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "it is one of the deepest",
-            "postfix": "reptile.",
+            "text": "it is one of the deepest _____ reptile.",
+            "postfix": "",
             "correctAnswer": "dives",
             "wordLimit": 1
           },
@@ -408,8 +428,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "Shell is",
-            "postfix": "not bony to avoid from high pressure.",
+            "text": "Shell is _____ not bony to avoid from high pressure.",
+            "postfix": "",
             "correctAnswer": "soft",
             "wordLimit": 1
           },
@@ -417,8 +437,8 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "Leatherbacks can",
-            "postfix": "in the water for several hours due to their size of lungs.",
+            "text": "Leatherbacks can _____ in the water for several hours due to their size of lungs.",
+            "postfix": "",
             "correctAnswer": "sleep",
             "wordLimit": 1
           },
@@ -426,8 +446,8 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "Main food is jellyfish contains high proportion in",
-            "postfix": "and mineral.",
+            "text": "Main food is jellyfish contains high proportion in _____ and mineral.",
+            "postfix": "",
             "correctAnswer": "protein",
             "wordLimit": 1
           },
@@ -439,8 +459,8 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "Scientists can learn their",
-            "postfix": "pattern in Atlantic ocean.",
+            "text": "Scientists can learn their _____ pattern in Atlantic ocean.",
+            "postfix": "",
             "correctAnswer": "migration",
             "wordLimit": 1
           },
@@ -448,7 +468,7 @@
             "type": "question",
             "questionId": "q37",
             "format": "gap-fill",
-            "text": "Scientists can start tracking when the turtle reaches",
+            "text": "Scientists can start tracking when the turtle reaches _____",
             "postfix": "",
             "correctAnswer": "surface",
             "wordLimit": 1
@@ -457,8 +477,8 @@
             "type": "question",
             "questionId": "q38",
             "format": "gap-fill",
-            "text": "Huge front flipper can produce",
-            "postfix": "from strong muscles",
+            "text": "Huge front flipper can produce _____ from strong muscles",
+            "postfix": "",
             "correctAnswer": "power",
             "wordLimit": 1
           },
@@ -466,8 +486,8 @@
             "type": "question",
             "questionId": "q39",
             "format": "gap-fill",
-            "text": "A new recorder can monitor not only their location but also the",
-            "postfix": "in the sea.",
+            "text": "A new recorder can monitor not only their location but also the _____ in the sea.",
+            "postfix": "",
             "correctAnswer": "depth",
             "wordLimit": 1
           },
@@ -475,8 +495,8 @@
             "type": "question",
             "questionId": "q40",
             "format": "gap-fill",
-            "text": "Leatherback turtles are found using more",
-            "postfix": "to search food.",
+            "text": "Leatherback turtles are found using more _____ to search food.",
+            "postfix": "",
             "correctAnswer": "energy",
             "wordLimit": 1
           }

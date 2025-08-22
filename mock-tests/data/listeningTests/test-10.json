@@ -48,10 +48,14 @@
             }
           },
           {
+            "type": "text",
+            "groupInstruction": "Questions 5-7\nComplete the sentences below.\nWrite NO MORE THREE WORDS AND/OR A NUMBER for each answer."
+          },
+          {
             "type": "question",
             "questionId": "q5",
             "format": "gap-fill",
-            "text": "What colour is the bus that the woman should take?",
+            "text": "What colour is the bus that the woman should take? _____",
             "postfix": "",
             "correctAnswer": "green",
             "wordLimit": 3
@@ -60,7 +64,7 @@
             "type": "question",
             "questionId": "q6",
             "format": "gap-fill",
-            "text": "How long is the ferry boat trip?",
+            "text": "How long is the ferry boat trip? _____",
             "postfix": "",
             "correctAnswer": "50 minutes/ fifty minutes",
             "wordLimit": 3
@@ -69,7 +73,7 @@
             "type": "question",
             "questionId": "q7",
             "format": "gap-fill",
-            "text": "Where is the Bike Hire?",
+            "text": "Where is the Bike Hire? _____",
             "postfix": "",
             "correctAnswer": "behind the mall",
             "wordLimit": 3
@@ -79,7 +83,7 @@
             "groupType": "matching",
             "questionId": "q8_9_10",
             "text": "What is the theme of each of the following museums?",
-            "instructions": "Write the correct letter, A-E, next to Questions 8-10",
+            "groupInstruction": "Questions 8-10.\nChoose THREE correct answers.",
             "questions": [
               {
                 "questionId": "q8",
@@ -108,20 +112,25 @@
         ],
         "instructions": {
           "heading": "Questions 1-10",
-          "details": "Complete the notes below.",
-          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+          "details": "Complete the notes below."
         }
       },
       {
         "sectionNumber": 2,
-        "title": "Travel Program",
+        "title": "",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart2.mp3?alt=media&token=1bc857f9-6526-4a7e-a97e-83a1c376638b",
         "content": [
+          {
+            "type": "text",
+            "title": "Travel Program"
+          },
           {
             "type": "question",
             "questionId": "q11",
             "format": "multiple-choice",
             "text": "What is the speaker's profession?",
+            "groupInstruction": "Questions 11-16.\nChoose the correct letter, A, B or C.",
+
             "options": {
               "A": "a travel agent",
               "B": "an actor",
@@ -194,7 +203,8 @@
             "groupType": "matching",
             "questionId": "q17_18_19_20",
             "text": "Which feature does each of the following skiing locations have?",
-            "instructions": "Write the correct letter, A-G, next to Questions 17-20",
+            "groupInstruction": "Questions 17-20.\nChoose FOUR correct answers.",
+
             "questions": [
               {
                 "questionId": "q17",
@@ -239,10 +249,15 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart3.mp3?alt=media&token=98051ae8-bad3-469c-803a-67557501f70a",
         "content": [
           {
+            "type": "text",
+            "title": "Nursing Program Discussion"
+          },
+          {
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
             "text": "how old are the students of the nursing program?",
+            "groupInstruction": "Questions 21-24.\nChoose the correct letter, A, B or C.",
             "options": {
               "A": "they are teenagers.",
               "B": "they are in their twenties",
@@ -292,6 +307,7 @@
             "questionId": "q25_26_27_28_29_30",
             "text": "What are the suggestions offered by the speaker?",
             "instructions": "Choose SIX answers from the box and write the correct letter, A-H next to Question 25-30",
+            "groupInstruction": "Questions 25-30.\nChoose SIX correct answers.",
             "questions": [
               {
                 "questionId": "q25",
@@ -343,9 +359,13 @@
       },
       {
         "sectionNumber": 4,
-        "title": "Dinner Affects the Environment",
+        "title": "",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart4.mp3?alt=media&token=8d16cda6-6633-4b58-b745-a600d703e442",
         "content": [
+          {
+            "type": "text",
+            "title": "Dinner Affects the Environment"
+          },
           {
             "type": "text",
             "value": "Food industry"
@@ -354,7 +374,7 @@
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "- The amount of CO2 from producing our daily meals is the same as that from",
+            "text": "- The amount of CO2 from producing our daily meals is the same as that from _____",
             "postfix": "",
             "correctAnswer": "driving",
             "wordLimit": 1
@@ -363,8 +383,8 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "- The process of making 100g",
-            "postfix": "beans can result in 140g CO2.",
+            "text": "- The process of making 100g _____ beans can result in 140g CO2.",
+            "postfix": "",
             "correctAnswer": "coffee",
             "wordLimit": 1
           },
@@ -372,8 +392,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "- The",
-            "postfix": "production process contributes to climate & warming emissions.",
+            "text": "- The _____ production process contributes to climate & warming emissions.",
+            "postfix": "",
             "correctAnswer": "meat",
             "wordLimit": 1
           },
@@ -381,8 +401,8 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "- Scientists are working on reducing the impact of",
-            "postfix": "process.",
+            "text": "- Scientists are working on reducing the impact of _____ process.",
+            "postfix": "",
             "correctAnswer": "cooking",
             "wordLimit": 1
           },
@@ -390,8 +410,8 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "- Packaging needs",
-            "postfix": "as well as water and other resources for production.",
+            "text": "- Packaging needs _____ as well as water and other resources for production.",
+            "postfix": "",
             "correctAnswer": "energy",
             "wordLimit": 1
           },
@@ -399,8 +419,8 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "- Long distance",
-            "postfix": "leads to more pollution.",
+            "text": "- Long distance _____ leads to more pollution.",
+            "postfix": "",
             "correctAnswer": "transportation",
             "wordLimit": 1
           },
@@ -408,8 +428,8 @@
             "type": "question",
             "questionId": "q37",
             "format": "gap-fill",
-            "text": "- Due to the damage of",
-            "postfix": "the total amount of CO2 increases greatly",
+            "text": "- Due to the damage of _____ the total amount of CO2 increases greatly",
+            "postfix": "",
             "correctAnswer": "forests",
             "wordLimit": 1
           },
@@ -421,8 +441,8 @@
             "type": "question",
             "questionId": "q38",
             "format": "gap-fill",
-            "text": "- Livestock are either kept on farms or on a",
-            "postfix": "in different parts of the world.",
+            "text": "- Livestock are either kept on farms or on a _____ in different parts of the world.",
+            "postfix": "",
             "correctAnswer": "mountain",
             "wordLimit": 1
           },
@@ -430,8 +450,8 @@
             "type": "question",
             "questionId": "q39",
             "format": "gap-fill",
-            "text": "- In animal agriculture,",
-            "postfix": "required constantly",
+            "text": "- In animal agriculture, _____ required constantly",
+            "postfix": "",
             "correctAnswer": "food",
             "wordLimit": 1
           },
@@ -439,8 +459,8 @@
             "type": "question",
             "questionId": "q40",
             "format": "gap-fill",
-            "text": "- Some agricultural activities like",
-            "postfix": "are unlikely to be changed",
+            "text": "- Some agricultural activities like _____ are unlikely to be changed",
+            "postfix": "",
             "correctAnswer": "fishing",
             "wordLimit": 1
           }

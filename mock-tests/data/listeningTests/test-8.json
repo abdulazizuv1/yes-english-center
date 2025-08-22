@@ -85,11 +85,16 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart2.mp3?alt=media&token=7b9e8fc3-9003-42c4-b86e-7fa7467dbbf1",
         "content": [
           {
+            "type": "text",
+            "title": "Tourist Attractions"
+          },
+          {
             "type": "question-group",
             "groupType": "matching",
             "questionId": "q11_12_13_14_15_16",
             "text": "What tourist attraction does each of the following locations have?",
-            "instructions": "Choose six answers from the box and write the correct letter, A-I, next to Questions 11-16",
+            "groupInstruction": "Questions 11-16.\nChoose SIX answers from the box and write the correct letter, A-I.",
+
             "questions": [
               {
                 "questionId": "q11",
@@ -139,7 +144,8 @@
             "groupType": "multi-select",
             "questionId": "q17_18",
             "text": "Which TWO types of accommodation are available on a weekly basis?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 17-18.\nChoose TWO correct answers.",
+
             "questions": [
               {
                 "questionId": "q17",
@@ -164,6 +170,8 @@
             "questionId": "q19_20",
             "text": "Which TWO benefits can all the members get?",
             "instructions": "Choose TWO letter, A-E",
+            "groupInstruction": "Questions 19-20.\nChoose TWO correct answers.",
+
             "questions": [
               {
                 "questionId": "q19",
@@ -195,6 +203,10 @@
         "content": [
           {
             "type": "text",
+            "title": "SUVs (Sport Utility Vehicles)"
+          },
+          {
+            "type": "text",
             "value": "Purposes"
           },
           {
@@ -205,7 +217,7 @@
             "type": "question",
             "questionId": "q21",
             "format": "gap-fill",
-            "text": "• Now often found in",
+            "text": "• Now often found in _____",
             "postfix": "",
             "correctAnswer": "cities",
             "wordLimit": 2
@@ -218,8 +230,8 @@
             "type": "question",
             "questionId": "q22",
             "format": "gap-fill",
-            "text": "• Available for",
-            "postfix": "Purpose",
+            "text": "• Available for _____ Purpose",
+            "postfix": "",
             "correctAnswer": "commercial",
             "wordLimit": 2
           },
@@ -227,8 +239,8 @@
             "type": "question",
             "questionId": "q23",
             "format": "gap-fill",
-            "text": "• Larger",
-            "postfix": "Capacity",
+            "text": "• Larger _____ Capacity",
+            "postfix": "",
             "correctAnswer": "engine",
             "wordLimit": 2
           },
@@ -248,8 +260,8 @@
             "type": "question",
             "questionId": "q24",
             "format": "gap-fill",
-            "text": "• Seen as",
-            "postfix": "By mothers",
+            "text": "• Seen as _____ By mothers",
+            "postfix": "",
             "correctAnswer": "safe",
             "wordLimit": 2
           },
@@ -261,7 +273,7 @@
             "type": "question",
             "questionId": "q25",
             "format": "gap-fill",
-            "text": "• Drivers like their",
+            "text": "• Drivers like their _____",
             "postfix": "",
             "correctAnswer": "higher seats",
             "wordLimit": 2
@@ -274,8 +286,8 @@
             "type": "question",
             "questionId": "q26",
             "format": "gap-fill",
-            "text": "• SUVs can be",
-            "postfix": "in urban centres beacause of their",
+            "text": "• SUVs can be _____ in urban centres beacause of their",
+            "postfix": "",
             "correctAnswer": "harmful",
             "wordLimit": 2
           },
@@ -283,7 +295,7 @@
             "type": "question",
             "questionId": "q27",
             "format": "gap-fill",
-            "text": "",
+            "text": "_____",
             "postfix": "",
             "correctAnswer": "weight",
             "wordLimit": 2
@@ -296,7 +308,7 @@
             "type": "question",
             "questionId": "q28",
             "format": "gap-fill",
-            "text": "• They are liable to",
+            "text": "• They are liable to _____ ",
             "postfix": "",
             "correctAnswer": "roll over",
             "wordLimit": 2
@@ -309,8 +321,8 @@
             "type": "question",
             "questionId": "q29",
             "format": "gap-fill",
-            "text": "• Limit use to those people who need them ( e.g.",
-            "postfix": ")",
+            "text": "• Limit use to those people who need them ( e.g. _____)",
+            "postfix": "",
             "correctAnswer": "farmers",
             "wordLimit": 2
           },
@@ -318,8 +330,8 @@
             "type": "question",
             "questionId": "q30",
             "format": "gap-fill",
-            "text": "• Raise cost of",
-            "postfix": "For drivers",
+            "text": "• Raise cost of _____ For drivers",
+            "postfix": "",
             "correctAnswer": "insurance",
             "wordLimit": 2
           }
@@ -336,10 +348,16 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-8%2Fpart4.mp3?alt=media&token=86ac8ed7-c62f-4a68-9191-022177b54659",
         "content": [
           {
+            "type": "text",
+            "title": "Learner Persistence Study"
+          },
+          {
             "type": "question",
             "questionId": "q31",
             "format": "multiple-choice",
             "text": "participants in the learner persistence study were all drawn from the same",
+            "groupInstruction": "Questions 31 and 32\nChoose the correct letter, A, B or C.",
+
             "options": {
               "A": "age",
               "B": "geographical area",
@@ -401,7 +419,7 @@
             "type": "question",
             "questionId": "q38",
             "format": "gap-fill",
-            "text": "• Ask new students to complete questionnaires to gauge their level of",
+            "text": "• Ask new students to complete questionnaires to gauge their level of _____",
             "postfix": "",
             "correctAnswer": "maturity",
             "wordLimit": 1
@@ -410,7 +428,7 @@
             "type": "question",
             "questionId": "q39",
             "format": "gap-fill",
-            "text": "• Train the selected students to act as",
+            "text": "• Train the selected students to act as _____",
             "postfix": "",
             "correctAnswer": "advisors",
             "wordLimit": 1
@@ -419,8 +437,8 @@
             "type": "question",
             "questionId": "q40",
             "format": "gap-fill",
-            "text": "• Outside office hours, offer",
-            "postfix": "help",
+            "text": "• Outside office hours, offer _____ help",
+            "postfix": "",
             "correctAnswer": "online",
             "wordLimit": 1
           },

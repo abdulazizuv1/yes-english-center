@@ -12,7 +12,6 @@
           {
             "type": "table",
             "title": "Rental Property Application Form",
-            "groupInstruction": "Questions 1-10\nComplete the form below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
             "columns": [
               "Field",
               "Information"
@@ -97,6 +96,10 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-3%2Fpart2.mp3?alt=media&token=866a22e2-11af-4c72-b772-29ca79b2a80c",
         "content": [
           {
+            "type": "text",
+            "title": "The Pre-school Family Centre"
+          },
+          {
             "type": "subheading",
             "value": "Features of the Pre-school Family Centre"
           },
@@ -104,8 +107,8 @@
             "type": "question",
             "questionId": "q11",
             "format": "gap-fill",
-            "text": "for children from",
-            "postfix": "to 5 years old",
+            "text": "for children from _____ to 5 years old",
+            "postfix": "",
             "correctAnswer": "3 months",
             "wordLimit": 3
           },
@@ -113,8 +116,8 @@
             "type": "question",
             "questionId": "q12",
             "format": "gap-fill",
-            "text": "run as a",
-            "postfix": "by parents, who attend with their children",
+            "text": "run as a _____ by parents, who attend with their children",
+            "postfix": "",
             "correctAnswer": "cooperative",
             "wordLimit": 3
           },
@@ -122,8 +125,8 @@
             "type": "question",
             "questionId": "q13",
             "format": "gap-fill",
-            "text": "parents receive special",
-            "postfix": "from the centre",
+            "text": "parents receive special _____ from the centre",
+            "postfix": "",
             "correctAnswer": "training",
             "wordLimit": 3
           },
@@ -131,8 +134,8 @@
             "type": "question",
             "questionId": "q14",
             "format": "gap-fill",
-            "text": "children's activities organised in",
-            "postfix": "age groups",
+            "text": "children's activities organised in _____ age groups",
+            "postfix": "",
             "correctAnswer": "mixed",
             "wordLimit": 3
           },
@@ -148,8 +151,8 @@
             "type": "question",
             "questionId": "q15",
             "format": "gap-fill",
-            "text": "• one afternoon session to help prepare older children for",
-            "postfix": "at school",
+            "text": "• one afternoon session to help prepare older children for _____ at school",
+            "postfix": "",
             "correctAnswer": "reading",
             "wordLimit": 3
           },
@@ -157,8 +160,8 @@
             "type": "question",
             "questionId": "q16",
             "format": "gap-fill",
-            "text": "• parents must make several",
-            "postfix": "before they enroll their child",
+            "text": "• parents must make several _____ before they enroll their child",
+            "postfix": "",
             "correctAnswer": "visits",
             "wordLimit": 3
           },
@@ -166,8 +169,8 @@
             "type": "question",
             "questionId": "q17",
             "format": "gap-fill",
-            "text": "• each centre is officially recognised and receives",
-            "postfix": "funding",
+            "text": "• each centre is officially recognised and receives _____ funding",
+            "postfix": "",
             "correctAnswer": "government",
             "wordLimit": 3
           },
@@ -179,7 +182,7 @@
             "type": "question",
             "questionId": "q18",
             "format": "gap-fill",
-            "text": "• take on responsibility for a special",
+            "text": "• take on responsibility for a special _____",
             "postfix": "",
             "correctAnswer": "job",
             "wordLimit": 3
@@ -188,7 +191,7 @@
             "type": "question",
             "questionId": "q19",
             "format": "gap-fill",
-            "text": "• attend one",
+            "text": "• attend one _____",
             "postfix": "",
             "correctAnswer": "meeting",
             "wordLimit": 3
@@ -201,7 +204,7 @@
             "type": "question",
             "questionId": "q20",
             "format": "gap-fill",
-            "text": "• attend regularly to help your child gain",
+            "text": "• attend regularly to help your child gain _____",
             "postfix": "",
             "correctAnswer": "confidence",
             "wordLimit": 3
@@ -227,9 +230,14 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-3%2Fpart3.mp3?alt=media&token=6f43c26e-8e01-41bf-83a4-7178a29636a0",
         "content": [
           {
+            "type": "text",
+            "title": "Presentation on foot injuries among sports players"
+          },
+          {
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 21-26\nChoose the correct letter, A, B or C.",
             "text": "John and Cath's presentation plans are different in",
             "options": {
               "A": "the examples used.",
@@ -303,7 +311,7 @@
             "groupType": "multi-select",
             "questionId": "q27_28",
             "text": "Which TWO treatment techniques did the female runner find useful for her swollen heel?",
-            "instructions": "Choose TWO letters A-E",
+            "groupInstruction": "Questions 27 and 28.\nChoose TWO letters A-E",
             "questions": [
               {
                 "questionId": "q27",
@@ -327,7 +335,7 @@
             "groupType": "multi-select",
             "questionId": "q29_30",
             "text": "Which TWO sports did the male sprinter find most effective during his rehabilitation programme?",
-            "instructions": "Choose TWO letters A-E",
+            "groupInstruction": "Questions 29 and 30.\nChoose TWO letters A-E",
             "questions": [
               {
                 "questionId": "q29",
@@ -357,6 +365,10 @@
         "title": "Different Types of Supermarket Layout",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-3%2Fpart4.mp3?alt=media&token=2eb97330-b555-4c08-8066-73213e5ab3ca",
         "content": [
+          {
+            "type": "text",
+            "title": "Different Types of Supermarket Layout"
+          },
           {
             "type": "table",
             "title": "Different Types of Supermarket Layout",
@@ -400,7 +412,7 @@
             "type": "question-group",
             "questionId": "q37_40",
             "groupType": "matching",
-            "instructions": "Which types of products are placed in each location in supermarkets?\n\nChoose FOUR answers from the box and write the correct letter, A-F, next to questions 37-40.",
+            "groupInstruction": "Which types of products are placed in each location in supermarkets?\n\nChoose FOUR answers from the box and write the correct letter, A-F, next to questions 37-40.",
             "text": "Location",
             "questions": [
               {

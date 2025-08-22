@@ -65,9 +65,14 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-6%2Fpart2.mp3?alt=media&token=8652a827-e268-4e96-bcde-67a1075de880",
         "content": [
           {
+            "type": "text",
+            "title": "Theme Park Information"
+          },
+          {
             "type": "question",
             "questionId": "q11",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 11-16\nChoose the correct letter, A, B or C.",
             "text": "when does the riding in the park open?",
             "options": {
               "A": "9.00 am",
@@ -141,7 +146,7 @@
             "groupType": "matching",
             "questionId": "q17_18_19_20",
             "text": "What comment is made about each of the following activities?",
-            "instructions": "Choose FOUR answers from the box and write the correct letter, A-G, next to Question 17-20",
+            "groupInstruction": "Questions 17-20.\nChoose FIVE answers from the box and write the correct letter, A-G.",
             "questions": [
               {
                 "questionId": "q17",
@@ -186,11 +191,15 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-6%2Fpart3.mp3?alt=media&token=53d756ff-f141-46af-b7b3-cf953881ca3b",
         "content": [
           {
+            "type": "text",
+            "title": "Career Development Discussion"
+          },
+          {
             "type": "question-group",
             "groupType": "multi-select",
             "questionId": "q21_22",
             "text": "Which TWO aspects should people just graduating from secondary schools emphasise?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 21-22.\nChoose TWO correct answers.",
             "questions": [
               {
                 "questionId": "q21",
@@ -214,7 +223,7 @@
             "groupType": "multi-select",
             "questionId": "q23_24",
             "text": "Which TWO of the following are mentioned about women returned to work after raising children?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 23-24.\nChoose TWO correct answers.",
             "questions": [
               {
                 "questionId": "q23",
@@ -238,7 +247,7 @@
             "groupType": "multi-select",
             "questionId": "q25_26",
             "text": "Which TWO types of people do employers always avoid hiring?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 25-26.\nChoose TWO correct answers.",
             "questions": [
               {
                 "questionId": "q25",
@@ -262,7 +271,7 @@
             "groupType": "multi-select",
             "questionId": "q27_28_29",
             "text": "Which THREE factors are mentioned as reasons why people avoid hiring retrenched workers?",
-            "instructions": "Choose THREE letters, A-G",
+            "groupInstruction": "Questions 27-29.\nChoose THREE correct answers.",
             "questions": [
               {
                 "questionId": "q27",
@@ -291,8 +300,9 @@
             "type": "question",
             "questionId": "q30",
             "format": "gap-fill",
-            "text": "Applicants'inappropriate",
-            "postfix": "and appearance",
+            "groupInstruction": "Question 30\nComplete the note below.\nWrite ONE WORD for answer.",
+            "text": "Applicants'inappropriate _____ and appearance",
+            "postfix": "",
             "correctAnswer": "Clothes",
             "wordLimit": 1
           }
@@ -309,13 +319,21 @@
         "content": [
           {
             "type": "text",
+            "groupInstruction": "Questions 31-37\nComplete the sentences below.\nWrite ONE WORD AND/OR A NUMBER for each answer."
+          },
+          {
+            "type": "text",
+            "title": "Organic Farming"
+          },
+          {
+            "type": "text",
             "value": "Advantages"
           },
           {
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "• Organic farming is",
+            "text": "• Organic farming is _____",
             "postfix": "",
             "correctAnswer": "sustainable",
             "wordLimit": 1
@@ -324,8 +342,8 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "• It can boost the",
-            "postfix": "Of organic food products",
+            "text": "• It can boost the _____ Of organic food products",
+            "postfix": "",
             "correctAnswer": "sales",
             "wordLimit": 1
           },
@@ -333,8 +351,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "• It can save necessary",
-            "postfix": "for producing pesticides and fertilisers",
+            "text": "• It can save necessary _____ for producing pesticides and fertilisers",
+            "postfix": "",
             "correctAnswer": "energy",
             "wordLimit": 1
           },
@@ -346,8 +364,8 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "•",
-            "postfix": "Which double in number may attack organic vegetables.",
+            "text": "• _____ Which double in number may attack organic vegetables.",
+            "postfix": "",
             "correctAnswer": "insects",
             "wordLimit": 1
           },
@@ -355,8 +373,8 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "• Production of organic vegetables such as tomatoes and",
-            "postfix": "Is 40% lower.",
+            "text": "• Production of organic vegetables such as tomatoes and _____ Is 40% lower.",
+            "postfix": "",
             "correctAnswer": "potatoes",
             "wordLimit": 1
           },
@@ -364,8 +382,8 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "• Winter weed production is",
-            "postfix": "lower than it used to be.",
+            "text": "• Winter weed production is _____ lower than it used to be.",
+            "postfix": "",
             "correctAnswer": "10%/ 10 percent",
             "wordLimit": 2
           },
@@ -373,8 +391,8 @@
             "type": "question",
             "questionId": "q37",
             "format": "gap-fill",
-            "text": "• Production of organic products for animals including organic",
-            "postfix": "keeps the same.",
+            "text": "• Production of organic products for animals including organic _____ keeps the same.",
+            "postfix": "",
             "correctAnswer": "grass",
             "wordLimit": 1
           },
@@ -382,6 +400,8 @@
             "type": "question",
             "questionId": "q38",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 38-40\nChoose the correct letter, A, B or C.",
+
             "text": "what happened to organic farming in India?",
             "options": {
               "A": "Yields increased",
@@ -417,8 +437,7 @@
         ],
         "instructions": {
           "heading": "Questions 31-40",
-          "details": "Complete the notes below.",
-          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+          "details": "Complete the notes below."
         }
       }
     ],

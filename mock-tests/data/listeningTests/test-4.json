@@ -12,7 +12,6 @@
           {
             "type": "table",
             "title": "Riverdale Pre-school",
-            "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
             "columns": [
               "Field",
               "Information"
@@ -69,11 +68,15 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart2.mp3?alt=media&token=52fca5d3-9789-4b22-b09b-5bbc112142f9",
         "content": [
           {
+            "type": "text",
+            "groupInstruction": "Questions 11-15\nComplete the sentences below.\nWrite NO MORE THAN TWO WORDS AND/ORA NUMBER for each answer."
+          },
+          {
             "type": "question",
             "questionId": "q11",
             "format": "gap-fill",
-            "text": "Special conditions may apply to",
-            "postfix": "students looking for a job.",
+            "text": "Special conditions may apply to _____ students looking for a job.",
+            "postfix": "",
             "correctAnswer": "overseas",
             "wordLimit": 2
           },
@@ -81,8 +84,8 @@
             "type": "question",
             "questionId": "q12",
             "format": "gap-fill",
-            "text": "The university Job Centre is located on the",
-            "postfix": "Campus.",
+            "text": "The university Job Centre is located on the _____ Campus.",
+            "postfix": "",
             "correctAnswer": "WOODSIDE",
             "wordLimit": 2
           },
@@ -90,8 +93,8 @@
             "type": "question",
             "questionId": "q13",
             "format": "gap-fill",
-            "text": "The Job Centre remains open until",
-            "postfix": "every evening.",
+            "text": "The Job Centre remains open until _____ every evening.",
+            "postfix": "",
             "correctAnswer": "8",
             "wordLimit": 2
           },
@@ -99,7 +102,7 @@
             "type": "question",
             "questionId": "q14",
             "format": "gap-fill",
-            "text": "The only day the employment lawyer is available is",
+            "text": "The only day the employment lawyer is available is _____",
             "postfix": "",
             "correctAnswer": "tuesday",
             "wordLimit": 2
@@ -108,14 +111,15 @@
             "type": "question",
             "questionId": "q15",
             "format": "gap-fill",
-            "text": "The university",
-            "postfix": "regularly advertises new jobs.",
+            "text": "The university _____ regularly advertises new jobs.",
+            "postfix": "",
             "correctAnswer": "website",
             "wordLimit": 2
           },
           {
             "type": "question",
             "questionId": "q16",
+            "groupInstruction": "Questions 16-20\nChoose the correct letter, A, B or C.",
             "format": "multiple-choice",
             "text": "At present, the university is offering part-time work in",
             "options": {
@@ -186,9 +190,14 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart3.mp3?alt=media&token=6b7d4fd6-8ddb-4a71-b3dc-57d712be7b20",
         "content": [
           {
+            "type": "text",
+            "title": "Research Project"
+          },
+          {
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 21-26\nChoose the correct letter, A, B or C.",
             "text": "How did John choose the topic of his research project?",
             "options": {
               "A": "He thought the information would be useful for town planning.",
@@ -262,7 +271,7 @@
             "groupType": "multi-select",
             "questionId": "q27_28",
             "text": "Which TWO strategies will John use to encourage people to fill out his questionnaire?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 27 and 28.\nChoose TWO letters A-E",
             "questions": [
               {
                 "questionId": "q27",
@@ -286,7 +295,7 @@
             "groupType": "multi-select",
             "questionId": "q29_30",
             "text": "Which TWO pieces of advice does the tutor give John about his questionnaire?",
-            "instructions": "Choose TWO letters, A-E",
+            "groupInstruction": "Questions 29 and 30.\nChoose TWO letters A-E",
             "questions": [
               {
                 "questionId": "q29",
@@ -316,12 +325,18 @@
         "title": "Driverless vehicle competition",
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-4%2Fpart4.mp3?alt=media&token=ffc5c736-e61c-4d42-b37f-2a4c776af83c",
         "content": [
+          
+          {
+            "type": "text",
+            "title": "Driverless vehicle competition"
+          },
           {
             "type": "question",
             "questionId": "q31",
+            "groupInstruction": "Questions 31-33\nComplete the sentences below.\nWrite NO MORE THAN TWO WORDS for each answer.",
             "format": "gap-fill",
-            "text": "Undergraduates from both the engineering school and the",
-            "postfix": "department can definitely take part in the project.",
+            "text": "Undergraduates from both the engineering school and the _____ department can definitely take part in the project.",
+            "postfix": "",
             "correctAnswer": "computer science",
             "wordLimit": 2
           },
@@ -329,7 +344,7 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "The automated vehicles will have to avoid obstacles such as",
+            "text": "The automated vehicles will have to avoid obstacles such as _____",
             "postfix": "",
             "correctAnswer": "rocks",
             "wordLimit": 2
@@ -338,8 +353,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "The tutor mentions one vehicle which used technology such as",
-            "postfix": ", lasers, and laptops to measure its surroundings.",
+            "text": "The tutor mentions one vehicle which used technology such as _____, lasers, and laptops to measure its surroundings.",
+            "postfix": "",
             "correctAnswer": "video cameras",
             "wordLimit": 2
           },
@@ -423,8 +438,7 @@
         ],
         "instructions": {
           "heading": "Questions 31-40",
-          "details": "Complete the sentences below and the table.",
-          "note": "Write NO MORE THAN TWO WORDS for each answer."
+          "details": "Complete the sentences below and the table."
         }
       }
     ],

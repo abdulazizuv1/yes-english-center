@@ -12,7 +12,6 @@
           {
             "type": "table",
             "title": "Consultation",
-            "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
             "columns": [
               "Section",
               "Information"
@@ -57,7 +56,12 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart2.mp3?alt=media&token=aa6a29e6-5847-4d28-85cd-5ba69f178209",
         "content": [
           {
+            "type": "text",
+            "title": "Davison Wildlife Park"
+          },
+          {
             "type": "question",
+            "groupInstruction": "Questions 11-13\nChoose the correct letter, A, B or C.",
             "questionId": "q11",
             "format": "multiple-choice",
             "text": "Where is the information board?",
@@ -96,7 +100,7 @@
             "type": "question",
             "questionId": "q14",
             "format": "gap-fill",
-            "text": "Davison Wildlife Park is a great place for",
+            "text": "Davison Wildlife Park is a great place for _____",
             "postfix": "",
             "correctAnswer": "family",
             "wordLimit": 1
@@ -105,7 +109,7 @@
             "type": "question",
             "questionId": "q15",
             "format": "gap-fill",
-            "text": "Children are allowed to",
+            "text": "Children are allowed to _____",
             "postfix": "",
             "correctAnswer": "feed the animals",
             "wordLimit": 3
@@ -114,7 +118,7 @@
             "type": "question",
             "questionId": "q16",
             "format": "gap-fill",
-            "text": "Red kangaroos are larger than",
+            "text": "Red kangaroos are larger than _____",
             "postfix": "",
             "correctAnswer": "adults",
             "wordLimit": 1
@@ -123,7 +127,7 @@
             "type": "question",
             "questionId": "q17",
             "format": "gap-fill",
-            "text": "Crocodiles can live for at least",
+            "text": "Crocodiles can live for at least _____",
             "postfix": "",
             "correctAnswer": "50 years",
             "wordLimit": 2
@@ -133,7 +137,7 @@
             "groupType": "multi-select",
             "questionId": "q18_19_20",
             "text": "Which THREE activities are popular now for tourists in inland region?",
-            "instructions": "Choose THREE correct answers.",
+            "groupInstruction": "Questions 18-20.\nChoose THREE correct answers.",
             "questions": [
               {
                 "questionId": "q18",
@@ -171,9 +175,14 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-5%2Fpart3.mp3?alt=media&token=b1980274-6773-40eb-a07f-43f08e8f1de2",
         "content": [
           {
+            "type": "text",
+            "title": "Research Project Discussion"
+          },
+          {
             "type": "question",
             "questionId": "q21",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 21-25\nChoose the correct letter, A, B or C.",
             "text": "Why did they do it as a team?",
             "options": {
               "A": "They needed to do a lot of research.",
@@ -235,7 +244,8 @@
             "groupType": "matching",
             "questionId": "q26_27_28_29_30",
             "text": "What does the tutor suggest doing with Jack's research regarding each of the following tasks?",
-            "instructions": "Choose FIVE answers from the box and write the correct letter, A-E, next to Questions 26-30.",
+            "groupInstruction": "Questions 26-30.\nChoose FIVE answers from the box and write the correct letter, A-E.",
+
             "questions": [
               {
                 "questionId": "q26",
@@ -284,6 +294,10 @@
         "content": [
           {
             "type": "text",
+            "title": "Study of Fossil Park"
+          },
+          {
+            "type": "text",
             "value": "Types of fossils:"
           },
           {
@@ -294,8 +308,8 @@
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "-",
-            "postfix": "fossils: more common, actual fossilised remains",
+            "text": "- _____ fossils: more common, actual fossilised remains",
+            "postfix": "",
             "correctAnswer": "preserved",
             "wordLimit": 1
           },
@@ -303,8 +317,8 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "-",
-            "postfix": "fossils: indirect evidence of animals, such as footprints or tunnels",
+            "text": "- _____ fossils: indirect evidence of animals, such as footprints or tunnels",
+            "postfix": "",
             "correctAnswer": "trace",
             "wordLimit": 1
           },
@@ -324,8 +338,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "- An animal is",
-            "postfix": "in the mud after death.",
+            "text": "- An animal is _____ in the mud after death.",
+            "postfix": "",
             "correctAnswer": "buried",
             "wordLimit": 1
           },
@@ -337,8 +351,8 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "-",
-            "postfix": "replace the bones leaving a stone shape.",
+            "text": "- _____ replace the bones leaving a stone shape.",
+            "postfix": "",
             "correctAnswer": "mineral",
             "wordLimit": 1
           },
@@ -350,7 +364,7 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "- Site: Shop outside the park or from the park's",
+            "text": "- Site: Shop outside the park or from the park's _____",
             "postfix": "",
             "correctAnswer": "affordable",
             "wordLimit": 1
@@ -359,7 +373,7 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "- Prices: generally",
+            "text": "- Prices: generally _____",
             "postfix": "",
             "correctAnswer": "flashing",
             "wordLimit": 1

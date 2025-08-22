@@ -57,9 +57,14 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart2.mp3?alt=media&token=593ffdc0-6323-4fc9-9543-0e62e944df20",
         "content": [
           {
+            "type": "text",
+            "title": "Driving license in UK"
+          },
+          {
             "type": "question",
             "questionId": "q11",
             "format": "multiple-choice",
+            "groupInstruction": "Questions 11-15\nChoose the correct letter, A, B or C.",
             "text": "What is the basic requirement for applying for a UK driving licence?",
             "options": {
               "A": "a medical report.",
@@ -121,7 +126,8 @@
             "groupType": "matching",
             "questionId": "q16_17_18_19_20",
             "text": "What is the current feature of traffic management in each of the following cities",
-            "instructions": "Write the correct letter, A-H, next to Question 16-20",
+            "groupInstruction": "Questions 16-20.\nChoose FIVE answers from the box and write the correct letter, A-H.",
+
             "questions": [
               {
                 "questionId": "q16",
@@ -172,11 +178,16 @@
         "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart3.mp3?alt=media&token=022c643b-7e2a-4656-87f5-06ef92e0d90c",
         "content": [
           {
+            "type": "text",
+            "title": "Hotel Internship Discussion"
+          },
+          {
             "type": "question-group",
             "groupType": "matching",
             "questionId": "q21_22_23_24_25_26",
             "text": "What problem does Mona point out about each part of the hotel where she interned?",
             "instructions": "Write the correct letter, A-F, next to Question 21-26",
+            "groupInstruction": "Questions 21-26.\nChoose SIX answers from the box and write the correct letter, A-F.",
             "questions": [
               {
                 "questionId": "q21",
@@ -223,6 +234,7 @@
             "questionId": "q27",
             "format": "multiple-choice",
             "text": "how does the experience benefit Mona?",
+            "groupInstruction": "Questions 27-30\nChoose the correct letter, A, B or C.",
             "options": {
               "A": "It is good for her future job",
               "B": "It is good for her dissertation.",
@@ -279,13 +291,17 @@
         "content": [
           {
             "type": "text",
+            "title": "The Early History of Salt"
+          },
+          {
+            "type": "text",
             "value": "Introduction"
           },
           {
             "type": "question",
             "questionId": "q31",
             "format": "gap-fill",
-            "text": "• Salt is essential for human",
+            "text": "• Salt is essential for human _____",
             "postfix": "",
             "correctAnswer": "health",
             "wordLimit": 1
@@ -298,8 +314,8 @@
             "type": "question",
             "questionId": "q32",
             "format": "gap-fill",
-            "text": "• The word",
-            "postfix": "comes from the Latin word's solarium argetum, which was used to describe the payment to Roman soldiers.",
+            "text": "• The word _____ comes from the Latin word's solarium argetum, which was used to describe the payment to Roman soldiers.",
+            "postfix": "",
             "correctAnswer": "salary",
             "wordLimit": 1
           },
@@ -311,8 +327,8 @@
             "type": "question",
             "questionId": "q33",
             "format": "gap-fill",
-            "text": "• Animals were kept in the local",
-            "postfix": "at the right time of year.",
+            "text": "• Animals were kept in the local _____ at the right time of year.",
+            "postfix": "",
             "correctAnswer": "forest",
             "wordLimit": 1
           },
@@ -320,7 +336,7 @@
             "type": "question",
             "questionId": "q34",
             "format": "gap-fill",
-            "text": "• Fresh meat was only available in",
+            "text": "• Fresh meat was only available in _____",
             "postfix": "",
             "correctAnswer": "October",
             "wordLimit": 1
@@ -329,8 +345,8 @@
             "type": "question",
             "questionId": "q35",
             "format": "gap-fill",
-            "text": "• Salt has been used widely: we can tell from the diet of the",
-            "postfix": "in Sweden.",
+            "text": "• Salt has been used widely: we can tell from the diet of the _____ in Sweden.",
+            "postfix": "",
             "correctAnswer": "king",
             "wordLimit": 1
           },
@@ -338,8 +354,8 @@
             "type": "question",
             "questionId": "q36",
             "format": "gap-fill",
-            "text": "•",
-            "postfix": "Consumption increased rapidly because the food was much too salty.",
+            "text": "• _____ Consumption increased rapidly because the food was much too salty",
+            "postfix": ".",
             "correctAnswer": "beer",
             "wordLimit": 1
           },
@@ -351,8 +367,8 @@
             "type": "question",
             "questionId": "q37",
             "format": "gap-fill",
-            "text": "• People mainly extract salt from oceans and",
-            "postfix": "in the basins.",
+            "text": "• People mainly extract salt from oceans and _____ in the basins.",
+            "postfix": "",
             "correctAnswer": "deserts",
             "wordLimit": 1
           },
@@ -360,8 +376,8 @@
             "type": "question",
             "questionId": "q38",
             "format": "gap-fill",
-            "text": "• Salt from spring water is more",
-            "postfix": "And purer compared to that from sea water",
+            "text": "• Salt from spring water is more _____ And purer compared to that from sea water",
+            "postfix": "",
             "correctAnswer": "concentrated",
             "wordLimit": 1
           },
@@ -377,8 +393,8 @@
             "type": "question",
             "questionId": "q39",
             "format": "gap-fill",
-            "text": "- Locals needed to protect the",
-            "postfix": "By which they imported salt.",
+            "text": "- Locals needed to protect the _____ By which they imported salt.",
+            "postfix": "",
             "correctAnswer": "shipping",
             "wordLimit": 1
           },
@@ -390,7 +406,7 @@
             "type": "question",
             "questionId": "q40",
             "format": "gap-fill",
-            "text": "- People carrying salt around were seen as a natural means of",
+            "text": "- People carrying salt around were seen as a natural means of _____",
             "postfix": "",
             "correctAnswer": "transport",
             "wordLimit": 1
