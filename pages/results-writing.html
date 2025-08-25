@@ -370,6 +370,14 @@
         .word-count-cell {
           justify-content: flex-end;
         }
+        #searchInput {
+          transition: all 0.3s ease;
+        }
+        #searchInput:focus {
+          outline: none;
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+          transform: scale(1.02);
+        }
       }
     </style>
   </head>
@@ -377,6 +385,19 @@
     <div class="container">
       <div class="header">
         <h2>✍️ Writing Results</h2>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="🔍 Search by email..."
+          style="
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+          "
+        />
         <button class="res_back" onclick="location.href='results-select.html'">
           🔙 Back
         </button>

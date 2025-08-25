@@ -552,14 +552,14 @@
         },
         {
           "type": "gap-fill",
-          "question": "The committee advises that when satellites are no longer active, any unused __________ or pressurised material that could cause explosions should be removed.",
+          "question": "The committee advises that when satellites are no longer active, any unused __________ ",
           "answer": [
             "fuel"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "The committee advises that when satellites are no longer active, any unused fuel or pressurised material that could cause __________ should be removed.",
+          "question": "or pressurised material that could cause __________ should be removed.",
           "answer": [
             "explosions"
           ]

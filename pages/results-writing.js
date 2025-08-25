@@ -289,7 +289,67 @@ async function loadResults() {
     });
 
     console.log(`✅ Processed ${processedCount} documents successfully`);
-    } catch (error) {
+    
+    // Добавляем обработчик поиска
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = resultsBody.querySelectorAll('tr:not(.no-results tr)');
+        
+        let visibleCount = 0;
+        rows.forEach(row => {
+          const emailCell = row.querySelector('.email-cell');
+          if (emailCell) {
+            const email = emailCell.textContent.toLowerCase();
+            const shouldShow = email.includes(searchTerm);
+            row.style.display = shouldShow ? '' : 'none';
+            if (shouldShow) visibleCount++;
+          }
+        });
+        
+        // Показываем сообщение если ничего не найдено
+        if (visibleCount === 0 && searchTerm.trim()) {
+          const noResultsRow = document.createElement('tr');
+          noResultsRow.className = 'search-no-results';
+          noResultsRow.innerHTML = `
+            <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+              <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+              <h3>No Results Found</h3>
+              <p>No results match "<strong>${searchTerm}</strong>"</p>
+            </td>
+          `;
+          
+          // Удаляем предыдущее сообщение о поиске
+          const existingNoResults = resultsBody.querySelector('.search-no-results');
+          if (existingNoResults) {
+            existingNoResults.remove();
+          }
+          
+          resultsBody.appendChild(noResultsRow);
+        } else {
+          // Удаляем сообщение о поиске если что-то найдено
+          const searchNoResults = resultsBody.querySelector('.search-no-results');
+          if (searchNoResults) {
+            searchNoResults.remove();
+          }
+        }
+      });
+    }
+    
+    // Анимация появления строк
+    const rows = resultsBody.querySelectorAll("tr");
+    rows.forEach((row, index) => {
+      row.style.opacity = "0";
+      row.style.transform = "translateY(20px)";
+      setTimeout(() => {
+        row.style.transition = "all 0.3s ease";
+        row.style.opacity = "1";
+        row.style.transform = "translateY(0)";
+      }, index * 100);
+    });
+
+  } catch (error) {
     console.error("❌ Error loading results:", error);
     resultsTable.innerHTML = `
       <thead>
@@ -316,16 +376,6 @@ async function loadResults() {
   } finally {
     hideLoader();
   }
-  const rows = resultsBody.querySelectorAll("tr");
-    rows.forEach((row, index) => {
-      row.style.opacity = "0";
-      row.style.transform = "translateY(20px)";
-      setTimeout(() => {
-        row.style.transition = "all 0.3s ease";
-        row.style.opacity = "1";
-        row.style.transform = "translateY(0)";
-      }, index * 100);
-    });
 }
 
 // Authentication check
