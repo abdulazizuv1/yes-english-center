@@ -65,10 +65,9 @@ async function loadTestStructure(testId) {
   }
 }
 
-// Get all questions from test structure
 function getAllQuestions(testStructure) {
   if (!testStructure || !testStructure.sections) {
-    console.warn("⚠️ No test structure or sections found");
+    console.warn("No test structure or sections found");
     return [];
   }
   
@@ -78,7 +77,7 @@ function getAllQuestions(testStructure) {
     if (!section.content) {
       // Check for legacy format
       if (section.questions || section.multiSelect || section.matching) {
-        console.log(`📝 Processing legacy section ${sectionIndex + 1}`);
+        console.log(`Processing legacy section ${sectionIndex + 1}`);
       }
       return;
     }
@@ -92,6 +91,7 @@ function getAllQuestions(testStructure) {
           options: item.options,
           sectionIndex: sectionIndex
         });
+        
       } else if (item.type === "question-group") {
         if (item.groupType === "multi-select" && item.questions) {
           item.questions.forEach(q => {
@@ -114,6 +114,20 @@ function getAllQuestions(testStructure) {
             });
           });
         }
+        
+      } else if (item.type === "matching" && item.questions) {
+        // ДОБАВЛЕНО: Обработка прямого типа "matching"
+        console.log(`Processing direct matching type with ${item.questions.length} questions`);
+        item.questions.forEach(q => {
+          allQuestions.push({
+            qId: q.questionId,
+            type: "matching",
+            correctAnswer: q.correctAnswer,
+            options: item.options,
+            sectionIndex: sectionIndex
+          });
+        });
+        
       } else if (item.type === "table" && item.answer) {
         // Handle table questions
         Object.keys(item.answer).forEach(qId => {
@@ -125,6 +139,7 @@ function getAllQuestions(testStructure) {
             sectionIndex: sectionIndex
           });
         });
+        
       } else if (item.qId) {
         // Legacy question format
         allQuestions.push({
@@ -183,7 +198,7 @@ function getAllQuestions(testStructure) {
     });
   });
   
-  console.log(`📝 Extracted ${allQuestions.length} questions from test structure`);
+  console.log(`Extracted ${allQuestions.length} questions from test structure:`, allQuestions);
   return allQuestions;
 }
 
@@ -558,15 +573,74 @@ function highlightBand(selector) {
     }, 500);
   }
 }
+window.debugMatchingProcessing = function() {
+    console.log("=== DEBUGGING MATCHING PROCESSING ===");
+    
+    console.log("Test structure cache:", testStructureCache);
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const resultId = urlParams.get("id");
+    
+    if (resultId) {
+        const docRef = doc(db, "resultsListening", resultId);
+        getDoc(docRef).then(docSnap => {
+            if (docSnap.exists()) {
+                const resultData = docSnap.data();
+                console.log("Result data:", resultData);
+                console.log("TestId from result:", resultData.testId);
+                
+                loadTestStructure(resultData.testId).then(testStructure => {
+                    console.log("Loaded test structure:", testStructure);
+                    
+                    if (testStructure && testStructure.sections) {
+                        testStructure.sections.forEach((section, index) => {
+                            console.log(`Section ${index}:`, section);
+                            
+                            if (section.content) {
+                                section.content.forEach((item, itemIndex) => {
+                                    if (item.type === "matching") {
+                                        console.log(`Found matching item in section ${index}, item ${itemIndex}:`, item);
+                                        console.log(`  Questions:`, item.questions);
+                                        console.log(`  Options:`, item.options);
+                                        
+                                        if (item.questions) {
+                                            item.questions.forEach(q => {
+                                                console.log(`    Question ${q.questionId}: correct=${q.correctAnswer}, user=${resultData.answers[q.questionId] || 'NO ANSWER'}`);
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    const allQuestions = getAllQuestions(testStructure);
+                    console.log("All questions extracted:", allQuestions);
+                    
+                    const matchingQuestions = allQuestions.filter(q => q.type === "matching");
+                    console.log("Matching questions found:", matchingQuestions);
+                    
+                }).catch(err => {
+                    console.error("Error loading test structure:", err);
+                });
+            }
+        }).catch(err => {
+            console.error("Error getting result document:", err);
+        });
+    }
+};
 
-// Process answers and calculate score
 function processAnswers(data, allQuestions) {
+  console.log("Processing answers with data:", data);
+  console.log("All questions to process:", allQuestions);
+  
   const userAnswers = {};
   const correctAnswers = {};
   let score = 0;
   
   Object.entries(data.answers || {}).forEach(([qId, answer]) => {
     userAnswers[qId] = answer;
+    console.log(`User answer loaded: ${qId} = ${answer}`);
   });
   
   allQuestions.forEach(question => {
@@ -577,8 +651,13 @@ function processAnswers(data, allQuestions) {
     correctAnswers[qId] = correctAnswer;
     
     const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, question.type);
+    
+    console.log(`Question ${qId} (${question.type}): user="${userAnswer}" vs correct="${correctAnswer}" = ${isCorrect ? 'CORRECT' : 'INCORRECT'}`);
+    
     if (isCorrect) score++;
   });
+  
+  console.log(`Final score calculation: ${score}/${allQuestions.length}`);
   
   return {
     userAnswers,
@@ -588,16 +667,32 @@ function processAnswers(data, allQuestions) {
   };
 }
 
-// Check answer correctness
 function checkAnswerCorrectness(userAnswer, correctAnswer, questionType) {
-  if (!correctAnswer) return false;
+  if (!correctAnswer) {
+    console.warn("No correct answer provided for comparison");
+    return false;
+  }
+  
+  if (!userAnswer || 
+      userAnswer === "" || 
+      userAnswer === null || 
+      userAnswer === undefined ||
+      (Array.isArray(userAnswer) && userAnswer.length === 0)) {
+    return false;
+  }
   
   if (questionType === "matching") {
-    return String(userAnswer || "").toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+    const userClean = String(userAnswer).toUpperCase().trim();
+    const correctClean = String(correctAnswer).toUpperCase().trim();
+    
+    console.log(`Matching comparison: "${userClean}" vs "${correctClean}"`);
+    return userClean === correctClean;
   }
   
   if (Array.isArray(correctAnswer)) {
-    if (!Array.isArray(userAnswer)) return false;
+    if (!Array.isArray(userAnswer)) {
+      return checkArrayAnswer([userAnswer], correctAnswer);
+    }
     return checkArrayAnswer(userAnswer, correctAnswer);
   }
   
@@ -633,7 +728,9 @@ function processAnswer(userAnswer, correctAnswer, questionData) {
   if (questionType === "matching") {
     const optionText = options[userAnswer] || '';
     const userDisplay = userAnswer ? `${userAnswer}. ${optionText}` : "<i>Not answered</i>";
-    const isCorrect = String(userAnswer).toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+    const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, questionType);
+    
+    console.log(`Processing matching answer: ${userAnswer} -> ${isCorrect ? 'CORRECT' : 'INCORRECT'} (expected: ${correctAnswer})`);
     return { userDisplay, isCorrect };
   }
 
@@ -671,11 +768,25 @@ function checkStringAnswer(userAnswer, correctAnswer) {
   const userClean = userAnswer.toLowerCase().trim();
   
   if (Array.isArray(correctAnswer)) {
-    return correctAnswer.some(correct => 
-      String(correct).toLowerCase().trim() === userClean
-    );
+    return correctAnswer.some(correct => {
+      const correctClean = String(correct).toLowerCase().trim();
+      
+      if (correctClean.includes('/')) {
+        const alternatives = correctClean.split('/').map(alt => alt.trim());
+        return alternatives.some(alt => userClean === alt);
+      }
+      
+      return correctClean === userClean;
+    });
   } else {
-    return String(correctAnswer).toLowerCase().trim() === userClean;
+    const correctClean = String(correctAnswer).toLowerCase().trim();
+     
+    if (correctClean.includes('/')) {
+      const alternatives = correctClean.split('/').map(alt => alt.trim());
+      return alternatives.some(alt => userClean === alt);
+    }
+    
+    return correctClean === userClean;
   }
 }
 
@@ -696,7 +807,12 @@ function formatCorrectAnswer(correctAnswer, questionData) {
     return correctAnswer.length > 0 ? correctAnswer.join(" / ") : "<i>No data</i>";
   }
 
-  return String(correctAnswer);
+  const answerStr = String(correctAnswer);
+  if (answerStr.includes('/')) {
+    return answerStr.split('/').join(' / ');
+  }
+
+  return answerStr;
 }
 
 function convertToIELTS(score, total) {
