@@ -30,6 +30,29 @@ let currentPassageIndex = 0;
 let passages = [];
 let answersSoFar = {};
 let orderedQIds = [];
+let testStorageKey = "readingTest_temp";
+let passageHighlights = {};
+let questionHighlights = {}; 
+
+function loadSavedState() {
+  const saved = localStorage.getItem(testStorageKey);
+  if (saved) {
+    const data = JSON.parse(saved);
+    answersSoFar = data.answers || {};
+    passageHighlights = data.passageHighlights || {};
+    questionHighlights = data.questionHighlights || {}; 
+  }
+}
+
+function saveState() {
+  const data = {
+    answers: answersSoFar,
+    passageHighlights: passageHighlights,
+    questionHighlights: questionHighlights, 
+    timestamp: Date.now()
+  };
+  localStorage.setItem(testStorageKey, JSON.stringify(data));
+}
 let currentTestId = "test-1";
 let currentQuestionIndex = 0;
 
@@ -158,14 +181,17 @@ function getPassageEndQuestion(passageIndex) {
 }
 
 function jumpToQuestion(questionNum) {
+  // Сохраняем highlights ТЕКУЩЕЙ секции
+  saveCurrentHighlights();
+  
   // Determine which passage contains this question
   let targetPassage = 0;
   if (questionNum >= 14 && questionNum <= 26) targetPassage = 1;
   else if (questionNum >= 27) targetPassage = 2;
 
-  currentPassageIndex = targetPassage;
+  currentPassageIndex = targetPassage; // Обновляем индекс
   currentQuestionIndex = questionNum - 1;
-  renderPassage(currentPassageIndex);
+  renderPassage(currentPassageIndex); // Рендерим НОВУЮ секцию
   updateQuestionNav();
 
   // Scroll to the specific question
@@ -181,7 +207,7 @@ function jumpToQuestion(questionNum) {
 let selectedText = "";
 let selectedRange = null;
 
-document.addEventListener("mouseup", function () {
+document.addEventListener("mouseup", function(e) {
   const selection = window.getSelection();
   if (selection.toString().length > 0) {
     selectedText = selection.toString();
@@ -189,13 +215,18 @@ document.addEventListener("mouseup", function () {
   }
 });
 
-document.addEventListener("contextmenu", function (e) {
-  if (selectedText.length > 0)  {
-    e.preventDefault();
-    const contextMenu = document.getElementById("contextMenu");
-    contextMenu.style.display = "block";
-    contextMenu.style.left = e.pageX + "px";
-    contextMenu.style.top = e.pageY + "px";
+document.addEventListener("contextmenu", function(e) {
+  if (selectedText.length > 0) {
+    const passagePanel = document.querySelector('.passage-panel');
+    const questionsPanel = document.querySelector('.questions-panel');
+    
+    if (passagePanel && (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
+      e.preventDefault();
+      const contextMenu = document.getElementById("contextMenu");
+      contextMenu.style.display = "block";
+      contextMenu.style.left = e.pageX + "px";
+      contextMenu.style.top = e.pageY + "px";
+    }
   }
 });
 
@@ -203,7 +234,7 @@ document.addEventListener("click", function () {
   document.getElementById("contextMenu").style.display = "none";
 });
 
-window.highlightSelection = function () {
+window.highlightSelection = function() {
   if (selectedRange) {
     const span = document.createElement("span");
     span.className = "highlighted";
@@ -218,32 +249,169 @@ window.highlightSelection = function () {
     window.getSelection().removeAllRanges();
     selectedText = "";
     selectedRange = null;
+    
+    // Сохраняем highlights после изменения
+    saveCurrentHighlights();
   }
   document.getElementById("contextMenu").style.display = "none";
 };
 
-window.removeHighlight = function () {
-  if (selectedRange) {
-    // Найти все highlighted элементы в выделенном диапазоне
-    const container = selectedRange.commonAncestorContainer;
-    const highlighted =
-      container.nodeType === Node.TEXT_NODE
-        ? container.parentElement.closest(".highlighted")
-          ? [container.parentElement.closest(".highlighted")]
-          : []
-        : Array.from(container.querySelectorAll(".highlighted")).filter((el) =>
-            selectedRange.intersectsNode(el)
-          );
+function saveCurrentHighlights() {
+  console.log('💾 Saving highlights for passage:', currentPassageIndex);
+  
+  const passageText = document.getElementById("passageText");
+  if (passageText) {
+    const highlights = passageText.querySelectorAll(".highlighted");
+    if (highlights.length > 0) {
+      passageHighlights[currentPassageIndex] = passageText.innerHTML;
+      console.log('✅ Saved passage highlights for index:', currentPassageIndex);
+    } else if (passageHighlights[currentPassageIndex]) {
+      delete passageHighlights[currentPassageIndex];
+      console.log('🗑️ Removed passage highlights for index:', currentPassageIndex);
+    }
+  }
+  
+  const questionsList = document.getElementById("questionsList");
+  if (questionsList) {
+    const highlights = questionsList.querySelectorAll(".highlighted");
+    if (highlights.length > 0) {
+      questionHighlights[currentPassageIndex] = questionsList.innerHTML;
+      console.log('✅ Saved question highlights for index:', currentPassageIndex);
+    } else if (questionHighlights[currentPassageIndex]) {
+      delete questionHighlights[currentPassageIndex];
+      console.log('🗑️ Removed question highlights for index:', currentPassageIndex);
+    }
+  }
+  
+  saveState();
+}
 
-    highlighted.forEach((element) => {
+function forceRenderPassageContent(index) {
+  const passage = passages[index];
+  console.log('🔄 Force rendering passage:', index, passage.title);
+  
+  // Update passage content - всегда загружаем оригинальный текст
+  document.getElementById("passageTitle").textContent = passage.title;
+  document.getElementById("passageInstructions").textContent = passage.instructions;
+
+  // Сначала загружаем чистый текст
+  const formattedText = passage.text
+    .split("\n\n")
+    .map((p) => `<p>${p.trim()}</p>`)
+    .join("");
+  document.getElementById("passageText").innerHTML = formattedText;
+  
+  // Потом проверяем, есть ли сохранённые highlights для этой секции
+  if (passageHighlights[index]) {
+    console.log('🎨 Restoring passage highlights for index:', index);
+    document.getElementById("passageText").innerHTML = passageHighlights[index];
+  }
+}
+
+function restoreHighlights() {
+  // Восстанавливаем highlights для passage text
+  const passageText = document.getElementById("passageText");
+  if (passageText && passageHighlights[currentPassageIndex]) {
+    passageText.innerHTML = passageHighlights[currentPassageIndex];
+  }
+  
+  // Восстанавливаем highlights для вопросов
+  const questionsList = document.getElementById("questionsList");
+  if (questionsList && questionHighlights[currentPassageIndex]) {
+    questionsList.innerHTML = questionHighlights[currentPassageIndex];
+    
+    // Переустанавливаем event listeners для input полей после восстановления HTML
+    setTimeout(() => {
+      restoreInputEventListeners();
+    }, 0);
+  }
+}
+
+function restoreInputEventListeners() {
+  // Для всех типов input полей
+  const inputs = document.querySelectorAll('input[data-question-id], input[id^="q"], input[id^="input-"], select[id^="q"]');
+  
+  inputs.forEach(input => {
+    const qId = input.dataset.questionId || input.id.replace('input-', '');
+    
+    if (input.type === 'text') {
+      // Text inputs (gap-fill)
+      input.value = answersSoFar[qId] || "";
+      if (input.value) {
+        input.classList.add('has-value');
+      }
+      
+      input.addEventListener("input", (e) => {
+        answersSoFar[qId] = e.target.value;
+        saveState();
+        updateQuestionNav();
+        
+        if (e.target.value.trim()) {
+          input.classList.add('has-value');
+          const textLength = e.target.value.length;
+          input.classList.remove('input-small', 'input-medium', 'input-large');
+          if (textLength > 15) {
+            input.classList.add('input-large');
+          } else if (textLength > 8) {
+            input.classList.add('input-medium');
+          } else {
+            input.classList.add('input-small');
+          }
+        } else {
+          input.classList.remove('has-value', 'input-small', 'input-medium', 'input-large');
+        }
+      });
+      
+      input.addEventListener('focus', () => input.classList.add('focused'));
+      input.addEventListener('blur', () => input.classList.remove('focused'));
+      
+    } else if (input.type === 'radio') {
+      // Radio buttons
+      if (answersSoFar[qId] === input.value) {
+        input.checked = true;
+      }
+      input.addEventListener("change", (e) => {
+        answersSoFar[qId] = e.target.value;
+        saveState();
+        updateQuestionNav();
+      });
+    }
+  });
+  
+  // Для select элементов
+  const selects = document.querySelectorAll('select[id^="q"]');
+  selects.forEach(select => {
+    const qId = select.id;
+    select.value = answersSoFar[qId] || "";
+    select.addEventListener("change", (e) => {
+      answersSoFar[qId] = e.target.value;
+      saveState();
+      updateQuestionNav();
+    });
+  });
+}
+
+
+window.removeHighlight = function() {
+  if (selectedRange) {
+    const container = selectedRange.commonAncestorContainer;
+    const highlighted = container.nodeType === Node.TEXT_NODE
+      ? container.parentElement.closest(".highlighted")
+        ? [container.parentElement.closest(".highlighted")]
+        : []
+      : Array.from(container.querySelectorAll(".highlighted")).filter(el =>
+          selectedRange.intersectsNode(el)
+        );
+
+    highlighted.forEach(element => {
       const parent = element.parentNode;
-      parent.insertBefore(
-        document.createTextNode(element.textContent),
-        element
-      );
+      parent.insertBefore(document.createTextNode(element.textContent), element);
       parent.removeChild(element);
       parent.normalize();
     });
+    
+    // Сохраняем изменения после удаления highlights
+    saveCurrentHighlights();
   }
 
   window.getSelection().removeAllRanges();
@@ -251,6 +419,7 @@ window.removeHighlight = function () {
   selectedRange = null;
   document.getElementById("contextMenu").style.display = "none";
 };
+
 
 // Modified assignQuestionIds function
 function assignQuestionIds() {
@@ -301,6 +470,8 @@ async function loadTest() {
     const urlParams = new URLSearchParams(window.location.search);
     const testId = urlParams.get("testId") || "test-1";
     currentTestId = testId;
+    testStorageKey = `readingTest_${currentTestId}`;
+    loadSavedState();
 
     console.log("🎯 Loading reading test with ID:", testId);
 
@@ -327,18 +498,14 @@ async function loadTest() {
 }
 
 function renderPassage(index) {
+  console.log('🎯 Rendering passage:', index);
+  
   const passage = passages[index];
 
-  // Update passage content
-  document.getElementById("passageTitle").textContent = passage.title;
-  document.getElementById("passageInstructions").textContent = passage.instructions;
+  // Принудительно обновляем контент passage
+  forceRenderPassageContent(index);
 
-  const formattedText = passage.text
-    .split("\n\n")
-    .map((p) => `<p>${p.trim()}</p>`)
-    .join("");
-  document.getElementById("passageText").innerHTML = formattedText;
-
+  // Рендерим вопросы как обычно
   const questionsList = document.getElementById("questionsList");
   questionsList.innerHTML = "";
   let lastInstruction = null;
@@ -395,19 +562,18 @@ function renderPassage(index) {
         if (isLastGapFill) {
           renderGapFillGroupComplete(gapFillGroup, questionsList);
           gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
-          return; // Пропускаем добавление qDiv
+          return;
         }
       }
-      return; // Не добавляем отдельные gap-fill элементы
+      return;
     }
     
-    // Рендерим накопленную gap-fill группу перед другими типами вопросов
     if (gapFillGroup.questions.length > 0) {
       renderGapFillGroupComplete(gapFillGroup, questionsList);
       gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
     }
 
-    // Обработка других типов вопросов
+    // Рендерим другие типы вопросов
     switch (q.type) {
       case "text-question":
         renderTextQuestion(q, qDiv);
@@ -431,21 +597,30 @@ function renderPassage(index) {
         break;
     }
 
-    // Add all types of questions except gap-fill (они уже добавлены группой)
     if (q.type !== "gap-fill" && (q.qId || q.type === "text-question" || q.type === "table")) {
       questionsList.appendChild(qDiv);
     }
   });
 
-  // Рендерим последнюю gap-fill группу если осталась
   if (gapFillGroup.questions.length > 0) {
     renderGapFillGroupComplete(gapFillGroup, questionsList);
   }
+
+  // Восстанавливаем highlights для вопросов после рендеринга
+  setTimeout(() => {
+    if (questionHighlights[index]) {
+      console.log('🎨 Restoring question highlights for index:', index);
+      questionsList.innerHTML = questionHighlights[index];
+      restoreInputEventListeners();
+    }
+  }, 0);
 
   // Update navigation buttons
   document.getElementById("backBtn").style.display = index > 0 ? "inline-block" : "none";
   document.getElementById("nextBtn").style.display = index < passages.length - 1 ? "inline-block" : "none";
   document.getElementById("finishBtn").style.display = index === passages.length - 1 ? "inline-block" : "none";
+  
+  console.log('✅ Passage rendered successfully:', index);
 }
 
 function renderGapFillGroupComplete(group, container) {
@@ -568,6 +743,7 @@ function renderGapFillGroupComplete(group, container) {
 
         input.addEventListener("input", (e) => {
           answersSoFar[q.qId] = e.target.value;
+          saveState();
           updateQuestionNav();
 
           if (e.target.value.trim()) {
@@ -639,6 +815,7 @@ function renderTrueFalseQuestion(q, qDiv) {
       }
       radio.addEventListener("change", (e) => {
         answersSoFar[q.qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     });
@@ -670,6 +847,7 @@ function renderMatchingQuestion(q, qDiv) {
       select.value = answersSoFar[q.qId] || "";
       select.addEventListener("change", (e) => {
         answersSoFar[q.qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     }
@@ -706,6 +884,7 @@ function renderMultipleChoiceQuestion(q, qDiv) {
       }
       radio.addEventListener("change", (e) => {
         answersSoFar[q.qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     });
@@ -741,6 +920,7 @@ function renderYesNoQuestion(q, qDiv) {
       }
       radio.addEventListener("change", (e) => {
         answersSoFar[q.qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     });
@@ -840,6 +1020,7 @@ function renderTableQuestion(q, qDiv) {
       input.value = answersSoFar[qId] || "";
       input.addEventListener("input", (e) => {
         answersSoFar[qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     });
@@ -873,10 +1054,10 @@ function startTimer(durationInSeconds, display) {
   }, 1000);
 }
 
-// Event handlers
 document.getElementById("backBtn").addEventListener("click", () => {
   if (currentPassageIndex > 0) {
-    currentPassageIndex--;
+    saveCurrentHighlights(); 
+    currentPassageIndex--; 
     renderPassage(currentPassageIndex);
     updateQuestionNav();
   }
@@ -884,8 +1065,9 @@ document.getElementById("backBtn").addEventListener("click", () => {
 
 document.getElementById("nextBtn").addEventListener("click", () => {
   if (currentPassageIndex < passages.length - 1) {
-    currentPassageIndex++;
-    renderPassage(currentPassageIndex);
+    saveCurrentHighlights(); 
+    currentPassageIndex++; 
+    renderPassage(currentPassageIndex); 
     updateQuestionNav();
   }
 });
@@ -954,7 +1136,6 @@ async function handleFinish() {
     if (isCorrect) correct++;
   }
 
-  // Теперь проверяем пользователя
   const auth = getAuth();
   const user = await new Promise((resolve) => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -964,7 +1145,6 @@ async function handleFinish() {
   });
 
   if (!user) {
-    // Hide loading modal and restore button
     loadingModal.style.display = "none";
     finishBtn.disabled = false;
     finishBtn.textContent = "Finish Test";
@@ -987,12 +1167,12 @@ async function handleFinish() {
     });
 
     window.location.href = `/pages/mock/result.html?id=${docRef.id}`;
+    localStorage.removeItem(testStorageKey); 
     clearInterval(window.readingTimerInterval);
     window.finished = true;
   } catch (e) {
     console.error("❌ Error saving result:", e);
     
-    // Hide loading modal and restore button on error
     loadingModal.style.display = "none";
     finishBtn.disabled = false;
     finishBtn.textContent = "Finish Test";
@@ -1001,16 +1181,14 @@ async function handleFinish() {
   }
 }
 
-// Review function
 window.openReview = function () {
   alert("Review functionality - showing all answers and flagged questions");
 };
 
-// Initialize when page loads
 window.onload = () => {
-  createPauseModal(); // Create pause modal
+  createPauseModal(); 
   loadTest().then(() => {
     const display = document.getElementById("time");
-    startTimer(60 * 60, display); // 60 minutes
+    startTimer(60 * 60, display);
   });
 };

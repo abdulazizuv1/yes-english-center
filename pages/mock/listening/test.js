@@ -37,6 +37,179 @@ let isPaused = false,
   timerStartTime = null,
   audioCurrentTime = 0;
 let currentQuestionNumber = 1;
+let savedHighlights = {};
+
+function saveCurrentHighlights() {
+  const questionList = document.getElementById("question-list");
+  if (!questionList) return;
+  
+  const highlights = questionList.querySelectorAll('.highlighted');
+  const sectionKey = `section_${currentSectionIndex}`;
+  
+  if (!savedHighlights[sectionKey]) {
+    savedHighlights[sectionKey] = [];
+  }
+  
+  savedHighlights[sectionKey] = [];
+  
+  highlights.forEach((highlight, index) => {
+    const parent = highlight.parentNode;
+    const parentHtml = parent.outerHTML || parent.innerHTML;
+    const highlightText = highlight.textContent;
+    const highlightHtml = highlight.outerHTML;
+    
+    // Создаем уникальный идентификатор для highlight
+    const highlightId = `highlight_${currentSectionIndex}_${index}_${Date.now()}`;
+    highlight.setAttribute('data-highlight-id', highlightId);
+    
+    savedHighlights[sectionKey].push({
+      id: highlightId,
+      text: highlightText,
+      html: highlightHtml,
+      parentSelector: getElementSelector(parent),
+      textBefore: getTextBefore(highlight),
+      textAfter: getTextAfter(highlight)
+    });
+  });
+  
+  // Сохраняем в localStorage
+  localStorage.setItem('testHighlights', JSON.stringify(savedHighlights));
+}
+
+// Функция для восстановления highlights в текущей секции
+function restoreHighlights() {
+  const sectionKey = `section_${currentSectionIndex}`;
+  const highlights = savedHighlights[sectionKey];
+  
+  if (!highlights || highlights.length === 0) return;
+  
+  setTimeout(() => {
+    highlights.forEach(highlightData => {
+      restoreSingleHighlight(highlightData);
+    });
+  }, 100); // Небольшая задержка для обеспечения рендеринга содержимого
+}
+
+// Функция для восстановления одного highlight
+function restoreSingleHighlight(highlightData) {
+  const questionList = document.getElementById("question-list");
+  if (!questionList) return;
+  
+  // Более простой и надежный подход - ищем точное совпадение текста
+  const walker = document.createTreeWalker(
+    questionList,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  
+  let textNode;
+  while (textNode = walker.nextNode()) {
+    const nodeText = textNode.textContent;
+    const targetText = highlightData.text;
+    
+    const index = nodeText.indexOf(targetText);
+    if (index !== -1) {
+      // Дополнительная проверка - убеждаемся что это не уже подсвеченный текст
+      const parent = textNode.parentNode;
+      if (parent && parent.classList && parent.classList.contains('highlighted')) {
+        continue; // Пропускаем уже подсвеченные элементы
+      }
+      
+      try {
+        // Создаем новый highlight
+        const range = document.createRange();
+        range.setStart(textNode, index);
+        range.setEnd(textNode, index + targetText.length);
+        
+        const span = document.createElement("span");
+        span.className = "highlighted";
+        span.style.backgroundColor = "#ffeb3b";
+        span.setAttribute('data-highlight-id', highlightData.id);
+        
+        range.surroundContents(span);
+        break; // Выходим после успешного восстановления
+      } catch (e) {
+        // Если не удается обернуть, пробуем другой способ
+        try {
+          const range = document.createRange();
+          range.setStart(textNode, index);
+          range.setEnd(textNode, index + targetText.length);
+          
+          const contents = range.extractContents();
+          const span = document.createElement("span");
+          span.className = "highlighted";
+          span.style.backgroundColor = "#ffeb3b";
+          span.setAttribute('data-highlight-id', highlightData.id);
+          span.appendChild(contents);
+          range.insertNode(span);
+          break;
+        } catch (e2) {
+          console.warn('Failed to restore highlight:', e2);
+        }
+      }
+    }
+  }
+}
+
+function getElementSelector(element) {
+  if (element.id) return `#${element.id}`;
+  if (element.className) return `.${element.className.split(' ')[0]}`;
+  return element.tagName.toLowerCase();
+}
+
+function getTextBefore(node) {
+  let text = "";
+  let current = node;
+  
+  while (current && text.length < 50) {
+    if (current.previousSibling) {
+      current = current.previousSibling;
+      if (current.nodeType === Node.TEXT_NODE) {
+        text = current.textContent + text;
+      } else if (current.textContent) {
+        text = current.textContent + text;
+      }
+    } else {
+      current = current.parentNode;
+      if (!current || current.id === 'question-list') break;
+    }
+  }
+  
+  return text;
+}
+
+function getTextAfter(node) {
+  let text = "";
+  let current = node;
+  
+  while (current && text.length < 50) {
+    if (current.nextSibling) {
+      current = current.nextSibling;
+      if (current.nodeType === Node.TEXT_NODE) {
+        text += current.textContent;
+      } else if (current.textContent) {
+        text += current.textContent;
+      }
+    } else {
+      current = current.parentNode;
+      if (!current || current.id === 'question-list') break;
+    }
+  }
+  
+  return text;
+}
+function loadSavedHighlights() {
+  try {
+    const saved = localStorage.getItem('testHighlights');
+    if (saved) {
+      savedHighlights = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.warn('Error loading highlights:', e);
+    savedHighlights = {};
+  }
+}
 
 window.togglePause = function () {
   const pauseBtn = document.getElementById("pauseBtn");
@@ -151,10 +324,17 @@ function jumpToQuestion(questionNum) {
   const targetSection = Math.floor((questionNum - 1) / 10);
   const shouldRender = targetSection !== currentSectionIndex;
 
-  currentSectionIndex = targetSection;
+  // Сохраняем highlights перед переключением секции
+  if (shouldRender) {
+    saveCurrentHighlights();
+  }
+
   currentQuestionNumber = questionNum;
 
-  if (shouldRender) renderSection(currentSectionIndex);
+  if (shouldRender) {
+    currentSectionIndex = targetSection;
+    renderSection(currentSectionIndex);
+  }
   updateQuestionNav();
 
   setTimeout(
@@ -162,7 +342,7 @@ function jumpToQuestion(questionNum) {
       const el = document.getElementById(`q${questionNum}`);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     },
-    shouldRender ? 100 : 0
+    shouldRender ? 200 : 0
   );
 }
 
@@ -218,12 +398,12 @@ document.addEventListener("click", (e) => {
   const menu = document.getElementById("contextMenu");
   if (menu && !e.target.closest("#contextMenu")) menu.style.display = "none";
 });
-
 window.highlightSelection = () => {
   if (selectedRange) {
     const span = document.createElement("span");
     span.className = "highlighted";
     span.style.backgroundColor = "#ffeb3b";
+    
     try {
       selectedRange.surroundContents(span);
     } catch (e) {
@@ -231,11 +411,16 @@ window.highlightSelection = () => {
       span.appendChild(contents);
       selectedRange.insertNode(span);
     }
+    
     window.getSelection().removeAllRanges();
     selectedRange = null;
+    
+    // Сохраняем highlights после добавления нового
+    saveCurrentHighlights();
   }
   document.getElementById("contextMenu").style.display = "none";
 };
+
 
 window.removeHighlight = function () {
   if (selectedRange) {
@@ -258,10 +443,12 @@ window.removeHighlight = function () {
       parent.removeChild(element);
       parent.normalize();
     });
+    
+    // Сохраняем highlights после удаления
+    saveCurrentHighlights();
   }
 
   window.getSelection().removeAllRanges();
-  selectedText = "";
   selectedRange = null;
   document.getElementById("contextMenu").style.display = "none";
 };
@@ -301,18 +488,32 @@ function initializeTest() {
   currentQuestionNumber = 1;
   audioInitialized = false;
   currentAudioSection = 0;
+  
+  // Загружаем сохраненные highlights
+  loadSavedHighlights();
+  
   renderSection(0);
   updateQuestionNav();
   startTimer(40 * 60, document.getElementById("time"));
 }
-
 function renderSection(index) {
+  // Сохраняем highlights текущей секции перед переключением
+  if (currentSectionIndex !== index) {
+    saveCurrentHighlights();
+    currentSectionIndex = index; // Обновляем индекс после сохранения
+  }
+  
   const section = sections[index];
   if (!section) return;
 
   handleAudio(section, index);
   renderContent(section, index);
   updateNavButtons(index);
+  
+  // Восстанавливаем highlights после рендеринга
+  setTimeout(() => {
+    restoreHighlights();
+  }, 150);
 }
 
 function handleAudio(section, index) {
@@ -1031,7 +1232,9 @@ async function handleFinishTest() {
       completedAt: new Date().toISOString(),
     });
 
+    // Очищаем сохраненные данные включая highlights
     localStorage.removeItem("listeningTestAnswers");
+    localStorage.removeItem("testHighlights");
     clearInterval(window.listeningTimerInterval);
 
     if (loadingModal) {
