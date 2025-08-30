@@ -39,18 +39,18 @@ function hideLoader() {
 }
 
 function convertToIELTS(score, total) {
-  const percent = (score / total) * 100;
-  if (percent >= 97.5) return "9.0";
-  if (percent >= 95) return "8.5";
-  if (percent >= 87.5) return "8.0";
-  if (percent >= 82.5) return "7.5";
-  if (percent >= 75) return "7.0";
-  if (percent >= 72.5) return "6.5";
-  if (percent >= 57.5) return "6.0";
-  if (percent >= 50) return "5.5";
-  if (percent >= 45) return "5.0";
-  if (percent >= 40) return "4.5";
-  if (percent >= 35) return "4.0";
+  const normalizedScore = Math.round((score / total) * 40);
+  if (normalizedScore >= 39) return "9.0";
+  if (normalizedScore >= 37) return "8.5";
+  if (normalizedScore >= 35) return "8.0";
+  if (normalizedScore >= 32) return "7.5";
+  if (normalizedScore >= 30) return "7.0";
+  if (normalizedScore >= 26) return "6.5";
+  if (normalizedScore >= 23) return "6.0";
+  if (normalizedScore >= 18) return "5.5";
+  if (normalizedScore >= 16) return "5.0";
+  if (normalizedScore >= 13) return "4.5";
+  if (normalizedScore >= 10) return "4.0";
   return "Below 4.0";
 }
 

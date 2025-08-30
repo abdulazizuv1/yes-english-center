@@ -176,19 +176,19 @@
       const container = document.getElementById("test-buttons");
       const loading = document.getElementById("loading");
 
-      function convertToIELTS(score, total = 40) {
-        const percent = (score / total) * 100;
-        if (percent >= 90) return "9.0";
-        if (percent >= 87.5) return "8.5";
-        if (percent >= 80) return "8.0";
-        if (percent >= 75) return "7.5";
-        if (percent >= 70) return "7.0";
-        if (percent >= 65) return "6.5";
-        if (percent >= 60) return "6.0";
-        if (percent >= 55) return "5.5";
-        if (percent >= 50) return "5.0";
-        if (percent >= 45) return "4.5";
-        if (percent >= 40) return "4.0";
+      function convertToIELTS(score, total) {
+        const normalizedScore = Math.round((score / total) * 40);
+        if (normalizedScore >= 39) return "9.0";
+        if (normalizedScore >= 37) return "8.5";
+        if (normalizedScore >= 35) return "8.0";
+        if (normalizedScore >= 33) return "7.5";
+        if (normalizedScore >= 30) return "7.0";
+        if (normalizedScore >= 27) return "6.5";
+        if (normalizedScore >= 23) return "6.0";
+        if (normalizedScore >= 19) return "5.5";
+        if (normalizedScore >= 15) return "5.0";
+        if (normalizedScore >= 13) return "4.5";
+        if (normalizedScore >= 10) return "4.0";
         return "Below 4.0";
       }
 

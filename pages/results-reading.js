@@ -43,12 +43,12 @@ function ieltsScore(score, total) {
   if (normalizedScore >= 39) return "9.0";
   if (normalizedScore >= 37) return "8.5";
   if (normalizedScore >= 35) return "8.0";
-  if (normalizedScore >= 32) return "7.5";
+  if (normalizedScore >= 33) return "7.5";
   if (normalizedScore >= 30) return "7.0";
-  if (normalizedScore >= 26) return "6.5";
+  if (normalizedScore >= 27) return "6.5";
   if (normalizedScore >= 23) return "6.0";
-  if (normalizedScore >= 18) return "5.5";
-  if (normalizedScore >= 16) return "5.0";
+  if (normalizedScore >= 19) return "5.5";
+  if (normalizedScore >= 15) return "5.0";
   if (normalizedScore >= 13) return "4.5";
   if (normalizedScore >= 10) return "4.0";
   return "Below 4.0";
