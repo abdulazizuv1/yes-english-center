@@ -456,7 +456,7 @@ window.removeHighlight = function () {
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Please log in to take the test.");
-    window.location.href = "/login.html";
+    window.location.href = "/";
   } else loadTest();
 });
 

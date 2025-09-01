@@ -24,6 +24,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
 // Global variables
 let currentPassageIndex = 0;
@@ -56,11 +57,9 @@ function saveState() {
 let currentTestId = "test-1";
 let currentQuestionIndex = 0;
 
-// Pause functionality variables
 let isPaused = false;
 let pausedTime = 0;
 
-// Create pause modal
 function createPauseModal() {
   const modal = document.createElement("div");
   modal.className = "pause-modal";
@@ -75,50 +74,42 @@ function createPauseModal() {
   document.body.appendChild(modal);
 }
 
-// Toggle pause function
 window.togglePause = function () {
   const pauseBtn = document.getElementById("pauseBtn");
   const pauseModal = document.getElementById("pauseModal");
 
   if (!isPaused) {
-    // Pause the test
     isPaused = true;
     clearInterval(window.readingTimerInterval);
     pauseBtn.textContent = "Resume";
     pauseBtn.classList.add("paused");
     pauseModal.style.display = "flex";
 
-    // Disable interaction with test
     document.querySelector(".passage-panel").style.pointerEvents = "none";
     document.querySelector(".questions-panel").style.pointerEvents = "none";
     document.querySelector(".bottom-controls").style.pointerEvents = "none";
     document.querySelector(".question-nav").style.pointerEvents = "none";
   } else {
-    // Resume the test
     isPaused = false;
     pauseBtn.textContent = "Pause";
     pauseBtn.classList.remove("paused");
     pauseModal.style.display = "none";
 
-    // Enable interaction with test
     document.querySelector(".passage-panel").style.pointerEvents = "auto";
     document.querySelector(".questions-panel").style.pointerEvents = "auto";
     document.querySelector(".bottom-controls").style.pointerEvents = "auto";
     document.querySelector(".question-nav").style.pointerEvents = "auto";
 
-    // Resume timer with remaining time
     const display = document.getElementById("time");
     startTimer(pausedTime, display);
   }
 };
 
-// Question navigation functions
 function generateQuestionNav() {
   const part1 = document.getElementById("part1Numbers");
   const part2 = document.getElementById("part2Numbers");
   const part3 = document.getElementById("part3Numbers");
 
-  // Generate question numbers for each part
   for (let i = 1; i <= 13; i++) {
     const num = document.createElement("div");
     num.className = "nav-number";
@@ -154,7 +145,6 @@ function updateQuestionNav() {
       num.classList.add("answered");
     }
 
-    // Highlight current question based on passage
     if (
       index + 1 >= getPassageStartQuestion(currentPassageIndex) &&
       index + 1 <= getPassageEndQuestion(currentPassageIndex)
@@ -181,20 +171,17 @@ function getPassageEndQuestion(passageIndex) {
 }
 
 function jumpToQuestion(questionNum) {
-  // Сохраняем highlights ТЕКУЩЕЙ секции
   saveCurrentHighlights();
   
-  // Determine which passage contains this question
   let targetPassage = 0;
   if (questionNum >= 14 && questionNum <= 26) targetPassage = 1;
   else if (questionNum >= 27) targetPassage = 2;
 
-  currentPassageIndex = targetPassage; // Обновляем индекс
+  currentPassageIndex = targetPassage; 
   currentQuestionIndex = questionNum - 1;
-  renderPassage(currentPassageIndex); // Рендерим НОВУЮ секцию
+  renderPassage(currentPassageIndex); 
   updateQuestionNav();
 
-  // Scroll to the specific question
   setTimeout(() => {
     const questionElement = document.getElementById(`q${questionNum}`);
     if (questionElement) {
@@ -203,7 +190,6 @@ function jumpToQuestion(questionNum) {
   }, 100);
 }
 
-// Highlight functionality
 let selectedText = "";
 let selectedRange = null;
 
@@ -241,7 +227,6 @@ window.highlightSelection = function() {
     try {
       selectedRange.surroundContents(span);
     } catch (e) {
-      // If can't surround (crosses element boundaries), extract and wrap
       const contents = selectedRange.extractContents();
       span.appendChild(contents);
       selectedRange.insertNode(span);
@@ -250,24 +235,20 @@ window.highlightSelection = function() {
     selectedText = "";
     selectedRange = null;
     
-    // Сохраняем highlights после изменения
     saveCurrentHighlights();
   }
   document.getElementById("contextMenu").style.display = "none";
 };
 
 function saveCurrentHighlights() {
-  console.log('💾 Saving highlights for passage:', currentPassageIndex);
   
   const passageText = document.getElementById("passageText");
   if (passageText) {
     const highlights = passageText.querySelectorAll(".highlighted");
     if (highlights.length > 0) {
       passageHighlights[currentPassageIndex] = passageText.innerHTML;
-      console.log('✅ Saved passage highlights for index:', currentPassageIndex);
     } else if (passageHighlights[currentPassageIndex]) {
       delete passageHighlights[currentPassageIndex];
-      console.log('🗑️ Removed passage highlights for index:', currentPassageIndex);
     }
   }
   
@@ -276,10 +257,8 @@ function saveCurrentHighlights() {
     const highlights = questionsList.querySelectorAll(".highlighted");
     if (highlights.length > 0) {
       questionHighlights[currentPassageIndex] = questionsList.innerHTML;
-      console.log('✅ Saved question highlights for index:', currentPassageIndex);
     } else if (questionHighlights[currentPassageIndex]) {
       delete questionHighlights[currentPassageIndex];
-      console.log('🗑️ Removed question highlights for index:', currentPassageIndex);
     }
   }
   
@@ -288,39 +267,31 @@ function saveCurrentHighlights() {
 
 function forceRenderPassageContent(index) {
   const passage = passages[index];
-  console.log('🔄 Force rendering passage:', index, passage.title);
   
-  // Update passage content - всегда загружаем оригинальный текст
   document.getElementById("passageTitle").textContent = passage.title;
   document.getElementById("passageInstructions").textContent = passage.instructions;
 
-  // Сначала загружаем чистый текст
   const formattedText = passage.text
     .split("\n\n")
     .map((p) => `<p>${p.trim()}</p>`)
     .join("");
   document.getElementById("passageText").innerHTML = formattedText;
   
-  // Потом проверяем, есть ли сохранённые highlights для этой секции
   if (passageHighlights[index]) {
-    console.log('🎨 Restoring passage highlights for index:', index);
     document.getElementById("passageText").innerHTML = passageHighlights[index];
   }
 }
 
 function restoreHighlights() {
-  // Восстанавливаем highlights для passage text
   const passageText = document.getElementById("passageText");
   if (passageText && passageHighlights[currentPassageIndex]) {
     passageText.innerHTML = passageHighlights[currentPassageIndex];
   }
   
-  // Восстанавливаем highlights для вопросов
   const questionsList = document.getElementById("questionsList");
   if (questionsList && questionHighlights[currentPassageIndex]) {
     questionsList.innerHTML = questionHighlights[currentPassageIndex];
     
-    // Переустанавливаем event listeners для input полей после восстановления HTML
     setTimeout(() => {
       restoreInputEventListeners();
     }, 0);
@@ -410,7 +381,6 @@ window.removeHighlight = function() {
       parent.normalize();
     });
     
-    // Сохраняем изменения после удаления highlights
     saveCurrentHighlights();
   }
 
@@ -421,7 +391,6 @@ window.removeHighlight = function() {
 };
 
 
-// Modified assignQuestionIds function
 function assignQuestionIds() {
   let counter = 1;
   for (const passage of passages) {
@@ -434,7 +403,6 @@ function assignQuestionIds() {
       }
 
       if (question.type === "table") {
-        // Get the column keys in visible order (excluding the first column)
         const columnKeys = question.columns
           .slice(1)
           .map((col) => col.toLowerCase());
@@ -457,10 +425,23 @@ function assignQuestionIds() {
   }
 }
 
-// Load test function with cache busting for CSS
+
+
 async function loadTest() {
+  const auth = getAuth();
+  const user = await new Promise((resolve) => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      unsub();
+      resolve(u);
+    });
+  });
+
+  if (!user) {
+    alert("You must be logged in to access the reading test.");
+    window.location.href = "/";
+    return;
+  }
   try {
-    // Add version to CSS to force reload
     const cssLink = document.querySelector('link[href*="test.css"]');
     if (cssLink) {
       const timestamp = new Date().getTime();
@@ -498,14 +479,12 @@ async function loadTest() {
 }
 
 function renderPassage(index) {
-  console.log('🎯 Rendering passage:', index);
   
   const passage = passages[index];
 
   // Принудительно обновляем контент passage
   forceRenderPassageContent(index);
 
-  // Рендерим вопросы как обычно
   const questionsList = document.getElementById("questionsList");
   questionsList.innerHTML = "";
   let lastInstruction = null;
@@ -609,7 +588,6 @@ function renderPassage(index) {
   // Восстанавливаем highlights для вопросов после рендеринга
   setTimeout(() => {
     if (questionHighlights[index]) {
-      console.log('🎨 Restoring question highlights for index:', index);
       questionsList.innerHTML = questionHighlights[index];
       restoreInputEventListeners();
     }
@@ -620,7 +598,6 @@ function renderPassage(index) {
   document.getElementById("nextBtn").style.display = index < passages.length - 1 ? "inline-block" : "none";
   document.getElementById("finishBtn").style.display = index === passages.length - 1 ? "inline-block" : "none";
   
-  console.log('✅ Passage rendered successfully:', index);
 }
 
 function renderGapFillGroupComplete(group, container) {
@@ -1087,14 +1064,11 @@ function findQuestionByQId(qId) {
   return { answer: [] };
 }
 
-// Handle finish function
 async function handleFinish() {
-  // Disable finish button to prevent multiple clicks
   const finishBtn = document.getElementById("finishBtn");
   finishBtn.disabled = true;
   finishBtn.textContent = "Submitting...";
   
-  // Show loading modal
   const loadingModal = document.getElementById("loadingModal");
   loadingModal.style.display = "flex";
 
@@ -1136,25 +1110,13 @@ async function handleFinish() {
     if (isCorrect) correct++;
   }
 
-  const auth = getAuth();
-  const user = await new Promise((resolve) => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      unsub();
-      resolve(u);
-    });
-  });
-
-  if (!user) {
-    loadingModal.style.display = "none";
-    finishBtn.disabled = false;
-    finishBtn.textContent = "Finish Test";
-    
-    alert("You must be logged in to submit.");
-    window.location.href = "/";
-    return;
-  }
-
   try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
     const docRef = await addDoc(collection(db, "resultsReading"), {
       userId: user.uid,
       name: user.email || "unknown",
