@@ -27,7 +27,7 @@
             "format": "gap-fill",
             "text": "Postcode: _____",
             "postfix": "",
-            "correctAnswer": "DW30 7YZ",
+            "correctAnswer": "DW307YZ",
             "wordLimit": 1
           },
           {
@@ -40,7 +40,7 @@
             "format": "gap-fill",
             "text": "Date of bus journey: _____",
             "postfix": "",
-            "correctAnswer": "24th April",
+            "correctAnswer": "24th April/April 24th/April 24",
             "wordLimit": 2
           },
           {
