@@ -402,6 +402,14 @@ function assignQuestionIds() {
         counter++;
       }
 
+      if (question.type === "question-group" && question.questions) {
+        question.questions.forEach(q => {
+          q.qId = q.questionId || `q${counter}`;
+          orderedQIds.push(q.qId);
+          counter++;
+        });
+      }
+
       if (question.type === "table") {
         const columnKeys = question.columns
           .slice(1)
@@ -573,6 +581,9 @@ function renderPassage(index) {
         break;
       case "table":
         renderTableQuestion(q, qDiv);
+        break;
+      case "question-group":
+        renderQuestionGroup(q, qDiv);
         break;
     }
 
@@ -904,7 +915,6 @@ function renderYesNoQuestion(q, qDiv) {
   }, 0);
 }
 
-// Table function остается без изменений как просили
 function renderTableQuestion(q, qDiv) {
   // Add title before table if exists
   if (q.title) {
@@ -1004,7 +1014,120 @@ function renderTableQuestion(q, qDiv) {
   }, 0);
 }
 
-// Timer function with pause support
+function renderQuestionGroup(group, qDiv) {
+  if (group.groupType === "multi-select") {
+    // Add group instruction if exists
+    if (group.groupInstruction) {
+      const instructionDiv = document.createElement("div");
+      instructionDiv.className = "group-instruction";
+      instructionDiv.innerHTML = group.groupInstruction
+        .split("\n")
+        .map((line) => `<p>${line}</p>`)
+        .join("");
+      qDiv.appendChild(instructionDiv);
+    }
+
+    // Add title/text
+    const titleDiv = document.createElement("div");
+    titleDiv.style.cssText = "font-weight: 600; margin: 15px 0;";
+    titleDiv.textContent = group.text;
+    qDiv.appendChild(titleDiv);
+
+    // Add instructions
+    if (group.instructions) {
+      const instrDiv = document.createElement("div");
+      instrDiv.style.cssText = "color: #6b7280; margin-bottom: 15px; font-style: italic;";
+      instrDiv.textContent = group.instructions;
+      qDiv.appendChild(instrDiv);
+    }
+
+    // Create checkbox group
+    const optionsContainer = document.createElement("div");
+    optionsContainer.style.cssText = "margin: 20px 0;";
+
+    Object.keys(group.options || {}).sort().forEach((key) => {
+      const label = document.createElement("label");
+      label.style.cssText = "display: block; margin: 8px 0; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;";
+      
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = key;
+      checkbox.dataset.groupId = group.questionId;
+      checkbox.style.marginRight = "8px";
+      
+      // Check if this option is selected
+      const isChecked = group.questions.some(q => answersSoFar[q.qId || q.questionId] === key);
+      if (isChecked) {
+        checkbox.checked = true;
+        label.style.background = "#dbeafe";
+        label.style.borderColor = "#3b82f6";
+      }
+      
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(`${key}. ${group.options[key]}`));
+      optionsContainer.appendChild(label);
+    });
+
+    qDiv.appendChild(optionsContainer);
+
+    // Add event listeners
+    setTimeout(() => {
+      const checkboxes = qDiv.querySelectorAll(`input[data-group-id="${group.questionId}"]`);
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+          handleMultiSelectGroup(e.target, group);
+        });
+      });
+    }, 0);
+  }
+}
+
+function handleMultiSelectGroup(checkbox, group) {
+  const allCheckboxes = document.querySelectorAll(
+    `input[type="checkbox"][data-group-id="${group.questionId}"]`
+  );
+  const selectedOptions = Array.from(allCheckboxes)
+    .filter((cb) => cb.checked)
+    .map((cb) => cb.value);
+
+  const maxAllowed = group.questions.length;
+
+  if (selectedOptions.length > maxAllowed) {
+    checkbox.checked = false;
+    alert(`You can only select ${maxAllowed} options for this question.`);
+    return;
+  }
+
+  // Clear previous answers for this group
+  group.questions.forEach(q => {
+    const qId = q.qId || q.questionId;
+    delete answersSoFar[qId];
+  });
+
+  // Assign selected options to questions
+  selectedOptions.forEach((option, index) => {
+    if (group.questions[index]) {
+      const qId = group.questions[index].qId || group.questions[index].questionId;
+      answersSoFar[qId] = option;
+    }
+  });
+
+  // Update checkbox styles
+  allCheckboxes.forEach(cb => {
+    const label = cb.parentElement;
+    if (cb.checked) {
+      label.style.background = "#dbeafe";
+      label.style.borderColor = "#3b82f6";
+    } else {
+      label.style.background = "";
+      label.style.borderColor = "#d1d5db";
+    }
+  });
+
+  saveState();
+  updateQuestionNav();
+}
+
 function startTimer(durationInSeconds, display) {
   clearInterval(window.readingTimerInterval);
 
@@ -1059,6 +1182,15 @@ function findQuestionByQId(qId) {
       if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
         return { ...q, qId };
       }
+      // Check question-group
+      if (q.type === "question-group" && q.questions) {
+        const found = q.questions.find(subQ => 
+          (subQ.qId === qId) || (subQ.questionId === qId)
+        );
+        if (found) {
+          return { ...found, qId, correctAnswer: found.correctAnswer };
+        }
+      }
     }
   }
   return { answer: [] };
@@ -1093,7 +1225,10 @@ async function handleFinish() {
     // Get correct answer
     let correctAnsArray = [];
 
-    if (typeof q.answer === "object" && !Array.isArray(q.answer)) {
+    if (q.correctAnswer) {
+      // For question-group questions
+      correctAnsArray = [q.correctAnswer];
+    } else if (typeof q.answer === "object" && !Array.isArray(q.answer)) {
       const extracted = q.answer[qId];
       correctAnsArray = Array.isArray(extracted) ? extracted : [extracted];
     } else {
