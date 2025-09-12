@@ -52,7 +52,7 @@
             ],
             "answer": {
               "q1": "theatre",
-              "q2": "4.30",
+              "q2": "4.30/4:30/4,30",
               "q3": "station",
               "q4": "cooking",
               "q5": "plate",
@@ -65,7 +65,7 @@
             "format": "gap-fill",
             "groupInstruction": "Questions 7-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
             "text": "This year, activities end by _____ p.m.",
-            "correctAnswer": "11.15",
+            "correctAnswer": "11.15/11:15/11,15",
             "wordLimit": 2
           },
           {
