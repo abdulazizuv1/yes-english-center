@@ -33,7 +33,68 @@ let answersSoFar = {};
 let orderedQIds = [];
 let testStorageKey = "readingTest_temp";
 let passageHighlights = {};
-let questionHighlights = {}; 
+let questionHighlights = {};
+let selectedText = "";
+let selectedRange = null;
+let highlightEventListeners = [];
+
+function cleanupHighlightListeners() {
+  highlightEventListeners.forEach(({ element, type, listener }) => {
+    element.removeEventListener(type, listener);
+  });
+  highlightEventListeners = [];
+}
+
+function addTrackedListener(element, type, listener) {
+  element.addEventListener(type, listener);
+  highlightEventListeners.push({ element, type, listener });
+}
+
+function initializeHighlightSystem() {
+  cleanupHighlightListeners();
+  
+  const mouseUpHandler = function(e) {
+    const selection = window.getSelection();
+    if (selection.toString().length > 0) {
+      selectedText = selection.toString();
+      try {
+        selectedRange = selection.getRangeAt(0);
+      } catch (err) {
+        selectedRange = null;
+      }
+    }
+  };
+  
+  const contextMenuHandler = function(e) {
+    if (selectedText.length > 0) {
+      const passagePanel = document.querySelector(".passage-panel");
+      const questionsPanel = document.querySelector(".questions-panel");
+      
+      if (passagePanel && questionsPanel && 
+          (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
+        e.preventDefault();
+        const contextMenu = document.getElementById("contextMenu");
+        if (contextMenu) {
+          contextMenu.style.display = "block";
+          contextMenu.style.left = e.pageX + "px";
+          contextMenu.style.top = e.pageY + "px";
+        }
+      }
+    }
+  };
+  
+  const clickHandler = function(e) {
+    const contextMenu = document.getElementById("contextMenu");
+    if (contextMenu && !contextMenu.contains(e.target)) {
+      contextMenu.style.display = "none";
+    }
+  };
+  
+  addTrackedListener(document, "mouseup", mouseUpHandler);
+  addTrackedListener(document, "contextmenu", contextMenuHandler);
+  addTrackedListener(document, "click", clickHandler);
+}
+
 
 function loadSavedState() {
   const saved = localStorage.getItem(testStorageKey);
@@ -41,7 +102,7 @@ function loadSavedState() {
     const data = JSON.parse(saved);
     answersSoFar = data.answers || {};
     passageHighlights = data.passageHighlights || {};
-    questionHighlights = data.questionHighlights || {}; 
+    questionHighlights = data.questionHighlights || {};
   }
 }
 
@@ -49,8 +110,8 @@ function saveState() {
   const data = {
     answers: answersSoFar,
     passageHighlights: passageHighlights,
-    questionHighlights: questionHighlights, 
-    timestamp: Date.now()
+    questionHighlights: questionHighlights,
+    timestamp: Date.now(),
   };
   localStorage.setItem(testStorageKey, JSON.stringify(data));
 }
@@ -172,14 +233,14 @@ function getPassageEndQuestion(passageIndex) {
 
 function jumpToQuestion(questionNum) {
   saveCurrentHighlights();
-  
+
   let targetPassage = 0;
   if (questionNum >= 14 && questionNum <= 26) targetPassage = 1;
   else if (questionNum >= 27) targetPassage = 2;
 
-  currentPassageIndex = targetPassage; 
+  currentPassageIndex = targetPassage;
   currentQuestionIndex = questionNum - 1;
-  renderPassage(currentPassageIndex); 
+  renderPassage(currentPassageIndex);
   updateQuestionNav();
 
   setTimeout(() => {
@@ -190,10 +251,8 @@ function jumpToQuestion(questionNum) {
   }, 100);
 }
 
-let selectedText = "";
-let selectedRange = null;
 
-document.addEventListener("mouseup", function(e) {
+document.addEventListener("mouseup", function (e) {
   const selection = window.getSelection();
   if (selection.toString().length > 0) {
     selectedText = selection.toString();
@@ -201,12 +260,15 @@ document.addEventListener("mouseup", function(e) {
   }
 });
 
-document.addEventListener("contextmenu", function(e) {
+document.addEventListener("contextmenu", function (e) {
   if (selectedText.length > 0) {
-    const passagePanel = document.querySelector('.passage-panel');
-    const questionsPanel = document.querySelector('.questions-panel');
-    
-    if (passagePanel && (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
+    const passagePanel = document.querySelector(".passage-panel");
+    const questionsPanel = document.querySelector(".questions-panel");
+
+    if (
+      passagePanel &&
+      (passagePanel.contains(e.target) || questionsPanel.contains(e.target))
+    ) {
       e.preventDefault();
       const contextMenu = document.getElementById("contextMenu");
       contextMenu.style.display = "block";
@@ -221,9 +283,21 @@ document.addEventListener("click", function () {
 });
 
 window.highlightSelection = function() {
-  if (selectedRange) {
+  if (!selectedRange) {
+    document.getElementById("contextMenu").style.display = "none";
+    return;
+  }
+  
+  try {
+    if (selectedRange.collapsed || !selectedRange.toString().trim()) {
+      clearSelection();
+      return;
+    }
+    
     const span = document.createElement("span");
     span.className = "highlighted";
+    span.setAttribute("data-highlight", "true");
+    
     try {
       selectedRange.surroundContents(span);
     } catch (e) {
@@ -231,112 +305,181 @@ window.highlightSelection = function() {
       span.appendChild(contents);
       selectedRange.insertNode(span);
     }
-    window.getSelection().removeAllRanges();
-    selectedText = "";
-    selectedRange = null;
     
+    clearSelection();
     saveCurrentHighlights();
+  } catch (error) {
+    console.warn("Failed to create highlight:", error);
   }
+  
   document.getElementById("contextMenu").style.display = "none";
 };
 
+let saveHighlightsTimeout;
 function saveCurrentHighlights() {
-  
-  const passageText = document.getElementById("passageText");
-  if (passageText) {
-    const highlights = passageText.querySelectorAll(".highlighted");
-    if (highlights.length > 0) {
-      passageHighlights[currentPassageIndex] = passageText.innerHTML;
-    } else if (passageHighlights[currentPassageIndex]) {
-      delete passageHighlights[currentPassageIndex];
+  clearTimeout(saveHighlightsTimeout);
+  saveHighlightsTimeout = setTimeout(() => {
+    try {
+      const passageText = document.getElementById("passageText");
+      const questionsList = document.getElementById("questionsList");
+      
+      if (passageText) {
+        const highlights = passageText.querySelectorAll(".highlighted");
+        if (highlights.length > 0) {
+          // Clean and save HTML
+          const cleanedHTML = cleanHighlightHTML(passageText.innerHTML);
+          passageHighlights[currentPassageIndex] = cleanedHTML;
+        } else {
+          // Only delete if we're sure there are no highlights
+          delete passageHighlights[currentPassageIndex];
+        }
+      }
+      
+      if (questionsList) {
+        const highlights = questionsList.querySelectorAll(".highlighted");
+        if (highlights.length > 0) {
+          const cleanedHTML = cleanHighlightHTML(questionsList.innerHTML);
+          questionHighlights[currentPassageIndex] = cleanedHTML;
+        } else {
+          delete questionHighlights[currentPassageIndex];
+        }
+      }
+      
+      saveState();
+    } catch (error) {
+      console.warn("Failed to save highlights:", error);
     }
-  }
-  
-  const questionsList = document.getElementById("questionsList");
-  if (questionsList) {
-    const highlights = questionsList.querySelectorAll(".highlighted");
-    if (highlights.length > 0) {
-      questionHighlights[currentPassageIndex] = questionsList.innerHTML;
-    } else if (questionHighlights[currentPassageIndex]) {
-      delete questionHighlights[currentPassageIndex];
-    }
-  }
-  
-  saveState();
+  }, 100);
 }
+
+function cleanHighlightHTML(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  
+  // Remove any invalid or temporary attributes
+  temp.querySelectorAll('*').forEach(el => {
+    // Keep only essential attributes
+    const allowedAttrs = ['class', 'id', 'type', 'name', 'value', 'data-question-id', 'data-group-qids', 'placeholder'];
+    const attrs = Array.from(el.attributes);
+    attrs.forEach(attr => {
+      if (!allowedAttrs.includes(attr.name)) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  
+  return temp.innerHTML;
+}
+
 
 function forceRenderPassageContent(index) {
   const passage = passages[index];
   
   document.getElementById("passageTitle").textContent = passage.title;
   document.getElementById("passageInstructions").textContent = passage.instructions;
-
+  
   const formattedText = passage.text
     .split("\n\n")
-    .map((p) => `<p>${p.trim()}</p>`)
+    .map(p => `<p>${p.trim()}</p>`)
     .join("");
-  document.getElementById("passageText").innerHTML = formattedText;
   
-  if (passageHighlights[index]) {
-    document.getElementById("passageText").innerHTML = passageHighlights[index];
+  const passageTextEl = document.getElementById("passageText");
+  passageTextEl.innerHTML = formattedText;
+  
+  requestAnimationFrame(() => {
+    restorePassageHighlights(index);
+  });
+}
+
+function restorePassageHighlights(index) {
+  const passageText = document.getElementById("passageText");
+  if (passageText && passageHighlights[index]) {
+    try {
+      passageText.innerHTML = passageHighlights[index];
+    } catch (error) {
+      console.warn("Failed to restore passage highlights:", error);
+      // Fallback to clean content
+      const passage = passages[index];
+      const formattedText = passage.text
+        .split("\n\n")
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+      passageText.innerHTML = formattedText;
+    }
   }
 }
 
 function restoreHighlights() {
-  const passageText = document.getElementById("passageText");
-  if (passageText && passageHighlights[currentPassageIndex]) {
-    passageText.innerHTML = passageHighlights[currentPassageIndex];
-  }
-  
+  restorePassageHighlights(currentPassageIndex);
   const questionsList = document.getElementById("questionsList");
   if (questionsList && questionHighlights[currentPassageIndex]) {
-    questionsList.innerHTML = questionHighlights[currentPassageIndex];
-    
+    try {
+      const savedHTML = questionHighlights[currentPassageIndex];
+      
+      setTimeout(() => {
+        questionsList.innerHTML = savedHTML;
+        
+        setTimeout(() => {
+          restoreInputEventListeners();
+        }, 50);
+      }, 10);
+    } catch (error) {
+      console.warn("Failed to restore question highlights:", error);
+      setTimeout(() => {
+        restoreInputEventListeners();
+      }, 50);
+    }
+  } else {
     setTimeout(() => {
       restoreInputEventListeners();
-    }, 0);
+    }, 10);
   }
 }
 
 function restoreInputEventListeners() {
-  // Для всех типов input полей
-  const inputs = document.querySelectorAll('input[data-question-id], input[id^="q"], input[id^="input-"], select[id^="q"]');
-  
-  inputs.forEach(input => {
-    const qId = input.dataset.questionId || input.id.replace('input-', '');
-    
-    if (input.type === 'text') {
+  const inputs = document.querySelectorAll(
+    'input[data-question-id], input[id^="q"], input[id^="input-"], select[id^="q"]'
+  );
+
+  inputs.forEach((input) => {
+    const qId = input.dataset.questionId || input.id.replace("input-", "");
+
+    if (input.type === "text") {
       // Text inputs (gap-fill)
       input.value = answersSoFar[qId] || "";
       if (input.value) {
-        input.classList.add('has-value');
+        input.classList.add("has-value");
       }
-      
+
       input.addEventListener("input", (e) => {
         answersSoFar[qId] = e.target.value;
         saveState();
         updateQuestionNav();
-        
+
         if (e.target.value.trim()) {
-          input.classList.add('has-value');
+          input.classList.add("has-value");
           const textLength = e.target.value.length;
-          input.classList.remove('input-small', 'input-medium', 'input-large');
+          input.classList.remove("input-small", "input-medium", "input-large");
           if (textLength > 15) {
-            input.classList.add('input-large');
+            input.classList.add("input-large");
           } else if (textLength > 8) {
-            input.classList.add('input-medium');
+            input.classList.add("input-medium");
           } else {
-            input.classList.add('input-small');
+            input.classList.add("input-small");
           }
         } else {
-          input.classList.remove('has-value', 'input-small', 'input-medium', 'input-large');
+          input.classList.remove(
+            "has-value",
+            "input-small",
+            "input-medium",
+            "input-large"
+          );
         }
       });
-      
-      input.addEventListener('focus', () => input.classList.add('focused'));
-      input.addEventListener('blur', () => input.classList.remove('focused'));
-      
-    } else if (input.type === 'radio') {
+
+      input.addEventListener("focus", () => input.classList.add("focused"));
+      input.addEventListener("blur", () => input.classList.remove("focused"));
+    } else if (input.type === "radio") {
       // Radio buttons
       if (answersSoFar[qId] === input.value) {
         input.checked = true;
@@ -348,10 +491,10 @@ function restoreInputEventListeners() {
       });
     }
   });
-  
+
   // Для select элементов
   const selects = document.querySelectorAll('select[id^="q"]');
-  selects.forEach(select => {
+  selects.forEach((select) => {
     const qId = select.id;
     select.value = answersSoFar[qId] || "";
     select.addEventListener("change", (e) => {
@@ -360,57 +503,99 @@ function restoreInputEventListeners() {
       updateQuestionNav();
     });
   });
+  // Восстановление состояния для question-group checkboxes
+  const groupContainers = document.querySelectorAll("[data-group-id]");
+  groupContainers.forEach((container) => {
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      // Найти соответствующий question-group
+      passages.forEach((passage) => {
+        passage.questions.forEach((question) => {
+          if (question.type === "question-group" && question.questions) {
+            const isSelected = question.questions.some(
+              (q) => answersSoFar[q.qId] === checkbox.value
+            );
+            if (isSelected) {
+              checkbox.checked = true;
+              const label = checkbox.parentElement;
+              if (label) {
+                label.style.background = "#dbeafe";
+                label.style.borderColor = "#3b82f6";
+              }
+            }
+          }
+        });
+      });
+    });
+  });
 }
 
-
 window.removeHighlight = function() {
-  if (selectedRange) {
+  if (!selectedRange) {
+    clearSelection();
+    return;
+  }
+  try {
     const container = selectedRange.commonAncestorContainer;
-    const highlighted = container.nodeType === Node.TEXT_NODE
-      ? container.parentElement.closest(".highlighted")
-        ? [container.parentElement.closest(".highlighted")]
-        : []
-      : Array.from(container.querySelectorAll(".highlighted")).filter(el =>
-          selectedRange.intersectsNode(el)
-        );
-
-    highlighted.forEach(element => {
+    let highlightedElements = [];
+    
+    if (container.nodeType === Node.TEXT_NODE) {
+      const parent = container.parentElement;
+      if (parent && parent.classList.contains("highlighted")) {
+        highlightedElements = [parent];
+      }
+    } else {
+      highlightedElements = Array.from(
+        container.querySelectorAll(".highlighted")
+      ).filter(el => selectedRange.intersectsNode(el));
+    }
+    
+    highlightedElements.forEach(element => {
       const parent = element.parentNode;
-      parent.insertBefore(document.createTextNode(element.textContent), element);
-      parent.removeChild(element);
-      parent.normalize();
+      if (parent) {
+        while (element.firstChild) {
+          parent.insertBefore(element.firstChild, element);
+        }
+        parent.removeChild(element);
+        parent.normalize();
+      }
     });
     
     saveCurrentHighlights();
+  } catch (error) {
+    console.warn("Failed to remove highlight:", error);
   }
-
-  window.getSelection().removeAllRanges();
-  selectedText = "";
-  selectedRange = null;
+  
+  clearSelection();
   document.getElementById("contextMenu").style.display = "none";
 };
 
+function clearSelection() {
+  window.getSelection().removeAllRanges();
+  selectedText = "";
+  selectedRange = null;
+}
 
 function assignQuestionIds() {
   let counter = 1;
   for (const passage of passages) {
     for (const question of passage.questions) {
-      // Only assign qId to questions that have a 'question' field
-      if (question.question) {
+      if (question.type === "question-group" && question.questions) {
+        // Для question-group назначаем qId каждому подвопросу
+        question.questions.forEach((subQ) => {
+          subQ.qId = `q${counter}`;
+          subQ.parentGroup = question; // Ссылка на родительскую группу
+          orderedQIds.push(subQ.qId);
+          counter++;
+        });
+        // Сохраняем ссылку на все qId в группе
+        question.qIds = question.questions.map((q) => q.qId);
+      } else if (question.question) {
+        // Обычные вопросы
         question.qId = `q${counter}`;
         orderedQIds.push(question.qId);
         counter++;
-      }
-
-      if (question.type === "question-group" && question.questions) {
-        question.questions.forEach(q => {
-          q.qId = q.questionId || `q${counter}`;
-          orderedQIds.push(q.qId);
-          counter++;
-        });
-      }
-
-      if (question.type === "table") {
+      } else if (question.type === "table") {
         const columnKeys = question.columns
           .slice(1)
           .map((col) => col.toLowerCase());
@@ -432,8 +617,6 @@ function assignQuestionIds() {
     }
   }
 }
-
-
 
 async function loadTest() {
   const auth = getAuth();
@@ -487,24 +670,29 @@ async function loadTest() {
 }
 
 function renderPassage(index) {
-  
   const passage = passages[index];
-
-  // Принудительно обновляем контент passage
+  
+  // Save current highlights before switching
+  if (currentPassageIndex !== index) {
+    saveCurrentHighlights();
+  }
+  
+  // Render passage content
   forceRenderPassageContent(index);
-
+  
+  // Render questions
   const questionsList = document.getElementById("questionsList");
   questionsList.innerHTML = "";
-  let lastInstruction = null;
   
+  let lastInstruction = null;
   let gapFillGroup = {
     title: null,
     subtitle: null,
     info: null,
     questions: [],
-    startDiv: null
+    startDiv: null,
   };
-
+  
   passage.questions.forEach((q, i) => {
     if (q.groupInstruction && q.groupInstruction !== lastInstruction) {
       if (gapFillGroup.questions.length > 0) {
@@ -516,15 +704,15 @@ function renderPassage(index) {
       instructionDiv.className = "group-instruction";
       instructionDiv.innerHTML = q.groupInstruction
         .split("\n")
-        .map((line) => `<p>${line}</p>`)
+        .map(line => `<p>${line}</p>`)
         .join("");
       questionsList.appendChild(instructionDiv);
       lastInstruction = q.groupInstruction;
     }
-
+    
     const qDiv = document.createElement("div");
     qDiv.className = "question-item";
-
+    
     if (q.type === "gap-fill") {
       if (!q.question && (q.title || q.subheading || q.text)) {
         if (gapFillGroup.questions.length > 0) {
@@ -536,12 +724,10 @@ function renderPassage(index) {
         if (q.subheading) gapFillGroup.subtitle = q.subheading;
         if (q.text) gapFillGroup.info = q.text;
         gapFillGroup.startDiv = qDiv;
-      } 
-      else if (q.question && q.qId) {
+      } else if (q.question && q.qId) {
         gapFillGroup.questions.push(q);
         
-        const isLastGapFill = 
-          i === passage.questions.length - 1 || 
+        const isLastGapFill = i === passage.questions.length - 1 ||
           passage.questions[i + 1]?.type !== "gap-fill" ||
           (!passage.questions[i + 1]?.question && 
            (passage.questions[i + 1]?.title || passage.questions[i + 1]?.subheading));
@@ -559,8 +745,8 @@ function renderPassage(index) {
       renderGapFillGroupComplete(gapFillGroup, questionsList);
       gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
     }
-
-    // Рендерим другие типы вопросов
+    
+    // Render other question types
     switch (q.type) {
       case "text-question":
         renderTextQuestion(q, qDiv);
@@ -586,97 +772,104 @@ function renderPassage(index) {
         renderQuestionGroup(q, qDiv);
         break;
     }
-
-    if (q.type !== "gap-fill" && (q.qId || q.type === "text-question" || q.type === "table")) {
+    
+    if (q.type !== "gap-fill" && q.type !== "question-group" && 
+        (q.qId || q.type === "text-question" || q.type === "table")) {
+      questionsList.appendChild(qDiv);
+    } else if (q.type === "question-group") {
       questionsList.appendChild(qDiv);
     }
   });
-
+  
   if (gapFillGroup.questions.length > 0) {
     renderGapFillGroupComplete(gapFillGroup, questionsList);
   }
-
-  // Восстанавливаем highlights для вопросов после рендеринга
-  setTimeout(() => {
-    if (questionHighlights[index]) {
-      questionsList.innerHTML = questionHighlights[index];
-      restoreInputEventListeners();
-    }
-  }, 0);
-
-  // Update navigation buttons
-  document.getElementById("backBtn").style.display = index > 0 ? "inline-block" : "none";
-  document.getElementById("nextBtn").style.display = index < passages.length - 1 ? "inline-block" : "none";
-  document.getElementById("finishBtn").style.display = index === passages.length - 1 ? "inline-block" : "none";
   
+  // Restore highlights after rendering is complete
+  requestAnimationFrame(() => {
+    restoreHighlights();
+  });
+  
+  // Update navigation
+  document.getElementById("backBtn").style.display = 
+    index > 0 ? "inline-block" : "none";
+  document.getElementById("nextBtn").style.display = 
+    index < passages.length - 1 ? "inline-block" : "none";
+  document.getElementById("finishBtn").style.display = 
+    index === passages.length - 1 ? "inline-block" : "none";
 }
+
+
+
 
 function renderGapFillGroupComplete(group, container) {
   if (!group.questions.length) return;
 
   // Create a single section container for the gap fill group
-  const section = document.createElement('div');
-  section.className = 'gap-fill-section';
+  const section = document.createElement("div");
+  section.className = "gap-fill-section";
 
   // Add title
   if (group.title) {
-    const titleDiv = document.createElement('div');
-    titleDiv.className = 'gap-fill-title';
+    const titleDiv = document.createElement("div");
+    titleDiv.className = "gap-fill-title";
     titleDiv.textContent = group.title;
     section.appendChild(titleDiv);
   }
 
   // Add info
   if (group.info) {
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'gap-fill-info';
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "gap-fill-info";
     infoDiv.textContent = group.info;
     section.appendChild(infoDiv);
   }
 
   // Add subtitle
   if (group.subtitle) {
-    const subtitleDiv = document.createElement('div');
-    subtitleDiv.className = 'gap-fill-subtitle';
+    const subtitleDiv = document.createElement("div");
+    subtitleDiv.className = "gap-fill-subtitle";
     subtitleDiv.textContent = group.subtitle;
     section.appendChild(subtitleDiv);
   }
 
   // Container for all questions
-  const questionsContainer = document.createElement('div');
-  questionsContainer.className = 'gap-fill-questions';
+  const questionsContainer = document.createElement("div");
+  questionsContainer.className = "gap-fill-questions";
 
   // Determine if bullets are used
-  const hasBullets = group.questions.some(q =>
-    q.question && (
-      q.question.includes('•') ||
-      q.question.includes('●') ||
-      q.question.includes('diet consists') ||
-      q.question.includes('nests are created')
-    )
+  const hasBullets = group.questions.some(
+    (q) =>
+      q.question &&
+      (q.question.includes("•") ||
+        q.question.includes("●") ||
+        q.question.includes("diet consists") ||
+        q.question.includes("nests are created"))
   );
 
-  group.questions.forEach(q => {
-    const questionDiv = document.createElement('div');
-    questionDiv.className = hasBullets ? 'gap-fill-list-item' : 'gap-fill-question';
+  group.questions.forEach((q) => {
+    const questionDiv = document.createElement("div");
+    questionDiv.className = hasBullets
+      ? "gap-fill-list-item"
+      : "gap-fill-question";
     questionDiv.id = q.qId;
 
     if (hasBullets) {
       // Add bullet
-      const bullet = document.createElement('span');
-      bullet.className = 'gap-fill-list-bullet';
+      const bullet = document.createElement("span");
+      bullet.className = "gap-fill-list-bullet";
       questionDiv.appendChild(bullet);
 
       // Content wrapper
-      const textWrapper = document.createElement('div');
-      textWrapper.className = 'gap-fill-content-wrapper';
+      const textWrapper = document.createElement("div");
+      textWrapper.className = "gap-fill-content-wrapper";
 
       // Text with input (no number span!)
-      const textSpan = document.createElement('span');
-      textSpan.className = 'gap-fill-text';
+      const textSpan = document.createElement("span");
+      textSpan.className = "gap-fill-text";
 
       // Clean bullet symbol
-      let cleanText = q.question.replace(/^[•●]\s*/, '');
+      let cleanText = q.question.replace(/^[•●]\s*/, "");
 
       // Replace blank with input, placeholder set to question number
       const inputHtml = cleanText.replace(
@@ -684,7 +877,7 @@ function renderGapFillGroupComplete(group, container) {
         `<input type="text"
                 id="input-${q.qId}"
                 class="gap-fill-input"
-                placeholder="${q.qId.replace('q','')}"
+                placeholder="${q.qId.replace("q", "")}"
                 data-question-id="${q.qId}" />`
       );
 
@@ -694,15 +887,15 @@ function renderGapFillGroupComplete(group, container) {
       questionDiv.appendChild(textWrapper);
     } else {
       // No bullets, just the text with input (no number span!)
-      const textSpan = document.createElement('span');
-      textSpan.className = 'gap-fill-text';
+      const textSpan = document.createElement("span");
+      textSpan.className = "gap-fill-text";
 
       const inputHtml = q.question.replace(
         /\.{3,}|_{3,}|…+|__________+/g,
         `<input type="text"
                 id="input-${q.qId}"
                 class="gap-fill-input"
-                placeholder="${q.qId.replace('q','')}"
+                placeholder="${q.qId.replace("q", "")}"
                 data-question-id="${q.qId}" />`
       );
 
@@ -718,7 +911,7 @@ function renderGapFillGroupComplete(group, container) {
 
   // Add input event listeners
   setTimeout(() => {
-    group.questions.forEach(q => {
+    group.questions.forEach((q) => {
       const input = document.getElementById(`input-${q.qId}`);
       if (input) {
         // Set saved value
@@ -726,7 +919,7 @@ function renderGapFillGroupComplete(group, container) {
 
         // Add class if value exists
         if (input.value) {
-          input.classList.add('has-value');
+          input.classList.add("has-value");
         }
 
         input.addEventListener("input", (e) => {
@@ -735,26 +928,35 @@ function renderGapFillGroupComplete(group, container) {
           updateQuestionNav();
 
           if (e.target.value.trim()) {
-            input.classList.add('has-value');
+            input.classList.add("has-value");
             // Size classes
             const textLength = e.target.value.length;
-            input.classList.remove('input-small', 'input-medium', 'input-large');
+            input.classList.remove(
+              "input-small",
+              "input-medium",
+              "input-large"
+            );
             if (textLength > 15) {
-              input.classList.add('input-large');
+              input.classList.add("input-large");
             } else if (textLength > 8) {
-              input.classList.add('input-medium');
+              input.classList.add("input-medium");
             } else {
-              input.classList.add('input-small');
+              input.classList.add("input-small");
             }
           } else {
-            input.classList.remove('has-value', 'input-small', 'input-medium', 'input-large');
+            input.classList.remove(
+              "has-value",
+              "input-small",
+              "input-medium",
+              "input-large"
+            );
           }
         });
-        input.addEventListener('focus', (e) => {
-          input.classList.add('focused');
+        input.addEventListener("focus", (e) => {
+          input.classList.add("focused");
         });
-        input.addEventListener('blur', (e) => {
-          input.classList.remove('focused');
+        input.addEventListener("blur", (e) => {
+          input.classList.remove("focused");
         });
       }
     });
@@ -814,31 +1016,41 @@ function renderMatchingQuestion(q, qDiv) {
   if (!q.question || !q.qId) return;
 
   qDiv.innerHTML = `
-       <div class="question-number">${q.qId
-         .toUpperCase()
-         .replace("Q", "")}</div>
-       <div class="question-text">${q.question}</div>
-       <select id="${q.qId}" class="select-input">
-           <option value="">Choose option</option>
-           ${q.options
-             ?.map(
-               (opt) =>
-                 `<option value="${opt.label}">${opt.label}: ${opt.text}</option>`
-             )
-             .join("")}
-       </select>
-   `;
+    <div class="question-number">${q.qId.toUpperCase().replace("Q", "")}</div>
+    <div class="question-text">${q.question}</div>
+    <div class="matching-options">
+      ${q.options?.map(opt => `
+        <label class="matching-option">
+          <input type="radio" name="${q.qId}" value="${opt.label}">
+          <span class="option-content">
+            <span class="option-label">${opt.label}</span>
+            <span class="option-text">${opt.text}</span>
+          </span>
+        </label>
+      `).join('') || ''}
+    </div>
+  `;
 
   setTimeout(() => {
-    const select = document.getElementById(q.qId);
-    if (select) {
-      select.value = answersSoFar[q.qId] || "";
-      select.addEventListener("change", (e) => {
+    const radios = document.querySelectorAll(`input[name="${q.qId}"]`);
+    radios.forEach((radio) => {
+      if (answersSoFar[q.qId] === radio.value) {
+        radio.checked = true;
+        radio.closest('.matching-option').classList.add('selected');
+      }
+      radio.addEventListener('change', (e) => {
+        const allOptions = document.querySelectorAll(`input[name="${q.qId}"]`);
+        allOptions.forEach(opt => {
+          opt.closest('.matching-option').classList.remove('selected');
+        });
+        
+        e.target.closest('.matching-option').classList.add('selected');
+        
         answersSoFar[q.qId] = e.target.value;
         saveState();
         updateQuestionNav();
       });
-    }
+    });
   }, 0);
 }
 
@@ -1015,71 +1227,198 @@ function renderTableQuestion(q, qDiv) {
 }
 
 function renderQuestionGroup(group, qDiv) {
-  if (group.groupType === "multi-select") {
-    // Add group instruction if exists
-    if (group.groupInstruction) {
-      const instructionDiv = document.createElement("div");
-      instructionDiv.className = "group-instruction";
-      instructionDiv.innerHTML = group.groupInstruction
-        .split("\n")
-        .map((line) => `<p>${line}</p>`)
-        .join("");
-      qDiv.appendChild(instructionDiv);
+  const groupContainer = document.createElement("div");
+  groupContainer.className = "multi-select-group";
+  
+
+  // Заголовок группы
+  if (group.text) {
+    const textDiv = document.createElement("h4");
+    textDiv.textContent = group.text;
+    textDiv.style.cssText = "margin: 0 0 20px 0; color: #1f2937;";
+    groupContainer.appendChild(textDiv);
+  }
+
+  // Создаем скрытые элементы для каждого вопроса (для навигации)
+  group.questions.forEach((q) => {
+    const hiddenMarker = document.createElement("div");
+    hiddenMarker.id = q.qId;
+    hiddenMarker.style.display = "none";
+    hiddenMarker.dataset.questionGroup = "true";
+    groupContainer.appendChild(hiddenMarker);
+  });
+
+  // Опции с чекбоксами
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "multi-select-options";
+  optionsContainer.dataset.groupQids = group.questions
+    .map((q) => q.qId)
+    .join(",");
+
+  // Получаем уже выбранные ответы
+  const selectedAnswers = [];
+  group.questions.forEach((q) => {
+    if (answersSoFar[q.qId]) {
+      selectedAnswers.push(answersSoFar[q.qId]);
     }
+  });
 
-    // Add title/text
-    const titleDiv = document.createElement("div");
-    titleDiv.style.cssText = "font-weight: 600; margin: 15px 0;";
-    titleDiv.textContent = group.text;
-    qDiv.appendChild(titleDiv);
+  Object.keys(group.options)
+    .sort()
+    .forEach((key) => {
+      const optionDiv = document.createElement("label");
+      optionDiv.style.cssText =
+        "display: block; margin: 10px 0; padding: 12px; border: 2px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s;";
 
-    // Add instructions
-    if (group.instructions) {
-      const instrDiv = document.createElement("div");
-      instrDiv.style.cssText = "color: #6b7280; margin-bottom: 15px; font-style: italic;";
-      instrDiv.textContent = group.instructions;
-      qDiv.appendChild(instrDiv);
-    }
-
-    // Create checkbox group
-    const optionsContainer = document.createElement("div");
-    optionsContainer.style.cssText = "margin: 20px 0;";
-
-    Object.keys(group.options || {}).sort().forEach((key) => {
-      const label = document.createElement("label");
-      label.style.cssText = "display: block; margin: 8px 0; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;";
-      
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.value = key;
-      checkbox.dataset.groupId = group.questionId;
-      checkbox.style.marginRight = "8px";
-      
-      // Check if this option is selected
-      const isChecked = group.questions.some(q => answersSoFar[q.qId || q.questionId] === key);
-      if (isChecked) {
+      checkbox.className = "multi-select-checkbox";
+      checkbox.dataset.groupQids = group.questions.map((q) => q.qId).join(",");
+
+      // Проверяем, выбрана ли эта опция
+      if (selectedAnswers.includes(key)) {
         checkbox.checked = true;
-        label.style.background = "#dbeafe";
-        label.style.borderColor = "#3b82f6";
+        optionDiv.style.background = "#dbeafe";
+        optionDiv.style.borderColor = "#3b82f6";
       }
-      
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(`${key}. ${group.options[key]}`));
-      optionsContainer.appendChild(label);
+
+      const textSpan = document.createElement("span");
+      textSpan.style.marginLeft = "10px";
+      textSpan.innerHTML = `<strong>${key}.</strong> ${group.options[key]}`;
+
+      optionDiv.appendChild(checkbox);
+      optionDiv.appendChild(textSpan);
+      optionsContainer.appendChild(optionDiv);
     });
 
-    qDiv.appendChild(optionsContainer);
+  groupContainer.appendChild(optionsContainer);
 
-    // Add event listeners
-    setTimeout(() => {
-      const checkboxes = qDiv.querySelectorAll(`input[data-group-id="${group.questionId}"]`);
-      checkboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", (e) => {
-          handleMultiSelectGroup(e.target, group);
-        });
+  // Добавляем индикатор выбранных опций
+  const indicator = document.createElement("div");
+  indicator.className = "selection-indicator";
+  indicator.style.cssText =
+    "margin-top: 15px; padding: 10px; background: #fef3c7; border-radius: 4px; font-size: 0.9em;";
+  indicator.textContent = `Select ${group.questions.length} options (${selectedAnswers.length} selected)`;
+  groupContainer.appendChild(indicator);
+
+  qDiv.appendChild(groupContainer);
+
+  // Добавляем обработчики событий
+  setTimeout(() => {
+    const checkboxes = optionsContainer.querySelectorAll(
+      ".multi-select-checkbox"
+    );
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        handleMultiSelectChange(group, optionsContainer);
       });
-    }, 0);
+    });
+  }, 0);
+}
+
+function handleMultiSelectChange(group, container) {
+  const checkboxes = container.querySelectorAll(".multi-select-checkbox");
+  const selected = Array.from(checkboxes)
+    .filter((cb) => cb.checked)
+    .map((cb) => cb.value)
+    .sort(); 
+
+  const maxAllowed = group.questions.length;
+
+  if (selected.length > maxAllowed) {
+    alert(`Please select exactly ${maxAllowed} options.`);
+    checkboxes.forEach((cb) => {
+      if (
+        cb.checked &&
+        !group.questions.some((q) => answersSoFar[q.qId] === cb.value)
+      ) {
+        cb.checked = false;
+      }
+    });
+    return;
   }
+
+  group.questions.forEach((q) => {
+    delete answersSoFar[q.qId];
+  });
+
+  // Назначаем новые ответы последовательно
+  selected.forEach((value, index) => {
+    if (group.questions[index]) {
+      answersSoFar[group.questions[index].qId] = value;
+    }
+  });
+
+  // Обновляем визуальное состояние
+  checkboxes.forEach((cb) => {
+    const label = cb.parentElement;
+    if (cb.checked) {
+      label.style.background = "#dbeafe";
+      label.style.borderColor = "#3b82f6";
+    } else {
+      label.style.background = "";
+      label.style.borderColor = "#d1d5db";
+    }
+  });
+
+  // Обновляем индикатор
+  const indicator = container.parentElement.querySelector(
+    ".selection-indicator"
+  );
+  if (indicator) {
+    indicator.textContent = `Select ${maxAllowed} options (${selected.length} selected)`;
+    if (selected.length === maxAllowed) {
+      indicator.style.background = "#d1fae5";
+    } else {
+      indicator.style.background = "#fef3c7";
+    }
+  }
+
+  saveState();
+  updateQuestionNav();
+}
+
+function handleMultiSelectGroupReading(checkbox, group, container) {
+  const maxSelections =
+    parseInt(container.dataset.maxSelections) || group.questions.length;
+  const allCheckboxes = container.querySelectorAll('input[type="checkbox"]');
+  const selectedOptions = Array.from(allCheckboxes)
+    .filter((cb) => cb.checked)
+    .map((cb) => cb.value);
+
+  if (selectedOptions.length > maxSelections) {
+    checkbox.checked = false;
+    alert(`Please select exactly ${maxSelections} options.`);
+    return;
+  }
+
+  // Clear all answers for this group first
+  group.questions.forEach((q) => {
+    delete answersSoFar[q.qId];
+  });
+
+  // Assign selected options to question IDs in order
+  selectedOptions.sort().forEach((option, index) => {
+    if (group.questions[index]) {
+      answersSoFar[group.questions[index].qId] = option;
+    }
+  });
+
+  // Update visual state
+  allCheckboxes.forEach((cb) => {
+    const label = cb.parentElement;
+    if (cb.checked) {
+      label.style.background = "#dbeafe";
+      label.style.borderColor = "#3b82f6";
+    } else {
+      label.style.background = "";
+      label.style.borderColor = "#d1d5db";
+    }
+  });
+
+  saveState();
+  updateQuestionNav();
 }
 
 function handleMultiSelectGroup(checkbox, group) {
@@ -1099,7 +1438,7 @@ function handleMultiSelectGroup(checkbox, group) {
   }
 
   // Clear previous answers for this group
-  group.questions.forEach(q => {
+  group.questions.forEach((q) => {
     const qId = q.qId || q.questionId;
     delete answersSoFar[qId];
   });
@@ -1107,13 +1446,14 @@ function handleMultiSelectGroup(checkbox, group) {
   // Assign selected options to questions
   selectedOptions.forEach((option, index) => {
     if (group.questions[index]) {
-      const qId = group.questions[index].qId || group.questions[index].questionId;
+      const qId =
+        group.questions[index].qId || group.questions[index].questionId;
       answersSoFar[qId] = option;
     }
   });
 
   // Update checkbox styles
-  allCheckboxes.forEach(cb => {
+  allCheckboxes.forEach((cb) => {
     const label = cb.parentElement;
     if (cb.checked) {
       label.style.background = "#dbeafe";
@@ -1156,8 +1496,8 @@ function startTimer(durationInSeconds, display) {
 
 document.getElementById("backBtn").addEventListener("click", () => {
   if (currentPassageIndex > 0) {
-    saveCurrentHighlights(); 
-    currentPassageIndex--; 
+    saveCurrentHighlights();
+    currentPassageIndex--;
     renderPassage(currentPassageIndex);
     updateQuestionNav();
   }
@@ -1165,9 +1505,9 @@ document.getElementById("backBtn").addEventListener("click", () => {
 
 document.getElementById("nextBtn").addEventListener("click", () => {
   if (currentPassageIndex < passages.length - 1) {
-    saveCurrentHighlights(); 
-    currentPassageIndex++; 
-    renderPassage(currentPassageIndex); 
+    saveCurrentHighlights();
+    currentPassageIndex++;
+    renderPassage(currentPassageIndex);
     updateQuestionNav();
   }
 });
@@ -1179,16 +1519,17 @@ function findQuestionByQId(qId) {
   for (const p of passages) {
     for (const q of p.questions) {
       if (q.qId === qId) return q;
+
+      // Проверяем table questions
       if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
         return { ...q, qId };
       }
-      // Check question-group
+
+      // Проверяем question-group
       if (q.type === "question-group" && q.questions) {
-        const found = q.questions.find(subQ => 
-          (subQ.qId === qId) || (subQ.questionId === qId)
-        );
-        if (found) {
-          return { ...found, qId, correctAnswer: found.correctAnswer };
+        const subQuestion = q.questions.find((subQ) => subQ.qId === qId);
+        if (subQuestion) {
+          return subQuestion;
         }
       }
     }
@@ -1200,7 +1541,7 @@ async function handleFinish() {
   const finishBtn = document.getElementById("finishBtn");
   finishBtn.disabled = true;
   finishBtn.textContent = "Submitting...";
-  
+
   const loadingModal = document.getElementById("loadingModal");
   loadingModal.style.display = "flex";
 
@@ -1226,7 +1567,6 @@ async function handleFinish() {
     let correctAnsArray = [];
 
     if (q.correctAnswer) {
-      // For question-group questions
       correctAnsArray = [q.correctAnswer];
     } else if (typeof q.answer === "object" && !Array.isArray(q.answer)) {
       const extracted = q.answer[qId];
@@ -1248,7 +1588,7 @@ async function handleFinish() {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
-    
+
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -1264,16 +1604,16 @@ async function handleFinish() {
     });
 
     window.location.href = `/pages/mock/result.html?id=${docRef.id}`;
-    localStorage.removeItem(testStorageKey); 
+    localStorage.removeItem(testStorageKey);
     clearInterval(window.readingTimerInterval);
     window.finished = true;
   } catch (e) {
     console.error("❌ Error saving result:", e);
-    
+
     loadingModal.style.display = "none";
     finishBtn.disabled = false;
     finishBtn.textContent = "Finish Test";
-    
+
     alert("Error submitting your result. Please try again.");
   }
 }
@@ -1283,7 +1623,7 @@ window.openReview = function () {
 };
 
 window.onload = () => {
-  createPauseModal(); 
+  createPauseModal();
   loadTest().then(() => {
     const display = document.getElementById("time");
     startTimer(60 * 60, display);
