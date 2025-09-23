@@ -12,14 +12,14 @@ admin.initializeApp({
 const db = admin.firestore();
 
 // Путь к JSON файлу
-const filePath = path.join(__dirname, "data", "readingTests", "test-6.json");
+const filePath = path.join(__dirname, "data", "readingTests", "test-12.json");
 
 // Читаем JSON
 const rawData = fs.readFileSync(filePath);
 const readingTest = JSON.parse(rawData);
 
 // Название документа (test-1)
-const docId = "test-6";
+const docId = "test-12";
 
 // Загрузка в коллекцию "readingTests"
 db.collection("readingTests")
