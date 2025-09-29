@@ -294,22 +294,68 @@ window.highlightSelection = function() {
       return;
     }
     
-    const span = document.createElement("span");
-    span.className = "highlighted";
-    span.setAttribute("data-highlight", "true");
+    // Create a document fragment to hold highlighted content
+    const fragment = document.createDocumentFragment();
     
-    try {
-      selectedRange.surroundContents(span);
-    } catch (e) {
-      const contents = selectedRange.extractContents();
-      span.appendChild(contents);
-      selectedRange.insertNode(span);
+    // Clone the range to avoid modifying the original
+    const range = selectedRange.cloneRange();
+    
+    // Extract contents from the range
+    const contents = range.extractContents();
+    
+    // Function to wrap text nodes in highlight spans
+    function wrapTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.textContent.trim()) {
+          const span = document.createElement("span");
+          span.className = "highlighted";
+          span.setAttribute("data-highlight", "true");
+          span.textContent = node.textContent;
+          return span;
+        }
+        return node;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // For element nodes, process their children
+        const clone = node.cloneNode(false);
+        Array.from(node.childNodes).forEach(child => {
+          clone.appendChild(wrapTextNodes(child));
+        });
+        return clone;
+      }
+      return node;
+    }
+    
+    // Process all nodes in the extracted contents
+    Array.from(contents.childNodes).forEach(node => {
+      fragment.appendChild(wrapTextNodes(node));
+    });
+    
+    // Insert the highlighted content back
+    range.insertNode(fragment);
+    
+    // Normalize to merge adjacent text nodes
+    const commonAncestor = range.commonAncestorContainer;
+    if (commonAncestor.nodeType === Node.ELEMENT_NODE) {
+      commonAncestor.normalize();
+    } else if (commonAncestor.parentElement) {
+      commonAncestor.parentElement.normalize();
     }
     
     clearSelection();
     saveCurrentHighlights();
   } catch (error) {
     console.warn("Failed to create highlight:", error);
+    // If highlighting fails, try a simpler approach
+    try {
+      const span = document.createElement("span");
+      span.className = "highlighted";
+      span.setAttribute("data-highlight", "true");
+      selectedRange.surroundContents(span);
+      clearSelection();
+      saveCurrentHighlights();
+    } catch (e) {
+      console.error("Fallback highlighting also failed:", e);
+    }
   }
   
   document.getElementById("contextMenu").style.display = "none";
@@ -356,10 +402,20 @@ function cleanHighlightHTML(html) {
   const temp = document.createElement('div');
   temp.innerHTML = html;
   
-  // Remove any invalid or temporary attributes
+  // Merge nested highlights (in case they were created)
+  temp.querySelectorAll('.highlighted .highlighted').forEach(nested => {
+    const parent = nested.parentElement;
+    if (parent && parent.classList.contains('highlighted')) {
+      while (nested.firstChild) {
+        parent.insertBefore(nested.firstChild, nested);
+      }
+      nested.remove();
+    }
+  });
+  
+  // Clean attributes
   temp.querySelectorAll('*').forEach(el => {
-    // Keep only essential attributes
-    const allowedAttrs = ['class', 'id', 'type', 'name', 'value', 'data-question-id', 'data-group-qids', 'placeholder'];
+    const allowedAttrs = ['class', 'id', 'type', 'name', 'value', 'data-question-id', 'data-group-qids', 'placeholder', 'data-highlight'];
     const attrs = Array.from(el.attributes);
     attrs.forEach(attr => {
       if (!allowedAttrs.includes(attr.name)) {
@@ -367,6 +423,9 @@ function cleanHighlightHTML(html) {
       }
     });
   });
+  
+  // Normalize all text nodes
+  temp.normalize();
   
   return temp.innerHTML;
 }
@@ -535,28 +594,50 @@ window.removeHighlight = function() {
     clearSelection();
     return;
   }
+  
   try {
-    const container = selectedRange.commonAncestorContainer;
+    const range = selectedRange.cloneRange();
+    const container = range.commonAncestorContainer;
     let highlightedElements = [];
     
+    // Find all highlighted elements that intersect with the selection
     if (container.nodeType === Node.TEXT_NODE) {
-      const parent = container.parentElement;
-      if (parent && parent.classList.contains("highlighted")) {
-        highlightedElements = [parent];
+      let parent = container.parentElement;
+      while (parent) {
+        if (parent.classList && parent.classList.contains("highlighted")) {
+          highlightedElements.push(parent);
+          break;
+        }
+        parent = parent.parentElement;
       }
-    } else {
-      highlightedElements = Array.from(
-        container.querySelectorAll(".highlighted")
-      ).filter(el => selectedRange.intersectsNode(el));
+    } else if (container.nodeType === Node.ELEMENT_NODE) {
+      // Get all highlighted elements within the container
+      const allHighlights = container.querySelectorAll(".highlighted");
+      highlightedElements = Array.from(allHighlights).filter(el => {
+        try {
+          return range.intersectsNode(el);
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      // Also check if the container itself is highlighted
+      if (container.classList && container.classList.contains("highlighted")) {
+        highlightedElements.push(container);
+      }
     }
     
+    // Remove highlights by unwrapping the span elements
     highlightedElements.forEach(element => {
       const parent = element.parentNode;
       if (parent) {
+        // Move all child nodes before the highlighted element
         while (element.firstChild) {
           parent.insertBefore(element.firstChild, element);
         }
+        // Remove the now-empty highlighted span
         parent.removeChild(element);
+        // Normalize to merge adjacent text nodes
         parent.normalize();
       }
     });
@@ -1016,41 +1097,32 @@ function renderMatchingQuestion(q, qDiv) {
   if (!q.question || !q.qId) return;
 
   qDiv.innerHTML = `
-    <div class="question-number">${q.qId.toUpperCase().replace("Q", "")}</div>
-    <div class="question-text">${q.question}</div>
-    <div class="matching-options">
-      ${q.options?.map(opt => `
-        <label class="matching-option">
-          <input type="radio" name="${q.qId}" value="${opt.label}">
-          <span class="option-content">
-            <span class="option-label">${opt.label}</span>
-            <span class="option-text">${opt.text}</span>
-          </span>
-        </label>
-      `).join('') || ''}
-    </div>
-  `;
+      
+       <div class="question-number">${q.qId
+         .toUpperCase()
+         .replace("Q", "")}</div>
+       <div class="question-text">${q.question}</div>
+       <select id="${q.qId}" class="select-input">
+           <option value="">Choose option</option>
+           ${q.options
+             ?.map(
+               (opt) =>
+                 `<option value="${opt.label}">${opt.label}: ${opt.text}</option>`
+             )
+             .join("")}
+       </select>
+   `;
 
   setTimeout(() => {
-    const radios = document.querySelectorAll(`input[name="${q.qId}"]`);
-    radios.forEach((radio) => {
-      if (answersSoFar[q.qId] === radio.value) {
-        radio.checked = true;
-        radio.closest('.matching-option').classList.add('selected');
-      }
-      radio.addEventListener('change', (e) => {
-        const allOptions = document.querySelectorAll(`input[name="${q.qId}"]`);
-        allOptions.forEach(opt => {
-          opt.closest('.matching-option').classList.remove('selected');
-        });
-        
-        e.target.closest('.matching-option').classList.add('selected');
-        
+    const select = document.getElementById(q.qId);
+    if (select) {
+      select.value = answersSoFar[q.qId] || "";
+      select.addEventListener("change", (e) => {
         answersSoFar[q.qId] = e.target.value;
         saveState();
         updateQuestionNav();
       });
-    });
+    }
   }, 0);
 }
 
@@ -1211,7 +1283,6 @@ function renderTableQuestion(q, qDiv) {
   table.appendChild(tbody);
   qDiv.appendChild(table);
 
-  // Add event listeners for input fields after adding to DOM
   setTimeout(() => {
     const inputs = qDiv.querySelectorAll('input[type="text"]');
     inputs.forEach((input) => {
@@ -1514,18 +1585,15 @@ document.getElementById("nextBtn").addEventListener("click", () => {
 
 document.getElementById("finishBtn").addEventListener("click", handleFinish);
 
-// Find question function
 function findQuestionByQId(qId) {
   for (const p of passages) {
     for (const q of p.questions) {
       if (q.qId === qId) return q;
 
-      // Проверяем table questions
       if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
         return { ...q, qId };
       }
 
-      // Проверяем question-group
       if (q.type === "question-group" && q.questions) {
         const subQuestion = q.questions.find((subQ) => subQ.qId === qId);
         if (subQuestion) {
@@ -1534,7 +1602,7 @@ function findQuestionByQId(qId) {
       }
     }
   }
-  return { answer: [] };
+  return { answer: null };
 }
 
 async function handleFinish() {
@@ -1545,7 +1613,6 @@ async function handleFinish() {
   const loadingModal = document.getElementById("loadingModal");
   loadingModal.style.display = "flex";
 
-  // Подсчет результатов ПЕРЕД проверкой пользователя
   const answers = {};
   const correctAnswers = {};
   let correct = 0;

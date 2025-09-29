@@ -351,7 +351,7 @@
           ]
         },
         {
-          "groupInstruction": "Question 20-22\nLook at the following statements (Question 20-22) and the list of people below.\nMatch each statement with the correct person, A, B, C or D\nWrite the correct letter, A, B, C or D in boxes 20-22 on your answer sheet",
+          "groupInstruction": "Question 20-22\nLook at the following statements (Question 20-22) and the list of people below.\nMatch each statement with the correct person, A, B, C or D\nWrite the correct letter, A, B, C or D in boxes 20-22 on your answer sheet\nOptions:\nA. George de Mestral\nB. Andrew Parker\nC. Robert Cohen\nD. Ronald Fearing",
           "type": "match-person",
           "question": "All living things provide something, useful for humans to discover.",
           "answer": "B",
@@ -573,7 +573,7 @@
           ]
         },
         {
-          "groupInstruction": "Questions 32-36\nComplete the summary using the list of words, A-I, below\nWrite the correct letter, A-I, in boxes 32-36 on your answer sheet\n\nThe television series based on Ekman's work",
+          "groupInstruction": "Questions 32-36\nComplete the summary using the list of words, A-I, below\nWrite the correct letter, A-I, in boxes 32-36 on your answer sheet\n\nThe television series based on Ekman's work\nOptions:\nA. consequences\nB. motives\nC. false beliefs\nD. crimes\nE. justice\nF. accuracy\nG. acting\nH. research\nI. ratings",
           "type": "paragraph-matching",
           "question": "A new TV series based on Ekman's work features a hero named Lightman, who detects lies. Initially, Ekman was unenthusiastic about the TV project because he feared the possibility of encouraging viewers 32____.",
           "answer": [

@@ -314,7 +314,7 @@
         },
         {
           "type": "match-person",
-          "groupInstruction": "Questions 19–22\nLook at the following statements (Questions 19–22) and the list of researchers below.\nMatch each statement with the correct researcher(s), A–H\nWrite the correct letter, A–H, in boxes 19–22 on your answer sheet.",
+          "groupInstruction": "Questions 19–22\nLook at the following statements (Questions 19–22) and the list of researchers below.\nMatch each statement with the correct researcher(s), A–H\nWrite the correct letter, A–H, in boxes 19–22 on your answer sheet.\nOptions:\nA. Kunkel\nB. Kunkel et al\nC. McNeal\nD. Turow",
           "question": "Ads often aim to teach children that a brand is fun rather than telling them about what is being sold.",
           "answer": "B",
           "options": [
