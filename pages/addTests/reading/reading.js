@@ -244,7 +244,6 @@ window.addQuestion = function (passageNumber, type) {
     </div>
   `;
       break;
-      break;
 
     case "true-false-notgiven":
       questionHTML = `
@@ -293,34 +292,38 @@ window.addQuestion = function (passageNumber, type) {
       </div>
       <textarea placeholder="Group instruction (optional, e.g., 'Questions 27-30\nChoose the correct letter, A, B, C or D.')" class="group-instruction" rows="2"></textarea>
       <input type="text" placeholder="Question" class="question-text">
-      <div class="mc-options">
+      <div class="mc-options" id="mc-options-${questionId}">
         <div class="mc-option">
           <input type="radio" name="mc-answer-${questionId}" value="A">
           <label>A</label>
           <input type="text" placeholder="Option A text" class="option-text" data-option="A">
+          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
         <div class="mc-option">
           <input type="radio" name="mc-answer-${questionId}" value="B">
           <label>B</label>
           <input type="text" placeholder="Option B text" class="option-text" data-option="B">
+          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
         <div class="mc-option">
           <input type="radio" name="mc-answer-${questionId}" value="C">
           <label>C</label>
           <input type="text" placeholder="Option C text" class="option-text" data-option="C">
+          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
         <div class="mc-option">
           <input type="radio" name="mc-answer-${questionId}" value="D">
           <label>D</label>
           <input type="text" placeholder="Option D text" class="option-text" data-option="D">
+          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
       </div>
+      <button type="button" onclick="addMCOption(${questionId})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
     </div>
   `;
       break;
 
     case "paragraph-matching":
-      // Используем существующие опции или создаем стандартные
       if (sharedOptions["paragraph-matching"].length === 0) {
         sharedOptions["paragraph-matching"] = [
           { label: "A", text: "Paragraph A" },
@@ -374,7 +377,6 @@ window.addQuestion = function (passageNumber, type) {
       break;
 
     case "match-person":
-      // Используем существующие опции или создаем стандартные
       if (sharedOptions["match-person"].length === 0) {
         sharedOptions["match-person"] = [
           { label: "A", text: "" },
@@ -444,11 +446,9 @@ window.toggleOptionsEdit = function (questionId, type) {
     optionsDiv.style.display = "block";
     previewDiv.style.display = "none";
   } else {
-    // Save changes to shared options
     updateSharedOptions(questionId, type);
     optionsDiv.style.display = "none";
     previewDiv.style.display = "block";
-    // Update preview
     updateAllOptionsPreview(type);
   }
 };
@@ -458,6 +458,26 @@ function updateSharedOptions(questionId, type) {
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
+  
+  if (!container) {
+    const anyQuestion = document.querySelector(`.question-item[data-type="${type}"]`);
+    if (anyQuestion) {
+      const anyQuestionId = anyQuestion.dataset.questionId;
+      const anyContainer = document.getElementById(
+        `${type === "paragraph-matching" ? "pm" : "match"}-options-${anyQuestionId}`
+      );
+      if (anyContainer) {
+        updateSharedOptionsFromContainer(anyContainer, type);
+      }
+    }
+    return;
+  }
+  
+  updateSharedOptionsFromContainer(container, type);
+}
+
+// Helper function to update shared options from a specific container
+function updateSharedOptionsFromContainer(container, type) {
   const newOptions = [];
 
   container.querySelectorAll(".option-row").forEach((row) => {
@@ -509,7 +529,6 @@ window.addOption = function (questionId, type) {
     </div>
   `;
 
-  // Insert before the Add button
   const addButton = container.querySelector('button[onclick*="addOption"]');
   addButton.insertAdjacentHTML("beforebegin", optionHTML);
 };
@@ -519,20 +538,37 @@ window.removeOption = function (button, type) {
   button.parentElement.remove();
 };
 
-window.addMatchOption = function (questionId) {
-  const container = document.getElementById(`match-options-${questionId}`);
-  const existingOptions = container.querySelectorAll(".option-row").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions); // A, B, C, etc.
+// Add option for Multiple Choice
+window.addMCOption = function (questionId) {
+  const container = document.getElementById(`mc-options-${questionId}`);
+  const existingOptions = container.querySelectorAll(".mc-option").length;
+  const nextLetter = String.fromCharCode(65 + existingOptions);
 
   const optionHTML = `
-    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-      <span style="min-width: 25px; font-weight: bold;">${nextLetter}</span>
-      <input type="text" placeholder="Option ${nextLetter}" class="option-text" data-label="${nextLetter}" style="flex: 1;">
-      <button type="button" onclick="this.parentElement.remove()" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+    <div class="mc-option">
+      <input type="radio" name="mc-answer-${questionId}" value="${nextLetter}">
+      <label>${nextLetter}</label>
+      <input type="text" placeholder="Option ${nextLetter} text" class="option-text" data-option="${nextLetter}">
+      <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
     </div>
   `;
 
   container.insertAdjacentHTML("beforeend", optionHTML);
+};
+
+// Remove option for Multiple Choice
+window.removeMCOption = function (button) {
+  const mcOption = button.closest(".mc-option");
+  const container = mcOption.parentElement;
+  
+  if (container.querySelectorAll(".mc-option").length <= 2) {
+    alert("Multiple choice question must have at least 2 options");
+    return;
+  }
+  
+  if (confirm("Remove this option?")) {
+    mcOption.remove();
+  }
 };
 
 // Remove a question
@@ -572,7 +608,6 @@ function renumberPassages() {
       ".passage-title"
     ).childNodes[1].textContent = ` Passage ${newNumber}`;
 
-    // Update instructions
     const instructionsInput = passage.querySelector(".passage-instructions");
     if (instructionsInput) {
       instructionsInput.value = `You should spend about 20 minutes on Questions ${getQuestionRange(
@@ -580,19 +615,16 @@ function renumberPassages() {
       )}`;
     }
 
-    // Update question menu ID
     const questionMenu = passage.querySelector(".question-types-menu");
     if (questionMenu) {
       questionMenu.id = `questionMenu${newNumber}`;
     }
 
-    // Update questions container ID
     const questionsContainer = passage.querySelector(".questions-container");
     if (questionsContainer) {
       questionsContainer.id = `questions${newNumber}`;
     }
 
-    // Update onclick handlers
     const addQuestionBtn = passage.querySelector(".add-question-btn");
     if (addQuestionBtn) {
       addQuestionBtn.setAttribute(
@@ -606,7 +638,6 @@ function renumberPassages() {
       removeBtn.setAttribute("onclick", `removePassage(${newNumber})`);
     }
 
-    // Update question type options
     const questionOptions = passage.querySelectorAll(".question-type-option");
     questionOptions.forEach((option) => {
       const type = option.textContent.toLowerCase().replace(/[^a-z-]/g, "");
@@ -623,6 +654,7 @@ function renumberPassages() {
 // Get question type from text
 function getQuestionTypeFromText(text) {
   const types = {
+    "Text Only (No Question)": "text-question",
     "Gap Fill": "gap-fill",
     "True/False/Not Given": "true-false-notgiven",
     "Yes/No/Not Given": "yes-no-notgiven",
@@ -736,7 +768,6 @@ function collectTestData() {
         type: type,
       };
 
-      // Добавляем groupInstruction если есть
       const groupInstruction = questionEl
         .querySelector(".group-instruction")
         ?.value.trim();
@@ -744,10 +775,7 @@ function collectTestData() {
         questionData.groupInstruction = groupInstruction;
       }
 
-      // Обработка разных типов вопросов
-      // Обработка разных типов вопросов
       if (type === "text-question") {
-        // Для text-question собираем все возможные поля
         const title = questionEl.querySelector(".question-title")?.value.trim();
         const subheading = questionEl
           .querySelector(".question-subheading")
@@ -760,7 +788,6 @@ function collectTestData() {
       } else {
         questionData.question = questionText;
 
-        // Для gap-fill добавляем title и subheading
         if (type === "gap-fill") {
           const title = questionEl
             .querySelector(".question-title")
@@ -800,6 +827,9 @@ function collectTestData() {
             .querySelector(".question-answer")
             .value.trim();
 
+          const questionId = questionEl.dataset.questionId;
+          updateSharedOptions(questionId, type);
+          
           questionData.options = sharedOptions[type].map((opt) => ({
             label: opt.label,
             text: opt.text,
@@ -854,19 +884,19 @@ function validateForm() {
       return false;
     }
 
-    // Validate each question
-    // Validate each question
     for (let question of questions) {
       const type = question.dataset.type;
 
-      // Text-question не требует ответа
       if (type === "text-question") {
-        const text = question.querySelector(".question-text").value.trim();
-        if (!text) {
-          alert("Please fill in text for all text-only items");
+        const title = question.querySelector(".question-title")?.value.trim();
+        const subheading = question.querySelector(".question-subheading")?.value.trim();
+        const text = question.querySelector(".question-text")?.value.trim();
+        
+        if (!title && !subheading && !text) {
+          alert("Please fill in at least one field for text-only items");
           return false;
         }
-        continue; // Пропускаем остальные проверки
+        continue;
       }
 
       const questionText = question
@@ -877,8 +907,6 @@ function validateForm() {
         return false;
       }
 
-      // Остальная валидация как была...
-
       if (type === "multiple-choice") {
         const selectedAnswer = question.querySelector(
           'input[type="radio"]:checked'
@@ -887,6 +915,16 @@ function validateForm() {
           alert(
             "Please select the correct answer for all multiple choice questions"
           );
+          return false;
+        }
+        
+        const options = question.querySelectorAll(".option-text");
+        let hasEmptyOption = false;
+        options.forEach(opt => {
+          if (!opt.value.trim()) hasEmptyOption = true;
+        });
+        if (hasEmptyOption) {
+          alert("Please fill in all multiple choice options");
           return false;
         }
       } else if (type === "gap-fill") {
@@ -920,35 +958,29 @@ async function handleFormSubmit(e) {
   const submitText = document.getElementById("submitText");
   const loader = document.getElementById("loader");
 
-  // Disable submit button and show loader
   submitBtn.disabled = true;
   submitText.textContent = "Adding test...";
   loader.style.display = "inline-block";
 
   try {
-    // Collect test data
     const testData = collectTestData();
 
     console.log("💾 Saving test data:", testData);
 
-    // Save to Firestore with specific document ID
     const docId = `test-${nextTestNumber}`;
     await setDoc(doc(db, "readingTests", docId), testData);
     console.log("✅ Test added with ID:", docId);
 
-    // Show success message
     const successModal = document.getElementById("successModal");
     const successMessage = document.getElementById("successMessage");
     successMessage.textContent = `Reading Test ${nextTestNumber} has been added successfully!`;
     successModal.style.display = "flex";
 
-    // Update next test number
     nextTestNumber++;
   } catch (error) {
     console.error("❌ Error adding test:", error);
     alert(`❌ Error adding test: ${error.message}`);
   } finally {
-    // Reset button state
     submitBtn.disabled = false;
     submitText.textContent = "Add Reading Test";
     loader.style.display = "none";
@@ -957,22 +989,21 @@ async function handleFormSubmit(e) {
 
 // Reset form for adding another test
 window.resetForm = function () {
-  // Hide success modal
   document.getElementById("successModal").style.display = "none";
 
-  // Clear passages
   document.getElementById("passagesContainer").innerHTML = "";
   passageCount = 0;
   questionIdCounter = 0;
+  sharedOptions = {
+    "paragraph-matching": [],
+    "match-person": [],
+  };
 
-  // Update displays
   updatePassageCount();
   updateAddPassageButton();
 
-  // Update test number
   getNextTestNumber();
 
-  // Scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -980,13 +1011,10 @@ window.resetForm = function () {
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("📚 Reading Test Add page loaded");
 
-  // Check admin access
   await checkAdminAccess();
 
-  // Get next test number
   await getNextTestNumber();
 
-  // Setup event listeners
   document
     .getElementById("addPassageBtn")
     .addEventListener("click", addPassage);
@@ -995,7 +1023,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     .getElementById("readingTestForm")
     .addEventListener("submit", handleFormSubmit);
 
-  // Add first passage automatically
   addPassage();
 
   console.log("✅ Page initialized successfully");

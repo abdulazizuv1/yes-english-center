@@ -1695,4 +1695,4 @@ window.onload = () => {
     const display = document.getElementById("time");
     startTimer(60 * 60, display);
   });
-};
+};f
