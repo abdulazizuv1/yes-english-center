@@ -1590,15 +1590,19 @@ function findQuestionByQId(qId) {
     for (const q of p.questions) {
       if (q.qId === qId) return q;
 
-      if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
-        return { ...q, qId };
-      }
-
       if (q.type === "question-group" && q.questions) {
         const subQuestion = q.questions.find((subQ) => subQ.qId === qId);
         if (subQuestion) {
-          return subQuestion;
+          return {
+            ...subQuestion,
+            answer: subQuestion.answer,
+            parentGroup: q
+          };
         }
+      }
+
+      if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
+        return { ...q, qId };
       }
     }
   }
