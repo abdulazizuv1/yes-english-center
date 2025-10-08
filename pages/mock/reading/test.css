@@ -188,22 +188,14 @@ body {
 .highlighted {
     background: yellow;
     border-radius: 3px;
-}
-
-/* Preserve whitespace only in passage text and instruction blocks */
-.passage-text .highlighted,
-.group-instruction .highlighted {
-    white-space: pre-wrap;
+    /* Do not force white-space; inherit from context to avoid reflow */
+    white-space: inherit;
+    /* Ensure multi-line highlights render as one continuous box per line */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
 }
 
-/* Preserve whitespace in highlighted text inside questions/options */
-.questions-panel .highlighted {
-    white-space: pre-wrap;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-}
+/* Let context control white-space; lines above set decoration-break for all */
 
 /* ===== QUESTIONS PANEL ===== */
 .questions-panel {

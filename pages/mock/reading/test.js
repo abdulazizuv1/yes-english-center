@@ -288,10 +288,6 @@ window.highlightSelection = function() {
           const span = document.createElement("span");
           span.className = "highlighted";
           span.setAttribute("data-highlight", "true");
-          // Preserve spaces and line breaks inside highlights universally
-          span.style.whiteSpace = "pre-wrap";
-          span.style.webkitBoxDecorationBreak = "clone";
-          span.style.boxDecorationBreak = "clone";
           span.textContent = node.textContent;
           return span;
         }
@@ -332,10 +328,6 @@ window.highlightSelection = function() {
       const span = document.createElement("span");
       span.className = "highlighted";
       span.setAttribute("data-highlight", "true");
-      // Preserve spaces and line breaks in fallback wrap
-      span.style.whiteSpace = "pre-wrap";
-      span.style.webkitBoxDecorationBreak = "clone";
-      span.style.boxDecorationBreak = "clone";
       selectedRange.surroundContents(span);
       clearSelection();
       saveCurrentHighlights();
