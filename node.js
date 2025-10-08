@@ -1,16 +1,25 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import fs from "fs";
+import 'dotenv/config';
 
+// Read Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBw36xP5tVYO2D0T-XFQQAGFA4wrJ8If8k",
-  authDomain: "yes-english-center.firebaseapp.com",
-  projectId: "yes-english-center",
-  storageBucket: "yes-english-center.firebasestorage.app",
-  messagingSenderId: "203211203853",
-  appId: "1:203211203853:web:7d499925c3aa830eaefc44",
-  measurementId: "G-4LHEBLG2KK",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
+
+// Basic validation to help local devs
+for (const [key, value] of Object.entries(firebaseConfig)) {
+  if (!value) {
+    throw new Error(`Missing environment variable for Firebase config: ${key}`);
+  }
+}
 
 // Инициализация
 const app = initializeApp(firebaseConfig);

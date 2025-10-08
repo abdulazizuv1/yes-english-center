@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { firebaseConfig } from "./config.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -17,16 +18,6 @@ import {
   orderBy,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBw36xP5tVYO2D0T-XFQQAGFA4wrJ8If8k",
-  authDomain: "yes-english-center.firebaseapp.com",
-  projectId: "yes-english-center",
-  storageBucket: "yes-english-center.firebasestorage.app",
-  messagingSenderId: "203211203853",
-  appId: "1:203211203853:web:7d499925c3aa830eaefc44",
-  measurementId: "G-4LHEBLG2KK",
-};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

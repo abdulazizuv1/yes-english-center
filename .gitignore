@@ -66,6 +66,15 @@ functions/node_modules/
 
 # dotenv environment variables file
 .env
+.env.*
+
+# Frontend Firebase config (real config should be in config.js)
+config.js
+
+# Service accounts / keys
+serviceAccount*.json
+**/serviceAccount*.json
+mock-tests/serviceAccountKey.json
 
 # dataconnect generated files
 .dataconnect
