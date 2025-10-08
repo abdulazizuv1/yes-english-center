@@ -190,6 +190,21 @@ body {
     border-radius: 3px;
 }
 
+/* Preserve whitespace only in passage text and instruction blocks */
+.passage-text .highlighted,
+.group-instruction .highlighted {
+    white-space: pre-wrap;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+/* Preserve whitespace in highlighted text inside questions/options */
+.questions-panel .highlighted {
+    white-space: pre-wrap;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
 /* ===== QUESTIONS PANEL ===== */
 .questions-panel {
     width: 50%;
@@ -207,6 +222,8 @@ body {
     font-size: 14px;
     font-weight: 500;
     color: #1e293b;
+    /* Render newlines as separate lines so multi-line highlights stay within one element */
+    white-space: pre-line;
 }
 .question-item {
     padding: 20px;
@@ -410,7 +427,6 @@ body {
 }
 
 .radio-option {
-    display: flex;
     align-items: center;
     padding: 10px 14px;
     border: 1px solid #e5e7eb;
@@ -429,6 +445,11 @@ body {
     margin-right: 10px;
     width: 16px;
     height: 16px;
+}
+
+/* Preserve spaces and breaks inside multiple-choice option text when highlighting */
+.mc-option-text {
+    white-space: normal;
 }
 
 .select-input {

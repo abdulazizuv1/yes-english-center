@@ -244,7 +244,21 @@ function jumpToQuestion(questionNum) {
   updateQuestionNav();
 
   setTimeout(() => {
-    const questionElement = document.getElementById(`q${questionNum}`);
+    let questionElement = document.getElementById(`q${questionNum}`);
+    if (!questionElement) {
+      // Fallbacks: try to find related controls for this question
+      const byRadio = document.querySelector(`input[name="q${questionNum}"]`);
+      if (byRadio) {
+        // Prefer scrolling the question container if present
+        questionElement = byRadio.closest('.question-item') || byRadio;
+      } else {
+        // Try any element explicitly referencing this question id
+        const byData = document.querySelector(`[data-question-id="q${questionNum}"]`);
+        if (byData) {
+          questionElement = byData.closest('.question-item') || byData;
+        }
+      }
+    }
     if (questionElement) {
       questionElement.scrollIntoView({ behavior: "smooth", block: "center" });
     }
@@ -252,35 +266,8 @@ function jumpToQuestion(questionNum) {
 }
 
 
-document.addEventListener("mouseup", function (e) {
-  const selection = window.getSelection();
-  if (selection.toString().length > 0) {
-    selectedText = selection.toString();
-    selectedRange = selection.getRangeAt(0);
-  }
-});
+// Highlight listeners are managed via initializeHighlightSystem()
 
-document.addEventListener("contextmenu", function (e) {
-  if (selectedText.length > 0) {
-    const passagePanel = document.querySelector(".passage-panel");
-    const questionsPanel = document.querySelector(".questions-panel");
-
-    if (
-      passagePanel &&
-      (passagePanel.contains(e.target) || questionsPanel.contains(e.target))
-    ) {
-      e.preventDefault();
-      const contextMenu = document.getElementById("contextMenu");
-      contextMenu.style.display = "block";
-      contextMenu.style.left = e.pageX + "px";
-      contextMenu.style.top = e.pageY + "px";
-    }
-  }
-});
-
-document.addEventListener("click", function () {
-  document.getElementById("contextMenu").style.display = "none";
-});
 
 window.highlightSelection = function() {
   if (!selectedRange) {
@@ -310,6 +297,10 @@ window.highlightSelection = function() {
           const span = document.createElement("span");
           span.className = "highlighted";
           span.setAttribute("data-highlight", "true");
+          // Preserve spaces and line breaks inside highlights universally
+          span.style.whiteSpace = "pre-wrap";
+          span.style.webkitBoxDecorationBreak = "clone";
+          span.style.boxDecorationBreak = "clone";
           span.textContent = node.textContent;
           return span;
         }
@@ -350,6 +341,10 @@ window.highlightSelection = function() {
       const span = document.createElement("span");
       span.className = "highlighted";
       span.setAttribute("data-highlight", "true");
+      // Preserve spaces and line breaks in fallback wrap
+      span.style.whiteSpace = "pre-wrap";
+      span.style.webkitBoxDecorationBreak = "clone";
+      span.style.boxDecorationBreak = "clone";
       selectedRange.surroundContents(span);
       clearSelection();
       saveCurrentHighlights();
@@ -783,16 +778,18 @@ function renderPassage(index) {
       
       const instructionDiv = document.createElement("div");
       instructionDiv.className = "group-instruction";
-      instructionDiv.innerHTML = q.groupInstruction
-        .split("\n")
-        .map(line => `<p>${line}</p>`)
-        .join("");
+      // Render as single block with preserved line breaks to avoid fragmented highlights
+      instructionDiv.textContent = q.groupInstruction;
       questionsList.appendChild(instructionDiv);
       lastInstruction = q.groupInstruction;
     }
     
     const qDiv = document.createElement("div");
     qDiv.className = "question-item";
+    // Assign DOM id for single-question types so navigation can scroll to them
+    if (q.qId && q.type !== "gap-fill" && q.type !== "question-group" && q.type !== "table") {
+      qDiv.id = q.qId;
+    }
     
     if (q.type === "gap-fill") {
       if (!q.question && (q.title || q.subheading || q.text)) {
@@ -1134,7 +1131,7 @@ function renderMultipleChoiceQuestion(q, qDiv) {
     optionsHtml += `
            <label class="radio-option">
                <input type="radio" name="${q.qId}" value="${opt.label}"> 
-               ${opt.label}. ${opt.text}
+               <span class="mc-option-text"><strong>${opt.label}.</strong> ${opt.text}</span>
            </label>
        `;
   });
@@ -1695,8 +1692,9 @@ window.openReview = function () {
 
 window.onload = () => {
   createPauseModal();
+  initializeHighlightSystem();
   loadTest().then(() => {
     const display = document.getElementById("time");
     startTimer(60 * 60, display);
   });
-};f
+};
