@@ -1063,13 +1063,13 @@ function renderTrueFalseQuestion(q, qDiv) {
        <div class="question-text">${q.question}</div>
        <div class="radio-group">
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="TRUE"> TRUE
+               <input type="radio" name="${q.qId}" value="TRUE" data-question-id="${q.qId}"> TRUE
            </label>
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="FALSE"> FALSE
+               <input type="radio" name="${q.qId}" value="FALSE" data-question-id="${q.qId}"> FALSE
            </label>
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="NOT GIVEN"> NOT GIVEN
+               <input type="radio" name="${q.qId}" value="NOT GIVEN" data-question-id="${q.qId}"> NOT GIVEN
            </label>
        </div>
    `;
@@ -1129,7 +1129,7 @@ function renderMultipleChoiceQuestion(q, qDiv) {
   q.options?.forEach((opt) => {
     optionsHtml += `
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="${opt.label}"> 
+               <input type="radio" name="${q.qId}" value="${opt.label}" data-question-id="${q.qId}"> 
                <span class="mc-option-text"><strong>${opt.label}.</strong> ${opt.text}</span>
            </label>
        `;
@@ -1169,13 +1169,13 @@ function renderYesNoQuestion(q, qDiv) {
        <div class="question-text">${q.question}</div>
        <div class="radio-group">
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="YES"> YES
+               <input type="radio" name="${q.qId}" value="YES" data-question-id="${q.qId}"> YES
            </label>
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="NO"> NO
+               <input type="radio" name="${q.qId}" value="NO" data-question-id="${q.qId}"> NO
            </label>
            <label class="radio-option">
-               <input type="radio" name="${q.qId}" value="NOT GIVEN"> NOT GIVEN
+               <input type="radio" name="${q.qId}" value="NOT GIVEN" data-question-id="${q.qId}"> NOT GIVEN
            </label>
        </div>
    `;
