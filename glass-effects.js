@@ -242,28 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Initialize Mock Test Redirect (работает с Firebase auth от main.js)
-    function initMockRedirect() {
-        const mockLinks = document.querySelectorAll("#mockLink, #mobileTokenLink");
-        
-        mockLinks.forEach(mockLink => {
-            if (mockLink) {
-                mockLink.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    
-                    // Проверяем статус логина через main.js Firebase auth
-                    if (typeof window.auth !== 'undefined' && window.auth.currentUser) {
-                        window.location.href = "pages/mock.html";
-                    } else {
-                        toggleLogin();
-                    }
-                });
-            }
-        });
-    }
-    
-    // Initialize all functionality
-    initMockRedirect();
+    // Mock redirect handled centrally in main.js
 });
 
 // Event Handlers for Mobile Menu

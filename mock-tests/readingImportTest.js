@@ -10,12 +10,12 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const filePath = path.join(__dirname, "data", "readingTests", "test-13.json");
+const filePath = path.join(__dirname, "data", "readingTests", "test-1.json");
 
 const rawData = fs.readFileSync(filePath);
 const readingTest = JSON.parse(rawData);
 
-const docId = "test-13";
+const docId = "test-1";
 
 db.collection("readingTests")
   .doc(docId)

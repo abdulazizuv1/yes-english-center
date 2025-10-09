@@ -744,6 +744,7 @@ function renderPassage(index) {
   questionsList.innerHTML = "";
   
   let lastInstruction = null;
+  let matchingOptionsShown = false; // show plain-text options once per instruction for matching types
   let gapFillGroup = {
     title: null,
     subtitle: null,
@@ -765,6 +766,7 @@ function renderPassage(index) {
       instructionDiv.textContent = q.groupInstruction;
       questionsList.appendChild(instructionDiv);
       lastInstruction = q.groupInstruction;
+      matchingOptionsShown = false; // reset when a new instruction starts
     }
     
     const qDiv = document.createElement("div");
@@ -805,6 +807,20 @@ function renderPassage(index) {
     if (gapFillGroup.questions.length > 0) {
       renderGapFillGroupComplete(gapFillGroup, questionsList);
       gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
+    }
+    
+    // For matching types, display shared options once as plain text before the first question in the group
+    const isMatchingType = q.type === "paragraph-matching" || q.type === "match-person" || q.type === "match-purpose";
+    if (isMatchingType && !matchingOptionsShown && Array.isArray(q.options) && q.options.length > 0) {
+      const optsDiv = document.createElement("div");
+      optsDiv.className = "matching-options-plain";
+      optsDiv.style.cssText = "margin: 10px 0 15px; padding: 10px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; white-space: pre-wrap;";
+      const plainText = q.options
+        .map((opt) => `${opt.label}. ${opt.text}`)
+        .join("\n");
+      optsDiv.textContent = plainText;
+      questionsList.appendChild(optsDiv);
+      matchingOptionsShown = true;
     }
     
     // Render other question types

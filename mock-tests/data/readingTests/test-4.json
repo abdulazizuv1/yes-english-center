@@ -314,7 +314,7 @@
         },
         {
           "type": "match-person",
-          "groupInstruction": "Questions 19–22\nLook at the following statements (Questions 19–22) and the list of researchers below.\nMatch each statement with the correct researcher(s), A–H\nWrite the correct letter, A–H, in boxes 19–22 on your answer sheet.\nOptions:\nA. Kunkel\nB. Kunkel et al\nC. McNeal\nD. Turow",
+          "groupInstruction": "Questions 19–22\nLook at the following statements (Questions 19–22) and the list of researchers below.\nMatch each statement with the correct researcher(s), A–H\nWrite the correct letter, A–H, in boxes 19–22 on your answer sheet.",
           "question": "Ads often aim to teach children that a brand is fun rather than telling them about what is being sold.",
           "answer": "B",
           "options": [
@@ -558,7 +558,7 @@
           ]
         },
         {
-          "groupInstruction": "Questions 32–35\nComplete the summary using the list of words, A-I below.\nWrite the correct letter, A-I, in boxes 32–35 on your answer sheet.\n\nA - adventures  B - biographer  C - nature  D - publisher  E - collaborator  F - findings  G - editor  H - sailor  I - writer",
+          "groupInstruction": "Questions 32–35\nComplete the summary using the list of words, A-I below.\nWrite the correct letter, A-I, in boxes 32–35 on your answer sheet.",
           "type": "match-purpose",
           "question": "The success of the book cannot solely be attributed to the originality of Dampier's 32 __________.",
           "answer": "F",

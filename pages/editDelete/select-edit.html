@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Tests - YES English Center</title>
+    <link rel="stylesheet" href="select-edit.css">
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+</head>
+<body>
+    <div class="header">
+        <span>
+            <img src="/image/logo.png" alt="YES Logo">
+            <h1>Edit Tests</h1>
+        </span>
+        <a href="/pages/settings.html" class="back-btn">🔙 Back to Settings</a>
+    </div>
+    
+    <div class="subtitle">
+        <p>Choose the test type you want to edit or manage</p>
+        <p>Select from Reading, Listening, or Writing tests to modify content</p>
+    </div>
+    
+    <div class="tests-grid">
+        <button class="test-card active" onclick="location.href='reading/test-reading-edit-select.html'">
+            <span class="test-icon">📖</span>
+            <div class="test-title">Reading Tests</div>
+            <p class="test-subtitle">Edit reading passages and questions</p>
+            <span class="test-status available">Available</span>
+        </button>
+        
+        <button class="test-card active" onclick="location.href='listening/test-listening-edit-select.html'">
+            <span class="test-icon">🎧</span>
+            <div class="test-title">Listening Tests</div>
+            <p class="test-subtitle">Edit listening audio and questions</p>
+            <span class="test-status available">Available</span>
+        </button>
+        
+        <button class="test-card active" onclick="location.href='writing/test-writing-edit-select.html'">
+            <span class="test-icon">✍️</span>
+            <div class="test-title">Writing Tests</div>
+            <p class="test-subtitle">Edit writing tasks and prompts</p>
+            <span class="test-status available">Available</span>
+        </button>
+    </div>
+    
+    <div class="info-section">
+        <div class="info-card">
+            <h3>📝 Edit Features</h3>
+            <ul>
+                <li>Modify test content and questions</li>
+                <li>Update passages and audio files</li>
+                <li>Change answer options and explanations</li>
+                <li>Delete unwanted tests</li>
+            </ul>
+        </div>
+        
+        <div class="info-card">
+            <h3>⚠️ Important Notes</h3>
+            <ul>
+                <li>Changes are permanent and cannot be undone</li>
+                <li>Backup your tests before making major changes</li>
+                <li>Test all modifications before publishing</li>
+                <li>Contact admin if you need assistance</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script type="module" src="select-edit.js"></script>
+</body>
+</html>

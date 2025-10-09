@@ -452,14 +452,16 @@ function updateSharedOptions(questionId, type) {
   );
   
   if (!container) {
-    const anyQuestion = document.querySelector(`.question-item[data-type="${type}"]`);
-    if (anyQuestion) {
-      const anyQuestionId = anyQuestion.dataset.questionId;
+    // If the specific container is not found, try to find any visible container of this type
+    const allQuestions = document.querySelectorAll(`.question-item[data-type="${type}"]`);
+    for (let question of allQuestions) {
+      const questionId = question.dataset.questionId;
       const anyContainer = document.getElementById(
-        `${type === "paragraph-matching" ? "pm" : "match"}-options-${anyQuestionId}`
+        `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
       );
-      if (anyContainer) {
+      if (anyContainer && anyContainer.style.display !== "none") {
         updateSharedOptionsFromContainer(anyContainer, type);
+        return;
       }
     }
     return;
@@ -481,6 +483,7 @@ function updateSharedOptionsFromContainer(container, type) {
   });
 
   sharedOptions[type] = newOptions;
+  console.log(`📝 Updated ${type} options:`, newOptions);
 }
 
 // Update all previews of the same type
@@ -734,8 +737,42 @@ window.closePreview = function () {
   document.getElementById("previewModal").style.display = "none";
 };
 
+// Update all shared options before collecting test data
+function updateAllSharedOptions() {
+  // Update paragraph-matching options
+  const pmQuestions = document.querySelectorAll('.question-item[data-type="paragraph-matching"]');
+  if (pmQuestions.length > 0) {
+    // Find any visible paragraph-matching options container
+    for (let question of pmQuestions) {
+      const questionId = question.dataset.questionId;
+      const container = document.getElementById(`pm-options-${questionId}`);
+      if (container && container.style.display !== "none") {
+        updateSharedOptionsFromContainer(container, "paragraph-matching");
+        break;
+      }
+    }
+  }
+  
+  // Update match-person options
+  const mpQuestions = document.querySelectorAll('.question-item[data-type="match-person"]');
+  if (mpQuestions.length > 0) {
+    // Find any visible match-person options container
+    for (let question of mpQuestions) {
+      const questionId = question.dataset.questionId;
+      const container = document.getElementById(`match-options-${questionId}`);
+      if (container && container.style.display !== "none") {
+        updateSharedOptionsFromContainer(container, "match-person");
+        break;
+      }
+    }
+  }
+}
+
 // Collect test data
 function collectTestData() {
+  // Update all shared options before collecting data
+  updateAllSharedOptions();
+  
   const passages = [];
   const passageElements = document.querySelectorAll(".passage-container");
 
@@ -819,13 +856,12 @@ function collectTestData() {
             .querySelector(".question-answer")
             .value.trim();
 
-          const questionId = questionEl.dataset.questionId;
-          updateSharedOptions(questionId, type);
-          
+          // Use the already saved shared options instead of trying to update them again
           questionData.options = sharedOptions[type].map((opt) => ({
             label: opt.label,
             text: opt.text,
           }));
+          console.log(`💾 Saving ${type} options for question:`, questionData.options);
         } else {
           questionData.answer = questionEl
             .querySelector(".question-answer")
@@ -880,11 +916,12 @@ function validateForm() {
       const type = question.dataset.type;
 
       if (type === "text-question") {
+        const groupInstruction = question.querySelector(".group-instruction")?.value.trim();
         const title = question.querySelector(".question-title")?.value.trim();
         const subheading = question.querySelector(".question-subheading")?.value.trim();
         const text = question.querySelector(".question-text")?.value.trim();
         
-        if (!title && !subheading && !text) {
+        if (!groupInstruction && !title && !subheading && !text) {
           alert("Please fill in at least one field for text-only items");
           return false;
         }

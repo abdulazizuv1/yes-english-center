@@ -527,27 +527,27 @@ function loadImageWithCorsHandling(imgElement, originalUrl) {
     imgElement.style.opacity = "1";
   };
   
-  imgElement.onerror = () => {
-    console.warn('Failed to load image:', originalUrl);
-    
-    // Пробуем добавить alt=media
-    if (!originalUrl.includes('alt=media')) {
-      const newUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'alt=media';
-      imgElement.src = newUrl;
-      
-      imgElement.onload = () => imgElement.style.opacity = "1";
       imgElement.onerror = () => {
-        // Fallback изображение
-        imgElement.src = './image/placeholder.jpg';
-        imgElement.style.opacity = "1";
-        console.error('All loading attempts failed for:', originalUrl);
+        console.warn('Failed to load image:', originalUrl);
+        
+        // Пробуем добавить alt=media
+        if (!originalUrl.includes('alt=media')) {
+          const newUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'alt=media';
+          imgElement.src = newUrl;
+          
+          imgElement.onload = () => imgElement.style.opacity = "1";
+          imgElement.onerror = () => {
+            // Fallback изображение
+            imgElement.src = './image/placeholder.svg';
+            imgElement.style.opacity = "1";
+            console.error('All loading attempts failed for:', originalUrl);
+          };
+        } else {
+          // Fallback изображение
+          imgElement.src = './image/placeholder.svg';
+          imgElement.style.opacity = "1";
+        }
       };
-    } else {
-      // Fallback изображение
-      imgElement.src = './image/placeholder.jpg';
-      imgElement.style.opacity = "1";
-    }
-  };
 }
 
 
