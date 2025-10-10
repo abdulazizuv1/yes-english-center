@@ -38,6 +38,382 @@ let audioCurrentTime = 0;
 let currentAudioSection = 0; // Какая секция аудио сейчас играет
 let audioInitialized = false; // Было ли аудио инициализировано
 
+// Highlight system variables
+let savedHighlights = {};
+let selectedText = "";
+let selectedRange = null;
+let highlightEventListeners = [];
+
+// Test storage key
+let testStorageKey = "fullmockTest_temp";
+
+// Passage and question highlights for reading
+let passageHighlights = {};
+let questionHighlights = {};
+
+// Highlight system functions
+function cleanupHighlightListeners() {
+  highlightEventListeners.forEach(({ element, type, listener }) => {
+    element.removeEventListener(type, listener);
+  });
+  highlightEventListeners = [];
+}
+
+function addTrackedListener(element, type, listener) {
+  element.addEventListener(type, listener);
+  highlightEventListeners.push({ element, type, listener });
+}
+
+function initializeHighlightSystem() {
+  cleanupHighlightListeners();
+  
+  const mouseUpHandler = function(e) {
+    const selection = window.getSelection();
+    if (selection.toString().length > 0) {
+      selectedText = selection.toString();
+      try {
+        selectedRange = selection.getRangeAt(0);
+      } catch (err) {
+        selectedRange = null;
+      }
+    }
+  };
+  
+  const contextMenuHandler = function(e) {
+    console.log("Context menu triggered, selectedText:", selectedText.length);
+    
+    if (selectedText.length > 0) {
+      const passagePanel = document.querySelector(".passage-panel");
+      const questionsPanel = document.querySelector(".questions-panel");
+      
+      console.log("Passage panel:", !!passagePanel, "Questions panel:", !!questionsPanel);
+      console.log("Target element:", e.target);
+      console.log("Target in passage:", passagePanel?.contains(e.target));
+      console.log("Target in questions:", questionsPanel?.contains(e.target));
+      
+      // Check if target is in any reading-related element
+      let isInReadingArea = false;
+      
+      // Check direct containment
+      if (passagePanel?.contains(e.target) || questionsPanel?.contains(e.target)) {
+        isInReadingArea = true;
+      }
+      
+      // Check if target is inside a reading stage
+      const readingStage = document.getElementById("readingStage");
+      if (readingStage?.contains(e.target)) {
+        isInReadingArea = true;
+      }
+      
+      // Check if we're currently in reading stage
+      if (currentStage === "reading") {
+        isInReadingArea = true;
+      }
+      
+      console.log("Is in reading area:", isInReadingArea);
+      
+      if (isInReadingArea) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        
+        console.log("Showing custom context menu");
+        const contextMenu = document.getElementById("contextMenu");
+        if (contextMenu) {
+          contextMenu.style.display = "block";
+          contextMenu.style.left = e.pageX + "px";
+          contextMenu.style.top = e.pageY + "px";
+          contextMenu.style.zIndex = "10000";
+        }
+      }
+    }
+  };
+  
+  const clickHandler = function(e) {
+    const contextMenu = document.getElementById("contextMenu");
+    if (contextMenu && !contextMenu.contains(e.target)) {
+      contextMenu.style.display = "none";
+    }
+  };
+  
+  addTrackedListener(document, "mouseup", mouseUpHandler);
+  addTrackedListener(document, "contextmenu", contextMenuHandler);
+  addTrackedListener(document, "click", clickHandler);
+}
+
+function saveCurrentHighlights() {
+  if (currentStage === "listening") {
+    const questionList = document.getElementById("listening-questions");
+    if (!questionList) return;
+    
+    const highlights = questionList.querySelectorAll('.highlighted');
+    const sectionKey = `section_${currentSectionIndex}`;
+    
+    if (!savedHighlights[sectionKey]) {
+      savedHighlights[sectionKey] = [];
+    }
+    
+    savedHighlights[sectionKey] = [];
+    
+    highlights.forEach((highlight, index) => {
+      const parent = highlight.parentNode;
+      const parentHtml = parent.outerHTML || parent.innerHTML;
+      const highlightText = highlight.textContent;
+      const highlightHtml = highlight.outerHTML;
+      
+      const highlightId = `highlight_${currentSectionIndex}_${index}_${Date.now()}`;
+      highlight.setAttribute('data-highlight-id', highlightId);
+      
+      savedHighlights[sectionKey].push({
+        id: highlightId,
+        text: highlightText,
+        html: highlightHtml,
+        parentSelector: getElementSelector(parent),
+        textBefore: getTextBefore(highlight),
+        textAfter: getTextAfter(highlight)
+      });
+    });
+  } else if (currentStage === "reading") {
+    const passageText = document.getElementById("passageText");
+    const questionsList = document.getElementById("reading-questions");
+    
+    if (passageText) {
+      const highlights = passageText.querySelectorAll(".highlighted");
+      if (highlights.length > 0) {
+        const cleanedHTML = cleanHighlightHTML(passageText.innerHTML);
+        passageHighlights[currentPassageIndex] = cleanedHTML;
+      } else {
+        delete passageHighlights[currentPassageIndex];
+      }
+    }
+    if (questionsList) {
+      const highlights = questionsList.querySelectorAll(".highlighted");
+      if (highlights.length > 0) {
+        const cleanedHTML = cleanHighlightHTML(questionsList.innerHTML);
+        questionHighlights[currentPassageIndex] = cleanedHTML;
+      } else {
+        delete questionHighlights[currentPassageIndex];
+      }
+    }
+  }
+  
+  saveState();
+}
+
+function restoreHighlights() {
+  if (currentStage === "listening") {
+    const sectionKey = `section_${currentSectionIndex}`;
+    const highlights = savedHighlights[sectionKey];
+    
+    if (!highlights || highlights.length === 0) return;
+    
+    setTimeout(() => {
+      highlights.forEach(highlightData => {
+        restoreSingleHighlight(highlightData);
+      });
+    }, 100);
+  } else if (currentStage === "reading") {
+    restorePassageHighlights(currentPassageIndex);
+    const questionsList = document.getElementById("reading-questions");
+    if (questionsList && questionHighlights[currentPassageIndex]) {
+      try {
+        const savedHTML = questionHighlights[currentPassageIndex];
+        
+        setTimeout(() => {
+          questionsList.innerHTML = savedHTML;
+          
+          setTimeout(() => {
+            restoreInputEventListeners();
+          }, 50);
+        }, 10);
+      } catch (error) {
+        console.warn("Failed to restore question highlights:", error);
+        setTimeout(() => {
+          restoreInputEventListeners();
+        }, 50);
+      }
+    } else {
+      setTimeout(() => {
+        restoreInputEventListeners();
+      }, 10);
+    }
+  }
+}
+
+function restoreSingleHighlight(highlightData) {
+  const questionList = document.getElementById("listening-questions");
+  if (!questionList) return;
+  
+  const walker = document.createTreeWalker(
+    questionList,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  
+  let textNode;
+  while (textNode = walker.nextNode()) {
+    const nodeText = textNode.textContent;
+    const targetText = highlightData.text;
+    
+    const index = nodeText.indexOf(targetText);
+    if (index !== -1) {
+      const parent = textNode.parentNode;
+      if (parent && parent.classList && parent.classList.contains('highlighted')) {
+        continue;
+      }
+      
+      try {
+        const range = document.createRange();
+        range.setStart(textNode, index);
+        range.setEnd(textNode, index + targetText.length);
+        
+        const span = document.createElement("span");
+        span.className = "highlighted";
+        span.style.backgroundColor = "#ffeb3b";
+        span.setAttribute('data-highlight-id', highlightData.id);
+        
+        range.surroundContents(span);
+        break;
+      } catch (e) {
+        try {
+          const range = document.createRange();
+          range.setStart(textNode, index);
+          range.setEnd(textNode, index + targetText.length);
+          
+          const contents = range.extractContents();
+          const span = document.createElement("span");
+          span.className = "highlighted";
+          span.style.backgroundColor = "#ffeb3b";
+          span.setAttribute('data-highlight-id', highlightData.id);
+          span.appendChild(contents);
+          range.insertNode(span);
+          break;
+        } catch (e2) {
+          console.warn('Failed to restore highlight:', e2);
+        }
+      }
+    }
+  }
+}
+
+function getElementSelector(element) {
+  if (element.id) return `#${element.id}`;
+  if (element.className) return `.${element.className.split(' ')[0]}`;
+  return element.tagName.toLowerCase();
+}
+
+function getTextBefore(node) {
+  let text = "";
+  let current = node;
+  
+  while (current && text.length < 50) {
+    if (current.previousSibling) {
+      current = current.previousSibling;
+      if (current.nodeType === Node.TEXT_NODE) {
+        text = current.textContent + text;
+      } else if (current.textContent) {
+        text = current.textContent + text;
+      }
+    } else {
+      current = current.parentNode;
+      if (!current || current.id === 'listening-questions') break;
+    }
+  }
+  
+  return text;
+}
+
+function getTextAfter(node) {
+  let text = "";
+  let current = node;
+  
+  while (current && text.length < 50) {
+    if (current.nextSibling) {
+      current = current.nextSibling;
+      if (current.nodeType === Node.TEXT_NODE) {
+        text += current.textContent;
+      } else if (current.textContent) {
+        text += current.textContent;
+      }
+    } else {
+      current = current.parentNode;
+      if (!current || current.id === 'listening-questions') break;
+    }
+  }
+  
+  return text;
+}
+
+function cleanHighlightHTML(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  
+  temp.querySelectorAll('.highlighted .highlighted').forEach(nested => {
+    const parent = nested.parentElement;
+    if (parent && parent.classList && parent.classList.contains('highlighted')) {
+      while (nested.firstChild) {
+        parent.insertBefore(nested.firstChild, nested);
+      }
+      nested.remove();
+    }
+  });
+  
+  temp.querySelectorAll('*').forEach(el => {
+    const allowedAttrs = ['class', 'id', 'type', 'name', 'value', 'data-question-id', 'data-group-qids', 'placeholder', 'data-highlight'];
+    const attrs = Array.from(el.attributes);
+    attrs.forEach(attr => {
+      if (!allowedAttrs.includes(attr.name)) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  
+  temp.normalize();
+  
+  return temp.innerHTML;
+}
+
+function restorePassageHighlights(index) {
+  const passageText = document.getElementById("passageText");
+  if (passageText && passageHighlights[index]) {
+    try {
+      passageText.innerHTML = passageHighlights[index];
+    } catch (error) {
+      console.warn("Failed to restore passage highlights:", error);
+      const passage = stageData.reading.passages[index];
+      const formattedText = passage.text
+        .split("\n\n")
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+      passageText.innerHTML = formattedText;
+    }
+  }
+}
+
+// State management functions
+function loadSavedState() {
+  const saved = localStorage.getItem(testStorageKey);
+  if (saved) {
+    const data = JSON.parse(saved);
+    answersSoFar = data.answers || {};
+    passageHighlights = data.passageHighlights || {};
+    questionHighlights = data.questionHighlights || {};
+    savedHighlights = data.savedHighlights || {};
+  }
+}
+
+function saveState() {
+  const data = {
+    answers: answersSoFar,
+    passageHighlights: passageHighlights,
+    questionHighlights: questionHighlights,
+    savedHighlights: savedHighlights,
+    timestamp: Date.now(),
+  };
+  localStorage.setItem(testStorageKey, JSON.stringify(data));
+}
+
 // Функция для полной остановки аудио
 function stopAllAudio() {
   if (currentAudio) {
@@ -284,7 +660,21 @@ function jumpToQuestion(questionNum) {
 
   // Scroll to the specific question
   setTimeout(() => {
-    const questionElement = document.getElementById(`q${questionNum}`);
+    let questionElement = document.getElementById(`reading_q${questionNum}`);
+    if (!questionElement) {
+      // Fallbacks: try to find related controls for this question
+      const byRadio = document.querySelector(`input[name="reading_q${questionNum}"]`);
+      if (byRadio) {
+        // Prefer scrolling the question container if present
+        questionElement = byRadio.closest('.question-item') || byRadio;
+      } else {
+        // Try any element explicitly referencing this question id
+        const byData = document.querySelector(`[data-question-id="reading_q${questionNum}"]`);
+        if (byData) {
+          questionElement = byData.closest('.question-item') || byData;
+        }
+      }
+    }
     if (questionElement) {
       questionElement.scrollIntoView({ behavior: "smooth", block: "center" });
     }
@@ -366,7 +756,13 @@ async function loadTest() {
     // Получить testId из URL параметров
     const urlParams = new URLSearchParams(window.location.search);
     currentTestId = urlParams.get("testId") || "test-1";
+    testStorageKey = `fullmockTest_${currentTestId}`;
+    
     console.log("🔄 Loading full mock test...");
+    
+    // Load saved state
+    loadSavedState();
+    
     const docRef = doc(db, "fullmockTests", currentTestId);
     const docSnap = await getDoc(docRef);
 
@@ -384,6 +780,9 @@ async function loadTest() {
     });
 
     console.log("✅ Full mock test loaded successfully");
+
+    // Initialize highlight system
+    initializeHighlightSystem();
 
     // Start with listening
     initializeStage("listening");
@@ -459,6 +858,12 @@ function initializeListening() {
 }
 
 function renderListeningSection(index) {
+  // Save current highlights before switching
+  if (currentSectionIndex !== index) {
+    saveCurrentHighlights();
+    currentSectionIndex = index;
+  }
+  
   const section = stageData.listening.sections[index];
   if (!section) return;
 
@@ -499,6 +904,11 @@ function renderListeningSection(index) {
   }
 
   updateNavigationButtons();
+  
+  // Restore highlights after rendering
+  setTimeout(() => {
+    restoreHighlights();
+  }, 150);
 }
 function handleSectionAudio(section, index) {
   // Если аудио уже инициализировано, не трогаем его при навигации
@@ -839,6 +1249,17 @@ function initializeReading() {
   currentPassageIndex = 0;
   assignReadingQuestionIds();
   renderReadingPassage(0);
+  
+  // Block default context menu in reading stage
+  const readingStage = document.getElementById("readingStage");
+  if (readingStage) {
+    readingStage.addEventListener("contextmenu", function(e) {
+      // Only prevent if we don't have selected text (let our custom handler deal with it)
+      if (selectedText.length === 0) {
+        e.preventDefault();
+      }
+    });
+  }
 }
 
 function assignReadingQuestionIds() {
@@ -877,6 +1298,12 @@ function assignReadingQuestionIds() {
 }
 
 function renderReadingPassage(index) {
+  // Save current highlights before switching
+  if (currentPassageIndex !== index) {
+    saveCurrentHighlights();
+    currentPassageIndex = index;
+  }
+  
   const passage = stageData.reading.passages[index];
 
   // Update passage content
@@ -894,27 +1321,88 @@ function renderReadingPassage(index) {
   const questionsList = document.getElementById("reading-questions");
   questionsList.innerHTML = "";
   let lastInstruction = null;
+  let matchingOptionsShown = false;
+  let gapFillGroup = {
+    title: null,
+    subtitle: null,
+    info: null,
+    questions: [],
+    startDiv: null,
+  };
 
   passage.questions.forEach((q, i) => {
     // Show group instructions
     if (q.groupInstruction && q.groupInstruction !== lastInstruction) {
+      if (gapFillGroup.questions.length > 0) {
+        renderGapFillGroupComplete(gapFillGroup, questionsList);
+        gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
+      }
+      
       const instructionDiv = document.createElement("div");
       instructionDiv.className = "group-instruction";
-      instructionDiv.innerHTML = q.groupInstruction
-        .split("\n")
-        .map((line) => `<p>${line}</p>`)
-        .join("");
+      // Render as single block with preserved line breaks to avoid fragmented highlights
+      instructionDiv.textContent = q.groupInstruction;
       questionsList.appendChild(instructionDiv);
       lastInstruction = q.groupInstruction;
+      matchingOptionsShown = false; // reset when a new instruction starts
     }
 
     const qDiv = document.createElement("div");
     qDiv.className = "question-item";
+    // Assign DOM id for single-question types so navigation can scroll to them
+    if (q.qId && q.type !== "gap-fill" && q.type !== "question-group" && q.type !== "table") {
+      qDiv.id = q.qId;
+    }
 
+    if (q.type === "gap-fill") {
+      if (!q.question && (q.title || q.subheading || q.text)) {
+        if (gapFillGroup.questions.length > 0) {
+          renderGapFillGroupComplete(gapFillGroup, questionsList);
+          gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
+        }
+        
+        if (q.title) gapFillGroup.title = q.title;
+        if (q.subheading) gapFillGroup.subtitle = q.subheading;
+        if (q.text) gapFillGroup.info = q.text;
+        gapFillGroup.startDiv = qDiv;
+      } else if (q.question && q.qId) {
+        gapFillGroup.questions.push(q);
+        
+        const isLastGapFill = i === passage.questions.length - 1 ||
+          passage.questions[i + 1]?.type !== "gap-fill" ||
+          (!passage.questions[i + 1]?.question && 
+           (passage.questions[i + 1]?.title || passage.questions[i + 1]?.subheading));
+        
+        if (isLastGapFill) {
+          renderGapFillGroupComplete(gapFillGroup, questionsList);
+          gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
+          return;
+        }
+      }
+      return;
+    }
+    
+    if (gapFillGroup.questions.length > 0) {
+      renderGapFillGroupComplete(gapFillGroup, questionsList);
+      gapFillGroup = { title: null, subtitle: null, info: null, questions: [], startDiv: null };
+    }
+    
+    // For matching types, display shared options once as plain text before the first question in the group
+    const isMatchingType = q.type === "paragraph-matching" || q.type === "match-person" || q.type === "match-purpose";
+    if (isMatchingType && !matchingOptionsShown && Array.isArray(q.options) && q.options.length > 0) {
+      const optsDiv = document.createElement("div");
+      optsDiv.className = "matching-options-plain";
+      optsDiv.style.cssText = "margin: 10px 0 15px; padding: 10px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; white-space: pre-wrap;";
+      const plainText = q.options
+        .map((opt) => `${opt.label}. ${opt.text}`)
+        .join("\n");
+      optsDiv.textContent = plainText;
+      questionsList.appendChild(optsDiv);
+      matchingOptionsShown = true;
+    }
+    
+    // Render other question types
     switch (q.type) {
-      case "gap-fill":
-        renderReadingGapFillQuestion(q, qDiv);
-        break;
       case "text-question":
         renderReadingTextQuestion(q, qDiv);
         break;
@@ -935,14 +1423,191 @@ function renderReadingPassage(index) {
       case "table":
         renderReadingTableQuestion(q, qDiv);
         break;
+      case "question-group":
+        renderQuestionGroup(q, qDiv);
+        break;
     }
 
-    if (q.qId || q.type === "text-question" || q.type === "table") {
+    if (q.type !== "gap-fill" && q.type !== "question-group" && 
+        (q.qId || q.type === "text-question" || q.type === "table")) {
+      questionsList.appendChild(qDiv);
+    } else if (q.type === "question-group") {
       questionsList.appendChild(qDiv);
     }
   });
+  
+  if (gapFillGroup.questions.length > 0) {
+    renderGapFillGroupComplete(gapFillGroup, questionsList);
+  }
 
   updateNavigationButtons();
+  
+  // Restore highlights after rendering
+  requestAnimationFrame(() => {
+    restoreHighlights();
+  });
+}
+
+// New gap-fill group rendering function
+function renderGapFillGroupComplete(group, container) {
+  if (!group.questions.length) return;
+
+  // Create a single section container for the gap fill group
+  const section = document.createElement("div");
+  section.className = "gap-fill-section";
+
+  // Add title
+  if (group.title) {
+    const titleDiv = document.createElement("div");
+    titleDiv.className = "gap-fill-title";
+    titleDiv.textContent = group.title;
+    section.appendChild(titleDiv);
+  }
+
+  // Add info
+  if (group.info) {
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "gap-fill-info";
+    infoDiv.textContent = group.info;
+    section.appendChild(infoDiv);
+  }
+
+  // Add subtitle
+  if (group.subtitle) {
+    const subtitleDiv = document.createElement("div");
+    subtitleDiv.className = "gap-fill-subtitle";
+    subtitleDiv.textContent = group.subtitle;
+    section.appendChild(subtitleDiv);
+  }
+
+  // Container for all questions
+  const questionsContainer = document.createElement("div");
+  questionsContainer.className = "gap-fill-questions";
+
+  // Determine if bullets are used
+  const hasBullets = group.questions.some(
+    (q) =>
+      q.question &&
+      (q.question.includes("•") ||
+        q.question.includes("●") ||
+        q.question.includes("diet consists") ||
+        q.question.includes("nests are created"))
+  );
+
+  group.questions.forEach((q) => {
+    const questionDiv = document.createElement("div");
+    questionDiv.className = hasBullets
+      ? "gap-fill-list-item"
+      : "gap-fill-question";
+    questionDiv.id = q.qId;
+
+    if (hasBullets) {
+      // Add bullet
+      const bullet = document.createElement("span");
+      bullet.className = "gap-fill-list-bullet";
+      questionDiv.appendChild(bullet);
+
+      // Content wrapper
+      const textWrapper = document.createElement("div");
+      textWrapper.className = "gap-fill-content-wrapper";
+
+      // Text with input (no number span!)
+      const textSpan = document.createElement("span");
+      textSpan.className = "gap-fill-text";
+
+      // Clean bullet symbol
+      let cleanText = q.question.replace(/^[•●]\s*/, "");
+
+      // Replace blank with input, placeholder set to question number
+      const inputHtml = cleanText.replace(
+        /\.{3,}|_{3,}|…+|__________+/g,
+        `<input type="text"
+                id="input-${q.qId}"
+                class="gap-fill-input"
+                placeholder="${q.qId.replace("reading_q", "")}"
+                data-question-id="${q.qId}" />`
+      );
+
+      textSpan.innerHTML = inputHtml;
+
+      textWrapper.appendChild(textSpan);
+      questionDiv.appendChild(textWrapper);
+    } else {
+      // No bullets, just the text with input (no number span!)
+      const textSpan = document.createElement("span");
+      textSpan.className = "gap-fill-text";
+
+      const inputHtml = q.question.replace(
+        /\.{3,}|_{3,}|…+|__________+/g,
+        `<input type="text"
+                id="input-${q.qId}"
+                class="gap-fill-input"
+                placeholder="${q.qId.replace("reading_q", "")}"
+                data-question-id="${q.qId}" />`
+      );
+
+      textSpan.innerHTML = inputHtml;
+      questionDiv.appendChild(textSpan);
+    }
+
+    questionsContainer.appendChild(questionDiv);
+  });
+
+  section.appendChild(questionsContainer);
+  container.appendChild(section);
+
+  // Add input event listeners
+  setTimeout(() => {
+    group.questions.forEach((q) => {
+      const input = document.getElementById(`input-${q.qId}`);
+      if (input) {
+        // Set saved value
+        input.value = answersSoFar[q.qId] || "";
+
+        // Add class if value exists
+        if (input.value) {
+          input.classList.add("has-value");
+        }
+
+        input.addEventListener("input", (e) => {
+          answersSoFar[q.qId] = e.target.value;
+          saveState();
+          updateQuestionNav();
+
+          if (e.target.value.trim()) {
+            input.classList.add("has-value");
+            // Size classes
+            const textLength = e.target.value.length;
+            input.classList.remove(
+              "input-small",
+              "input-medium",
+              "input-large"
+            );
+            if (textLength > 15) {
+              input.classList.add("input-large");
+            } else if (textLength > 8) {
+              input.classList.add("input-medium");
+            } else {
+              input.classList.add("input-small");
+            }
+          } else {
+            input.classList.remove(
+              "has-value",
+              "input-small",
+              "input-medium",
+              "input-large"
+            );
+          }
+        });
+        input.addEventListener("focus", (e) => {
+          input.classList.add("focused");
+        });
+        input.addEventListener("blur", (e) => {
+          input.classList.remove("focused");
+        });
+      }
+    });
+  }, 0);
 }
 
 function renderReadingGapFillQuestion(q, qDiv) {
@@ -976,6 +1641,7 @@ function renderReadingGapFillQuestion(q, qDiv) {
       input.value = answersSoFar[q.qId] || "";
       input.addEventListener("input", (e) => {
         answersSoFar[q.qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     }
@@ -1216,10 +1882,165 @@ function renderReadingTableQuestion(q, qDiv) {
       input.value = answersSoFar[qId] || "";
       input.addEventListener("input", (e) => {
         answersSoFar[qId] = e.target.value;
+        saveState();
         updateQuestionNav();
       });
     });
   }, 0);
+}
+
+// Question group rendering function
+function renderQuestionGroup(group, qDiv) {
+  const groupContainer = document.createElement("div");
+  groupContainer.className = "multi-select-group";
+  
+
+  // Заголовок группы
+  if (group.text) {
+    const textDiv = document.createElement("h4");
+    textDiv.textContent = group.text;
+    textDiv.style.cssText = "margin: 0 0 20px 0; color: #1f2937;";
+    groupContainer.appendChild(textDiv);
+  }
+
+  // Создаем скрытые элементы для каждого вопроса (для навигации)
+  group.questions.forEach((q) => {
+    const hiddenMarker = document.createElement("div");
+    hiddenMarker.id = q.qId;
+    hiddenMarker.style.display = "none";
+    hiddenMarker.dataset.questionGroup = "true";
+    groupContainer.appendChild(hiddenMarker);
+  });
+
+  // Опции с чекбоксами
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "multi-select-options";
+  optionsContainer.dataset.groupQids = group.questions
+    .map((q) => q.qId)
+    .join(",");
+
+  // Получаем уже выбранные ответы
+  const selectedAnswers = [];
+  group.questions.forEach((q) => {
+    if (answersSoFar[q.qId]) {
+      selectedAnswers.push(answersSoFar[q.qId]);
+    }
+  });
+
+  Object.keys(group.options)
+    .sort()
+    .forEach((key) => {
+      const optionDiv = document.createElement("label");
+      optionDiv.style.cssText =
+        "display: block; margin: 10px 0; padding: 12px; border: 2px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s;";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = key;
+      checkbox.className = "multi-select-checkbox";
+      checkbox.dataset.groupQids = group.questions.map((q) => q.qId).join(",");
+
+      // Проверяем, выбрана ли эта опция
+      if (selectedAnswers.includes(key)) {
+        checkbox.checked = true;
+        optionDiv.style.background = "#dbeafe";
+        optionDiv.style.borderColor = "#3b82f6";
+      }
+
+      const textSpan = document.createElement("span");
+      textSpan.style.marginLeft = "10px";
+      textSpan.innerHTML = `<strong>${key}.</strong> ${group.options[key]}`;
+
+      optionDiv.appendChild(checkbox);
+      optionDiv.appendChild(textSpan);
+      optionsContainer.appendChild(optionDiv);
+    });
+
+  groupContainer.appendChild(optionsContainer);
+
+  // Добавляем индикатор выбранных опций
+  const indicator = document.createElement("div");
+  indicator.className = "selection-indicator";
+  indicator.style.cssText =
+    "margin-top: 15px; padding: 10px; background: #fef3c7; border-radius: 4px; font-size: 0.9em;";
+  indicator.textContent = `Select ${group.questions.length} options (${selectedAnswers.length} selected)`;
+  groupContainer.appendChild(indicator);
+
+  qDiv.appendChild(groupContainer);
+
+  // Добавляем обработчики событий
+  setTimeout(() => {
+    const checkboxes = optionsContainer.querySelectorAll(
+      ".multi-select-checkbox"
+    );
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        handleMultiSelectChange(group, optionsContainer);
+      });
+    });
+  }, 0);
+}
+
+function handleMultiSelectChange(group, container) {
+  const checkboxes = container.querySelectorAll(".multi-select-checkbox");
+  const selected = Array.from(checkboxes)
+    .filter((cb) => cb.checked)
+    .map((cb) => cb.value)
+    .sort(); 
+
+  const maxAllowed = group.questions.length;
+
+  if (selected.length > maxAllowed) {
+    alert(`Please select exactly ${maxAllowed} options.`);
+    checkboxes.forEach((cb) => {
+      if (
+        cb.checked &&
+        !group.questions.some((q) => answersSoFar[q.qId] === cb.value)
+      ) {
+        cb.checked = false;
+      }
+    });
+    return;
+  }
+
+  group.questions.forEach((q) => {
+    delete answersSoFar[q.qId];
+  });
+
+  // Назначаем новые ответы последовательно
+  selected.forEach((value, index) => {
+    if (group.questions[index]) {
+      answersSoFar[group.questions[index].qId] = value;
+    }
+  });
+
+  // Обновляем визуальное состояние
+  checkboxes.forEach((cb) => {
+    const label = cb.parentElement;
+    if (cb.checked) {
+      label.style.background = "#dbeafe";
+      label.style.borderColor = "#3b82f6";
+    } else {
+      label.style.background = "";
+      label.style.borderColor = "#d1d5db";
+    }
+  });
+
+  // Обновляем индикатор
+  const indicator = container.parentElement.querySelector(
+    ".selection-indicator"
+  );
+  if (indicator) {
+    indicator.textContent = `Select ${maxAllowed} options (${selected.length} selected)`;
+    if (selected.length === maxAllowed) {
+      indicator.style.background = "#d1fae5";
+    } else {
+      indicator.style.background = "#fef3c7";
+    }
+  }
+
+  saveState();
+  updateQuestionNav();
 }
 
 // Initialize Writing
@@ -1330,7 +2151,7 @@ function updateNavigationButtons() {
 // Event handlers
 document.addEventListener("input", (e) => {
   const input = e.target;
-  const qId = input.dataset.qid || input.id;
+  const qId = input.dataset.qid || input.id || input.dataset.questionId;
 
   if (
     input.classList.contains("gap-fill") ||
@@ -1339,25 +2160,28 @@ document.addEventListener("input", (e) => {
     input.classList.contains("table-input") // ✅ Добавлен новый класс
   ) {
     answersSoFar[qId] = input.value;
+    saveState();
     updateQuestionNav();
   }
 });
 
 document.addEventListener("change", (e) => {
   const input = e.target;
-  const qId = input.name || input.dataset.qid || input.id;
+  const qId = input.name || input.dataset.qid || input.id || input.dataset.questionId;
 
   if (
     input.classList.contains("matching-select") ||
     input.classList.contains("select-input")
   ) {
     answersSoFar[qId] = input.value;
+    saveState();
     updateQuestionNav();
     return;
   }
 
   if (input.type === "radio") {
     answersSoFar[qId] = input.value;
+    saveState();
     updateQuestionNav();
   }
 
@@ -1463,6 +2287,7 @@ document.addEventListener("change", (e) => {
         label.style.borderWidth = "1px";
       }
 
+      saveState();
       updateQuestionNav();
     }
   }
@@ -1557,6 +2382,102 @@ function showStageTransition(fromStage, toStage) {
     stopAllAudio();
     initializeStage(toStage);
   };
+}
+
+// Enhanced input event listener restoration
+function restoreInputEventListeners() {
+  const inputs = document.querySelectorAll(
+    'input[data-question-id], input[id^="reading_q"], input[id^="input-"], select[id^="reading_q"]'
+  );
+
+  inputs.forEach((input) => {
+    const qId = input.dataset.questionId || input.id.replace("input-", "");
+
+    if (input.type === "text") {
+      // Text inputs (gap-fill)
+      input.value = answersSoFar[qId] || "";
+      if (input.value) {
+        input.classList.add("has-value");
+      }
+
+      input.addEventListener("input", (e) => {
+        answersSoFar[qId] = e.target.value;
+        saveState();
+        updateQuestionNav();
+
+        if (e.target.value.trim()) {
+          input.classList.add("has-value");
+          const textLength = e.target.value.length;
+          input.classList.remove("input-small", "input-medium", "input-large");
+          if (textLength > 15) {
+            input.classList.add("input-large");
+          } else if (textLength > 8) {
+            input.classList.add("input-medium");
+          } else {
+            input.classList.add("input-small");
+          }
+        } else {
+          input.classList.remove(
+            "has-value",
+            "input-small",
+            "input-medium",
+            "input-large"
+          );
+        }
+      });
+
+      input.addEventListener("focus", () => input.classList.add("focused"));
+      input.addEventListener("blur", () => input.classList.remove("focused"));
+    } else if (input.type === "radio") {
+      // Radio buttons
+      if (answersSoFar[qId] === input.value) {
+        input.checked = true;
+      }
+      input.addEventListener("change", (e) => {
+        answersSoFar[qId] = e.target.value;
+        saveState();
+        updateQuestionNav();
+      });
+    }
+  });
+
+  // Для select элементов
+  const selects = document.querySelectorAll('select[id^="reading_q"]');
+  selects.forEach((select) => {
+    const qId = select.id;
+    select.value = answersSoFar[qId] || "";
+    select.addEventListener("change", (e) => {
+      answersSoFar[qId] = e.target.value;
+      saveState();
+      updateQuestionNav();
+    });
+  });
+  
+  // Восстановление состояния для question-group checkboxes
+  const groupContainers = document.querySelectorAll("[data-group-id]");
+  groupContainers.forEach((container) => {
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      // Найти соответствующий question-group
+      stageData.reading.passages.forEach((passage) => {
+        passage.questions.forEach((question) => {
+          if (question.type === "question-group" && question.questions) {
+            const isSelected = question.questions.some(
+              (q) => answersSoFar[q.qId] === checkbox.value
+            );
+            if (isSelected) {
+              checkbox.checked = true;
+              const label = checkbox.parentElement;
+              if (label) {
+                label.style.background = "#dbeafe";
+                label.style.borderColor = "#3b82f6";
+              }
+            }
+          }
+        });
+      });
+    });
+  });
 }
 
 // Finish test
@@ -1882,9 +2803,10 @@ async function handleFinishTest() {
     console.error("❌ Error saving result:", e);
     alert("Error submitting your result. Please try again.");
   }
-  // Clear saved writing data
+  // Clear saved data
   localStorage.removeItem("fullmock_task1Answer");
   localStorage.removeItem("fullmock_task2Answer");
+  localStorage.removeItem(testStorageKey);
 }
 
 // Helper functions
@@ -2062,84 +2984,162 @@ function startTimer(durationInSeconds, display) {
   }, 1000);
 }
 
-// Highlight functionality
-let selectedText = "";
-let selectedRange = null;
-
-document.addEventListener("mouseup", function () {
-  const selection = window.getSelection();
-  if (selection.toString().length > 0) {
-    selectedText = selection.toString();
-    selectedRange = selection.getRangeAt(0);
+// Enhanced highlight functionality
+window.highlightSelection = function() {
+  if (!selectedRange) {
+    document.getElementById("contextMenu").style.display = "none";
+    return;
   }
-});
-document.addEventListener("contextmenu", function (e) {
-  if (
-    selectedText.length > 0 &&
-    (e.target.closest(".passage-text") || e.target.closest(".questions-panel"))
-  ) {
-    e.preventDefault();
-    const contextMenu = document.getElementById("contextMenu");
-    contextMenu.style.display = "block";
-    contextMenu.style.left = e.pageX + "px";
-    contextMenu.style.top = e.pageY + "px";
-  }
-});
-
-document.addEventListener("click", function () {
-  document.getElementById("contextMenu").style.display = "none";
-});
-
-window.highlightSelection = function () {
-  if (selectedRange) {
-    const span = document.createElement("span");
-    span.className = "highlighted";
-    try {
-      selectedRange.surroundContents(span);
-    } catch (e) {
-      const contents = selectedRange.extractContents();
-      span.appendChild(contents);
-      selectedRange.insertNode(span);
+  
+  try {
+    if (selectedRange.collapsed || !selectedRange.toString().trim()) {
+      clearSelection();
+      return;
     }
-    window.getSelection().removeAllRanges();
-    selectedText = "";
-    selectedRange = null;
+    
+    // Create a document fragment to hold highlighted content
+    const fragment = document.createDocumentFragment();
+    
+    // Clone the range to avoid modifying the original
+    const range = selectedRange.cloneRange();
+    
+    // Extract contents from the range
+    const contents = range.extractContents();
+    
+    // Function to wrap text nodes in highlight spans
+    function wrapTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.textContent.trim()) {
+          const span = document.createElement("span");
+          span.className = "highlighted";
+          span.setAttribute("data-highlight", "true");
+          span.style.backgroundColor = "#ffeb3b";
+          span.textContent = node.textContent;
+          return span;
+        }
+        return node;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // For element nodes, process their children
+        const clone = node.cloneNode(false);
+        Array.from(node.childNodes).forEach(child => {
+          clone.appendChild(wrapTextNodes(child));
+        });
+        return clone;
+      }
+      return node;
+    }
+    
+    // Process all nodes in the extracted contents
+    Array.from(contents.childNodes).forEach(node => {
+      fragment.appendChild(wrapTextNodes(node));
+    });
+    
+    // Insert the highlighted content back
+    range.insertNode(fragment);
+    
+    // Normalize to merge adjacent text nodes
+    const commonAncestor = range.commonAncestorContainer;
+    if (commonAncestor.nodeType === Node.ELEMENT_NODE) {
+      commonAncestor.normalize();
+    } else if (commonAncestor.parentElement) {
+      commonAncestor.parentElement.normalize();
+    }
+    
+    clearSelection();
+    saveCurrentHighlights();
+  } catch (error) {
+    console.warn("Failed to create highlight:", error);
+    // If highlighting fails, try a simpler approach
+    try {
+      const span = document.createElement("span");
+      span.className = "highlighted";
+      span.setAttribute("data-highlight", "true");
+      span.style.backgroundColor = "#ffeb3b";
+      selectedRange.surroundContents(span);
+      clearSelection();
+      saveCurrentHighlights();
+    } catch (e) {
+      console.error("Fallback highlighting also failed:", e);
+    }
   }
+  
   document.getElementById("contextMenu").style.display = "none";
 };
 
-window.removeHighlight = function () {
-  if (selectedRange) {
-    const container = selectedRange.commonAncestorContainer;
-    const highlighted =
-      container.nodeType === Node.TEXT_NODE
-        ? container.parentElement.closest(".highlighted")
-          ? [container.parentElement.closest(".highlighted")]
-          : []
-        : Array.from(container.querySelectorAll(".highlighted")).filter((el) =>
-            selectedRange.intersectsNode(el)
-          );
-
-    highlighted.forEach((element) => {
-      const parent = element.parentNode;
-      parent.insertBefore(
-        document.createTextNode(element.textContent),
-        element
-      );
-      parent.removeChild(element);
-      parent.normalize();
-    });
+window.removeHighlight = function() {
+  if (!selectedRange) {
+    clearSelection();
+    return;
   }
+  
+  try {
+    const range = selectedRange.cloneRange();
+    const container = range.commonAncestorContainer;
+    let highlightedElements = [];
+    
+    // Find all highlighted elements that intersect with the selection
+    if (container.nodeType === Node.TEXT_NODE) {
+      let parent = container.parentElement;
+      while (parent) {
+        if (parent.classList && parent.classList.contains("highlighted")) {
+          highlightedElements.push(parent);
+          break;
+        }
+        parent = parent.parentElement;
+      }
+    } else if (container.nodeType === Node.ELEMENT_NODE) {
+      // Get all highlighted elements within the container
+      const allHighlights = container.querySelectorAll(".highlighted");
+      highlightedElements = Array.from(allHighlights).filter(el => {
+        try {
+          return range.intersectsNode(el);
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      // Also check if the container itself is highlighted
+      if (container.classList && container.classList.contains("highlighted")) {
+        highlightedElements.push(container);
+      }
+    }
+    
+    // Remove highlights by unwrapping the span elements
+    highlightedElements.forEach(element => {
+      const parent = element.parentNode;
+      if (parent) {
+        // Move all child nodes before the highlighted element
+        while (element.firstChild) {
+          parent.insertBefore(element.firstChild, element);
+        }
+        // Remove the now-empty highlighted span
+        parent.removeChild(element);
+        // Normalize to merge adjacent text nodes
+        parent.normalize();
+      }
+    });
+    
+    saveCurrentHighlights();
+  } catch (error) {
+    console.warn("Failed to remove highlight:", error);
+  }
+  
+  clearSelection();
+  document.getElementById("contextMenu").style.display = "none";
+};
 
+function clearSelection() {
   window.getSelection().removeAllRanges();
   selectedText = "";
   selectedRange = null;
-  document.getElementById("contextMenu").style.display = "none";
-};
+}
 
 window.openReview = function () {
   alert(
     "Review functionality - showing all answers and flagged questions for current stage"
   );
 };
-window.onload = () => {};
+// Initialize everything when page loads
+window.onload = () => {
+  console.log("🌐 Full mock test page loaded");
+};

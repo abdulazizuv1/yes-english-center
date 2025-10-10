@@ -527,9 +527,12 @@
           "questions": [
             {
               "groupInstruction": "Questions 1–7\nComplete the notes below.\nChoose ONE WORD ONLY from the passage for each answer.\nWrite your answers in boxes 1–7 on your answer sheet.",
-              "type": "gap-fill",
+              "type": "text-question",
               "title": "Chinese silk",
-              "subheading": "Early Uses",
+              "subheading": "Early Uses"
+            },
+            {
+              "type": "gap-fill",
               "question": "emperor wore 1 __________ silk indoors",
               "answer": [
                 "white"
