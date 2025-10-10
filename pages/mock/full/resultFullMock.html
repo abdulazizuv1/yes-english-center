@@ -33,9 +33,8 @@
                     </div>
                 </div>
                 <div class="result-badge" id="resultBadge">
-                    <div class="overall-score" id="overallScore">0</div>
-                    <div class="score-total">/ <span id="totalPossible">80</span></div>
-                    <div class="ielts-label">Overall Score</div>
+                    <div class="overall-score" id="overallBand">0.0</div>
+                    <div class="ielts-label" id="overallBandLabel">Overall Band Score</div>
                 </div>
             </div>
             
@@ -46,6 +45,7 @@
                         <span class="score-label">Listening</span>
                         <span class="score-value" id="listeningScore">0 / 40</span>
                         <div class="score-percentage" id="listeningPercentage">0%</div>
+                        <div class="band-score">Band <span id="listeningBand">0.0</span></div>
                     </div>
                 </div>
                 <div class="score-item reading">
@@ -54,6 +54,7 @@
                         <span class="score-label">Reading</span>
                         <span class="score-value" id="readingScore">0 / 40</span>
                         <div class="score-percentage" id="readingPercentage">0%</div>
+                        <div class="band-score">Band <span id="readingBand">0.0</span></div>
                     </div>
                 </div>
                 <div class="score-item writing">
@@ -66,16 +67,6 @@
                 </div>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="progress-section">
-                <div class="progress-label">
-                    <span>Overall Performance (Listening + Reading)</span>
-                    <span id="progressPercent">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
         </div>
 
         <!-- Section Tabs -->
@@ -91,25 +82,25 @@
             <div class="analysis-card">
                 <h3>📊 Performance Analysis</h3>
                 <div class="analysis-grid">
-                    <div class="analysis-item correct">
-                        <div class="analysis-icon">✅</div>
+                    <div class="analysis-item listening">
+                        <div class="analysis-icon">👂</div>
                         <div class="analysis-content">
-                            <div class="analysis-number" id="totalCorrect">0</div>
-                            <div class="analysis-label">Total Correct</div>
+                            <div class="analysis-number" id="listeningBandDisplay">0.0</div>
+                            <div class="analysis-label">Listening Band</div>
                         </div>
                     </div>
-                    <div class="analysis-item incorrect">
-                        <div class="analysis-icon">❌</div>
+                    <div class="analysis-item reading">
+                        <div class="analysis-icon">📖</div>
                         <div class="analysis-content">
-                            <div class="analysis-number" id="totalIncorrect">0</div>
-                            <div class="analysis-label">Total Incorrect</div>
+                            <div class="analysis-number" id="readingBandDisplay">0.0</div>
+                            <div class="analysis-label">Reading Band</div>
                         </div>
                     </div>
-                    <div class="analysis-item accuracy">
+                    <div class="analysis-item overall">
                         <div class="analysis-icon">🎯</div>
                         <div class="analysis-content">
-                            <div class="analysis-number" id="overallAccuracy">0%</div>
-                            <div class="analysis-label">Overall Accuracy</div>
+                            <div class="analysis-number" id="overallBandDisplay">0.0</div>
+                            <div class="analysis-label">Overall Band</div>
                         </div>
                     </div>
                 </div>
@@ -117,32 +108,62 @@
 
             <!-- Band Score Guide -->
             <div class="band-guide-card">
-                <h3>🎯 IELTS Band Score Estimation</h3>
+                <h3>🎯 IELTS Band Score Guide</h3>
                 <div class="band-scale">
                     <div class="band-item band-9">
                         <div class="band-number">9.0</div>
                         <div class="band-description">Expert User</div>
-                        <div class="band-range">75-80 correct</div>
+                        <div class="band-range">39-40 correct</div>
+                    </div>
+                    <div class="band-item band-8-5">
+                        <div class="band-number">8.5</div>
+                        <div class="band-description">Very Good User</div>
+                        <div class="band-range">37-38 correct</div>
                     </div>
                     <div class="band-item band-8">
-                        <div class="band-number">8.0-8.5</div>
+                        <div class="band-number">8.0</div>
                         <div class="band-description">Very Good User</div>
-                        <div class="band-range">65-74 correct</div>
+                        <div class="band-range">35-36 correct</div>
+                    </div>
+                    <div class="band-item band-7-5">
+                        <div class="band-number">7.5</div>
+                        <div class="band-description">Good User</div>
+                        <div class="band-range">32-34 correct</div>
                     </div>
                     <div class="band-item band-7">
-                        <div class="band-number">7.0-7.5</div>
+                        <div class="band-number">7.0</div>
                         <div class="band-description">Good User</div>
-                        <div class="band-range">55-64 correct</div>
+                        <div class="band-range">30-31 correct</div>
+                    </div>
+                    <div class="band-item band-6-5">
+                        <div class="band-number">6.5</div>
+                        <div class="band-description">Competent User</div>
+                        <div class="band-range">26-29 correct</div>
                     </div>
                     <div class="band-item band-6">
-                        <div class="band-number">6.0-6.5</div>
+                        <div class="band-number">6.0</div>
                         <div class="band-description">Competent User</div>
-                        <div class="band-range">45-54 correct</div>
+                        <div class="band-range">23-25 correct</div>
+                    </div>
+                    <div class="band-item band-5-5">
+                        <div class="band-number">5.5</div>
+                        <div class="band-description">Modest User</div>
+                        <div class="band-range">18-22 correct</div>
                     </div>
                     <div class="band-item band-5">
-                        <div class="band-number">5.0-5.5</div>
+                        <div class="band-number">5.0</div>
                         <div class="band-description">Modest User</div>
-                        <div class="band-range">30-44 correct</div>
+                        <div class="band-range">16-17 correct</div>
+                    </div>
+                    <div class="band-item band-4-5">
+                        <div class="band-number">4.5</div>
+                        <div class="band-description">Limited User</div>
+                        <div class="band-range">13-15 correct</div>
+                    </div>
+                    <div class="band-item band-4">
+                        <div class="band-number">4.0</div>
+                        <div class="band-description">Limited User</div>
+                        <div class="band-range">10-12 correct</div>
                     </div>
                 </div>
             </div>

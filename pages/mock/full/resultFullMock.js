@@ -70,7 +70,13 @@ async function initializeResult() {
     }
 
     resultData = docSnap.data();
-    console.log("📊 Result data loaded:", resultData);
+  console.log("📊 Result data loaded:", resultData);
+  console.log("🔍 Listening answers:", resultData.listeningAnswers);
+  console.log("🔍 Reading answers:", resultData.readingAnswers);
+  console.log("🔍 Listening correct answers:", resultData.listeningCorrectAnswers);
+  console.log("🔍 Reading correct answers:", resultData.readingCorrectAnswers);
+  console.log("🔍 Listening answers keys:", Object.keys(resultData.listeningAnswers || {}));
+  console.log("🔍 Reading answers keys:", Object.keys(resultData.readingAnswers || {}));
 
     // Update UI
     updateResultDisplay();
@@ -108,62 +114,51 @@ function updateResultDisplay() {
   safeUpdate("email", resultData.name || "Unknown");
   safeUpdate("completionDate", formatDate(resultData.createdAt));
 
-  // Calculate scores
+  // Calculate scores - separate listening and reading
   const listeningScore = resultData.listeningScore || 0;
   const readingScore = resultData.readingScore || 0;
-  const totalScore = listeningScore + readingScore;
-  const totalPossible = 80;
   const listeningTotal = 40;
   const readingTotal = 40;
 
   // Convert to IELTS bands
   const listeningBand = convertListeningToIELTS(listeningScore);
   const readingBand = convertReadingToIELTS(readingScore);
+  
+  // Overall band is the average of listening and reading bands (IELTS standard)
   const overallBand = ((listeningBand + readingBand) / 2).toFixed(1);
 
-  // Update main score display
-  safeUpdate("overallScore", totalScore);
-  safeUpdate("totalPossible", totalPossible);
+  // Update main score display - show overall band instead of total score
   safeUpdate("overallBand", overallBand);
+  safeUpdate("overallBandLabel", "Overall Band Score");
 
   // Update individual scores with bands
-  safeUpdate("listeningScore", `${listeningScore} / ${listeningTotal} (Band ${listeningBand})`);
-  safeUpdate("readingScore", `${readingScore} / ${readingTotal} (Band ${readingBand})`);
+  safeUpdate("listeningScore", `${listeningScore} / ${listeningTotal}`);
+  safeUpdate("listeningBand", listeningBand);
+  safeUpdate("readingScore", `${readingScore} / ${readingTotal}`);
+  safeUpdate("readingBand", readingBand);
 
   // Calculate and update percentages
   const listeningPercentage = Math.round((listeningScore / listeningTotal) * 100);
   const readingPercentage = Math.round((readingScore / readingTotal) * 100);
-  const overallPercentage = Math.round((totalScore / totalPossible) * 100);
 
   safeUpdate("listeningPercentage", `${listeningPercentage}%`);
   safeUpdate("readingPercentage", `${readingPercentage}%`);
-  safeUpdate("progressPercent", `${overallPercentage}%`);
-
-  // Update progress bar
-  setTimeout(() => {
-    safeStyleUpdate("progressFill", "width", `${overallPercentage}%`);
-  }, 500);
-
-  // Update analysis
-  const totalIncorrect = totalPossible - totalScore;
-  safeUpdate("totalCorrect", totalScore);
-  safeUpdate("totalIncorrect", totalIncorrect);
-  safeUpdate("overallAccuracy", `${overallPercentage}%`);
 
   // Update detailed scores with bands
-  safeUpdate("listeningDetailScore", `${listeningScore}/${listeningTotal} (${listeningBand})`);
-  safeUpdate("readingDetailScore", `${readingScore}/${readingTotal} (${readingBand})`);
+  safeUpdate("listeningDetailScore", `${listeningScore}/${listeningTotal} (Band ${listeningBand})`);
+  safeUpdate("readingDetailScore", `${readingScore}/${readingTotal} (Band ${readingBand})`);
 
-  // Update band displays
+  // Update band displays in overview section
   safeUpdate("listeningBandDisplay", listeningBand);
   safeUpdate("readingBandDisplay", readingBand);
+  safeUpdate("overallBandDisplay", overallBand);
 
   // Update writing info
   updateWritingSection();
 
-  // Render question grids
-  renderListeningQuestions();
-  renderReadingQuestions();
+  // Render detailed question grids with answers
+  renderDetailedListeningQuestions();
+  renderDetailedReadingQuestions();
 
   // Highlight band score based on overall band
   highlightBandScore(parseFloat(overallBand));
@@ -200,8 +195,8 @@ function countWords(text) {
   return text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
 }
 
-// Render listening questions
-function renderListeningQuestions() {
+// Render detailed listening questions with full answer display
+function renderDetailedListeningQuestions() {
   const container = document.getElementById("listeningQuestions");
   if (!container) {
     console.warn("listeningQuestions container not found");
@@ -211,40 +206,83 @@ function renderListeningQuestions() {
   const listeningAnswers = resultData.listeningAnswers || {};
   const listeningCorrectAnswers = resultData.listeningCorrectAnswers || {};
 
+  console.log("🎯 Rendering listening questions with data:", {
+    answers: listeningAnswers,
+    correctAnswers: listeningCorrectAnswers
+  });
+
   // Clear container
   container.innerHTML = "";
 
-  // Create 40 questions for listening
+  // Create detailed answers for each question
   for (let i = 1; i <= 40; i++) {
-    const qId = `q${i}`;
-    const userAnswer = listeningAnswers[qId];
-    const correctAnswers = listeningCorrectAnswers[qId] || [];
+    // Try both formats: numeric key and q-prefixed key
+    const userAnswer = listeningAnswers[i] || listeningAnswers[`q${i}`];
+    const correctAnswer = listeningCorrectAnswers[i] || listeningCorrectAnswers[`q${i}`];
 
-    const questionDiv = document.createElement("div");
-    questionDiv.className = "question-result";
-    questionDiv.textContent = i;
+    console.log(`🔍 Listening Question ${i}:`, {
+      userAnswer,
+      correctAnswer,
+      allAnswers: listeningAnswers,
+      allCorrectAnswers: listeningCorrectAnswers
+    });
 
-    // Determine status based on actual comparison
+    const answerDiv = document.createElement("div");
+    answerDiv.className = "detailed-answer";
+
+    // Determine status and styling
+    let statusIcon = "";
+    let statusClass = "";
+    let userDisplay = "";
+    let correctDisplay = "";
+
     if (userAnswer === undefined || userAnswer === null || userAnswer === "") {
-      questionDiv.classList.add("unanswered");
-      questionDiv.title = `Question ${i}: Not answered`;
+      statusIcon = "⭕";
+      statusClass = "unanswered";
+      userDisplay = "<i>Not answered</i>";
     } else {
-      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswers);
+      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer);
       if (isCorrect) {
-        questionDiv.classList.add("correct");
-        questionDiv.title = `Question ${i}: Correct\nYour answer: ${userAnswer}`;
+        statusIcon = "✅";
+        statusClass = "correct";
       } else {
-        questionDiv.classList.add("incorrect");
-        questionDiv.title = `Question ${i}: Incorrect\nYour answer: ${userAnswer}\nCorrect answer: ${correctAnswers.join(", ")}`;
+        statusIcon = "❌";
+        statusClass = "incorrect";
       }
+      
+      userDisplay = String(userAnswer);
+    }
+    
+    // Handle correct answer display
+    if (Array.isArray(correctAnswer)) {
+      correctDisplay = correctAnswer.join(", ");
+    } else {
+      correctDisplay = String(correctAnswer || "");
     }
 
-    container.appendChild(questionDiv);
+    answerDiv.classList.add(statusClass);
+
+    answerDiv.innerHTML = `
+      <div class="answer-header">
+        <span class="status-icon">${statusIcon}</span>
+        <strong>Question ${i}</strong>
+      </div>
+      <div class="answer-content">
+        <div class="user-answer">
+          <strong>Your Answer:</strong> ${userDisplay}
+        </div>
+        <div class="correct-answer">
+          <strong>Correct Answer:</strong> ${correctDisplay}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(answerDiv);
   }
 }
 
-// Render reading questions
-function renderReadingQuestions() {
+// Render detailed reading questions with full answer display
+function renderDetailedReadingQuestions() {
   const container = document.getElementById("readingQuestions");
   if (!container) {
     console.warn("readingQuestions container not found");
@@ -254,49 +292,125 @@ function renderReadingQuestions() {
   const readingAnswers = resultData.readingAnswers || {};
   const readingCorrectAnswers = resultData.readingCorrectAnswers || {};
 
+  console.log("🎯 Rendering reading questions with data:", {
+    answers: readingAnswers,
+    correctAnswers: readingCorrectAnswers,
+    answersKeys: Object.keys(readingAnswers || {}),
+    correctAnswersKeys: Object.keys(readingCorrectAnswers || {})
+  });
+
   // Clear container
   container.innerHTML = "";
 
-  // Create 40 questions for reading
+  // Create detailed answers for each question
   for (let i = 1; i <= 40; i++) {
+    // Try both formats: reading_q prefix and q prefix
+    const readingQId = `reading_q${i}`;
     const qId = `q${i}`;
-    const userAnswer = readingAnswers[qId];
-    const correctAnswers = readingCorrectAnswers[qId] || [];
+    const userAnswer = readingAnswers[readingQId] || readingAnswers[qId];
+    const correctAnswer = readingCorrectAnswers[readingQId] || readingCorrectAnswers[qId];
 
-    const questionDiv = document.createElement("div");
-    questionDiv.className = "question-result";
-    questionDiv.textContent = i;
+    console.log(`🔍 Reading Question ${i}:`, {
+      readingQId,
+      qId,
+      userAnswer,
+      correctAnswer,
+      allAnswers: readingAnswers,
+      allCorrectAnswers: readingCorrectAnswers
+    });
 
-    // Determine status based on actual comparison
+    const answerDiv = document.createElement("div");
+    answerDiv.className = "detailed-answer";
+
+    // Determine status and styling
+    let statusIcon = "";
+    let statusClass = "";
+    let userDisplay = "";
+    let correctDisplay = "";
+
     if (userAnswer === undefined || userAnswer === null || userAnswer === "") {
-      questionDiv.classList.add("unanswered");
-      questionDiv.title = `Question ${i}: Not answered`;
+      statusIcon = "⭕";
+      statusClass = "unanswered";
+      userDisplay = "<i>Not answered</i>";
     } else {
-      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswers);
+      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer);
+      console.log(`🔍 Reading Question ${i} correctness check:`, {
+        userAnswer,
+        correctAnswer,
+        isCorrect
+      });
+      
       if (isCorrect) {
-        questionDiv.classList.add("correct");
-        questionDiv.title = `Question ${i}: Correct\nYour answer: ${userAnswer}`;
+        statusIcon = "✅";
+        statusClass = "correct";
       } else {
-        questionDiv.classList.add("incorrect");
-        questionDiv.title = `Question ${i}: Incorrect\nYour answer: ${userAnswer}\nCorrect answer: ${correctAnswers.join(", ")}`;
+        statusIcon = "❌";
+        statusClass = "incorrect";
       }
+      
+      userDisplay = String(userAnswer);
+    }
+    
+    // Handle correct answer display
+    if (Array.isArray(correctAnswer)) {
+      correctDisplay = correctAnswer.join(", ");
+    } else {
+      correctDisplay = String(correctAnswer || "");
     }
 
-    container.appendChild(questionDiv);
+    answerDiv.classList.add(statusClass);
+
+    answerDiv.innerHTML = `
+      <div class="answer-header">
+        <span class="status-icon">${statusIcon}</span>
+        <strong>Question ${i}</strong>
+      </div>
+      <div class="answer-content">
+        <div class="user-answer">
+          <strong>Your Answer:</strong> ${userDisplay}
+        </div>
+        <div class="correct-answer">
+          <strong>Correct Answer:</strong> ${correctDisplay}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(answerDiv);
   }
 }
 
 // Check answer correctness (same logic as in main test)
 function checkAnswerCorrectness(userAns, expected) {
-  if (!expected || expected.length === 0) return false;
+  if (!expected) return false;
 
-  if (Array.isArray(userAns) && Array.isArray(expected)) {
-    if (userAns.length !== expected.length) return false;
-    return expected.every((v) => userAns.includes(v)) && userAns.length === expected.length;
-  } else {
-    const userStr = typeof userAns === "string" ? userAns.toLowerCase().trim() : String(userAns || "").toLowerCase().trim();
-    return expected.map((a) => String(a).toLowerCase().trim()).includes(userStr);
+  // Handle empty user answer
+  if (!userAns || userAns === "") return false;
+
+  // Handle array of expected answers (for reading)
+  if (Array.isArray(expected)) {
+    const userStr = String(userAns).toLowerCase().trim();
+    return expected.some(exp => {
+      const expStr = String(exp).toLowerCase().trim();
+      if (expStr.includes("/")) {
+        const alternatives = expStr.split("/").map(alt => alt.trim());
+        return alternatives.some(alt => alt === userStr);
+      }
+      return expStr === userStr;
+    });
   }
+
+  // Convert to strings for comparison
+  const userStr = String(userAns).toLowerCase().trim();
+  const expectedStr = String(expected).toLowerCase().trim();
+
+  // Handle multiple correct answers (separated by "/")
+  if (expectedStr.includes("/")) {
+    const alternatives = expectedStr.split("/").map(alt => alt.trim());
+    return alternatives.some(alt => alt === userStr);
+  }
+
+  // Simple string comparison
+  return userStr === expectedStr;
 }
 
 // Highlight appropriate band score based on overall band
