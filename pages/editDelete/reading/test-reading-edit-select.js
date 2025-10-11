@@ -177,7 +177,7 @@ function displayTests() {
 window.editTest = function(testId) {
   console.log(`✏️ Editing test: ${testId}`);
   // Redirect to edit page with test ID as parameter
-  window.location.href = `test-edit.html?testId=${testId}`;
+  window.location.href = `editReading/edit-reading-test.html?testId=${testId}`;
 };
 
 // Confirm delete - show modal

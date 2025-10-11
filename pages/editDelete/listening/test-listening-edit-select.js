@@ -125,8 +125,10 @@ function displayTests() {
   
   container.innerHTML = allTests.map(test => {
     const testNumber = test.id.replace("test-", "");
-    const sectionCount = test.sections?.length || 0;
-    const totalQuestions = test.sections?.reduce((sum, s) => sum + (s.questions?.length || 0), 0) || 0;
+    const sectionCount = test.parts?.sections?.length || 0;
+    const totalQuestions = test.parts?.sections?.reduce((sum, s) => {
+      return sum + (s.content?.filter(c => c.type === 'question' || c.type === 'question-group').length || 0);
+    }, 0) || 0;
     const createdDate = test.createdAt ? new Date(test.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -185,7 +187,7 @@ function displayTests() {
 window.editTest = function(testId) {
   console.log(`✏️ Editing listening test: ${testId}`);
   // Redirect to edit page with test ID as parameter
-  window.location.href = `test-edit.html?testId=${testId}`;
+  window.location.href = `editListening/edit-listening-test.html?testId=${testId}`;
 };
 
 // Confirm delete - show modal

@@ -8,454 +8,474 @@
       "title": "Listening Test ",
       "duration": 30,
       "sections": [
-        {
-          "sectionNumber": 1,
-          "title": "Apartments in Arillas",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart1.mp3?alt=media&token=596dea8b-fa20-4fa9-8e43-cddd4d31153f",
-          "content": [
-            {
-              "type": "table",
-              "title": "Apartments in Arillas",
-              "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
-              "columns": [
-                "Apartments",
-                "Parking",
-                "Additional information"
-              ],
-              "rows": [
-                {
-                  "apartments": "Rose Garden Apartments",
-                  "parking": "Example: free parking lot",
-                  "additionalinformation": "a large ___q1___"
-                },
-                {
-                  "apartments": "Blue Bay",
-                  "parking": "no parking lot",
-                  "additionalinformation": "man-made lake, no ___q2___"
-                },
-                {
-                  "apartments": "Sunshade Apartments",
-                  "parking": "huge parking lot",
-                  "additionalinformation": "No ___q3___ In the room"
-                },
-                {
-                  "apartments": "Grand Apartments",
-                  "parking": "no charge on street",
-                  "additionalinformation": "most guests are ___q4___"
-                }
-              ],
-              "answer": {
-                "q1": "swimming pool",
-                "q2": "lift",
-                "q3": "kitchen",
-                "q4": "children"
+      {
+        "sectionNumber": 1,
+        "title": "Apartments in Arillas",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart1.mp3?alt=media&token=596dea8b-fa20-4fa9-8e43-cddd4d31153f",
+        "content": [
+          {
+            "type": "table",
+            "title": "Apartments in Arillas",
+            "groupInstruction": "Questions 1-10\nComplete the notes below.\nWrite ONE WORD AND/OR A NUMBER for each answer.",
+            "columns": [
+              "Apartments",
+              "Parking",
+              "Additional information"
+            ],
+            "rows": [
+              {
+                "apartments": "Rose Garden Apartments",
+                "parking": "Example: free parking lot",
+                "additionalinformation": "a large 1 ___q1___"
+              },
+              {
+                "apartments": "Blue Bay",
+                "parking": "no parking lot",
+                "additionalinformation": "man-made lake, no 2 ___q2___"
+              },
+              {
+                "apartments": "Sunshade Apartments",
+                "parking": "huge parking lot",
+                "additionalinformation": "No 3 ___q3___ In the room"
+              },
+              {
+                "apartments": "Grand Apartments",
+                "parking": "no charge on street",
+                "additionalinformation": "most guests are 4 ___q4___"
               }
-            },
-            {
-              "type": "question",
-              "questionId": "q5",
-              "format": "gap-fill",
-              "text": "What colour is the bus that the woman should take?",
-              "postfix": "",
-              "correctAnswer": "green",
-              "wordLimit": 3
-            },
-            {
-              "type": "question",
-              "questionId": "q6",
-              "format": "gap-fill",
-              "text": "How long is the ferry boat trip?",
-              "postfix": "",
-              "correctAnswer": "50 minutes/ fifty minutes",
-              "wordLimit": 3
-            },
-            {
-              "type": "question",
-              "questionId": "q7",
-              "format": "gap-fill",
-              "text": "Where is the Bike Hire?",
-              "postfix": "",
-              "correctAnswer": "behind the mall",
-              "wordLimit": 3
-            },
-            {
-              "type": "question-group",
-              "groupType": "matching",
-              "questionId": "q8_9_10",
-              "text": "What is the theme of each of the following museums?",
-              "instructions": "Write the correct letter, A-E, next to Questions 8-10",
-              "questions": [
-                {
-                  "questionId": "q8",
-                  "text": "Museum 1",
-                  "correctAnswer": "D"
-                },
-                {
-                  "questionId": "q9",
-                  "text": "Museum 2",
-                  "correctAnswer": "E"
-                },
-                {
-                  "questionId": "q10",
-                  "text": "Museum 3",
-                  "correctAnswer": "B"
-                }
-              ],
-              "options": {
-                "A": "Earth science",
-                "B": "Astronomy science",
-                "C": "Modern industrial history",
-                "D": "Decoration and art",
-                "E": "Soft drink manufacturing"
+            ],
+            "answer": {
+              "q1": "swimming pool",
+              "q2": "lift",
+              "q3": "kitchen",
+              "q4": "children"
+            }
+          },
+          {
+            "type": "text",
+            "groupInstruction": "Questions 5-7\nComplete the sentences below.\nWrite NO MORE THREE WORDS AND/OR A NUMBER for each answer."
+          },
+          {
+            "type": "question",
+            "questionId": "q5",
+            "format": "gap-fill",
+            "text": "What colour is the bus that the woman should take? _____",
+            "postfix": "",
+            "correctAnswer": "green",
+            "wordLimit": 3
+          },
+          {
+            "type": "question",
+            "questionId": "q6",
+            "format": "gap-fill",
+            "text": "How long is the ferry boat trip? _____",
+            "postfix": "",
+            "correctAnswer": "50 minutes/ fifty minutes",
+            "wordLimit": 3
+          },
+          {
+            "type": "question",
+            "questionId": "q7",
+            "format": "gap-fill",
+            "text": "Where is the Bike Hire? _____",
+            "postfix": "",
+            "correctAnswer": "behind the mall",
+            "wordLimit": 3
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q8_9_10",
+            "text": "What is the theme of each of the following museums?",
+            "groupInstruction": "Questions 8-10.\nChoose THREE correct answers.",
+            "questions": [
+              {
+                "questionId": "q8",
+                "text": "Museum 1",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q9",
+                "text": "Museum 2",
+                "correctAnswer": "E"
+              },
+              {
+                "questionId": "q10",
+                "text": "Museum 3",
+                "correctAnswer": "B"
               }
+            ],
+            "options": {
+              "A": "Earth science",
+              "B": "Astronomy science",
+              "C": "Modern industrial history",
+              "D": "Decoration and art",
+              "E": "Soft drink manufacturing"
             }
-          ],
-          "instructions": {
-            "heading": "Questions 1-10",
-            "details": "Complete the notes below.",
-            "note": "Write ONE WORD AND/OR A NUMBER for each answer."
           }
-        },
-        {
-          "sectionNumber": 2,
-          "title": "Travel Program",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart2.mp3?alt=media&token=1bc857f9-6526-4a7e-a97e-83a1c376638b",
-          "content": [
-            {
-              "type": "question",
-              "questionId": "q11",
-              "format": "multiple-choice",
-              "text": "What is the speaker's profession?",
-              "options": {
-                "A": "a travel agent",
-                "B": "an actor",
-                "C": "a journalist"
-              },
-              "correctAnswer": "B"
-            },
-            {
-              "type": "question",
-              "questionId": "q12",
-              "format": "multiple-choice",
-              "text": "Why does he love travelling?",
-              "options": {
-                "A": "He watched documentaries as a child.",
-                "B": "He is influenced by his parents' passion.",
-                "C": "His parents are geographers."
-              },
-              "correctAnswer": "B"
-            },
-            {
-              "type": "question",
-              "questionId": "q13",
-              "format": "multiple-choice",
-              "text": "When was the first British ski resort established?",
-              "options": {
-                "A": "1920s",
-                "B": "1930s",
-                "C": "1960s"
-              },
-              "correctAnswer": "C"
-            },
-            {
-              "type": "question",
-              "questionId": "q14",
-              "format": "multiple-choice",
-              "text": "Which activity is offered by a school in the other town?",
-              "options": {
-                "A": "skydiving",
-                "B": "playing golf",
-                "C": "visiting a brewery"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q15",
-              "format": "multiple-choice",
-              "text": "What does the speaker recommend in Edimore region?",
-              "options": {
-                "A": "a hot spring",
-                "B": "a museum",
-                "C": "a local market"
-              },
-              "correctAnswer": "B"
-            },
-            {
-              "type": "question",
-              "questionId": "q16",
-              "format": "multiple-choice",
-              "text": "What program will be available soon?",
-              "options": {
-                "A": "Landscape of UK",
-                "B": "Mountain Walking in Europe",
-                "C": "Wildlife around the World"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question-group",
-              "groupType": "matching",
-              "questionId": "q17_18_19_20",
-              "text": "Which feature does each of the following skiing locations have?",
-              "instructions": "Write the correct letter, A-G, next to Questions 17-20",
-              "questions": [
-                {
-                  "questionId": "q17",
-                  "text": "Lakeside",
-                  "correctAnswer": "F"
-                },
-                {
-                  "questionId": "q18",
-                  "text": "Petersburg",
-                  "correctAnswer": "C"
-                },
-                {
-                  "questionId": "q19",
-                  "text": "Winterton",
-                  "correctAnswer": "B"
-                },
-                {
-                  "questionId": "q20",
-                  "text": "Al slops",
-                  "correctAnswer": "G"
-                }
-              ],
-              "options": {
-                "A": "A well- known ski school",
-                "B": "Suitable for beginners",
-                "C": "Olympics champion training location",
-                "D": "Would- be olympics Rink",
-                "E": "Good ski facilities",
-                "F": "Popular for many years",
-                "G": "Childcare provided"
-              }
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 11-20",
-            "details": "Answer the questions below."
-          }
-        },
-        {
-          "sectionNumber": 3,
-          "title": "Nursing Program Discussion",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart3.mp3?alt=media&token=98051ae8-bad3-469c-803a-67557501f70a",
-          "content": [
-            {
-              "type": "question",
-              "questionId": "q21",
-              "format": "multiple-choice",
-              "text": "how old are the students of the nursing program?",
-              "options": {
-                "A": "they are teenagers.",
-                "B": "they are in their twenties",
-                "C": "they belong to different age group"
-              },
-              "correctAnswer": "C"
-            },
-            {
-              "type": "question",
-              "questionId": "q22",
-              "format": "multiple-choice",
-              "text": "what do the speaker say about the group project?",
-              "options": {
-                "A": "it helps to improve relationship among different classmates",
-                "B": "it helps to develop problem solvings skills'",
-                "C": "it provides supportive learning environment"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q23",
-              "format": "multiple-choice",
-              "text": "which part of the program surprised Paul",
-              "options": {
-                "A": "There's a number of essay to write",
-                "B": "there's a lot of practical work",
-                "C": "there's internship provided"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q24",
-              "format": "multiple-choice",
-              "text": "what do they feel about learning law?",
-              "options": {
-                "A": "it is essential training",
-                "B": "it is too theoretical",
-                "C": "it takes up took much time"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question-group",
-              "groupType": "matching",
-              "questionId": "q25_26_27_28_29_30",
-              "text": "What are the suggestions offered by the speaker?",
-              "instructions": "Choose SIX answers from the box and write the correct letter, A-H next to Question 25-30",
-              "questions": [
-                {
-                  "questionId": "q25",
-                  "text": "Essays",
-                  "correctAnswer": "E"
-                },
-                {
-                  "questionId": "q26",
-                  "text": "Lectures",
-                  "correctAnswer": "G"
-                },
-                {
-                  "questionId": "q27",
-                  "text": "Research",
-                  "correctAnswer": "C"
-                },
-                {
-                  "questionId": "q28",
-                  "text": "Online forum",
-                  "correctAnswer": "A"
-                },
-                {
-                  "questionId": "q29",
-                  "text": "placement tests",
-                  "correctAnswer": "B"
-                },
-                {
-                  "questionId": "q30",
-                  "text": "freshmen",
-                  "correctAnswer": "H"
-                }
-              ],
-              "options": {
-                "A": "get feedback from teaching staff",
-                "B": "do more reading",
-                "C": "get help from school supporting staff",
-                "D": "get help for nursing problem",
-                "E": "manage time properly",
-                "F": "be well prepared",
-                "G": "review the notes regularly",
-                "H": "don't set unrealistic goals"
-              }
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 21-30",
-            "details": "Answer the questions below."
-          }
-        },
-        {
-          "sectionNumber": 4,
-          "title": "Dinner Affects the Environment",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart4.mp3?alt=media&token=8d16cda6-6633-4b58-b745-a600d703e442",
-          "content": [
-            {
-              "type": "text",
-              "value": "Food industry"
-            },
-            {
-              "type": "question",
-              "questionId": "q31",
-              "format": "gap-fill",
-              "text": "- The amount of CO2 from producing our daily meals is the same as that from",
-              "postfix": "",
-              "correctAnswer": "driving",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q32",
-              "format": "gap-fill",
-              "text": "- The process of making 100g",
-              "postfix": "beans can result in 140g CO2.",
-              "correctAnswer": "coffee",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q33",
-              "format": "gap-fill",
-              "text": "- The",
-              "postfix": "production process contributes to climate & warming emissions.",
-              "correctAnswer": "meat",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q34",
-              "format": "gap-fill",
-              "text": "- Scientists are working on reducing the impact of",
-              "postfix": "process.",
-              "correctAnswer": "cooking",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q35",
-              "format": "gap-fill",
-              "text": "- Packaging needs",
-              "postfix": "as well as water and other resources for production.",
-              "correctAnswer": "energy",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q36",
-              "format": "gap-fill",
-              "text": "- Long distance",
-              "postfix": "leads to more pollution.",
-              "correctAnswer": "transportation",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q37",
-              "format": "gap-fill",
-              "text": "- Due to the damage of",
-              "postfix": "the total amount of CO2 increases greatly",
-              "correctAnswer": "forests",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "Agriculture"
-            },
-            {
-              "type": "question",
-              "questionId": "q38",
-              "format": "gap-fill",
-              "text": "- Livestock are either kept on farms or on a",
-              "postfix": "in different parts of the world.",
-              "correctAnswer": "mountain",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q39",
-              "format": "gap-fill",
-              "text": "- In animal agriculture,",
-              "postfix": "required constantly",
-              "correctAnswer": "food",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q40",
-              "format": "gap-fill",
-              "text": "- Some agricultural activities like",
-              "postfix": "are unlikely to be changed",
-              "correctAnswer": "fishing",
-              "wordLimit": 1
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 31-40",
-            "details": "Complete the notes below.",
-            "note": "Write ONE WORD AND/OR A NUMBER for each answer."
-          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the notes below."
         }
-      ]
+      },
+      {
+        "sectionNumber": 2,
+        "title": "",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart2.mp3?alt=media&token=1bc857f9-6526-4a7e-a97e-83a1c376638b",
+        "content": [
+          {
+            "type": "text",
+            "title": "Travel Program"
+          },
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "text": "What is the speaker's profession?",
+            "groupInstruction": "Questions 11-16.\nChoose the correct letter, A, B or C.",
+
+            "options": {
+              "A": "a travel agent",
+              "B": "an actor",
+              "C": "a journalist"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "Why does he love travelling?",
+            "options": {
+              "A": "He watched documentaries as a child.",
+              "B": "He is influenced by his parents' passion.",
+              "C": "His parents are geographers."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "When was the first British ski resort established?",
+            "options": {
+              "A": "1920s",
+              "B": "1930s",
+              "C": "1960s"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "multiple-choice",
+            "text": "Which activity is offered by a school in the other town?",
+            "options": {
+              "A": "skydiving",
+              "B": "playing golf",
+              "C": "visiting a brewery"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "multiple-choice",
+            "text": "What does the speaker recommend in Edimore region?",
+            "options": {
+              "A": "a hot spring",
+              "B": "a museum",
+              "C": "a local market"
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q16",
+            "format": "multiple-choice",
+            "text": "What program will be available soon?",
+            "options": {
+              "A": "Landscape of UK",
+              "B": "Mountain Walking in Europe",
+              "C": "Wildlife around the World"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q17_18_19_20",
+            "text": "Which feature does each of the following skiing locations have?",
+            "groupInstruction": "Questions 17-20.\nChoose FOUR correct answers.",
+
+            "questions": [
+              {
+                "questionId": "q17",
+                "text": "Lakeside",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q18",
+                "text": "Petersburg",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q19",
+                "text": "Winterton",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q20",
+                "text": "Al slops",
+                "correctAnswer": "G"
+              }
+            ],
+            "options": {
+              "A": "A well- known ski school",
+              "B": "Suitable for beginners",
+              "C": "Olympics champion training location",
+              "D": "Would- be olympics Rink",
+              "E": "Good ski facilities",
+              "F": "Popular for many years",
+              "G": "Childcare provided"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Nursing Program Discussion",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart3.mp3?alt=media&token=98051ae8-bad3-469c-803a-67557501f70a",
+        "content": [
+          {
+            "type": "text",
+            "title": "Nursing Program Discussion"
+          },
+          {
+            "type": "question",
+            "questionId": "q21",
+            "format": "multiple-choice",
+            "text": "how old are the students of the nursing program?",
+            "groupInstruction": "Questions 21-24.\nChoose the correct letter, A, B or C.",
+            "options": {
+              "A": "they are teenagers.",
+              "B": "they are in their twenties",
+              "C": "they belong to different age group"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q22",
+            "format": "multiple-choice",
+            "text": "what do the speaker say about the group project?",
+            "options": {
+              "A": "it helps to improve relationship among different classmates",
+              "B": "it helps to develop problem solvings skills'",
+              "C": "it provides supportive learning environment"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q23",
+            "format": "multiple-choice",
+            "text": "which part of the program surprised Paul",
+            "options": {
+              "A": "There's a number of essay to write",
+              "B": "there's a lot of practical work",
+              "C": "there's internship provided"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q24",
+            "format": "multiple-choice",
+            "text": "what do they feel about learning law?",
+            "options": {
+              "A": "it is essential training",
+              "B": "it is too theoretical",
+              "C": "it takes up took much time"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q25_26_27_28_29_30",
+            "text": "What are the suggestions offered by the speaker?",
+            "instructions": "Choose SIX answers from the box and write the correct letter, A-H next to Question 25-30",
+            "groupInstruction": "Questions 25-30.\nChoose SIX correct answers.",
+            "questions": [
+              {
+                "questionId": "q25",
+                "text": "Essays",
+                "correctAnswer": "E"
+              },
+              {
+                "questionId": "q26",
+                "text": "Lectures",
+                "correctAnswer": "G"
+              },
+              {
+                "questionId": "q27",
+                "text": "Research",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q28",
+                "text": "Online forum",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q29",
+                "text": "placement tests",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q30",
+                "text": "freshmen",
+                "correctAnswer": "H"
+              }
+            ],
+            "options": {
+              "A": "get feedback from teaching staff",
+              "B": "do more reading",
+              "C": "get help from school supporting staff",
+              "D": "get help for nursing problem",
+              "E": "manage time properly",
+              "F": "be well prepared",
+              "G": "review the notes regularly",
+              "H": "don't set unrealistic goals"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-10%2Fpart4.mp3?alt=media&token=8d16cda6-6633-4b58-b745-a600d703e442",
+        "content": [
+          {
+            "type": "text",
+            "title": "Dinner Affects the Environment"
+          },
+          {
+            "type": "text",
+            "value": "Food industry"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "- The amount of CO2 from producing our daily meals is the same as that from _____",
+            "postfix": "",
+            "correctAnswer": "driving",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "- The process of making 100g _____ beans can result in 140g CO2.",
+            "postfix": "",
+            "correctAnswer": "coffee",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "- The _____ production process contributes to climate & warming emissions.",
+            "postfix": "",
+            "correctAnswer": "meat",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "- Scientists are working on reducing the impact of _____ process.",
+            "postfix": "",
+            "correctAnswer": "cooking",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "- Packaging needs _____ as well as water and other resources for production.",
+            "postfix": "",
+            "correctAnswer": "energy",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "- Long distance _____ leads to more pollution.",
+            "postfix": "",
+            "correctAnswer": "transportation",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q37",
+            "format": "gap-fill",
+            "text": "- Due to the damage of _____ the total amount of CO2 increases greatly",
+            "postfix": "",
+            "correctAnswer": "forests",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Agriculture"
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "- Livestock are either kept on farms or on a _____ in different parts of the world.",
+            "postfix": "",
+            "correctAnswer": "mountain",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "- In animal agriculture, _____ required constantly",
+            "postfix": "",
+            "correctAnswer": "food",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "- Some agricultural activities like _____ are unlikely to be changed",
+            "postfix": "",
+            "correctAnswer": "fishing",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD AND/OR A NUMBER for each answer."
+        }
+      }
+    ]
     },
     {
       "id": "reading",
@@ -782,16 +802,12 @@
               "groupInstruction": "Questions 12 and 13\nAnswer the questions below.\nChoose NO MORE THAN TWO WORDS from the passage for each answer.\nWrite your answers in boxes 12 and 13 on your answer sheet.",
               "type": "gap-fill",
               "question": "12 What ecological problem do the roots of bamboo help to control? __________",
-              "answer": [
-                "soil erosion"
-              ]
+              "answer": ["soil erosion"]
             },
             {
               "type": "gap-fill",
               "question": "13 Which bamboo product is undergoing market expansion? __________",
-              "answer": [
-                "paper"
-              ]
+              "answer": ["paper"]
             }
           ]
         },
@@ -801,7 +817,7 @@
           "text": "An insight into the progress in renewable energy research\n\nThe race is on for the ultimate goal of renewable energy: electricity production at prices that are competitive with coal-fired power stations, but without coal's pollution. Some new technologies are aiming to be the first to push coal from its position as Australia's chief source of electricity.\n\nAt the moment the front-runner in renewable energy is wind technology. According to Peter Bergin of Australian Hydro, one of Australia's leading wind energy companies, there have been no dramatic changes in windmill design for many years, but the cumulative effects of numerous small improvements have had a major impact on cost. 'We're reaping the benefits of 30 years of research in Europe, without having to make the same mistakes that they did,' Mr. Bergin says.\n\nElectricity can be produced from coal at around 4 cents per kilowatt-hour, but only if the environmental costs are ignored. 'Australia has the second cheapest electricity in the world, and this makes it difficult for renewable to compete,' says Richard Hunter of the Australian Ecogeneration Association (AEA). Nevertheless, the AEA reports: 'The production cost of a kilowatt-hour of wind power is one fifth of what it was 20 years ago,' or around 7 cents per kilowatt-hour.\n\nAustralian Hydro has dozens of wind monitoring stations across Australia as part of its aim to become Australia's pre-eminent renewable energy company. Despite all these developments, wind power remains one of the few forms of alternative energy where Australia is nowhere near the global cutting edge, mostly just replicating European designs.\n\nWhile wind may currently lead the way, some consider a number of technologies under development have more potential. In several cases, Australia is at the forefront of global research in the area. Some of them are very site-specific, ensuring that they may never become dominant market players. On the other hand, these newer developments are capable of providing more reliable power, avoiding the major criticism of windmills – the need for back-up on a calm day.\n\nOne such development uses hot, dry rocks. Deep beneath South Australia, radiation from elements contained in granite heats the rocks. Layers of insulating sedimentation raise the temperatures in some location to 250° centigrade. An Australian firm, Geoenergy, is proposing to pump water 3.5 kilometres into the earth, where it will travel through tiny fissures in the granite, heating up as it goes, until it escapes as steam through another drilled hole.\n\nNo greenhouse gases are produced, but the system needs some additional features if it is to be environmentally friendly. Dr Prue Chopra, a geophysicist at the Australian National University and one of the founders of Geoenergy, note that the steam will bring with it radon gas, along through a heat exchanger and then sent back underground for another cycle. Technically speaking, hot dry rocks are not a renewable source of energy. However, the Australian source is so large it could supply the entire country's needs for thousands of years at current rates of consumption.\n\nTwo other proposals for very different ways to harness sun and wind energy have surfaced recently. Progress continues with Australian company EnviroPower's plans for Australia's first solar chimney near Mildura, in Victoria. Under this scheme, a tall tower will draw hot air from a greenhouse built to cover the surrounding 5km². As the air rises, it will drive a turbine* to produce electricity. The solar tower combines three very old technologies – the chimney, the turbine and the greenhouse – to produce something quite new. It is this reliance on proven engineering principles that led Enviropower's CEO, Richard Davies, to state: ' There is no doubt this technology will work, none at all.'\n\nThis year, Enviropower recognized that the quality of sunlight in the Mildura district will require a substantially larger collecting area than was previously thought. However, spokesperson Kay Firth says that a new location closer to Mildura will enable Enviropower to balance the increased costs with extra revenue. Besides saving in transmission costs, the new site 'will mean increased revenue from tourism and use of power for telecommunications. We'll also be able to use the outer 500 metres for agribusiness.' Wind speeds closer to the tower will be too high for farming.\n\nAnother Australian company, Wavetech, is achieving success with ways of harvesting the energy in waves. Wavetech's invention uses a curved surface to push waves into a chamber, where the flowing water column pushes air back and forth through a turbine. Wavetech was created when Dr. Tim Devine offered the idea to the world leader in wave generator manufacturers, who rather surprisingly rejected it. Dr. Devine responded by establishing Wavetech, and making a number of other improvements to generator design. Wavetech claims that, at appropriate sites, 'the cost of electricity produced with our technology should be below 4 cents per kilowatt-hour.\n\nThe diversity of forms of greenhouse –friendly energy under development in Australia is remarkable. However, support on a national level is disappointing. According to Richard Hunter of the AEA, 'Australia has huge potential for wind, sun and wave technology. We should really be at the forefront, but the reality is we are a long way behind.'",
           "questions": [
             {
-              "groupInstruction": "Question 14 – 20\nDo the following statements agree with the information given in Reading Passage 2?\nIn boxes 14-20 on your answer sheet, write\n\nTRUE if the statement agrees with the information\nFALSE if the statement contradicts the information\nNOT GIVEN if there is no information on this",
+              "groupInstruction": "Question 14 – 20\nDo the following statements agree with the information given in Reading Passage 2?\nIn boxes 14-20 on your answer sheet, write\nTRUE if the statement agrees with the information\nFALSE if the statement contradicts the information\nNOT GIVEN if there is no information on this",
               "type": "true-false-notgiven",
               "question": "14 In Australia, alternative energies are less expensive than conventional electricity.",
               "answer": "FALSE"
@@ -837,7 +853,7 @@
               "answer": "FALSE"
             },
             {
-              "groupInstruction": "Question 21 – 26\nLook at the following statements (Questions 21-26) and the list of companies below.\nMatch each statement with the correct company, A-D.\nWrite the correct letter, A-D, in boxes 21-26 on your answer sheet.\nNB You may use any letter more than once.",
+              "groupInstruction": "Question 21 – 26\nLook at the following statements (Questions 21-26) and the list of companies below.\nMatch each statement with the correct company, A-D.\nWrite the correct letter, A-D, in boxes 21-26 on your answer sheet.",
               "type": "match-person",
               "question": "21 During the process, harmful substances are prevented from escaping.",
               "answer": "B",

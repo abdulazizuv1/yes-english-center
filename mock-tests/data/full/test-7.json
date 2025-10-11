@@ -8,405 +8,421 @@
       "title": "Listening Test ",
       "duration": 30,
       "sections": [
-        {
-          "sectionNumber": 1,
-          "title": "Washing Machine Warranty",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart1.mp3?alt=media&token=bbf6163c-3dc3-40b3-9414-f392cd414570",
-          "content": [
-            {
-              "type": "table",
-              "title": "Washing Machine Warranty",
-              "groupInstruction": "Questions 1-6\nComplete the table below.\nWrite ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer.",
-              "columns": [
-                "Section",
-                "Details"
-              ],
-              "rows": [
-                {
-                  "section": "Personal details",
-                  "details": "• Name: Judie Smith<br>• Reference number: ___q1___<br>• Time of purchase: ___q2___<br>• Current address: 120 ___q3___, Oxford<br>• Postcode: ___q4___"
-                },
-                {
-                  "section": "Problems",
-                  "details": "• The floor was wet because of the ___q5___<br>• The washing machine was out of control and the woman ___q6___ Immediately<br>• The floor is made of ___q7___"
-                },
-                {
-                  "section": "Arrangement for the repair work",
-                  "details": "• Ask a ___q8___ to repair the washing machine<br>• The repairman is available ___q9___<br>• The woman's house is oppsite the ___q10___"
-                }
-              ],
-              "answer": {
-                "q1": "CWX576884",
-                "q2": "9/nine moth",
-                "q3": "Middle Street",
-                "q4": "Go194KE",
-                "q5": "Water",
-                "q6": "Switched off",
-                "q7": "wood",
-                "q8": "Client engineer",
-                "q9": "next Tuesday",
-                "q10": "Post Office"
+      {
+        "sectionNumber": 1,
+        "title": "Washing Machine Warranty",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart1.mp3?alt=media&token=bbf6163c-3dc3-40b3-9414-f392cd414570",
+        "content": [
+          {
+            "type": "table",
+            "title": "Washing Machine Warranty",
+            "groupInstruction": "Questions 1-6\nComplete the table below.\nWrite ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer.",
+            "columns": [
+              "Section",
+              "Details"
+            ],
+            "rows": [
+              {
+                "section": "Personal details",
+                "details": "• Name: Judie Smith<br>• Reference number: 1 ___q1___<br>• Time of purchase: 2 ___q2___<br>• Current address: 120 3 ___q3___, Oxford<br>• Postcode: 4 ___q4___"
+              },
+              {
+                "section": "Problems",
+                "details": "• The floor was wet because of the 5 ___q5___<br>• The washing machine was out of control and the woman 6 ___q6___ Immediately<br>• The floor is made of 7 ___q7___"
+              },
+              {
+                "section": "Arrangement for the repair work",
+                "details": "• Ask a 8 ___q8___ to repair the washing machine<br>• The repairman is available 9 ___q9___<br>• The woman's house is oppsite the 10 ___q10___"
               }
+            ],
+            "answer": {
+              "q1": "CWX576884",
+              "q2": "9/nine months",
+              "q3": "Middle Street",
+              "q4": "Go194KE",
+              "q5": "Water",
+              "q6": "Switched off",
+              "q7": "wood",
+              "q8": "Client engineer",
+              "q9": "next Tuesday",
+              "q10": "Post Office"
             }
-          ],
-          "instructions": {
-            "heading": "Questions 1-10",
-            "details": "Complete the table below.",
-            "note": "Write ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer."
           }
-        },
-        {
-          "sectionNumber": 2,
-          "title": "Driving license in UK",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart2.mp3?alt=media&token=593ffdc0-6323-4fc9-9543-0e62e944df20",
-          "content": [
-            {
-              "type": "question",
-              "questionId": "q11",
-              "format": "multiple-choice",
-              "text": "What is the basic requirement for applying for a UK driving licence?",
-              "options": {
-                "A": "a medical report.",
-                "B": "a valid licence from another country.",
-                "C": "Current residency in the UK."
-              },
-              "correctAnswer": "C"
-            },
-            {
-              "type": "question",
-              "questionId": "q12",
-              "format": "multiple-choice",
-              "text": "What is true about the translation of original licences?",
-              "options": {
-                "A": "Applicants need to go to a recognised organisation.",
-                "B": "It is not always necessary for foreigners when applying for a UK licence.",
-                "C": "Applicants need to pay an extra fee for translation services."
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q13",
-              "format": "multiple-choice",
-              "text": "When applying for a UK licence, which type of photos will NOT be approved?",
-              "options": {
-                "A": "Photos in which the applicant is wearing glasses.",
-                "B": "Photos with a cream background.",
-                "C": "Photos that are undersized."
-              },
-              "correctAnswer": "B"
-            },
-            {
-              "type": "question",
-              "questionId": "q14",
-              "format": "multiple-choice",
-              "text": "What does the speaker think of the licence checking service?",
-              "options": {
-                "A": "The process is too slow.",
-                "B": "The application form is confusing.",
-                "C": "Some of the steps are unnecessary."
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q15",
-              "format": "multiple-choice",
-              "text": "What does the speaker recommend about making an application?",
-              "options": {
-                "A": "Choosing a quiet location.",
-                "B": "Visiting the nearest branch.",
-                "C": "Completing the forms online."
-              },
-              "correctAnswer": "C"
-            },
-            {
-              "type": "question-group",
-              "groupType": "matching",
-              "questionId": "q16_17_18_19_20",
-              "text": "What is the current feature of traffic management in each of the following cities",
-              "instructions": "Write the correct letter, A-H, next to Question 16-20",
-              "questions": [
-                {
-                  "questionId": "q16",
-                  "text": "London",
-                  "correctAnswer": "A"
-                },
-                {
-                  "questionId": "q17",
-                  "text": "Edinburgh",
-                  "correctAnswer": "F"
-                },
-                {
-                  "questionId": "q18",
-                  "text": "Cardiff",
-                  "correctAnswer": "G"
-                },
-                {
-                  "questionId": "q19",
-                  "text": "manchester",
-                  "correctAnswer": "D"
-                },
-                {
-                  "questionId": "q20",
-                  "text": "oxford",
-                  "correctAnswer": "B"
-                }
-              ],
-              "options": {
-                "A": "good signage",
-                "B": "multiple access roads",
-                "C": "police control points",
-                "D": "ring roads",
-                "E": "one- way streets",
-                "F": "Effective traffic lights",
-                "G": "Additional lanes",
-                "H": "Pedestrianised areas"
-              }
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 11-20",
-            "details": "Answer the questions below."
-          }
-        },
-        {
-          "sectionNumber": 3,
-          "title": "Hotel Internship Discussion",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart3.mp3?alt=media&token=022c643b-7e2a-4656-87f5-06ef92e0d90c",
-          "content": [
-            {
-              "type": "question-group",
-              "groupType": "matching",
-              "questionId": "q21_22_23_24_25_26",
-              "text": "What problem does Mona point out about each part of the hotel where she interned?",
-              "instructions": "Write the correct letter, A-F, next to Question 21-26",
-              "questions": [
-                {
-                  "questionId": "q21",
-                  "text": "reception",
-                  "correctAnswer": "C"
-                },
-                {
-                  "questionId": "q22",
-                  "text": "restaurant",
-                  "correctAnswer": "B"
-                },
-                {
-                  "questionId": "q23",
-                  "text": "coffee bar",
-                  "correctAnswer": "D"
-                },
-                {
-                  "questionId": "q24",
-                  "text": "shop",
-                  "correctAnswer": "F"
-                },
-                {
-                  "questionId": "q25",
-                  "text": "personal office",
-                  "correctAnswer": "A"
-                },
-                {
-                  "questionId": "q26",
-                  "text": "cleaning",
-                  "correctAnswer": "E"
-                }
-              ],
-              "options": {
-                "A": "it lacks patience.",
-                "B": "it is very strict",
-                "C": "it is a daily routine",
-                "D": "it lacks sufficient staff",
-                "E": "it is noisy",
-                "F": "it is very tiring"
-              }
-            },
-            {
-              "type": "question",
-              "questionId": "q27",
-              "format": "multiple-choice",
-              "text": "how does the experience benefit Mona?",
-              "options": {
-                "A": "It is good for her future job",
-                "B": "It is good for her dissertation.",
-                "C": "It can let her know something about the specific job."
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q28",
-              "format": "multiple-choice",
-              "text": "Why does the tutor want Mona to do the presentation?",
-              "options": {
-                "A": "Because she can do it skilfully.",
-                "B": "Because she wants to do it herself",
-                "C": "Because she can show other students how to do a presentation"
-              },
-              "correctAnswer": "C"
-            },
-            {
-              "type": "question",
-              "questionId": "q29",
-              "format": "multiple-choice",
-              "text": "what does Mona suggest Tom do?",
-              "options": {
-                "A": "Talk to the university's career centre",
-                "B": "talk to his tutor",
-                "C": "contact the hotel manager"
-              },
-              "correctAnswer": "A"
-            },
-            {
-              "type": "question",
-              "questionId": "q30",
-              "format": "multiple-choice",
-              "text": "what is Tom's plan for his own essay?",
-              "options": {
-                "A": "To study about the rise of five- star hotels",
-                "B": "to use a video approach",
-                "C": "To do research into how the hotel industry works"
-              },
-              "correctAnswer": "A"
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 21-30",
-            "details": "Answer the questions below."
-          }
-        },
-        {
-          "sectionNumber": 4,
-          "title": "The Early History of Salt",
-          "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart4.mp3?alt=media&token=0f722947-4c95-47a9-b52a-b606a5771cb5",
-          "content": [
-            {
-              "type": "text",
-              "value": "Introduction"
-            },
-            {
-              "type": "question",
-              "questionId": "q31",
-              "format": "gap-fill",
-              "text": "• Salt is essential for human",
-              "postfix": "",
-              "correctAnswer": "health",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "Ancient Rome"
-            },
-            {
-              "type": "question",
-              "questionId": "q32",
-              "format": "gap-fill",
-              "text": "• The word",
-              "postfix": "comes from the Latin word's solarium argetum, which was used to describe the payment to Roman soldiers.",
-              "correctAnswer": "salary",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "Ancient Sweden"
-            },
-            {
-              "type": "question",
-              "questionId": "q33",
-              "format": "gap-fill",
-              "text": "• Animals were kept in the local",
-              "postfix": "at the right time of year.",
-              "correctAnswer": "forest",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q34",
-              "format": "gap-fill",
-              "text": "• Fresh meat was only available in",
-              "postfix": "",
-              "correctAnswer": "October",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q35",
-              "format": "gap-fill",
-              "text": "• Salt has been used widely: we can tell from the diet of the",
-              "postfix": "in Sweden.",
-              "correctAnswer": "king",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q36",
-              "format": "gap-fill",
-              "text": "•",
-              "postfix": "Consumption increased rapidly because the food was much too salty.",
-              "correctAnswer": "beer",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "Salt source"
-            },
-            {
-              "type": "question",
-              "questionId": "q37",
-              "format": "gap-fill",
-              "text": "• People mainly extract salt from oceans and",
-              "postfix": "in the basins.",
-              "correctAnswer": "deserts",
-              "wordLimit": 1
-            },
-            {
-              "type": "question",
-              "questionId": "q38",
-              "format": "gap-fill",
-              "text": "• Salt from spring water is more",
-              "postfix": "And purer compared to that from sea water",
-              "correctAnswer": "concentrated",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "Salt distribution"
-            },
-            {
-              "type": "text",
-              "value": "• In ancient Sweden"
-            },
-            {
-              "type": "question",
-              "questionId": "q39",
-              "format": "gap-fill",
-              "text": "- Locals needed to protect the",
-              "postfix": "By which they imported salt.",
-              "correctAnswer": "shipping",
-              "wordLimit": 1
-            },
-            {
-              "type": "text",
-              "value": "• In other ancient countries"
-            },
-            {
-              "type": "question",
-              "questionId": "q40",
-              "format": "gap-fill",
-              "text": "- People carrying salt around were seen as a natural means of",
-              "postfix": "",
-              "correctAnswer": "transport",
-              "wordLimit": 1
-            }
-          ],
-          "instructions": {
-            "heading": "Questions 31-40",
-            "details": "Complete the notes below.",
-            "note": "Write ONE WORD ONLY for each answer."
-          }
+        ],
+        "instructions": {
+          "heading": "Questions 1-10",
+          "details": "Complete the table below.",
+          "note": "Write ONE MORE THAN TWO WORDS AND OR A NUMBER for each answer."
         }
-      ]
+      },
+      {
+        "sectionNumber": 2,
+        "title": "Driving license in UK",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart2.mp3?alt=media&token=593ffdc0-6323-4fc9-9543-0e62e944df20",
+        "content": [
+          {
+            "type": "text",
+            "title": "Driving license in UK"
+          },
+          {
+            "type": "question",
+            "questionId": "q11",
+            "format": "multiple-choice",
+            "groupInstruction": "Questions 11-15\nChoose the correct letter, A, B or C.",
+            "text": "What is the basic requirement for applying for a UK driving licence?",
+            "options": {
+              "A": "a medical report.",
+              "B": "a valid licence from another country.",
+              "C": "Current residency in the UK."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q12",
+            "format": "multiple-choice",
+            "text": "What is true about the translation of original licences?",
+            "options": {
+              "A": "Applicants need to go to a recognised organisation.",
+              "B": "It is not always necessary for foreigners when applying for a UK licence.",
+              "C": "Applicants need to pay an extra fee for translation services."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q13",
+            "format": "multiple-choice",
+            "text": "When applying for a UK licence, which type of photos will NOT be approved?",
+            "options": {
+              "A": "Photos in which the applicant is wearing glasses.",
+              "B": "Photos with a cream background.",
+              "C": "Photos that are undersized."
+            },
+            "correctAnswer": "B"
+          },
+          {
+            "type": "question",
+            "questionId": "q14",
+            "format": "multiple-choice",
+            "text": "What does the speaker think of the licence checking service?",
+            "options": {
+              "A": "The process is too slow.",
+              "B": "The application form is confusing.",
+              "C": "Some of the steps are unnecessary."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q15",
+            "format": "multiple-choice",
+            "text": "What does the speaker recommend about making an application?",
+            "options": {
+              "A": "Choosing a quiet location.",
+              "B": "Visiting the nearest branch.",
+              "C": "Completing the forms online."
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q16_17_18_19_20",
+            "text": "What is the current feature of traffic management in each of the following cities",
+            "groupInstruction": "Questions 16-20.\nChoose FIVE answers from the box and write the correct letter, A-H.",
+
+            "questions": [
+              {
+                "questionId": "q16",
+                "text": "London",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q17",
+                "text": "Edinburgh",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q18",
+                "text": "Cardiff",
+                "correctAnswer": "G"
+              },
+              {
+                "questionId": "q19",
+                "text": "manchester",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q20",
+                "text": "oxford",
+                "correctAnswer": "B"
+              }
+            ],
+            "options": {
+              "A": "good signage",
+              "B": "multiple access roads",
+              "C": "police control points",
+              "D": "ring roads",
+              "E": "one- way streets",
+              "F": "Effective traffic lights",
+              "G": "Additional lanes",
+              "H": "Pedestrianised areas"
+            }
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 11-20",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 3,
+        "title": "Hotel Internship Discussion",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart3.mp3?alt=media&token=022c643b-7e2a-4656-87f5-06ef92e0d90c",
+        "content": [
+          {
+            "type": "text",
+            "title": "Hotel Internship Discussion"
+          },
+          {
+            "type": "question-group",
+            "groupType": "matching",
+            "questionId": "q21_22_23_24_25_26",
+            "text": "What problem does Mona point out about each part of the hotel where she interned?",
+            "instructions": "Write the correct letter, A-F, next to Question 21-26",
+            "groupInstruction": "Questions 21-26.\nChoose SIX answers from the box and write the correct letter, A-F.",
+            "questions": [
+              {
+                "questionId": "q21",
+                "text": "reception",
+                "correctAnswer": "C"
+              },
+              {
+                "questionId": "q22",
+                "text": "restaurant",
+                "correctAnswer": "B"
+              },
+              {
+                "questionId": "q23",
+                "text": "coffee bar",
+                "correctAnswer": "D"
+              },
+              {
+                "questionId": "q24",
+                "text": "shop",
+                "correctAnswer": "F"
+              },
+              {
+                "questionId": "q25",
+                "text": "personal office",
+                "correctAnswer": "A"
+              },
+              {
+                "questionId": "q26",
+                "text": "cleaning",
+                "correctAnswer": "E"
+              }
+            ],
+            "options": {
+              "A": "it lacks patience.",
+              "B": "it is very strict",
+              "C": "it is a daily routine",
+              "D": "it lacks sufficient staff",
+              "E": "it is noisy",
+              "F": "it is very tiring"
+            }
+          },
+          {
+            "type": "question",
+            "questionId": "q27",
+            "format": "multiple-choice",
+            "text": "how does the experience benefit Mona?",
+            "groupInstruction": "Questions 27-30\nChoose the correct letter, A, B or C.",
+            "options": {
+              "A": "It is good for her future job",
+              "B": "It is good for her dissertation.",
+              "C": "It can let her know something about the specific job."
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q28",
+            "format": "multiple-choice",
+            "text": "Why does the tutor want Mona to do the presentation?",
+            "options": {
+              "A": "Because she can do it skilfully.",
+              "B": "Because she wants to do it herself",
+              "C": "Because she can show other students how to do a presentation"
+            },
+            "correctAnswer": "C"
+          },
+          {
+            "type": "question",
+            "questionId": "q29",
+            "format": "multiple-choice",
+            "text": "what does Mona suggest Tom do?",
+            "options": {
+              "A": "Talk to the university's career centre",
+              "B": "talk to his tutor",
+              "C": "contact the hotel manager"
+            },
+            "correctAnswer": "A"
+          },
+          {
+            "type": "question",
+            "questionId": "q30",
+            "format": "multiple-choice",
+            "text": "what is Tom's plan for his own essay?",
+            "options": {
+              "A": "To study about the rise of five- star hotels",
+              "B": "to use a video approach",
+              "C": "To do research into how the hotel industry works"
+            },
+            "correctAnswer": "A"
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 21-30",
+          "details": "Answer the questions below."
+        }
+      },
+      {
+        "sectionNumber": 4,
+        "title": "The Early History of Salt",
+        "audioUrl": "https://firebasestorage.googleapis.com/v0/b/yes-english-center.firebasestorage.app/o/listening-audio%2Ftest-7%2Fpart4.mp3?alt=media&token=0f722947-4c95-47a9-b52a-b606a5771cb5",
+        "content": [
+          {
+            "type": "text",
+            "title": "The Early History of Salt"
+          },
+          {
+            "type": "text",
+            "value": "Introduction"
+          },
+          {
+            "type": "question",
+            "questionId": "q31",
+            "format": "gap-fill",
+            "text": "• Salt is essential for human _____",
+            "postfix": "",
+            "correctAnswer": "health",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Ancient Rome"
+          },
+          {
+            "type": "question",
+            "questionId": "q32",
+            "format": "gap-fill",
+            "text": "• The word _____ comes from the Latin word's solarium argetum, which was used to describe the payment to Roman soldiers.",
+            "postfix": "",
+            "correctAnswer": "salary",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Ancient Sweden"
+          },
+          {
+            "type": "question",
+            "questionId": "q33",
+            "format": "gap-fill",
+            "text": "• Animals were kept in the local _____ at the right time of year.",
+            "postfix": "",
+            "correctAnswer": "forest",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q34",
+            "format": "gap-fill",
+            "text": "• Fresh meat was only available in _____",
+            "postfix": "",
+            "correctAnswer": "October",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q35",
+            "format": "gap-fill",
+            "text": "• Salt has been used widely: we can tell from the diet of the _____ in Sweden.",
+            "postfix": "",
+            "correctAnswer": "king",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q36",
+            "format": "gap-fill",
+            "text": "• _____ Consumption increased rapidly because the food was much too salty",
+            "postfix": ".",
+            "correctAnswer": "beer",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Salt source"
+          },
+          {
+            "type": "question",
+            "questionId": "q37",
+            "format": "gap-fill",
+            "text": "• People mainly extract salt from oceans and _____ in the basins.",
+            "postfix": "",
+            "correctAnswer": "deserts",
+            "wordLimit": 1
+          },
+          {
+            "type": "question",
+            "questionId": "q38",
+            "format": "gap-fill",
+            "text": "• Salt from spring water is more _____ And purer compared to that from sea water",
+            "postfix": "",
+            "correctAnswer": "concentrated",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "Salt distribution"
+          },
+          {
+            "type": "text",
+            "value": "• In ancient Sweden"
+          },
+          {
+            "type": "question",
+            "questionId": "q39",
+            "format": "gap-fill",
+            "text": "- Locals needed to protect the _____ By which they imported salt.",
+            "postfix": "",
+            "correctAnswer": "shipping",
+            "wordLimit": 1
+          },
+          {
+            "type": "text",
+            "value": "• In other ancient countries"
+          },
+          {
+            "type": "question",
+            "questionId": "q40",
+            "format": "gap-fill",
+            "text": "- People carrying salt around were seen as a natural means of _____",
+            "postfix": "",
+            "correctAnswer": "transport",
+            "wordLimit": 1
+          }
+        ],
+        "instructions": {
+          "heading": "Questions 31-40",
+          "details": "Complete the notes below.",
+          "note": "Write ONE WORD ONLY for each answer."
+        }
+      }
+    ]
     },
     {
       "id": "reading",
@@ -419,7 +435,7 @@
           "text": "Tuatara are lizard-like reptiles, found only in New Zealand. They are representative of ancient life forms. Tuatara are the only living representatives of an ancient lineage of reptiles called Sphenodontia, which is over 250 million years old. Because tuatara still look like fossils of reptiles that lived during the age of dinosaurs, they are often called living fossils. Now just two species of tuatara survive, and only in New Zealand. One is the Brothers Island tuatara which, until recent re-introductions to sanctuaries (safe places for wildlife), only survived on North Brother Island. The other species is the common tuatara, which survives on many other offshore islands. Although the tuatara species appear similar, they have genetic differences. Tuatara bones have been found in many parts of New Zealand. Where dated, they are usually a few hundred to 5,000 years old. It is not known whether these bones are from the two living species or other species that are now extinct.\n\nMany anatomical features distinguish tuatara from other living reptiles - for example, they have a defining pattern of openings in the skull and a unique type of haemoglobin in the blood, and males have no external reproductive organ. Adults are between 30 and 75 centimetres long, and weigh between 250 and 1,200 grams. Males are larger than females, and have more developed spines in the crest along the neck, back and tail.\n\nThe male tuatara courts the female by approaching her with a proud walk. Tuatara mate in late summer, and the female usually lays 6-10 eggs the following spring, in a shallow nest at ground level. She may guard the nest for a few nights, then return to her burrow underground. The eggs incubate for about a year, so hatchlings emerge about the time that eggs are being laid the following season. Evidence indicates the gender of tuatara hatchlings is determined by both genetic and environmental factors. It is said that it is more likely for warmer eggs to produce male tuatara, and cooler eggs to produce females. The hatchlings receive no parental care and need to find their own food.\n\nTuatara live for a relatively long time, reaching reproductive maturity at about 15 years, and may breed for many decades. Their maximum lifespan is not known for certain, but many tuatara have reached 80 years still looking vigorous and healthy. Tuatara live in underground burrows and are more active at night, but will come out during the day to bask in the sun. Both sexes are territorial, and males aggressively defend their territory by posing and fighting if necessary. Teeth are their main weapons, and a bite can cause serious injury. Tuatara are carnivorous, eating invertebrates, lizards and the baby seabirds with which they often share burrows.\n\nTuatara were once widespread and abundant on the New Zealand mainland, but when Polynesian settlers arrived in New Zealand, in about 1250-1300 AD, they brought with them Pacific rats which killed tuatara. By the time of European settlement, in the 1840s, tuatara were almost extinct on the New Zealand mainland. Some islands provided temporary havens, but soon these too began to be invaded by rats and other mammalian predators.\n\nGradually tuatara became restricted to 32 nearshore islands. Many of these islands were tiny, some as small as only one hectare. A few, such as the Poor Knights common tuatara lives on islands off the north-eastern coast of New Zealand, and on some islands in Cook Strait. The Brothers Island tuatara survived only on the of the Brothers Island tuatara have been created on Titi Island in the Marlborough Sounds, and on Somes Island in Wellington Harbour.\n\nTuatara can live in remarkably dense populations. Most tuatara islands have 50-100 tuatara per square hectare – so an island of only 10 hectares may have a population of hundreds. Larger islands with many seabirds and invertebrates, which tuatara eat, may have greater densities. The largest population is on Stephens Island, where there are estimated to be as many as 2,500 per hectare in some places, and a total of at least 30,000. The total number of tuatara on all the islands is estimated to be between 50,000 and 100,000.\n\nLegal protection was granted to tuatara and the islands they occupied in 1895, but the reptiles continued to decline. Since then, active conservation management has reversed the decline, and new populations have become established on predator-free islands. In the mid-1980s the New Zealand Wildlife Service and its successor, the Department of Conservation, developed ways to eradicate rats from islands. Rats have now gone from almost all of the tuatara islands, making them safe for many threatened native species. In addition, the collection by conservationists of eggs for incubation in captivity, breeding in captivity, and moving tuatara to rat-Islands off the Northland coast, or Stephens Island in Cook Strait, were never invaded by rats, and had few of the other mammals that threaten native animals. The tiny, 4 hectare North Brother Island, in Cook Strait. However, two new populations free islands, have increased the number of islands that are inhabited by tuatara to 37. Many new tuatara populations are planned for islands and mainland reserves that have been freed of predators.",
           "questions": [
             {
-              "groupInstruction": "Questions 1-6\nDo the following statements agree with the information given in Reading Passage?\nIn boxes 1-6 on your answer sheet, write\n\nTRUE if the statement agrees with the information\nFALSE if the statement contradicts the information\nNOT GIVEN if there is no information on this",
+              "groupInstruction": "Questions 1-6\nDo the following statements agree with the information given in Reading Passage?\nIn boxes 1-6 on your answer sheet, write\nTRUE if the statement agrees with the information\nFALSE if the statement contradicts the information\nNOT GIVEN if there is no information on this",
               "type": "true-false-notgiven",
               "question": "The two living species of tuatara look alike",
               "answer": "FALSE"
@@ -451,7 +467,7 @@
             },
             {
               "groupInstruction": "Questions 7-13\nComplete the notes below. Choose ONE WORD AND/OR A NUMBER from the passage for each answer\nWrite your answers in boxes 7-13 on your answer sheet.",
-              "type": "gap-fill",
+              "type": "text-question",
               "title": "The tuatara"
             },
             {
@@ -465,9 +481,7 @@
             {
               "type": "gap-fill",
               "question": "- many live to at least 7__________ years old",
-              "answer": [
-                "80"
-              ]
+              "answer": ["80"]
             },
             {
               "type": "text-question",
@@ -476,16 +490,12 @@
             {
               "type": "gap-fill",
               "question": "- attack other creatures with their 8__________",
-              "answer": [
-                "teeth"
-              ]
+              "answer": ["teeth"]
             },
             {
               "type": "gap-fill",
               "question": "- eat young 9__________ that live in the same burrows, invertebrates and reptiles",
-              "answer": [
-                "seabirds"
-              ]
+              "answer": ["seabirds"]
             },
             {
               "type": "text-question",
@@ -494,16 +504,12 @@
             {
               "type": "gap-fill",
               "question": "- abundant until rats were introduced by 10__________ people",
-              "answer": [
-                "Polynesian"
-              ]
+              "answer": ["Polynesian"]
             },
             {
               "type": "gap-fill",
               "question": "- by the 1840s, hardly any tuatara found on the 11__________",
-              "answer": [
-                "mainland"
-              ]
+              "answer": ["mainland"]
             },
             {
               "type": "text-question",
@@ -512,9 +518,7 @@
             {
               "type": "gap-fill",
               "question": "12__________ tuatara",
-              "answer": [
-                "common"
-              ]
+              "answer": ["common"]
             },
             {
               "type": "text-question",
@@ -523,9 +527,7 @@
             {
               "type": "gap-fill",
               "question": "- density of tuatara on Stephens Island is up to 13__________ tuatara for every hectare",
-              "answer": [
-                "2500"
-              ]
+              "answer": ["2500"]
             },
             {
               "type": "text-question",
@@ -550,37 +552,27 @@
               "groupInstruction": "Questions 14-18\nComplete the summary below\nChoose NO MORE THAN TWO WORDS AND/OR A NUMBER from the passage for each answer.\nWrite your answer in boxes 14-18 your answer sheet.",
               "type": "gap-fill",
               "question": "The thylacine was a dog-like animal which had a 14__________ coat and ",
-              "answer": [
-                "striped"
-              ]
+              "answer": ["striped"]
             },
             {
               "type": "gap-fill",
               "question": "was carnivorous. It was originally spread widely throughout the mainland of 15__________,",
-              "answer": [
-                "Australia"
-              ]
+              "answer": ["Australia"]
             },
             {
               "type": "gap-fill",
               "question": "but started to disappear from that area around 16__________ ago because of climate change.",
-              "answer": [
-                "12 million"
-              ]
+              "answer": ["12 million"]
             },
             {
               "type": "gap-fill",
               "question": "In the end, thylacines were found only on the island of 17__________ until the arrival ",
-              "answer": [
-                "Tasmania"
-              ]
+              "answer": ["Tasmania"]
             },
             {
               "type": "gap-fill",
               "question": "of 18__________ with their farming practices brought about a drastic reduction in thylacine numbers. The last one is thought to have died in Hobart Zoo in 1936.",
-              "answer": [
-                "Europeans"
-              ]
+              "answer": ["Europeans"]
             },
             {
               "groupInstruction": "Questions 19-24\nMatch each statement with the correct person, A, B, C or D. Write the correct letter, A, B, C or D, in boxes 19-24 on your answer sheet\nNB You may use any letter more than once.",
@@ -1203,23 +1195,17 @@
               "groupInstruction": "Questions 38-40\nComplete each of the following statements (Questions 38 - 40) with words taken from the box below.\nWrite your answers in boxes 38 - 40 on your answer sheet.\nflowers, hearing, hair, walking, leaves, roots, smelling, tadpoles, stalks, rope, seeds, sleeping",
               "type": "gap-fill",
               "question": "When suspended, the eggs of the cane toad resemble __________.",
-              "answer": [
-                "rope"
-              ]
+              "answer": ["rope"]
             },
             {
               "type": "gap-fill",
               "question": "Cane toads were introduced into Australia in order to stop beetle young eating sugar cane __________.",
-              "answer": [
-                "roots"
-              ]
+              "answer": ["roots"]
             },
             {
               "type": "gap-fill",
               "question": "The text says that dogs affected by cane toad poisoning may have problems with __________.",
-              "answer": [
-                "walking"
-              ]
+              "answer": ["walking"]
             }
           ]
         }

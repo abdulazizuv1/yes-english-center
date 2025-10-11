@@ -12,13 +12,13 @@ admin.initializeApp({
 const db = admin.firestore();
 
 // Путь к JSON файлу Full Mock Test
-const filePath = path.join(__dirname, "data", "full", "test-2.json");
+const filePath = path.join(__dirname, "data", "full", "test-10.json");
 
 // Читаем JSON
 const rawData = fs.readFileSync(filePath);
 const fullMockTest = JSON.parse(rawData);
 
-const docId = "test-2";
+const docId = "test-10";
 
 // Проверяем структуру данных
 if (!fullMockTest.stages || fullMockTest.stages.length !== 3) {
