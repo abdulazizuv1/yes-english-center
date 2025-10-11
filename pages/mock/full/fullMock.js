@@ -486,7 +486,7 @@ function getCurrentRemainingTime() {
 
 // Stage durations in minutes
 const stageDurations = {
-  listening: 30,
+  listening: 40,
   reading: 60,
   writing: 60,
 };
@@ -872,14 +872,15 @@ function renderListeningSection(index) {
   // Enhanced audio handling
   handleSectionAudio(section, index);
 
-  // Render questions
+  // Render questions in unified block
   const questionList = document.getElementById("listening-questions");
   questionList.innerHTML = `
-    <div class="section-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      <h2 style="margin: 0;">Section ${index + 1}: ${
+    <div class="listening-content-block">
+      <div class="section-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h2 style="margin: 0;">Section ${index + 1}: ${
     section.title || `Section ${index + 1}`
   }</h2>
-    </div>
+      </div>
   `;
 
   if (section.instructions) {
@@ -902,6 +903,8 @@ function renderListeningSection(index) {
   if (section.content && Array.isArray(section.content)) {
     section.content.forEach((item) => renderListeningContentItem(item));
   }
+  
+  questionList.innerHTML += `</div>`;
 
   updateNavigationButtons();
   
@@ -969,13 +972,13 @@ function renderListeningContentItem(item, itemIndex) {
   if (item.type) {
     switch (item.type) {
       case "text":
-        questionList.innerHTML += `<p style="margin: 15px 0; color: #4b5563;">${
+        questionList.innerHTML += `<p class="listening-text">${
           item.value || item.text || ""
         }</p>`;
         break;
 
       case "subheading":
-        questionList.innerHTML += `<h4 style="margin-top:20px; color: #dc2626; font-weight: 600;">${
+        questionList.innerHTML += `<h4 class="listening-subheading">${
           item.value || item.text || ""
         }</h4>`;
         break;
@@ -1003,16 +1006,24 @@ function renderListeningQuestion(question) {
   questionDiv.id = qId; // ✅ БЕЗ префикса
 
   if (question.format === "gap-fill") {
-    const prefix = question.text || "";
-    const postfix = question.postfix || "";
     const number = qId.toUpperCase().replace("Q", "");
+    let questionText = question.text || "";
+    
+    // Replace underscores with input field
+    const inputHtml = questionText.replace(
+      /(\d+)_+|_+(\d+)|_+/g,
+      `<input type="text" 
+              data-qid="${qId}" 
+              class="gap-fill-input" 
+              placeholder="${number}"
+              value="${answersSoFar[qId] || ""}" 
+              style="border: none; border-bottom: 2px solid #333; background: transparent; padding: 2px 4px; min-width: 80px; font-size: 14px; text-align: center;" />`
+    );
 
     questionDiv.innerHTML = `
       <div class="question-number">${number}</div>
       <div class="question-text">
-        ${prefix} <input type="text" value="${
-      answersSoFar[qId] || ""
-    }" data-qid="${qId}" class="gap-fill"/> ${postfix}
+        ${inputHtml}
       </div>
     `;
   } else if (question.format === "multiple-choice") {

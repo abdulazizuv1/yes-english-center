@@ -363,6 +363,22 @@ body {
     padding: 30px;
 }
 
+/* Unified content block */
+.listening-content-block {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.listening-content-block:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
 /* When in reading mode, adjust width */
 #readingStage .questions-panel {
     width: 50%;
@@ -389,17 +405,42 @@ body {
     color: #1e293b;
 }
 
+/* Enhanced subheading styles */
+.listening-subheading {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    margin: 25px 0 15px 0 !important;
+    padding: 12px 16px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    border-left: 4px solid #dc2626 !important;
+    border-radius: 0 8px 8px 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.listening-text {
+    font-size: 15px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 12px 0;
+    padding: 8px 0;
+}
+
 .question-item {
-    padding: 20px;
+    padding: 15px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    background: #fafafa;
+    background: #f8fafc;
     transition: all 0.2s;
+    margin: 10px 0;
 }
 
 .question-item:hover {
     border-color: #3b82f6;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    background: #f0f9ff;
 }
 
 .question-number {
@@ -428,20 +469,30 @@ body {
 
 /* Input Styles */
 .gap-fill-input, .gap-fill {
-    background: white;
-    border: 2px solid #d1d5db;
-    border-radius: 6px;
-    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #333;
+    border-radius: 0;
+    padding: 2px 4px;
     font-size: 14px;
-    min-width: 120px;
+    min-width: 80px;
     margin: 0 4px;
     transition: all 0.2s;
+    text-align: center;
+    font-weight: 500;
 }
 
 .gap-fill-input:focus, .gap-fill:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-bottom-color: #3b82f6;
+    box-shadow: 0 2px 0 0 rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.gap-fill-input:not(:placeholder-shown) {
+    border-bottom-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+    font-weight: 600;
 }
 
 .radio-group {

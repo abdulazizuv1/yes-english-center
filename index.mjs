@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import fs from "fs";
-import 'dotenv/config';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -24,12 +23,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function downloadDocument() {
-  const ref = doc(db, "readingTests", "test-13");
+  const ref = doc(db, "readingTests", "test-14");
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
     const data = snap.data();
-    fs.writeFileSync("test-13.json", JSON.stringify(data, null, 2));
+    fs.writeFileSync("test-14.json", JSON.stringify(data, null, 2));
     console.log("Документ сохранён как document.json");
   } else {
     console.log("Документ не найден");

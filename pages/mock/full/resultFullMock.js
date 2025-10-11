@@ -393,9 +393,9 @@ function checkAnswerCorrectness(userAns, expected) {
       const expStr = String(exp).toLowerCase().trim();
       if (expStr.includes("/")) {
         const alternatives = expStr.split("/").map(alt => alt.trim());
-        return alternatives.some(alt => alt === userStr);
+        return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
       }
-      return expStr === userStr;
+      return normalizeAnswer(expStr) === normalizeAnswer(userStr);
     });
   }
 
@@ -406,11 +406,47 @@ function checkAnswerCorrectness(userAns, expected) {
   // Handle multiple correct answers (separated by "/")
   if (expectedStr.includes("/")) {
     const alternatives = expectedStr.split("/").map(alt => alt.trim());
-    return alternatives.some(alt => alt === userStr);
+    return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
   }
 
-  // Simple string comparison
-  return userStr === expectedStr;
+  // Simple string comparison with postfix normalization
+  return normalizeAnswer(userStr) === normalizeAnswer(expectedStr);
+}
+
+// Helper function to normalize answers by removing postfixes
+function normalizeAnswer(answer) {
+  if (!answer || typeof answer !== 'string') return '';
+  
+  let normalized = answer.toLowerCase().trim();
+  
+  // Remove common postfixes/suffixes
+  const postfixes = [
+    /ing\b/g,           // -ing endings
+    /ed\b/g,            // -ed endings  
+    /er\b/g,            // -er endings
+    /est\b/g,           // -est endings
+    /ly\b/g,            // -ly endings
+    /tion\b/g,          // -tion endings
+    /sion\b/g,          // -sion endings
+    /ness\b/g,          // -ness endings
+    /ment\b/g,          // -ment endings
+    /able\b/g,          // -able endings
+    /ible\b/g,          // -ible endings
+    /ful\b/g,           // -ful endings
+    /less\b/g,          // -less endings
+    /'s\b/g,            // possessive 's
+    /s\b/g,             // plural s (be careful with this)
+  ];
+  
+  // Apply postfix removal (but preserve the base word)
+  postfixes.forEach(postfix => {
+    normalized = normalized.replace(postfix, '');
+  });
+  
+  // Clean up extra spaces
+  normalized = normalized.replace(/\s+/g, ' ').trim();
+  
+  return normalized;
 }
 
 // Highlight appropriate band score based on overall band
