@@ -150,28 +150,28 @@ function addPassage() {
       <div class="questions-section">
         <div class="questions-header">
           <span class="questions-title">Questions</span>
-          <div class="add-question-dropdown">
-            <button type="button" class="add-question-btn" onclick="toggleQuestionMenu(${passageNumber})">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="16"></line>
-                <line x1="8" y1="12" x2="16" y2="12"></line>
-              </svg>
-              Add Question
-            </button>
-            <div class="question-types-menu" id="questionMenu${passageNumber}">
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'text-question')">Text Only (No Question)</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'gap-fill')">Gap Fill</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'true-false-notgiven')">True/False/Not Given</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'yes-no-notgiven')">Yes/No/Not Given</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multiple-choice')">Multiple Choice</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
-              <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
-            </div>
-          </div>
         </div>
         <div class="questions-container" id="questions${passageNumber}">
           <!-- Questions will be added here -->
+        </div>
+        <div class="add-question-dropdown" style="margin-top: 10px;">
+          <button type="button" class="add-question-btn" onclick="toggleQuestionMenu(${passageNumber})">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            Add Question
+          </button>
+          <div class="question-types-menu" id="questionMenu${passageNumber}">
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'text-question')">Text Only (No Question)</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'gap-fill')">Gap Fill</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'true-false-notgiven')">True/False/Not Given</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'yes-no-notgiven')">Yes/No/Not Given</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multiple-choice')">Multiple Choice</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
+          </div>
         </div>
       </div>
     </div>
@@ -213,6 +213,7 @@ window.addQuestion = function (passageNumber, type) {
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}">
       <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
         <span class="question-type-badge gap-fill">Gap Fill</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
       </div>
@@ -241,6 +242,7 @@ window.addQuestion = function (passageNumber, type) {
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}">
       <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
         <span class="question-type-badge tfng">True/False/Not Given</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
       </div>
@@ -260,6 +262,7 @@ window.addQuestion = function (passageNumber, type) {
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}">
       <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
         <span class="question-type-badge ynng">Yes/No/Not Given</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
       </div>
@@ -279,6 +282,7 @@ window.addQuestion = function (passageNumber, type) {
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}">
       <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
         <span class="question-type-badge mc">Multiple Choice</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
       </div>
@@ -425,6 +429,7 @@ window.addQuestion = function (passageNumber, type) {
   document
     .getElementById(`questionMenu${passageNumber}`)
     .classList.remove("show");
+  updateQuestionNumbers(passageNumber);
 };
 
 // Toggle options edit view
@@ -570,9 +575,24 @@ window.removeMCOption = function (button) {
 window.removeQuestion = function (questionId) {
   const question = document.querySelector(`[data-question-id="${questionId}"]`);
   if (question && confirm("Are you sure you want to remove this question?")) {
+    const passage = question.closest('.passage-container');
+    const passageNumber = passage ? parseInt(passage.dataset.passage) : null;
     question.remove();
+    if (passageNumber) updateQuestionNumbers(passageNumber);
   }
 };
+
+function updateQuestionNumbers(passageNumber) {
+  const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
+  let counter = 0;
+  items.forEach((item) => {
+    const numEl = item.querySelector('.question-index');
+    if (numEl) {
+      counter++;
+      numEl.textContent = counter;
+    }
+  });
+}
 
 // Remove a passage
 window.removePassage = function (passageNumber) {
@@ -701,7 +721,7 @@ window.previewTest = function () {
       passage.querySelector(".passage-title-input").value || "Untitled Passage";
     const text =
       passage.querySelector(".passage-text").value || "No text provided";
-    const questions = passage.querySelectorAll(".question-item");
+    const questions = Array.from(passage.querySelectorAll(".question-item")).filter(q => q.dataset.type !== 'text-question');
 
     previewHTML += `
       <div class="preview-passage">

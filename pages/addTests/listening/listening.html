@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Listening Test - YES English Center</title>
+    <link rel="stylesheet" href="listening.css">
+    <link rel="icon" href="/image/Logo.ver1.2.png" />
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="location.href='../addTests.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </button>
+            <h1>Add New Listening Test</h1>
+            <p>Create a new IELTS Listening test with 4 sections</p>
+        </div>
+
+        <div class="test-info-bar">
+            <div class="info-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span id="testNumber">Loading test number...</span>
+            </div>
+            <div class="progress-indicator">
+                <span id="sectionCount">0</span> / 4 Sections
+            </div>
+        </div>
+
+        <form id="listeningTestForm">
+            <!-- Basic Test Info -->
+            <div class="test-info-section">
+                <h3>Test Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Test Title *</label>
+                        <input type="text" id="testTitle" placeholder="e.g., IELTS Listening Practice Test 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Limit (minutes) *</label>
+                        <input type="number" id="timeLimit" value="30" min="10" max="60" required>
+                    </div>
+                </div>
+                
+                <div class="audio-upload-type">
+                    <h4>Audio Upload Type</h4>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="audioUploadType" value="single" id="singleAudio" checked>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>Single Audio File</strong>
+                                <p>Upload one audio file for the entire listening test</p>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="audioUploadType" value="separate" id="separateAudio">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>Separate Audio Files</strong>
+                                <p>Upload individual audio files for each section</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Single Audio Upload -->
+                <div class="single-audio-upload" id="singleAudioUpload" style="display: none;">
+                    <h4>Upload Test Audio</h4>
+                    <div class="audio-upload" id="singleAudioUploadArea">
+                        <input type="file" id="singleAudioFile" accept="audio/*" onchange="handleSingleAudioUpload()">
+                        <label for="singleAudioFile" class="audio-upload-label">
+                            <svg class="audio-upload-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            <div class="audio-upload-text">Upload Complete Test Audio</div>
+                            <div class="audio-upload-hint">Click to select or drag and drop audio file (MP3, WAV, etc.)</div>
+                        </label>
+                    </div>
+                    
+                    <div class="audio-preview" id="singleAudioPreview" style="display: none;">
+                        <div class="audio-preview-info">
+                            <span class="audio-preview-name" id="singleAudioPreviewName"></span>
+                            <span class="audio-preview-size" id="singleAudioPreviewSize"></span>
+                        </div>
+                        <div class="audio-preview-controls">
+                            <button type="button" onclick="playSingleAudio()">▶ Play</button>
+                            <button type="button" onclick="pauseSingleAudio()">⏸ Pause</button>
+                            <button type="button" onclick="removeSingleAudio()" class="remove-audio">🗑 Remove</button>
+                        </div>
+                        <audio id="singleAudioPlayer" style="display: none;"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sections Container -->
+            <div id="sectionsContainer">
+                <!-- Sections will be added here dynamically -->
+            </div>
+
+            <!-- Add Section Button -->
+            <button type="button" class="add-section-btn" id="addSectionBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Add Section
+            </button>
+
+            <!-- Submit Section -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="location.href='../addTests.html'">
+                    Cancel
+                </button>
+                <button type="button" class="btn-preview" id="previewBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Preview
+                </button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span id="submitText">Add Listening Test</span>
+                    <div class="loader" id="loader" style="display: none;"></div>
+                </button>
+            </div>
+        </form>
+
+        <!-- Preview Modal -->
+        <div class="preview-modal" id="previewModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Test Preview</h2>
+                    <button class="close-btn" onclick="closePreview()">×</button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="success-modal" id="successModal" style="display: none;">
+            <div class="modal-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="9 12 12 15 16 11"></polyline>
+                </svg>
+                <h3>Test Added Successfully!</h3>
+                <p id="successMessage"></p>
+                <button class="btn-primary" onclick="resetForm()">Add Another Test</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="listening.js"></script>
+</body>
+</html>

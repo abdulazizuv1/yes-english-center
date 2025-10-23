@@ -245,8 +245,9 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     margin-top: 5px;
     min-width: 250px;
-    z-index: 100;
+    z-index: 9999;
     display: none;
+    overflow: visible;
 }
 
 .question-types-menu.show {

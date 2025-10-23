@@ -64,7 +64,7 @@ async function checkAdminAccess() {
 
 // Show coming soon message
 window.showComingSoon = function(testType) {
-  alert(`📅 ${testType} test management coming soon!\n\nCurrently, only Writing tests can be added.`);
+  alert(`📅 ${testType} test management coming soon!\n\nCurrently, Listening, Reading, and Writing tests can be added.`);
 }
 
 // Initialize page
