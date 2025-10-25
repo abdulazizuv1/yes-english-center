@@ -2,11 +2,9 @@ const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
 
-// Инициализация Firebase Admin
-const serviceAccount = require("./serviceAccountKey.json");
-
+// Инициализация Firebase Admin через ADC (Application Default Credentials)
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.applicationDefault()
 });
 
 const db = admin.firestore();

@@ -22,10 +22,8 @@ let currentUser = null;
 let nextTestNumber = 1;
 let passageCount = 0;
 let questionIdCounter = 0;
-let sharedOptions = {
-  "paragraph-matching": [],
-  "match-person": [],
-};
+// Store shared options per passage: sharedOptions[passageNumber][type]
+let sharedOptions = {};
 
 // Check if user is admin
 async function checkAdminAccess() {
@@ -320,8 +318,12 @@ window.addQuestion = function (passageNumber, type) {
       break;
 
     case "paragraph-matching":
-      if (sharedOptions["paragraph-matching"].length === 0) {
-        sharedOptions["paragraph-matching"] = [
+      // Initialize passage-specific options if not exists
+      if (!sharedOptions[passageNumber]) {
+        sharedOptions[passageNumber] = {};
+      }
+      if (!sharedOptions[passageNumber]["paragraph-matching"]) {
+        sharedOptions[passageNumber]["paragraph-matching"] = [
           { label: "A", text: "Paragraph A" },
           { label: "B", text: "Paragraph B" },
           { label: "C", text: "Paragraph C" },
@@ -331,8 +333,11 @@ window.addQuestion = function (passageNumber, type) {
         ];
       }
 
+      const pmOptions = sharedOptions[passageNumber]["paragraph-matching"];
+      const isFirstPMQuestion = !document.querySelector(`#questions${passageNumber} .question-item[data-type="paragraph-matching"]`);
+
       questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}">
       <div class="question-header">
         <span class="question-type-badge pm">Paragraph Matching</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
@@ -342,25 +347,25 @@ window.addQuestion = function (passageNumber, type) {
       <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="question-answer">
       <div class="options-container">
         <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
-          Options (shared across all paragraph matching questions):
-          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'paragraph-matching')" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit Options</button>
+          Options (shared across all paragraph matching questions in this passage):
+          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'paragraph-matching', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">${isFirstPMQuestion ? 'Edit Options' : 'View Options'}</button>
         </label>
-        <div class="pm-options" id="pm-options-${questionId}" style="display: none;">
-          ${sharedOptions["paragraph-matching"]
+        <div class="pm-options" id="pm-options-${questionId}" style="display: none;" data-is-first="${isFirstPMQuestion}">
+          ${pmOptions
             .map(
               (opt) => `
             <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;">
-              <input type="text" value="${opt.text}" class="option-text" data-label="${opt.label}" style="flex: 1;">
-              <button type="button" onclick="removeOption(this, 'paragraph-matching')" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" ${isFirstPMQuestion ? '' : 'readonly'}>
+              <input type="text" value="${opt.text}" class="option-text" data-label="${opt.label}" style="flex: 1;" ${isFirstPMQuestion ? '' : 'readonly'}>
+              ${isFirstPMQuestion ? `<button type="button" onclick="removeOption(this, 'paragraph-matching', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>` : ''}
             </div>
           `
             )
             .join("")}
-          <button type="button" onclick="addOption(${questionId}, 'paragraph-matching')" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+          ${isFirstPMQuestion ? `<button type="button" onclick="addOption(${questionId}, 'paragraph-matching', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>` : ''}
         </div>
         <div class="options-preview" id="options-preview-${questionId}">
-          ${sharedOptions["paragraph-matching"]
+          ${pmOptions
             .map(
               (opt) =>
                 `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${opt.label}: ${opt.text}</span>`
@@ -373,15 +378,22 @@ window.addQuestion = function (passageNumber, type) {
       break;
 
     case "match-person":
-      if (sharedOptions["match-person"].length === 0) {
-        sharedOptions["match-person"] = [
+      // Initialize passage-specific options if not exists
+      if (!sharedOptions[passageNumber]) {
+        sharedOptions[passageNumber] = {};
+      }
+      if (!sharedOptions[passageNumber]["match-person"]) {
+        sharedOptions[passageNumber]["match-person"] = [
           { label: "A", text: "" },
           { label: "B", text: "" },
         ];
       }
 
+      const mpOptions = sharedOptions[passageNumber]["match-person"];
+      const isFirstMPQuestion = !document.querySelector(`#questions${passageNumber} .question-item[data-type="match-person"]`);
+
       questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}">
       <div class="question-header">
         <span class="question-type-badge mp">Match Person/Feature</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
@@ -391,25 +403,25 @@ window.addQuestion = function (passageNumber, type) {
       <input type="text" placeholder="Correct answer letter (A, B, C, etc.)" class="question-answer">
       <div class="options-container">
         <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
-          Options (shared across all match person questions):
-          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'match-person')" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit Options</button>
+          Options (shared across all match person questions in this passage):
+          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'match-person', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">${isFirstMPQuestion ? 'Edit Options' : 'View Options'}</button>
         </label>
-        <div class="match-options" id="match-options-${questionId}" style="display: none;">
-          ${sharedOptions["match-person"]
+        <div class="match-options" id="match-options-${questionId}" style="display: none;" data-is-first="${isFirstMPQuestion}">
+          ${mpOptions
             .map(
               (opt) => `
             <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;">
-              <input type="text" value="${opt.text}" placeholder="Enter name/text" class="option-text" data-label="${opt.label}" style="flex: 1;">
-              <button type="button" onclick="removeOption(this, 'match-person')" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" ${isFirstMPQuestion ? '' : 'readonly'}>
+              <input type="text" value="${opt.text}" placeholder="Enter name/text" class="option-text" data-label="${opt.label}" style="flex: 1;" ${isFirstMPQuestion ? '' : 'readonly'}>
+              ${isFirstMPQuestion ? `<button type="button" onclick="removeOption(this, 'match-person', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>` : ''}
             </div>
           `
             )
             .join("")}
-          <button type="button" onclick="addOption(${questionId}, 'match-person')" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+          ${isFirstMPQuestion ? `<button type="button" onclick="addOption(${questionId}, 'match-person', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>` : ''}
         </div>
         <div class="options-preview" id="options-preview-${questionId}">
-          ${sharedOptions["match-person"]
+          ${mpOptions
             .map(
               (opt) =>
                 `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
@@ -426,14 +438,108 @@ window.addQuestion = function (passageNumber, type) {
 
   container.insertAdjacentHTML("beforeend", questionHTML);
 
+  // Set up auto-propagation for first matching questions
+  if ((type === "paragraph-matching" || type === "match-person") && 
+      (type === "paragraph-matching" ? isFirstPMQuestion : isFirstMPQuestion)) {
+    setupOptionAutoPropagate(questionId, type, passageNumber);
+  }
+
   document
     .getElementById(`questionMenu${passageNumber}`)
     .classList.remove("show");
   updateQuestionNumbers(passageNumber);
 };
 
+// Set up auto-propagation for first matching question
+function setupOptionAutoPropagate(questionId, type, passageNumber) {
+  const container = document.getElementById(
+    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+  );
+  
+  if (!container) return;
+  
+  // Add input listeners to all option inputs
+  const optionInputs = container.querySelectorAll('.option-label, .option-text');
+  optionInputs.forEach(input => {
+    input.addEventListener('input', () => {
+      updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
+      updateAllOptionsInPassage(type, passageNumber);
+    });
+  });
+}
+
+// Update shared options from the first question as user types
+function updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber) {
+  const container = document.getElementById(
+    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+  );
+  
+  if (!container) return;
+  
+  const newOptions = [];
+  container.querySelectorAll(".option-row").forEach((row) => {
+    const label = row.querySelector(".option-label").value.trim();
+    const text = row.querySelector(".option-text").value;
+    if (label) {
+      newOptions.push({ label, text });
+    }
+  });
+
+  if (!sharedOptions[passageNumber]) {
+    sharedOptions[passageNumber] = {};
+  }
+  sharedOptions[passageNumber][type] = newOptions;
+}
+
+// Update all matching questions in the same passage
+function updateAllOptionsInPassage(type, passageNumber) {
+  const questions = document.querySelectorAll(
+    `#questions${passageNumber} .question-item[data-type="${type}"]`
+  );
+  
+  questions.forEach((question) => {
+    const questionId = question.dataset.questionId;
+    const container = document.getElementById(
+      `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+    );
+    const previewDiv = document.getElementById(`options-preview-${questionId}`);
+    
+    if (!container || !previewDiv) return;
+    
+    const isFirst = container.dataset.isFirst === "true";
+    const options = sharedOptions[passageNumber]?.[type] || [];
+    
+    // Update options container for non-first questions
+    if (!isFirst) {
+      const optionsHTML = options.map(opt => `
+        <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
+          <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" readonly>
+          <input type="text" value="${opt.text}" class="option-text" data-label="${opt.label}" style="flex: 1;" readonly>
+        </div>
+      `).join("");
+      
+      const existingRows = container.querySelectorAll('.option-row');
+      existingRows.forEach(row => row.remove());
+      
+      const addButton = container.querySelector('button[onclick*="addOption"]');
+      if (addButton) {
+        addButton.insertAdjacentHTML('beforebegin', optionsHTML);
+      } else {
+        container.innerHTML = optionsHTML;
+      }
+    }
+    
+    // Update preview
+    previewDiv.innerHTML = options
+      .map(opt => 
+        `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${opt.label}: ${opt.text || "(empty)"}</span>`
+      )
+      .join("");
+  });
+}
+
 // Toggle options edit view
-window.toggleOptionsEdit = function (questionId, type) {
+window.toggleOptionsEdit = function (questionId, type, passageNumber) {
   const optionsDiv = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
@@ -443,40 +549,40 @@ window.toggleOptionsEdit = function (questionId, type) {
     optionsDiv.style.display = "block";
     previewDiv.style.display = "none";
   } else {
-    updateSharedOptions(questionId, type);
+    updateSharedOptions(questionId, type, passageNumber);
     optionsDiv.style.display = "none";
     previewDiv.style.display = "block";
-    updateAllOptionsPreview(type);
+    updateAllOptionsInPassage(type, passageNumber);
   }
 };
 
 // Update shared options from inputs
-function updateSharedOptions(questionId, type) {
+function updateSharedOptions(questionId, type, passageNumber) {
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
   
   if (!container) {
-    // If the specific container is not found, try to find any visible container of this type
-    const allQuestions = document.querySelectorAll(`.question-item[data-type="${type}"]`);
+    // If the specific container is not found, try to find any visible container of this type in the passage
+    const allQuestions = document.querySelectorAll(`#questions${passageNumber} .question-item[data-type="${type}"]`);
     for (let question of allQuestions) {
-      const questionId = question.dataset.questionId;
+      const qId = question.dataset.questionId;
       const anyContainer = document.getElementById(
-        `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+        `${type === "paragraph-matching" ? "pm" : "match"}-options-${qId}`
       );
       if (anyContainer && anyContainer.style.display !== "none") {
-        updateSharedOptionsFromContainer(anyContainer, type);
+        updateSharedOptionsFromContainer(anyContainer, type, passageNumber);
         return;
       }
     }
     return;
   }
   
-  updateSharedOptionsFromContainer(container, type);
+  updateSharedOptionsFromContainer(container, type, passageNumber);
 }
 
 // Helper function to update shared options from a specific container
-function updateSharedOptionsFromContainer(container, type) {
+function updateSharedOptionsFromContainer(container, type, passageNumber) {
   const newOptions = [];
 
   container.querySelectorAll(".option-row").forEach((row) => {
@@ -487,34 +593,24 @@ function updateSharedOptionsFromContainer(container, type) {
     }
   });
 
-  sharedOptions[type] = newOptions;
-  console.log(`📝 Updated ${type} options:`, newOptions);
+  if (!sharedOptions[passageNumber]) {
+    sharedOptions[passageNumber] = {};
+  }
+  sharedOptions[passageNumber][type] = newOptions;
+  console.log(`📝 Updated ${type} options for passage ${passageNumber}:`, newOptions);
 }
 
-// Update all previews of the same type
-function updateAllOptionsPreview(type) {
-  document
-    .querySelectorAll(`.question-item[data-type="${type}"]`)
-    .forEach((item) => {
-      const questionId = item.dataset.questionId;
-      const previewDiv = document.getElementById(
-        `options-preview-${questionId}`
-      );
-      if (previewDiv) {
-        previewDiv.innerHTML = sharedOptions[type]
-          .map(
-            (opt) =>
-              `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
-                opt.label
-              }: ${opt.text || "(empty)"}</span>`
-          )
-          .join("");
-      }
-    });
+// Update all previews of the same type (deprecated - use updateAllOptionsInPassage instead)
+function updateAllOptionsPreview(type, passageNumber) {
+  // This function is now handled by updateAllOptionsInPassage
+  // Keeping for backward compatibility
+  if (passageNumber) {
+    updateAllOptionsInPassage(type, passageNumber);
+  }
 }
 
 // Add new option
-window.addOption = function (questionId, type) {
+window.addOption = function (questionId, type, passageNumber) {
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
@@ -525,17 +621,38 @@ window.addOption = function (questionId, type) {
     <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
       <input type="text" value="${nextLetter}" class="option-label" style="width: 40px; text-align: center;">
       <input type="text" placeholder="Enter text" class="option-text" data-label="${nextLetter}" style="flex: 1;">
-      <button type="button" onclick="removeOption(this, '${type}')" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+      <button type="button" onclick="removeOption(this, '${type}', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
     </div>
   `;
 
   const addButton = container.querySelector('button[onclick*="addOption"]');
   addButton.insertAdjacentHTML("beforebegin", optionHTML);
+  
+  // Set up listeners for newly added inputs
+  const newRow = addButton.previousElementSibling;
+  const newInputs = newRow.querySelectorAll('.option-label, .option-text');
+  newInputs.forEach(input => {
+    input.addEventListener('input', () => {
+      updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
+      updateAllOptionsInPassage(type, passageNumber);
+    });
+  });
+  
+  // Immediately update shared options and propagate
+  updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
+  updateAllOptionsInPassage(type, passageNumber);
 };
 
 // Remove option
-window.removeOption = function (button, type) {
+window.removeOption = function (button, type, passageNumber) {
+  const container = button.closest(`[id^="pm-options-"], [id^="match-options-"]`);
+  const questionId = container.id.split('-').pop();
+  
   button.parentElement.remove();
+  
+  // Update shared options and propagate
+  updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
+  updateAllOptionsInPassage(type, passageNumber);
 };
 
 // Add option for Multiple Choice
@@ -759,33 +876,39 @@ window.closePreview = function () {
 
 // Update all shared options before collecting test data
 function updateAllSharedOptions() {
-  // Update paragraph-matching options
-  const pmQuestions = document.querySelectorAll('.question-item[data-type="paragraph-matching"]');
-  if (pmQuestions.length > 0) {
-    // Find any visible paragraph-matching options container
-    for (let question of pmQuestions) {
-      const questionId = question.dataset.questionId;
-      const container = document.getElementById(`pm-options-${questionId}`);
-      if (container && container.style.display !== "none") {
-        updateSharedOptionsFromContainer(container, "paragraph-matching");
-        break;
-      }
-    }
-  }
+  const passages = document.querySelectorAll(".passage-container");
   
-  // Update match-person options
-  const mpQuestions = document.querySelectorAll('.question-item[data-type="match-person"]');
-  if (mpQuestions.length > 0) {
-    // Find any visible match-person options container
-    for (let question of mpQuestions) {
-      const questionId = question.dataset.questionId;
-      const container = document.getElementById(`match-options-${questionId}`);
-      if (container && container.style.display !== "none") {
-        updateSharedOptionsFromContainer(container, "match-person");
-        break;
+  passages.forEach((passage) => {
+    const passageNumber = parseInt(passage.dataset.passage);
+    
+    // Update paragraph-matching options for this passage
+    const pmQuestions = passage.querySelectorAll('.question-item[data-type="paragraph-matching"]');
+    if (pmQuestions.length > 0) {
+      // Find the first question's container (which has the master options)
+      for (let question of pmQuestions) {
+        const questionId = question.dataset.questionId;
+        const container = document.getElementById(`pm-options-${questionId}`);
+        if (container && container.dataset.isFirst === "true") {
+          updateSharedOptionsFromContainer(container, "paragraph-matching", passageNumber);
+          break;
+        }
       }
     }
-  }
+    
+    // Update match-person options for this passage
+    const mpQuestions = passage.querySelectorAll('.question-item[data-type="match-person"]');
+    if (mpQuestions.length > 0) {
+      // Find the first question's container (which has the master options)
+      for (let question of mpQuestions) {
+        const questionId = question.dataset.questionId;
+        const container = document.getElementById(`match-options-${questionId}`);
+        if (container && container.dataset.isFirst === "true") {
+          updateSharedOptionsFromContainer(container, "match-person", passageNumber);
+          break;
+        }
+      }
+    }
+  });
 }
 
 // Collect test data
@@ -797,6 +920,7 @@ function collectTestData() {
   const passageElements = document.querySelectorAll(".passage-container");
 
   passageElements.forEach((passageEl) => {
+    const passageNumber = parseInt(passageEl.dataset.passage);
     const passageData = {
       title: passageEl.querySelector(".passage-title-input").value.trim(),
       instructions: passageEl
@@ -876,12 +1000,13 @@ function collectTestData() {
             .querySelector(".question-answer")
             .value.trim();
 
-          // Use the already saved shared options instead of trying to update them again
-          questionData.options = sharedOptions[type].map((opt) => ({
+          // Use the passage-specific shared options
+          const passageOptions = sharedOptions[passageNumber]?.[type] || [];
+          questionData.options = passageOptions.map((opt) => ({
             label: opt.label,
             text: opt.text,
           }));
-          console.log(`💾 Saving ${type} options for question:`, questionData.options);
+          console.log(`💾 Saving ${type} options for question in passage ${passageNumber}:`, questionData.options);
         } else {
           questionData.answer = questionEl
             .querySelector(".question-answer")
@@ -1043,10 +1168,7 @@ window.resetForm = function () {
   document.getElementById("passagesContainer").innerHTML = "";
   passageCount = 0;
   questionIdCounter = 0;
-  sharedOptions = {
-    "paragraph-matching": [],
-    "match-person": [],
-  };
+  sharedOptions = {}; // Reset to empty object for passage-specific options
 
   updatePassageCount();
   updateAddPassageButton();

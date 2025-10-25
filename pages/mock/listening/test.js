@@ -592,7 +592,7 @@ function renderContent(section, index) {
           const instructionDiv = document.createElement("div");
           instructionDiv.className = "group-instruction";
           instructionDiv.style.cssText =
-            "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;";
+            "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0;";
           instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
           questionList.appendChild(instructionDiv);
           currentGroupInstruction = null;
@@ -605,15 +605,14 @@ function renderContent(section, index) {
             const instructionDiv = document.createElement("div");
             instructionDiv.className = "group-instruction";
             instructionDiv.style.cssText =
-              "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;";
+              "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6;  border-radius: 0 8px 8px 0;";
             instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
             questionList.appendChild(instructionDiv);
             currentGroupInstruction = null;
           }
 
           gapFillContainer = document.createElement("div");
-          gapFillContainer.style.cssText =
-            "background: #fafafa; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;";
+          gapFillContainer.className = "gap-fill-group";
         }
         renderGapFillQuestion(item, gapFillContainer);
       } else {
@@ -669,11 +668,16 @@ function renderTextItem(item) {
   const questionList = document.getElementById("question-list");
   const text = item.value || item.title || item.text || "";
 
+  const container = document.createElement("div");
+  container.className = "question-item text-item";
+
   if (item.title && !item.value) {
-    questionList.innerHTML += `<h4 style="text-align: center; margin: 20px 0; color: #1f2937; font-weight: 600;">${text}</h4>`;
+    container.innerHTML = `<h4 class="text-title">${text}</h4>`;
   } else {
-    questionList.innerHTML += `<p style="margin: 10px 0; padding: 0 20px; color: #4b5563;">${text}</p>`;
+    container.innerHTML = `<p class="text-paragraph">${text}</p>`;
   }
+
+  questionList.appendChild(container);
 }
 
 function renderGapFillQuestion(question, container) {
@@ -682,8 +686,7 @@ function renderGapFillQuestion(question, container) {
 
   const questionDiv = document.createElement("div");
   questionDiv.id = qId;
-  questionDiv.style.cssText =
-    "display: flex; align-items: center; margin: 12px 0;";
+  questionDiv.className = "question-item gap-fill-item";
 
   let textContent = question.title || question.text || question.value || "";
 
@@ -691,12 +694,12 @@ function renderGapFillQuestion(question, container) {
     /_____/g,
     `<input type="text" value="${
       answersSoFar[qId] || ""
-    }" data-qid="${qId}" class="gap-fill" style="min-width: 120px; padding: 6px 10px; border: 2px solid #d1d5db; border-radius: 6px; margin: 0 5px;" placeholder="Answer"/>`
+    }" data-qid="${qId}" class="gap-fill" placeholder="Answer"/>`
   );
 
   questionDiv.innerHTML = `
-        <div style="background: #3b82f6; color: white; min-width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; margin-right: 12px; font-size: 12px;">${number}</div>
-        <div style="flex: 1;">${textContent}</div>
+        <div class="question-number">${number}</div>
+        <div class="question-text">${textContent}</div>
     `;
 
   container.appendChild(questionDiv);
@@ -984,9 +987,9 @@ function renderTable(table) {
       let content = row[col.toLowerCase().replace(/\s+/g, "")] || "";
       content = content.replace(/___q(\d+)___/g, (match, num) => {
         const qId = `q${num}`;
-        return `<input type="text" value="${
+        return `<span class="input-with-number"><input type="text" value="${
           answersSoFar[qId] || ""
-        }" data-qid="${qId}" class="gap-fill" style="padding: 4px; border: 1px solid #ccc;" />`;
+        }" data-qid="${qId}" class="gap-fill has-number" /><span class="input-number">${num}</span></span>`;
       });
       tableHtml += `<td style="border: 1px solid #ddd; padding: 8px;">${content}</td>`;
     });

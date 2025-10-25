@@ -26,6 +26,33 @@ const db = getFirestore(app);
 // Make auth available globally for glass-effects.js
 window.auth = auth;
 
+// Fallback UI updater to ensure navbar reflects auth state immediately
+function applyAuthUIFallback(user) {
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+  const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+  const isLoggedIn = !!user;
+
+  if (loginBtn) {
+    loginBtn.style.display = isLoggedIn ? 'none' : 'block';
+    if (!isLoggedIn) loginBtn.textContent = 'Login';
+  }
+  if (logoutBtn) {
+    logoutBtn.style.display = isLoggedIn ? 'block' : 'none';
+    if (isLoggedIn) logoutBtn.textContent = 'Logout';
+  }
+  if (mobileLoginBtn) {
+    mobileLoginBtn.style.display = isLoggedIn ? 'none' : 'block';
+    if (!isLoggedIn) mobileLoginBtn.textContent = 'Login';
+  }
+  if (mobileLogoutBtn) {
+    mobileLogoutBtn.style.display = isLoggedIn ? 'block' : 'none';
+    if (isLoggedIn) mobileLogoutBtn.textContent = 'Logout';
+  }
+}
+
 // Cache for Firebase data to avoid repeated calls
 const dataCache = {
   groups: null,
@@ -373,12 +400,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show initial content and start loading data
   showInitialContent();
   
+  // If Firebase already has a current user, reflect it immediately
+  applyAuthUIFallback(auth.currentUser);
 });
 
 // Firebase Authentication with glass-effects.js integration
 onAuthStateChanged(auth, async (user) => {
 
   if (user) {
+    // Ensure immediate UI toggle even if glass-effects isn't ready
+    applyAuthUIFallback(user);
     try {
       const userDocRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(userDocRef);
@@ -416,6 +447,8 @@ onAuthStateChanged(auth, async (user) => {
     if (typeof window.updateAuthUI === 'function') {
       window.updateAuthUI(null, null);
     }
+    // Fallback update
+    applyAuthUIFallback(null);
   }
 });
 

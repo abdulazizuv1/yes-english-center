@@ -227,22 +227,20 @@ body {
 }
 
 .question-item {
-    margin-bottom: 25px;
     padding: 20px;
-    border: 1px solid #e5e7eb;
     border-radius: 8px;
     background: #fafafa;
     transition: all 0.2s;
 }
 
 .question-item:hover {
-    border-color: #dc2626;
+    border-color: #007bff;
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
 .question-number {
     display: inline-block;
-    background: #dc2626;
+    background: #007bff;
     color: white;
     width: 28px;
     height: 28px;
@@ -327,7 +325,7 @@ body {
 }
 
 /* Multi-select and Matching Groups */
-.multi-select-group, .matching-group {
+.multi-select-group, .matching-group, .gap-fill-group {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -358,6 +356,63 @@ body {
 
 .matching-question select {
     min-width: 150px;
+}
+
+/* Unified styles for text and gap-fill to look as one family */
+.gap-fill-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.gap-fill-item .question-text {
+    flex: 1;
+    width: auto;
+}
+.gap-fill-group{
+    margin-bottom: 0px !important;
+    border: none !important;
+}
+
+.text-item .text-title {
+    text-align: center;
+    margin: 0;
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 24px;
+}
+
+.text-item .text-paragraph {
+    margin: 0;
+    color: #4b5563;
+}
+
+/* Number inside input for table questions */
+.input-with-number {
+    position: relative;
+    display: inline-block;
+}
+
+.has-number {
+    padding-left: 24px;
+}
+
+.input-number {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #c7c4c4;
+    font-size: 12px;
+    line-height: 22px;
+    text-align: center;
+    font-weight: 600;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* Bottom Controls */
