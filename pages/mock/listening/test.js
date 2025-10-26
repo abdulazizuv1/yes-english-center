@@ -690,8 +690,9 @@ function renderGapFillQuestion(question, container) {
 
   let textContent = question.title || question.text || question.value || "";
 
+  // Replace any sequence of 3 or more underscores with an input field
   textContent = textContent.replace(
-    /_____/g,
+    /_{3,}/g,
     `<input type="text" value="${
       answersSoFar[qId] || ""
     }" data-qid="${qId}" class="gap-fill" placeholder="Answer"/>`
@@ -966,6 +967,14 @@ function renderTable(table) {
   const questionList = document.getElementById("question-list");
   const tableDiv = document.createElement("div");
 
+  // Debug logging
+  console.log('📋 Rendering table:', {
+    title: table.title,
+    columns: table.columns,
+    rowCount: table.rows?.length || 0,
+    rows: table.rows
+  });
+
   let instructionsHtml = "";
   if (table.groupInstruction) {
     instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
@@ -973,7 +982,7 @@ function renderTable(table) {
         </div>`;
   }
 
-  let tableHtml = `${instructionsHtml}<h4 style="margin-bottom: 15px;">${table.title}</h4><table style="width: 100%; border-collapse: collapse;">`;
+  let tableHtml = `${instructionsHtml}<h4 style="margin-bottom: 15px;">${table.title || ''}</h4><table style="width: 100%; border-collapse: collapse;">`;
   tableHtml += `<thead><tr>${table.columns
     .map(
       (col) =>
@@ -981,16 +990,31 @@ function renderTable(table) {
     )
     .join("")}</tr></thead><tbody>`;
 
-  table.rows.forEach((row) => {
+  table.rows.forEach((row, rowIndex) => {
+    console.log(`Row ${rowIndex}:`, row);
     tableHtml += "<tr>";
     table.columns.forEach((col) => {
-      let content = row[col.toLowerCase().replace(/\s+/g, "")] || "";
+      const columnKey = col.toLowerCase().replace(/\s+/g, "");
+      let content = row[columnKey] || "";
+      
+      console.log(`  Column "${col}" (key: "${columnKey}"):`, content);
+      
+      // Replace old pattern: ___q6___
       content = content.replace(/___q(\d+)___/g, (match, num) => {
         const qId = `q${num}`;
         return `<span class="input-with-number"><input type="text" value="${
           answersSoFar[qId] || ""
         }" data-qid="${qId}" class="gap-fill has-number" /><span class="input-number">${num}</span></span>`;
       });
+      
+      // Replace new pattern: 6_____ (any number of underscores, minimum 3)
+      content = content.replace(/(\d+)_{3,}/g, (match, num) => {
+        const qId = `q${num}`;
+        return `<span class="input-with-number"><input type="text" value="${
+          answersSoFar[qId] || ""
+        }" data-qid="${qId}" class="gap-fill has-number" /><span class="input-number">${num}</span></span>`;
+      });
+      
       tableHtml += `<td style="border: 1px solid #ddd; padding: 8px;">${content}</td>`;
     });
     tableHtml += "</tr>";

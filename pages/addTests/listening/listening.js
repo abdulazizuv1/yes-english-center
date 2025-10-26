@@ -152,8 +152,8 @@ function addSection() {
       </div>
       
       <div class="form-group">
-        <label>Section Title *</label>
-        <input type="text" class="section-title-input" placeholder="e.g., Transport survey" required>
+        <label>Section Title</label>
+        <input type="text" class="section-title-input" placeholder="e.g., Transport survey">
       </div>
       
       <div class="audio-upload" id="audioUpload${sectionNumber}" style="display: ${audioUploadType === 'separate' ? 'block' : 'none'};">
@@ -182,18 +182,18 @@ function addSection() {
       </div>
       
       <div class="instructions-section">
-        <h4>Section Instructions</h4>
+        <h4>Section Instructions *</h4>
         <div class="instructions-row">
           <div class="form-group">
-            <label>Heading</label>
+            <label>Heading *</label>
             <input type="text" class="instructions-heading" placeholder="e.g., Questions 1-10">
           </div>
           <div class="form-group">
-            <label>Details</label>
+            <label>Details *</label>
             <input type="text" class="instructions-details" placeholder="e.g., Complete the notes below.">
           </div>
           <div class="form-group">
-            <label>Note</label>
+            <label>Note *</label>
             <input type="text" class="instructions-note" placeholder="e.g., Write ONE WORD AND/OR A NUMBER for each answer.">
           </div>
         </div>
@@ -453,7 +453,7 @@ window.addQuestion = function (sectionNumber, type) {
             <span class="question-type-badge gap-fill">Gap Fill</span>
             <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
           </div>
-          <input type="text" placeholder="Group instruction (optional)" class="group-instruction">
+          <input type="text" placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction">
           <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text">
           <input type="text" placeholder="Postfix (optional)" class="question-postfix">
           <input type="text" placeholder="Correct answer" class="question-answer">
@@ -470,7 +470,7 @@ window.addQuestion = function (sectionNumber, type) {
             <span class="question-type-badge multiple-choice">Multiple Choice</span>
             <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
           </div>
-          <input type="text" placeholder="Group instruction (optional)" class="group-instruction">
+          <input type="text" placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction">
           <input type="text" placeholder="Question text" class="question-text">
           <div class="question-options">
             <label>Options:</label>
@@ -504,7 +504,7 @@ window.addQuestion = function (sectionNumber, type) {
             <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
           </div>
           <input type="text" placeholder="Table title (optional)" class="table-title">
-          <input type="text" placeholder="Group instruction (optional)" class="group-instruction">
+          <input type="text" placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction">
           
           <div class="table-builder">
             <div class="table-controls">
@@ -522,6 +522,12 @@ window.addQuestion = function (sectionNumber, type) {
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
                   Add Row ↓
+                </button>
+                <button type="button" onclick="recalculateTableQuestionNumbers('${questionId}')" class="control-btn recalculate-btn" style="background: #2196F3;" title="Recalculate all question numbers in this table">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  Renumber Questions
                 </button>
               </div>
             </div>
@@ -544,25 +550,25 @@ window.addQuestion = function (sectionNumber, type) {
                   <tr class="data-row">
                     <td class="data-cell">
                       <select class="cell-type" onchange="updateCellType(this, ${questionId}, 0, 0)">
-                        <option value="text">Text</option>
-                        <option value="question">Question (2_____)</option>
+                        <option value="text" selected>Text</option>
+                        <option value="question">Question (1_____)</option>
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="example">Example</option>
                       </select>
                       <div class="cell-content">
-                        <input type="text" class="cell-input" placeholder="Cell content" data-question-number="1">
+                        <input type="text" class="cell-input" placeholder="Cell content">
                       </div>
-                      <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, 0, 0)" title="Add another question">+</button>
+                      <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, 0, 0)" title="Add another question" style="display: none;">+</button>
                     </td>
                     <td class="data-cell">
                       <select class="cell-type" onchange="updateCellType(this, ${questionId}, 0, 1)">
                         <option value="text">Text</option>
-                        <option value="question" selected>Question (2_____)</option>
+                        <option value="question" selected>Question (1_____)</option>
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="example">Example</option>
                       </select>
                       <div class="cell-content">
-                        <input type="text" class="cell-input" placeholder="Cell content" data-question-number="2">
+                        <input type="text" class="cell-input" placeholder="Cell content (e.g., 1_____)" data-question-number="1">
                       </div>
                       <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, 0, 1)" title="Add another question">+</button>
                     </td>
@@ -588,45 +594,53 @@ window.addQuestion = function (sectionNumber, type) {
             <span class="question-type-badge question-group">Question Group</span>
             <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
           </div>
-          <input type="text" placeholder="Group instruction (e.g., Questions 11-15 Choose TWO letters, A-E.)" class="group-instruction">
-          <select class="group-type" style="margin-bottom: 10px;">
+          <input type="text" placeholder="Group instruction (e.g., Questions 11-15 Choose TWO letters, A-E. Use \n for paragraphs)" class="group-instruction">
+          <select class="group-type" onchange="handleGroupTypeChange(${questionId})">
             <option value="multi-select">Multi Select</option>
             <option value="matching">Matching</option>
           </select>
-          <input type="text" placeholder="Question text" class="question-text">
           
+          <!-- Multi-select: Question text section (visible only for multi-select) -->
+          <div class="multi-select-question" id="multi-select-question-${questionId}">
+            <input type="text" placeholder="Question text (e.g., Which THREE features does the speaker mention?)" class="question-text">
+          </div>
+          
+          <!-- Options section (visible for both types) -->
           <div class="group-options">
             <label>Options:</label>
             <div class="options-list" id="options-list-${questionId}">
               <div class="option-item">
-                <input type="text" value="A" class="option-label" style="width: 30px; text-align: center;">
+                <input type="text" value="A" class="option-label">
                 <input type="text" placeholder="Option A text" class="option-text">
-                <button type="button" onclick="removeOption(this)" style="padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
+                <button type="button" onclick="removeOption(this)" class="remove-option-btn">×</button>
               </div>
               <div class="option-item">
-                <input type="text" value="B" class="option-label" style="width: 30px; text-align: center;">
+                <input type="text" value="B" class="option-label">
                 <input type="text" placeholder="Option B text" class="option-text">
-                <button type="button" onclick="removeOption(this)" style="padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
+                <button type="button" onclick="removeOption(this)" class="remove-option-btn">×</button>
               </div>
             </div>
-            <button type="button" onclick="addOption(${questionId})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+            <button type="button" onclick="addOption(${questionId})" class="add-option-btn">+ Add Option</button>
           </div>
           
-          <div class="group-questions">
+          <!-- Matching: Individual Questions with text (visible only for matching) -->
+          <div class="group-questions matching-questions" id="matching-questions-${questionId}" style="display: none;">
             <label>Individual Questions:</label>
             <div class="questions-list" id="group-questions-list-${questionId}">
               <div class="group-question-item">
-                <input type="text" placeholder="Question/Statement" class="group-question-text">
+                <input type="text" placeholder="Question/Statement text" class="group-question-text">
                 <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="group-question-answer">
-                <button type="button" onclick="removeGroupQuestion(this)" style="padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
+                <button type="button" onclick="removeGroupQuestion(this)" class="remove-group-question-btn">×</button>
               </div>
             </div>
-            <button type="button" onclick="addGroupQuestion(${questionId})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Question</button>
+            <button type="button" onclick="addGroupQuestion(${questionId})" class="add-group-question-btn">+ Add Question</button>
           </div>
           
-          <div class="group-answer-section">
-            <label>Group Answer:</label>
+          <!-- Multi-select: Group Answer section (visible only for multi-select) -->
+          <div class="group-answer-section multi-select-answers" id="multi-select-answers-${questionId}">
+            <label>Correct Answers (comma-separated):</label>
             <input type="text" placeholder="Enter correct answers separated by commas (e.g., A,B,C)" class="group-correct-answers">
+            <p class="helper-text">For multi-select, enter the correct option letters separated by commas</p>
           </div>
         </div>
       `;
@@ -692,16 +706,17 @@ window.addTableColumn = function(questionId) {
     const cell = document.createElement('td');
     cell.className = 'data-cell';
     const questionNumber = getNextQuestionNumber(questionId);
+    
+    // New columns are typically questions (not text)
     cell.innerHTML = `
       <select class="cell-type" onchange="updateCellType(this, ${questionId}, ${rowIndex}, ${columnIndex})">
         <option value="text">Text</option>
-        <option value="question">Question (${questionNumber}_____)</option>
+        <option value="question" selected>Question (${questionNumber}_____)</option>
         <option value="multiple-choice">Multiple Choice</option>
-        <option value="true-false">True/False</option>
         <option value="example">Example</option>
       </select>
       <div class="cell-content">
-        <input type="text" class="cell-input" placeholder="Cell content" data-question-number="${questionNumber}">
+        <input type="text" class="cell-input" placeholder="Cell content (e.g., ${questionNumber}_____)" data-question-number="${questionNumber}">
       </div>
       <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, ${rowIndex}, ${columnIndex})" title="Add another question">+</button>
     `;
@@ -726,23 +741,32 @@ window.addTableRow = function(questionId) {
   
   const row = document.createElement('tr');
   row.className = 'data-row';
+  const rowIndex = tbody.children.length;
   
   for (let i = 0; i < columnCount; i++) {
     const cell = document.createElement('td');
     cell.className = 'data-cell';
     const questionNumber = getNextQuestionNumber(questionId);
+    
+    // First column is typically text (like "Name of restaurant"), others are questions
+    const isFirstColumn = i === 0;
+    const defaultType = isFirstColumn ? 'text' : 'question';
+    const showAddButton = !isFirstColumn;
+    
     cell.innerHTML = `
-      <select class="cell-type" onchange="updateCellType(this, ${questionId}, ${tbody.children.length}, ${i})">
-        <option value="text">Text</option>
-        <option value="question">Question (${questionNumber}_____)</option>
+      <select class="cell-type" onchange="updateCellType(this, ${questionId}, ${rowIndex}, ${i})">
+        <option value="text" ${defaultType === 'text' ? 'selected' : ''}>Text</option>
+        <option value="question" ${defaultType === 'question' ? 'selected' : ''}>Question (${questionNumber}_____)</option>
         <option value="multiple-choice">Multiple Choice</option>
-        <option value="true-false">True/False</option>
         <option value="example">Example</option>
       </select>
       <div class="cell-content">
-        <input type="text" class="cell-input" placeholder="Cell content" data-question-number="${questionNumber}">
+        ${defaultType === 'text' 
+          ? `<input type="text" class="cell-input" placeholder="Cell content">` 
+          : `<input type="text" class="cell-input" placeholder="Cell content (e.g., ${questionNumber}_____)" data-question-number="${questionNumber}">`
+        }
       </div>
-      <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, ${tbody.children.length}, ${i})" title="Add another question">+</button>
+      <button type="button" class="add-question-in-cell-btn" onclick="addQuestionToCell(this, ${questionId}, ${rowIndex}, ${i})" title="Add another question" style="display: ${showAddButton ? 'inline-block' : 'none'};">+</button>
     `;
     row.appendChild(cell);
     
@@ -800,58 +824,85 @@ window.removeTableRow = function(button) {
   }
 };
 
-// Helper function to get next question number based on content patterns
+// Helper function to get next question number based on ALL questions in ALL sections
 function getNextQuestionNumber(questionId) {
-  const table = document.getElementById(`question-table-${questionId}`);
-  const existingQuestions = table.querySelectorAll('.cell-input[data-question-number]');
   let maxNumber = 0;
   
-  // First, check existing data-question-number attributes
-  existingQuestions.forEach(input => {
-    const number = parseInt(input.getAttribute('data-question-number'));
-    if (number > maxNumber) maxNumber = number;
-  });
+  // Get all sections
+  const allSections = document.querySelectorAll('.section-container');
   
-  // Also check content patterns like "1_____", "2_____", etc.
-  const allInputs = table.querySelectorAll('.cell-input');
-  allInputs.forEach(input => {
-    const content = input.value.trim();
-    const match = content.match(/^(\d+)_____/);
-    if (match) {
-      const number = parseInt(match[1]);
-      if (number > maxNumber) maxNumber = number;
-    }
+  allSections.forEach(section => {
+    // Check regular questions (gap-fill, multiple-choice, etc.)
+    const regularQuestions = section.querySelectorAll('.question-item[data-type="gap-fill"], .question-item[data-type="multiple-choice"]');
+    maxNumber += regularQuestions.length;
+    
+    // Check table questions
+    const tableQuestions = section.querySelectorAll('.question-item[data-type="table"]');
+    tableQuestions.forEach(tableQ => {
+      const tableId = tableQ.getAttribute('data-question-id');
+      const table = document.getElementById(`question-table-${tableId}`);
+      
+      if (table) {
+        // Count all question inputs in this table
+        const cellInputs = table.querySelectorAll('.cell-input[data-question-number]');
+        cellInputs.forEach(input => {
+          const number = parseInt(input.getAttribute('data-question-number'));
+          if (number > maxNumber) maxNumber = number;
+        });
+        
+        // Also check content patterns
+        const allInputs = table.querySelectorAll('.cell-input');
+        allInputs.forEach(input => {
+          const content = input.value.trim();
+          const match = content.match(/(\d+)_____/g);
+          if (match) {
+            match.forEach(m => {
+              const number = parseInt(m.match(/(\d+)/)[1]);
+              if (number > maxNumber) maxNumber = number;
+            });
+          }
+        });
+      }
+    });
+    
+    // Check question group questions
+    const questionGroups = section.querySelectorAll('.question-item[data-type="question-group"]');
+    questionGroups.forEach(qg => {
+      const individualQuestions = qg.querySelectorAll('.group-question-item');
+      maxNumber += individualQuestions.length;
+    });
   });
   
   return maxNumber + 1;
 }
 
-// Update question numbers in table based on content patterns
+// Update question numbers in table based on content patterns and reassign if needed
 function updateQuestionNumbersInTable(questionId) {
   const table = document.getElementById(`question-table-${questionId}`);
   if (!table) return;
   
-  const cellInputs = table.querySelectorAll('.cell-input');
+  const cellInputs = table.querySelectorAll('.cell-input[data-question-number]');
   const questionNumbers = new Set();
   
-  // First pass: collect all question numbers from content
+  // First pass: collect all question numbers from content patterns (like "1_____")
   cellInputs.forEach(input => {
     const content = input.value.trim();
-    const match = content.match(/^(\d+)_____/);
-    if (match) {
-      const number = parseInt(match[1]);
-      questionNumbers.add(number);
-      // Update data-question-number attribute
-      input.setAttribute('data-question-number', number);
+    // Match patterns like "1_____", "2_____", etc.
+    const matches = content.match(/(\d+)_____/g);
+    if (matches) {
+      matches.forEach(match => {
+        const number = parseInt(match.match(/(\d+)/)[1]);
+        questionNumbers.add(number);
+        // Update data-question-number to match the content
+        input.setAttribute('data-question-number', number);
+      });
     }
   });
   
-  // Second pass: update data-question-number for inputs without content patterns
+  // Second pass: for cells without explicit patterns, keep their assigned numbers
   cellInputs.forEach(input => {
-    const content = input.value.trim();
-    if (!content.match(/^\d+_____/) && input.getAttribute('data-question-number')) {
-      // Keep existing number if no pattern match
-      const existingNumber = input.getAttribute('data-question-number');
+    const existingNumber = input.getAttribute('data-question-number');
+    if (existingNumber) {
       questionNumbers.add(parseInt(existingNumber));
     }
   });
@@ -859,21 +910,108 @@ function updateQuestionNumbersInTable(questionId) {
   console.log(`📊 Updated question numbers for table ${questionId}:`, Array.from(questionNumbers).sort((a, b) => a - b));
 }
 
+// Recalculate and reassign all question numbers in a table to be sequential
+window.recalculateTableQuestionNumbers = function(questionId) {
+  const table = document.getElementById(`question-table-${questionId}`);
+  if (!table) return;
+  
+  // Get the starting question number (based on all previous questions in the test)
+  let currentQuestionNumber = 1;
+  
+  // Count all questions before this table
+  const allSections = document.querySelectorAll('.section-container');
+  allSections.forEach(section => {
+    const questionItems = section.querySelectorAll('.question-item');
+    questionItems.forEach(item => {
+      const itemId = item.getAttribute('data-question-id');
+      
+      // Stop if we reached the current table
+      if (itemId === questionId) {
+        return;
+      }
+      
+      const type = item.getAttribute('data-type');
+      if (type === 'gap-fill' || type === 'multiple-choice') {
+        currentQuestionNumber++;
+      } else if (type === 'table' && itemId !== questionId) {
+        // Count questions in previous tables
+        const prevTable = document.getElementById(`question-table-${itemId}`);
+        if (prevTable) {
+          const prevInputs = prevTable.querySelectorAll('.cell-input[data-question-number]');
+          const prevCellTypes = prevTable.querySelectorAll('.cell-type');
+          let questionCells = 0;
+          prevCellTypes.forEach(typeSelect => {
+            if (typeSelect.value === 'question' || typeSelect.value === 'multiple-choice') {
+              questionCells++;
+            }
+          });
+          currentQuestionNumber += questionCells;
+        }
+      } else if (type === 'question-group') {
+        const groupQuestions = item.querySelectorAll('.group-question-item');
+        currentQuestionNumber += groupQuestions.length;
+      }
+    });
+  });
+  
+  // Now reassign numbers to all question cells in this table
+  const tbody = document.getElementById(`table-body-${questionId}`);
+  if (!tbody) return;
+  
+  const dataRows = tbody.querySelectorAll('.data-row');
+  dataRows.forEach((row, rowIndex) => {
+    const cells = row.querySelectorAll('.data-cell');
+    cells.forEach((cell, cellIndex) => {
+      const cellType = cell.querySelector('.cell-type').value;
+      
+      if (cellType === 'question' || cellType === 'multiple-choice') {
+        const cellInputs = cell.querySelectorAll('.cell-input[data-question-number]');
+        cellInputs.forEach(input => {
+          input.setAttribute('data-question-number', currentQuestionNumber);
+          
+          // Update the visual representation in the select dropdown
+          const cellTypeSelect = cell.querySelector('.cell-type');
+          const selectedOption = cellTypeSelect.querySelector(`option[value="${cellType}"]`);
+          if (selectedOption && cellType === 'question') {
+            selectedOption.textContent = `Question (${currentQuestionNumber}_____)`;
+          }
+          
+          currentQuestionNumber++;
+        });
+      }
+    });
+  });
+  
+  console.log(`✅ Recalculated table ${questionId} question numbers. Next number: ${currentQuestionNumber}`);
+  alert(`✅ Question numbers recalculated! Questions now numbered from their correct starting position.`);
+};
+
 // Update cell type and regenerate content
 window.updateCellType = function(select, questionId, rowIndex, colIndex) {
   const cell = select.closest('.data-cell');
   const cellContent = cell.querySelector('.cell-content');
-  const questionNumber = select.closest('.data-cell').querySelector('.cell-input').getAttribute('data-question-number');
+  const addButton = cell.querySelector('.add-question-in-cell-btn');
   const cellType = select.value;
+  
+  // Get question number or assign new one
+  let questionNumber = getNextQuestionNumber(questionId);
+  const existingInput = cell.querySelector('.cell-input[data-question-number]');
+  if (existingInput && existingInput.getAttribute('data-question-number')) {
+    questionNumber = existingInput.getAttribute('data-question-number');
+  }
   
   let contentHTML = '';
   
   switch(cellType) {
     case 'text':
-      contentHTML = `<input type="text" class="cell-input" placeholder="Cell content" data-question-number="${questionNumber}">`;
+      contentHTML = `<input type="text" class="cell-input" placeholder="Cell content">`;
+      // Hide the + button for text cells
+      if (addButton) addButton.style.display = 'none';
       break;
     case 'question':
-      contentHTML = `<input type="text" class="cell-input" placeholder="Cell content" data-question-number="${questionNumber}">`;
+      contentHTML = `<input type="text" class="cell-input" placeholder="Cell content (e.g., ${questionNumber}_____)" data-question-number="${questionNumber}">`;
+      // Show the + button for question cells
+      if (addButton) addButton.style.display = 'inline-block';
       break;
     case 'multiple-choice':
       contentHTML = `
@@ -895,9 +1033,13 @@ window.updateCellType = function(select, questionId, rowIndex, colIndex) {
           </div>
         </div>
       `;
+      // Show the + button for MC cells
+      if (addButton) addButton.style.display = 'inline-block';
       break;
     case 'example':
-      contentHTML = `<input type="text" class="cell-input" placeholder="Example content" data-question-number="${questionNumber}">`;
+      contentHTML = `<input type="text" class="cell-input" placeholder="Example: Good food" data-example="true">`;
+      // Hide the + button for example cells
+      if (addButton) addButton.style.display = 'none';
       break;
   }
   
@@ -921,26 +1063,30 @@ window.addQuestionToCell = function(button, questionId, rowIndex, colIndex) {
   const cellType = cell.querySelector('.cell-type').value;
   const nextQuestionNumber = getNextQuestionNumber(questionId);
   
-  // Create separator
+  // Don't allow adding questions to non-question cell types
+  if (cellType !== 'question' && cellType !== 'multiple-choice') {
+    alert('You can only add multiple questions to Question or Multiple Choice cells');
+    return;
+  }
+  
+  // Create separator with better styling
   const separator = document.createElement('div');
   separator.className = 'question-separator';
-  separator.innerHTML = '<hr><span>Question ' + nextQuestionNumber + '</span>';
+  separator.style.cssText = 'margin: 10px 0; padding: 5px 0; border-top: 1px dashed #ccc; color: #666; font-size: 11px;';
+  separator.innerHTML = `<span style="background: #f0f0f0; padding: 2px 8px; border-radius: 3px;">Question ${nextQuestionNumber}</span>`;
   
   // Create new question content based on type
   let newQuestionHTML = '';
   
   switch(cellType) {
-    case 'text':
-      newQuestionHTML = `<input type="text" class="cell-input" placeholder="Cell content" data-question-number="${nextQuestionNumber}">`;
-      break;
     case 'question':
-      newQuestionHTML = `<input type="text" class="cell-input" placeholder="Cell content" data-question-number="${nextQuestionNumber}">`;
+      newQuestionHTML = `<input type="text" class="cell-input" placeholder="${nextQuestionNumber}_____" data-question-number="${nextQuestionNumber}" style="margin-top: 5px;">`;
       break;
     case 'multiple-choice':
       newQuestionHTML = `
-        <div class="mc-cell-content">
-          <input type="text" class="cell-input" placeholder="Question text" data-question-number="${nextQuestionNumber}">
-          <div class="mc-options">
+        <div class="mc-cell-content" style="margin-top: 5px;">
+          <input type="text" class="cell-input" placeholder="Question ${nextQuestionNumber} text" data-question-number="${nextQuestionNumber}">
+          <div class="mc-options" style="margin-top: 5px;">
             <div class="mc-option">
               <input type="radio" name="mc_${questionId}_${rowIndex}_${colIndex}_${nextQuestionNumber}" value="A" class="mc-radio">
               <input type="text" placeholder="Option A" class="mc-option-text">
@@ -957,13 +1103,11 @@ window.addQuestionToCell = function(button, questionId, rowIndex, colIndex) {
         </div>
       `;
       break;
-    case 'example':
-      newQuestionHTML = `<input type="text" class="cell-input" placeholder="Example content" data-question-number="${nextQuestionNumber}">`;
-      break;
   }
   
   const newQuestionDiv = document.createElement('div');
   newQuestionDiv.className = 'additional-question';
+  newQuestionDiv.setAttribute('data-question-number', nextQuestionNumber);
   newQuestionDiv.innerHTML = newQuestionHTML;
   
   cellContent.appendChild(separator);
@@ -976,6 +1120,21 @@ window.addQuestionToCell = function(button, questionId, rowIndex, colIndex) {
       updateQuestionNumbersInTable(questionId);
     });
   });
+  
+  // Add remove button for this additional question
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.textContent = '×';
+  removeBtn.className = 'remove-additional-question-btn';
+  removeBtn.style.cssText = 'margin-left: 5px; padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;';
+  removeBtn.onclick = function() {
+    if (confirm('Remove this additional question?')) {
+      separator.remove();
+      newQuestionDiv.remove();
+      updateQuestionNumbersInTable(questionId);
+    }
+  };
+  separator.appendChild(removeBtn);
   
   console.log(`✅ Added question ${nextQuestionNumber} to cell ${rowIndex},${colIndex} in table ${questionId}`);
 };
@@ -1038,9 +1197,9 @@ window.addOption = function (questionId) {
 
   const optionHTML = `
     <div class="option-item">
-      <input type="text" value="${nextLetter}" class="option-label" style="width: 30px; text-align: center;">
+      <input type="text" value="${nextLetter}" class="option-label">
       <input type="text" placeholder="Option ${nextLetter} text" class="option-text">
-      <button type="button" onclick="removeOption(this)" style="padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
+      <button type="button" onclick="removeOption(this)" class="remove-option-btn">×</button>
     </div>
   `;
 
@@ -1054,7 +1213,7 @@ window.addGroupQuestion = function(questionId) {
     <div class="group-question-item">
       <input type="text" placeholder="Question/Statement" class="group-question-text">
       <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="group-question-answer">
-      <button type="button" onclick="removeGroupQuestion(this)" style="padding: 2px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
+      <button type="button" onclick="removeGroupQuestion(this)" class="remove-group-question-btn">×</button>
     </div>
   `;
   
@@ -1070,6 +1229,29 @@ window.removeGroupQuestion = function(button) {
   
   if (confirm("Remove this question?")) {
     button.closest(".group-question-item").remove();
+  }
+};
+
+// Handle group type change (multi-select vs matching)
+window.handleGroupTypeChange = function(questionId) {
+  const groupType = document.querySelector(`[data-question-id="${questionId}"] .group-type`).value;
+  
+  const multiSelectQuestion = document.getElementById(`multi-select-question-${questionId}`);
+  const matchingQuestions = document.getElementById(`matching-questions-${questionId}`);
+  const multiSelectAnswers = document.getElementById(`multi-select-answers-${questionId}`);
+  
+  if (groupType === 'multi-select') {
+    // Show: question text and group answers
+    // Hide: individual questions
+    multiSelectQuestion.style.display = 'block';
+    multiSelectAnswers.style.display = 'block';
+    matchingQuestions.style.display = 'none';
+  } else if (groupType === 'matching') {
+    // Show: individual questions
+    // Hide: question text and group answers
+    multiSelectQuestion.style.display = 'none';
+    multiSelectAnswers.style.display = 'none';
+    matchingQuestions.style.display = 'block';
   }
 };
 
@@ -1489,79 +1671,175 @@ function collectTestData() {
               cells.forEach((cellEl, cellIndex) => {
                 const cellType = cellEl.querySelector(".cell-type").value;
                 const cellContent = cellEl.querySelector(".cell-content");
-                const columnName = questionData.columns[cellIndex]?.toLowerCase() || `column${cellIndex + 1}`;
+                // ВАЖНО: Убираем пробелы из имени колонки, чтобы совпадало с рендерингом
+                const columnName = questionData.columns[cellIndex]?.toLowerCase().replace(/\s+/g, "") || `column${cellIndex + 1}`;
                 
                 if (cellType === "question") {
-                  // Process all questions in this cell
-                  const questions = cellContent.querySelectorAll('.cell-input[data-question-number]');
+                  // Process all questions in this cell (including additional questions)
                   let cellValue = '';
                   
-                  questions.forEach((input, qIndex) => {
-                    const questionNumber = input.getAttribute('data-question-number');
-                    const content = input.value.trim();
+                  // Get main question input
+                  const mainInput = cellContent.querySelector('.cell-input[data-question-number]');
+                  if (mainInput) {
+                    const questionNumber = mainInput.getAttribute('data-question-number');
+                    const content = mainInput.value.trim();
                     if (content) {
-                      if (qIndex > 0) cellValue += '<br>';
-                      cellValue += content.replace(/\d+_____/g, `${questionNumber}_____`);
+                      // Keep the content as-is - user controls the format
+                      // If they want "1_____", they type it
+                      // If they want "Good for people who are 1_____ interested", they type it
+                      // Just ensure the question number pattern uses the correct number if present
+                      let formattedContent = content;
+                      if (content.match(/\d+_____/)) {
+                        // Replace any question number pattern with the correct one
+                        formattedContent = content.replace(/(\d+)_____/g, `${questionNumber}_____`);
+                      }
+                      // Otherwise keep content as-is (e.g., plain text or text with _____ but no number)
+                      cellValue += formattedContent;
                       
                       // Store question by its number
                       if (!questionData.questions[questionNumber]) {
                         questionData.questions[questionNumber] = {
                           questionId: `q${questionNumber}`,
-                          text: content,
+                          text: formattedContent,
                           row: rowIndex,
                           column: cellIndex,
                           columnName: columnName
                         };
                       }
                     }
+                  }
+                  
+                  // Get additional questions in the same cell
+                  const additionalQuestions = cellContent.querySelectorAll('.additional-question');
+                  additionalQuestions.forEach((addQDiv, addQIndex) => {
+                    const addInput = addQDiv.querySelector('.cell-input[data-question-number]');
+                    if (addInput) {
+                      const questionNumber = addInput.getAttribute('data-question-number');
+                      const content = addInput.value.trim();
+                      if (content) {
+                        if (cellValue) cellValue += '<br>';
+                        
+                        // Keep the content as-is - user controls the format
+                        let formattedContent = content;
+                        if (content.match(/\d+_____/)) {
+                          // Replace any question number pattern with the correct one
+                          formattedContent = content.replace(/(\d+)_____/g, `${questionNumber}_____`);
+                        }
+                        // Otherwise keep content as-is
+                        cellValue += formattedContent;
+                        
+                        // Store question by its number
+                        if (!questionData.questions[questionNumber]) {
+                          questionData.questions[questionNumber] = {
+                            questionId: `q${questionNumber}`,
+                            text: formattedContent,
+                            row: rowIndex,
+                            column: cellIndex,
+                            columnName: columnName
+                          };
+                        }
+                      }
+                    }
                   });
                   
                   rowData[columnName] = cellValue;
                 } else if (cellType === "multiple-choice") {
-                  // Process multiple choice questions
-                  const mcQuestions = cellContent.querySelectorAll('.mc-cell-content');
+                  // Process multiple choice questions (main + additional)
                   let cellValue = '';
                   
-                  mcQuestions.forEach((mcEl, qIndex) => {
-                    const questionNumber = mcEl.querySelector('.cell-input').getAttribute('data-question-number');
-                    const questionText = mcEl.querySelector('.cell-input').value.trim();
-                    const options = mcEl.querySelectorAll('.mc-option');
-                    const correctAnswer = mcEl.querySelector('input[type="radio"]:checked')?.value || '';
-                    
-                    if (questionText) {
-                      if (qIndex > 0) cellValue += '<br><br>';
-                      cellValue += `Q${questionNumber}: ${questionText}<br>`;
+                  // Process main MC question
+                  const mainMcContent = cellContent.querySelector('.mc-cell-content');
+                  if (mainMcContent) {
+                    const mainInput = mainMcContent.querySelector('.cell-input');
+                    if (mainInput) {
+                      const questionNumber = mainInput.getAttribute('data-question-number');
+                      const questionText = mainInput.value.trim();
+                      const options = mainMcContent.querySelectorAll('.mc-option');
+                      const correctAnswer = mainMcContent.querySelector('input[type="radio"]:checked')?.value || '';
                       
-                      options.forEach(option => {
-                        const letter = option.querySelector('.mc-radio').value;
-                        const text = option.querySelector('.mc-option-text').value.trim();
-                        if (text) {
-                          cellValue += `${letter}. ${text}`;
-                          if (letter === correctAnswer) cellValue += ' ✓';
-                          cellValue += '<br>';
-                        }
-                      });
-                      
-                      // Store multiple choice question by its number
-                      if (!questionData.questions[questionNumber]) {
-                        questionData.questions[questionNumber] = {
-                          questionId: `q${questionNumber}`,
-                          text: questionText,
-                          format: 'multiple-choice',
-                          options: {},
-                          correctAnswer: correctAnswer,
-                          row: rowIndex,
-                          column: cellIndex,
-                          columnName: columnName
-                        };
+                      if (questionText) {
+                        cellValue += `Q${questionNumber}: ${questionText}<br>`;
                         
                         options.forEach(option => {
                           const letter = option.querySelector('.mc-radio').value;
                           const text = option.querySelector('.mc-option-text').value.trim();
                           if (text) {
-                            questionData.questions[questionNumber].options[letter] = text;
+                            cellValue += `${letter}. ${text}`;
+                            if (letter === correctAnswer) cellValue += ' ✓';
+                            cellValue += '<br>';
                           }
                         });
+                        
+                        // Store multiple choice question by its number
+                        if (!questionData.questions[questionNumber]) {
+                          questionData.questions[questionNumber] = {
+                            questionId: `q${questionNumber}`,
+                            text: questionText,
+                            format: 'multiple-choice',
+                            options: {},
+                            correctAnswer: correctAnswer,
+                            row: rowIndex,
+                            column: cellIndex,
+                            columnName: columnName
+                          };
+                          
+                          options.forEach(option => {
+                            const letter = option.querySelector('.mc-radio').value;
+                            const text = option.querySelector('.mc-option-text').value.trim();
+                            if (text) {
+                              questionData.questions[questionNumber].options[letter] = text;
+                            }
+                          });
+                        }
+                      }
+                    }
+                  }
+                  
+                  // Process additional MC questions in the same cell
+                  const additionalMcQuestions = cellContent.querySelectorAll('.additional-question .mc-cell-content');
+                  additionalMcQuestions.forEach((mcEl, qIndex) => {
+                    const addInput = mcEl.querySelector('.cell-input');
+                    if (addInput) {
+                      const questionNumber = addInput.getAttribute('data-question-number');
+                      const questionText = addInput.value.trim();
+                      const options = mcEl.querySelectorAll('.mc-option');
+                      const correctAnswer = mcEl.querySelector('input[type="radio"]:checked')?.value || '';
+                      
+                      if (questionText) {
+                        if (cellValue) cellValue += '<br>';
+                        cellValue += `Q${questionNumber}: ${questionText}<br>`;
+                        
+                        options.forEach(option => {
+                          const letter = option.querySelector('.mc-radio').value;
+                          const text = option.querySelector('.mc-option-text').value.trim();
+                          if (text) {
+                            cellValue += `${letter}. ${text}`;
+                            if (letter === correctAnswer) cellValue += ' ✓';
+                            cellValue += '<br>';
+                          }
+                        });
+                        
+                        // Store multiple choice question by its number
+                        if (!questionData.questions[questionNumber]) {
+                          questionData.questions[questionNumber] = {
+                            questionId: `q${questionNumber}`,
+                            text: questionText,
+                            format: 'multiple-choice',
+                            options: {},
+                            correctAnswer: correctAnswer,
+                            row: rowIndex,
+                            column: cellIndex,
+                            columnName: columnName
+                          };
+                          
+                          options.forEach(option => {
+                            const letter = option.querySelector('.mc-radio').value;
+                            const text = option.querySelector('.mc-option-text').value.trim();
+                            if (text) {
+                              questionData.questions[questionNumber].options[letter] = text;
+                            }
+                          });
+                        }
                       }
                     }
                   });
@@ -1582,17 +1860,31 @@ function collectTestData() {
                   
                   rowData[columnName] = cellValue;
                 } else {
-                  // Regular text cell
-                  const questions = cellContent.querySelectorAll('.cell-input[data-question-number]');
+                  // Regular text cell (no question numbers)
                   let cellValue = '';
                   
-                  questions.forEach((input, qIndex) => {
-                    const content = input.value.trim();
-                    if (content) {
-                      if (qIndex > 0) cellValue += '<br>';
-                      cellValue += content;
-                    }
-                  });
+                  // Check if there are inputs with question numbers (shouldn't be for text cells)
+                  const questionsWithNumbers = cellContent.querySelectorAll('.cell-input[data-question-number]');
+                  if (questionsWithNumbers.length > 0) {
+                    // If there are question-numbered inputs, process them
+                    questionsWithNumbers.forEach((input, qIndex) => {
+                      const content = input.value.trim();
+                      if (content) {
+                        if (qIndex > 0) cellValue += '<br>';
+                        cellValue += content;
+                      }
+                    });
+                  } else {
+                    // Pure text cell without question numbers
+                    const textInputs = cellContent.querySelectorAll('.cell-input');
+                    textInputs.forEach((input, qIndex) => {
+                      const content = input.value.trim();
+                      if (content) {
+                        if (qIndex > 0) cellValue += '<br>';
+                        cellValue += content;
+                      }
+                    });
+                  }
                   
                   rowData[columnName] = cellValue;
                 }
@@ -1613,22 +1905,29 @@ function collectTestData() {
               }
             });
           }
+          
+          // Debug logging
+          console.log(`📋 Table data collected:`, {
+            title: questionData.title,
+            columns: questionData.columns,
+            rowCount: questionData.rows.length,
+            rows: questionData.rows,
+            questions: questionData.questions,
+            answers: questionData.answer
+          });
           break;
 
         case "question-group":
           const groupTypeElement = questionEl.querySelector(".group-type");
           const groupType = groupTypeElement ? groupTypeElement.value : "multi-select";
           const questionGroupGroupInstruction = questionEl.querySelector(".group-instruction")?.value.trim();
-          const groupQuestionTextElement = questionEl.querySelector(".question-text");
-          const groupQuestionText = groupQuestionTextElement ? groupQuestionTextElement.value.trim() : "";
           
           questionData.type = "question-group";
           questionData.groupType = groupType;
           questionData.questionId = `q${questionId}`;
           if (questionGroupGroupInstruction) questionData.groupInstruction = questionGroupGroupInstruction;
-          questionData.text = groupQuestionText;
           
-          // Get options
+          // Get options (common for both types)
           questionData.options = {};
           questionEl.querySelectorAll(".option-item").forEach(optionEl => {
             const optionLabel = optionEl.querySelector(".option-label").value.trim();
@@ -1638,30 +1937,39 @@ function collectTestData() {
             }
           });
           
-          // Get individual questions
-          questionData.questions = [];
-          questionEl.querySelectorAll(".group-question-item").forEach((qEl, index) => {
-            const questionTextElement = qEl.querySelector(".group-question-text");
-            const correctAnswerElement = qEl.querySelector(".group-question-answer");
-            const questionText = questionTextElement ? questionTextElement.value.trim() : "";
-            const correctAnswer = correctAnswerElement ? correctAnswerElement.value.trim() : "";
-            if (questionText && correctAnswer) {
-              questionData.questions.push({
-                questionId: `q${questionId}_${index + 1}`,
-                text: questionText,
-                correctAnswer: correctAnswer
-              });
-            }
-          });
-          
-          // Get group answer
-          const groupAnswerElement = questionEl.querySelector(".group-correct-answers");
-          if (groupAnswerElement && groupAnswerElement.value.trim()) {
-            questionData.groupAnswer = groupAnswerElement.value.trim();
-          }
-          
           if (groupType === "multi-select") {
-            questionData.instructions = questionEl.querySelector(".question-select-count")?.value.trim();
+            // Multi-select: has question text and group answers
+            const groupQuestionTextElement = questionEl.querySelector(".question-text");
+            const groupQuestionText = groupQuestionTextElement ? groupQuestionTextElement.value.trim() : "";
+            questionData.text = groupQuestionText;
+            
+            // Get group answers (comma-separated correct answers)
+            const groupCorrectAnswers = questionEl.querySelector(".group-correct-answers")?.value.trim();
+            if (groupCorrectAnswers) {
+              const answersArray = groupCorrectAnswers.split(',').map(a => a.trim()).filter(a => a);
+              questionData.questions = answersArray.map((answer, index) => ({
+                questionId: `q${questionId}_${index + 1}`,
+                correctAnswer: answer
+              }));
+            } else {
+              questionData.questions = [];
+            }
+          } else if (groupType === "matching") {
+            // Matching: has individual questions with text
+            questionData.questions = [];
+            questionEl.querySelectorAll(".group-question-item").forEach((qEl, index) => {
+              const questionTextElement = qEl.querySelector(".group-question-text");
+              const correctAnswerElement = qEl.querySelector(".group-question-answer");
+              const questionText = questionTextElement ? questionTextElement.value.trim() : "";
+              const correctAnswer = correctAnswerElement ? correctAnswerElement.value.trim() : "";
+              if (questionText && correctAnswer) {
+                questionData.questions.push({
+                  questionId: `q${questionId}_${index + 1}`,
+                  text: questionText,
+                  correctAnswer: correctAnswer
+                });
+              }
+            });
           }
           break;
 
@@ -1807,29 +2115,7 @@ function validateForm() {
   }
 
   for (let section of sections) {
-    const title = section.querySelector(".section-title-input").value.trim();
     const questions = section.querySelectorAll(".question-item");
-
-    if (!title) {
-      alert("Please enter a title for all sections");
-      return false;
-    }
-
-    // Check audio only if separate audio mode is selected
-    if (audioUploadType === 'separate') {
-      const sectionNumber = section.dataset.section;
-      const audioFileInput = document.getElementById(`audioFile${sectionNumber}`);
-      console.log(`🔍 Checking audio for section ${sectionNumber}:`, {
-        audioFileInput: audioFileInput,
-        hasFiles: audioFileInput ? audioFileInput.files.length : 0,
-        fileName: audioFileInput && audioFileInput.files[0] ? audioFileInput.files[0].name : 'none'
-      });
-      
-      if (!audioFileInput || !audioFileInput.files[0]) {
-        alert("Please upload an audio file for all sections");
-        return false;
-      }
-    }
 
     if (questions.length === 0) {
       alert("Please add at least one question for each section");
@@ -1855,8 +2141,8 @@ function validateForm() {
         continue;
       }
 
-      // Check question text only for types that have it
-      if (type !== "table") {
+      // Check question text only for types that have it (skip table and question-group as they have their own validation)
+      if (type !== "table" && type !== "question-group") {
         const questionTextElement = question.querySelector(".question-text");
         console.log(`🔍 Checking question text for type ${type}:`, {
           element: questionTextElement,
@@ -1873,7 +2159,7 @@ function validateForm() {
           return false;
         }
       } else {
-        console.log(`🔍 Skipping question text validation for table type`);
+        console.log(`🔍 Skipping question text validation for ${type} type`);
       }
 
       if (type === "multiple-choice") {
@@ -1931,7 +2217,7 @@ function validateForm() {
             }
           }
           
-          // Check cell inputs - only check cells that are not empty (have content)
+          // Check cell inputs - validate main questions and additional questions
           const dataRows = table.querySelectorAll(".data-row");
           for (let row of dataRows) {
             const cells = row.querySelectorAll(".data-cell");
@@ -1939,29 +2225,74 @@ function validateForm() {
               const cellType = cell.querySelector(".cell-type").value;
               const cellContent = cell.querySelector(".cell-content");
               
-              if (cellType === "question" || cellType === "text") {
-                const cellInputs = cellContent.querySelectorAll(".cell-input");
-                for (let input of cellInputs) {
-                  if (!input.value.trim()) {
-                    alert("Please fill in all table cells");
+              if (cellType === "question") {
+                // Check main input for question cells (must be filled)
+                const mainInput = cellContent.querySelector('.cell-input[data-question-number]');
+                if (mainInput && !mainInput.value.trim()) {
+                  alert("Please fill in all question cells in the table");
+                  return false;
+                }
+                
+                // Check additional questions
+                const additionalQuestions = cellContent.querySelectorAll('.additional-question');
+                for (let addQ of additionalQuestions) {
+                  const addInput = addQ.querySelector('.cell-input[data-question-number]');
+                  if (addInput && !addInput.value.trim()) {
+                    alert("Please fill in all additional questions in table cells");
                     return false;
                   }
                 }
+              } else if (cellType === "text" || cellType === "example") {
+                // Text and example cells are optional - no validation needed
+                // They can be empty or filled
               } else if (cellType === "multiple-choice") {
-                const mcQuestions = cellContent.querySelectorAll(".mc-cell-content");
-                for (let mcEl of mcQuestions) {
-                  const questionText = mcEl.querySelector(".cell-input").value.trim();
+                // Check main MC question
+                const mainMcContent = cellContent.querySelector(".mc-cell-content");
+                if (mainMcContent) {
+                  const questionText = mainMcContent.querySelector(".cell-input")?.value.trim();
                   if (!questionText) {
                     alert("Please fill in all table cells");
                     return false;
                   }
                   
-                  const options = mcEl.querySelectorAll(".mc-option-text");
+                  const options = mainMcContent.querySelectorAll(".mc-option-text");
                   for (let option of options) {
                     if (!option.value.trim()) {
                       alert("Please fill in all table cell options");
                       return false;
                     }
+                  }
+                  
+                  // Check if correct answer is selected
+                  const hasCorrectAnswer = mainMcContent.querySelector('input[type="radio"]:checked');
+                  if (!hasCorrectAnswer) {
+                    alert("Please select the correct answer for all multiple choice questions in the table");
+                    return false;
+                  }
+                }
+                
+                // Check additional MC questions
+                const additionalMcQuestions = cellContent.querySelectorAll('.additional-question .mc-cell-content');
+                for (let addMcEl of additionalMcQuestions) {
+                  const questionText = addMcEl.querySelector(".cell-input")?.value.trim();
+                  if (!questionText) {
+                    alert("Please fill in all additional questions in table cells");
+                    return false;
+                  }
+                  
+                  const options = addMcEl.querySelectorAll(".mc-option-text");
+                  for (let option of options) {
+                    if (!option.value.trim()) {
+                      alert("Please fill in all options for additional questions in table cells");
+                      return false;
+                    }
+                  }
+                  
+                  // Check if correct answer is selected
+                  const hasCorrectAnswer = addMcEl.querySelector('input[type="radio"]:checked');
+                  if (!hasCorrectAnswer) {
+                    alert("Please select the correct answer for all multiple choice questions in the table");
+                    return false;
                   }
                 }
               }
@@ -1969,14 +2300,15 @@ function validateForm() {
           }
         }
       } else if (type === "question-group") {
-        const groupQuestionTextElement = question.querySelector(".question-text");
-        if (!groupQuestionTextElement || !groupQuestionTextElement.value.trim()) {
-          alert("Please fill in question text for all question group questions");
+        const groupTypeElement = question.querySelector(".group-type");
+        const groupType = groupTypeElement ? groupTypeElement.value : "multi-select";
+        
+        // Check if options are filled (common for both types)
+        const optionItems = question.querySelectorAll(".option-item");
+        if (optionItems.length === 0) {
+          alert("Please add at least one option for question group questions");
           return false;
         }
-        
-        // Check if options are filled
-        const optionItems = question.querySelectorAll(".option-item");
         for (let optionItem of optionItems) {
           const optionText = optionItem.querySelector(".option-text");
           if (!optionText || !optionText.value.trim()) {
@@ -1985,28 +2317,35 @@ function validateForm() {
           }
         }
         
-        // Check if individual questions are filled
-        const groupQuestionItems = question.querySelectorAll(".group-question-item");
-        for (let groupQuestionItem of groupQuestionItems) {
-          const questionText = groupQuestionItem.querySelector(".group-question-text");
-          const answer = groupQuestionItem.querySelector(".group-question-answer");
-          
-          if (!questionText || !questionText.value.trim()) {
-            alert("Please fill in all individual question texts for question group questions");
+        if (groupType === "multi-select") {
+          // Multi-select validation
+          const groupQuestionTextElement = question.querySelector(".question-text");
+          if (!groupQuestionTextElement || !groupQuestionTextElement.value.trim()) {
+            alert("Please fill in the question text for multi-select question");
             return false;
           }
           
-          if (!answer || !answer.value.trim()) {
-            alert("Please provide answers for all individual questions in question group questions");
+          // Check group answer field
+          const groupAnswerElement = question.querySelector(".group-correct-answers");
+          if (!groupAnswerElement || !groupAnswerElement.value.trim()) {
+            alert("Please provide the correct answers (comma-separated) for multi-select question");
             return false;
           }
-        }
-        
-        // Check group answer field
-        const groupAnswerElement = question.querySelector(".group-correct-answers");
-        if (!groupAnswerElement || !groupAnswerElement.value.trim()) {
-          alert("Please provide the group answer for question group questions");
-          return false;
+        } else if (groupType === "matching") {
+          // Matching validation
+          const groupQuestionItems = question.querySelectorAll(".group-question-item");
+          if (groupQuestionItems.length === 0) {
+            alert("Please add at least one question for matching type");
+            return false;
+          }
+          for (let groupQuestionItem of groupQuestionItems) {
+            const answer = groupQuestionItem.querySelector(".group-question-answer");
+            
+            if (!answer || !answer.value.trim()) {
+              alert("Please provide answers for all matching questions");
+              return false;
+            }
+          }
         }
       } else if (type === "multi-select" || type === "matching") {
         const optionsPreview = document.getElementById(`options-preview-${question.dataset.questionId}`);
@@ -2018,9 +2357,25 @@ function validateForm() {
     }
   }
 
-  // Check single audio file if single audio mode is selected
-  if (audioUploadType === 'single' && !singleAudioFile) {
-    alert("Please upload the complete test audio file");
+  // Check that at least one audio file is uploaded
+  let hasAudio = false;
+  
+  if (audioUploadType === 'single') {
+    hasAudio = !!singleAudioFile;
+  } else if (audioUploadType === 'separate') {
+    // Check if at least one section has an audio file
+    for (let section of sections) {
+      const sectionNumber = section.dataset.section;
+      const audioFileInput = document.getElementById(`audioFile${sectionNumber}`);
+      if (audioFileInput && audioFileInput.files[0]) {
+        hasAudio = true;
+        break;
+      }
+    }
+  }
+  
+  if (!hasAudio) {
+    alert("Please upload at least one audio file");
     return false;
   }
 

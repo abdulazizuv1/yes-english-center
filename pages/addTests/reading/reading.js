@@ -398,7 +398,7 @@ window.addQuestion = function (passageNumber, type) {
         <span class="question-type-badge mp">Match Person/Feature</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2"></textarea>
+      <textarea placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction" rows="2"></textarea>
       <input type="text" placeholder="Statement to match" class="question-text">
       <input type="text" placeholder="Correct answer letter (A, B, C, etc.)" class="question-answer">
       <div class="options-container">

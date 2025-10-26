@@ -814,7 +814,6 @@ function renderPassage(index) {
     if (isMatchingType && !matchingOptionsShown && Array.isArray(q.options) && q.options.length > 0) {
       const optsDiv = document.createElement("div");
       optsDiv.className = "matching-options-plain";
-      optsDiv.style.cssText = "margin: 10px 0 15px; padding: 10px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; white-space: pre-wrap;";
       const plainText = q.options
         .map((opt) => `${opt.label}. ${opt.text}`)
         .join("\n");

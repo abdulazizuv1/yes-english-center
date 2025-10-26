@@ -701,6 +701,18 @@ body {
 }
 
 /* Matching question styles */
+.matching-options-plain {
+  margin: 10px 0 15px;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.5;
+}
+
 .matching-options {
   display: flex;
   flex-direction: column;
