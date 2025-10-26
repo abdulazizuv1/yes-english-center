@@ -4,12 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YES English Center - Your Future Starts Here</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="icon" href="./image/Logo.ver1.2.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <!-- Preconnect для быстрой загрузки шрифтов -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <!-- Preload шрифта для моментальной загрузки (исправление мигания) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- AOS - Animate On Scroll Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Предотвращение мигания шрифта */
+        body {
+            font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        body.fonts-loaded {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
   <!-- Dynamic Background -->
@@ -142,19 +166,19 @@
     <div class="container">
       <div class="header_main">
         <div class="header_left">
-          <div class="achievement-badge glass-badge">
+          <div class="achievement-badge glass-badge" data-aos="fade-down" data-aos-duration="800">
             <span class="badge-icon">🏆</span>
             <span class="badge-text">Highest Score: 8.5 IELTS</span>
             <div class="badge-shine"></div>
           </div>
-          <h2 class="lng_header_title">YOUR FUTURE STARTS HERE</h2>
-          <h1 class="lng_header_sub_text">
+          <h2 class="lng_header_title" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">YOUR FUTURE STARTS HERE</h2>
+          <h1 class="lng_header_sub_text" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
             Achieve high <span class="gradient-text">IELTS and SAT</span><br>
             scores with courses from<br>
             <span class="gradient-text">the best</span> teachers
           </h1>
-          <p class="lng_header_sub_text2">Join thousands of successful students who achieved their dreams with YES English Center</p>
-          <div class="cta-buttons">
+          <p class="lng_header_sub_text2" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">Join thousands of successful students who achieved their dreams with YES English Center</p>
+          <div class="cta-buttons" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
             <a href="#contact" class="btn-primary glass-btn-primary">
               <span>Start Learning</span>
               <div class="btn-glow"></div>
@@ -163,22 +187,22 @@
               <span>Learn More</span>
             </a>
           </div>
-          <div class="stats-row">
-            <div class="stat-item glass-stat">
+          <div class="stats-row" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="600">
               <div class="stat-number">2015</div>
               <div class="stat-label">Founded</div>
             </div>
-            <div class="stat-item glass-stat">
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="700">
               <div class="stat-number">5000+</div>
               <div class="stat-label">Students</div>
             </div>
-            <div class="stat-item glass-stat">
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="800">
               <div class="stat-number">8.5</div>
               <div class="stat-label">Highest IELTS</div>
             </div>
           </div>
         </div>
-        <div class="header_right">
+        <div class="header_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="300">
           <div class="hero-image-container glass-image-container">
             <div class="glass-frame"></div>
             <img src="./image/header_img.png" alt="English Learning" class="hero-image">
@@ -196,12 +220,12 @@
   <main>
     <section id="groups" class="teachers_page glass-section">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
           <div class="section-badge glass-badge">👥 Our Team</div>
           <h1 class="lng_teacher_title">Meet Our <span class="gradient-text">Expert Groups</span></h1>
           <p class="lng_groups_sub section-subtitle">Experienced teachers dedicated to your success</p>
         </div>
-        <div class="swiper mySwiper glass-swiper">
+        <div class="swiper mySwiper glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
           <div class="swiper-wrapper">
             <!-- Cards will be dynamically added here by main.js -->
           </div>
@@ -213,25 +237,25 @@
     <section id="about-us" class="about-section">
       <div class="container">
         <div class="about_us_left">
-          <div class="section-badge glass-badge">🎓 Our Story</div>
-          <h1 class="lng_about_us">About <span class="gradient-text">YES English Center</span></h1>
-          <p class="lng_about_us_info">Founded in 2015, YES English Center has become one of the leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams.</p>
+          <div class="section-badge glass-badge" data-aos="fade-right" data-aos-duration="800">🎓 Our Story</div>
+          <h1 class="lng_about_us" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">About <span class="gradient-text">YES English Center</span></h1>
+          <p class="lng_about_us_info" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">Founded in 2015, YES English Center has become one of the leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams.</p>
           <div class="feature-list">
-            <div class="feature-item glass-feature">
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
               <span class="feature-icon">🏆</span>
               <div>
                 <h4>Record Achievement</h4>
                 <p>Our highest IELTS score: 8.5</p>
               </div>
             </div>
-            <div class="feature-item glass-feature">
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="400">
               <span class="feature-icon">👨‍🏫</span>
               <div>
                 <h4>Expert Teachers</h4>
                 <p>Certified and experienced professionals</p>
               </div>
             </div>
-            <div class="feature-item glass-feature">
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="500">
               <span class="feature-icon">📈</span>
               <div>
                 <h4>Proven Results</h4>
@@ -240,7 +264,7 @@
             </div>
           </div>
         </div>
-        <div class="about_us_right">
+        <div class="about_us_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
           <div class="about-image-container glass-image-container">
             <div class="glass-frame about-frame"></div>
             <img src="./image/yes_info.webp" alt="YES English Center">
@@ -259,12 +283,12 @@
 
     <section id="results" class="achievments_page glass-section">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
           <div class="section-badge glass-badge">🌟 Success Stories</div>
           <h1 class="lng_results_title">Our Outstanding <span class="gradient-text">Results</span></h1>
           <p  class="lng_results_sub section-subtitle">See how our students achieve their goals</p>
         </div>
-        <div class="swiper mySwiper3 glass-swiper">
+        <div class="swiper mySwiper3 glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
           <div class="swiper-wrapper">
             
           </div>
@@ -275,12 +299,12 @@
 
     <section id="feedbacks" class="feedback_page">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
           <div class="section-badge glass-badge">💬 Testimonials</div>
           <h1 class="lng_feedbacks_title">What Our <span class="gradient-text">Students Say</span></h1>
           <p class="lng_feadback_sub section-subtitle">Real feedback from real students</p>
         </div>
-        <div class="swiper swiper2 mySwiper2 glass-swiper">
+        <div class="swiper swiper2 mySwiper2 glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
           <div class="swiper-wrapper">
             
           </div>
@@ -291,7 +315,7 @@
 
     <section id="contact" class="contact">
       <div class="container">
-        <div class="contact_left">
+        <div class="contact_left" data-aos="fade-right" data-aos-duration="1000">
           <img class="con_line" src="./image/contact_line.png" alt="">
           <div class="contact-image-wrapper glass-image-container">
             <div class="glass-frame"></div>
@@ -302,11 +326,11 @@
             </div>
           </div>
         </div>
-        <div class="contact_right">
+        <div class="contact_right" data-aos="fade-left" data-aos-duration="1000">
           <div class="section-badge glass-badge">📞 Get Started</div>
-          <h1 class="lng_contact_info">Join <span class="gradient-text">YES</span> – one of the <span class="gradient-text">leading</span> English learning centers in the region!</h1>
-          <p class="lng_info_sub">Ready to transform your English skills? Contact us today and take the first step towards your international success.</p>
-          <div class="contact-features">
+          <h1 class="lng_contact_info" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">Join <span class="gradient-text">YES</span> – one of the <span class="gradient-text">leading</span> English learning centers in the region!</h1>
+          <p class="lng_info_sub" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">Ready to transform your English skills? Contact us today and take the first step towards your international success.</p>
+          <div class="contact-features" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
             <div class="contact-feature glass-check">
               <span class="feature-icon">✅</span>
               <span>Free consultation</span>
@@ -320,7 +344,7 @@
               <span>Expert guidance</span>
             </div>
           </div>
-          <a href="tel:+998904093307" class="contact-btn-wrapper">
+          <a href="tel:+998904093307" class="contact-btn-wrapper" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="400">
             <button class="lng_contact_btn glass-cta">
               <span class="btn-content">
                 <span class="btn-icon">📞</span>
@@ -403,10 +427,48 @@
     </div>
   </footer>
 
-<!-- Scripts -->
-<script src="lang.js"></script>
-<script type="module" src="main.js"></script>
-<script src="glass-effects.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script src="lang.js"></script>
+
+<script src="glass-effects.js"></script>
+
+<script type="module" src="src/main.js"></script>
+
+<script>
+  // Initialize AOS (Animate On Scroll)
+  AOS.init({
+    duration: 1000,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 100,
+    delay: 100,
+  });
+
+  // Font loading optimization (prevent FOUT - Flash of Unstyled Text)
+  document.fonts.ready.then(function () {
+    document.body.classList.add('fonts-loaded');
+    console.log('✅ Fonts loaded successfully');
+  });
+
+  // Fallback for older browsers
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      document.body.classList.add('fonts-loaded');
+    }, 100);
+  });
+
+  // Performance monitoring
+  window.addEventListener('load', function() {
+    if (window.performance) {
+      const perfData = window.performance.timing;
+      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+      const connectTime = perfData.responseEnd - perfData.requestStart;
+      const renderTime = perfData.domComplete - perfData.domLoading;
+    }
+  });
+</script>
 </body>
 </html>
