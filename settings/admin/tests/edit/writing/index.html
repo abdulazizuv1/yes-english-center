@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Writing Tests - YES English Center</title>
+  <link rel="stylesheet" href="./index.css">
+  <link rel="icon" href="/image/Logo.ver1.2.png" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>✍️ Manage Writing Tests</h1>
+      <p class="subtitle">Select a test to edit or delete</p>
+    </header>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-label">Total Tests:</span>
+        <span class="stat-value" id="totalTests">0</span>
+      </div>
+      <div class="stat-item">
+        <button class="btn-back" onclick="window.location.href='../index.html'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Test Selection
+        </button>
+      </div>
+    </div>
+
+    <div id="loadingContainer" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading tests...</p>
+    </div>
+
+    <div id="testsContainer" class="tests-container" style="display: none;">
+      <!-- Tests will be loaded here -->
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="15" x2="15" y2="15"></line>
+      </svg>
+      <h2>No Tests Found</h2>
+      <p>There are no writing tests available yet.</p>
+      <button class="btn-primary" onclick="window.location.href='/pages/addTests/writing/writing.html'">
+        Add First Test
+      </button>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚠️ Confirm Deletion</h2>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteTestName"></strong>?</p>
+        <p class="warning-text">This action cannot be undone. All writing tasks and prompts will be permanently deleted.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-delete-confirm" id="confirmDeleteBtn">
+          <span id="deleteText">Delete Test</span>
+          <span class="loader" id="deleteLoader" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./index.js"></script>
+</body>
+</html>
+
