@@ -28,7 +28,7 @@
 }
 
 .container {
-  max-width: 1300px;
+  max-width: 1420px;
   margin-left: auto;
   margin-right: auto;
   padding: 0 20px;
@@ -408,6 +408,38 @@ html {
   border-radius: var(--border-radius);
   border-left: 3px solid var(--primary-color);
   backdrop-filter: blur(5px);
+}
+
+/* Username Setup Panel */
+.username_panel {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 125;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeInGlass 0.3s ease-out;
+}
+
+.username-setup {
+  max-width: 420px;
+  width: 100%;
+  padding: 40px;
+  border-radius: var(--border-radius-lg);
+  position: relative;
+  animation: slideUpGlass 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.username_panel p {
+  color: #1763e1;
+  font-weight: 700;
 }
 
 /* Glass Navigation */

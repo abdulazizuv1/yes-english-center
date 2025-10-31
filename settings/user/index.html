@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Settings - YES English Center</title>
+    <link rel="icon" href="../../image/Logo.ver1.2.png">
+    <link rel="stylesheet" href="index.css">
+    <!-- Chart.js for Statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="dynamic-bg">
+        <div class="bg-blur bg-blur-1"></div>
+        <div class="bg-blur bg-blur-2"></div>
+        <div class="bg-blur bg-blur-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="settings-container">
+        <!-- Header Section -->
+        <div class="settings-header glass-morphism">
+            <button class="back-btn glass-btn" onclick="window.location.href='/'">
+                <span>←</span> Back to Home
+            </button>
+            <h1>Student Settings</h1>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header glass-morphism">
+            <div class="profile-avatar">
+                <img id="profilePicture" src="../../image/no_user.webp" alt="Profile Picture">
+            </div>
+            <div class="profile-info">
+                <h2 id="userName">Loading...</h2>
+                <p id="userEmail">Loading...</p>
+                <span class="user-role" id="userRole">Student</span>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation glass-morphism">
+            <button class="tab-btn active" data-tab="results">
+                📊 Results
+            </button>
+            <button class="tab-btn" data-tab="statistics">
+                📈 Statistics
+            </button>
+            <button class="tab-btn" data-tab="personal">
+                👤 Personal Details
+            </button>
+        </div>
+
+        <!-- Content Panel -->
+        <div class="content-panel">
+            <!-- Results Tab Content -->
+            <div id="results-content" class="tab-content active">
+                <div class="results-header">
+                    <h2>Test Results</h2>
+                    <div class="results-filter">
+                        <button class="filter-btn active" data-category="all">All</button>
+                        <button class="filter-btn" data-category="listening">Listening</button>
+                        <button class="filter-btn" data-category="reading">Reading</button>
+                        <button class="filter-btn" data-category="writing">Writing</button>
+                        <button class="filter-btn" data-category="fullmock">Full Mock</button>
+                    </div>
+                </div>
+                <div id="resultsContainer" class="results-grid">
+                    <!-- Results will be loaded here -->
+                    <div class="loading-message glass-morphism">
+                        <div class="spinner"></div>
+                        <p>Loading your results...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Tab Content -->
+            <div id="statistics-content" class="tab-content">
+                <div class="stats-header glass-morphism">
+                    <h2>Progress Statistics</h2>
+                    <div class="stats-controls">
+                        <label for="skillSelect">Select Skill:</label>
+                        <select id="skillSelect" class="glass-select">
+                            <option value="listening">Listening</option>
+                            <option value="reading">Reading</option>
+                            <option value="writing">Writing</option>
+                            <option value="fullmock">Full Mock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container glass-morphism">
+                    <canvas id="progressChart"></canvas>
+                </div>
+                <div id="trendFeedback" class="trend-feedback glass-morphism">
+                    <!-- Trend feedback will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Personal Details Tab Content -->
+            <div id="personal-content" class="tab-content">
+                <div class="personal-details-grid">
+                    <!-- Profile Picture Section -->
+                    <div class="detail-card glass-morphism">
+                        <h3>Profile Picture</h3>
+                        <div class="pfp-upload-section">
+                            <div class="pfp-preview">
+                                <img id="pfpPreview" src="../../image/no_user.webp" alt="Profile Preview">
+                            </div>
+                            <input type="file" id="pfpInput" accept="image/*" style="display: none;">
+                            <button class="glass-btn" onclick="document.getElementById('pfpInput').click()">
+                                Choose Image
+                            </button>
+                            <button id="uploadPfpBtn" class="glass-btn-primary" style="display: none;">
+                                Upload
+                            </button>
+                            <p class="helper-text">Max size: 2MB. Formats: JPG, PNG, WebP</p>
+                        </div>
+                    </div>
+
+                    <!-- Name Section -->
+                    <div class="detail-card glass-morphism">
+                        <h3>Full Name</h3>
+                        <div class="input-group">
+                            <input type="text" id="nameInput" class="glass-input" placeholder="Your full name">
+                            <button id="saveNameBtn" class="glass-btn-primary">Save</button>
+                        </div>
+                        <p id="nameMessage" class="message"></p>
+                    </div>
+
+                    <!-- Username Section -->
+                    <div class="detail-card glass-morphism">
+                        <h3>Username</h3>
+                        <div class="input-group">
+                            <input type="text" id="usernameInput" class="glass-input" placeholder="Your username">
+                            <button id="saveUsernameBtn" class="glass-btn-primary">Save</button>
+                        </div>
+                        <p id="usernameMessage" class="message"></p>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="detail-card glass-morphism">
+                        <h3>Change Password</h3>
+                        <div class="input-group">
+                            <input type="password" id="currentPasswordInput" class="glass-input" placeholder="Current password">
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="newPasswordInput" class="glass-input" placeholder="New password (min 6 characters)">
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="confirmPasswordInput" class="glass-input" placeholder="Confirm new password">
+                        </div>
+                        <button id="changePasswordBtn" class="glass-btn-primary">Change Password</button>
+                        <p id="passwordMessage" class="message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content glass-morphism">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>
+

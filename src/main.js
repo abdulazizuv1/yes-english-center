@@ -52,11 +52,27 @@ function initializeAuth() {
   // Setup auth state change listener
   Auth.onAuthChange((user, userData) => {
     AuthUI.updateAuthUI(user, userData);
+    
+    // Check if user needs to set up username
+    if (user && userData && !Auth.hasValidName(userData)) {
+      console.log('👤 User needs to set up name');
+      setTimeout(() => {
+        AuthUI.showUsernamePanel();
+      }, 500);
+    }
   });
 
   // Initialize login form
-  AuthUI.initLoginForm(async (email, password) => {
-    await Auth.login(email, password);
+  AuthUI.initLoginForm(async (usernameOrEmail, password) => {
+    await Auth.login(usernameOrEmail, password);
+  });
+
+  // Initialize username setup form
+  AuthUI.initUsernameForm(async (name) => {
+    const user = Auth.getCurrentUser();
+    if (user) {
+      await Auth.updateUserName(user.uid, name);
+    }
   });
 
   // Initialize mock redirect
@@ -64,11 +80,11 @@ function initializeAuth() {
 
   // Setup global login/logout functions
   window.loginUser = async function() {
-    const email = document.querySelector("#login_email").value.trim();
+    const usernameOrEmail = document.querySelector("#login_email").value.trim();
     const password = document.querySelector("#login_password").value.trim();
     const loginBtn = document.querySelector(".login_submit");
 
-    if (!email || !password) {
+    if (!usernameOrEmail || !password) {
       AuthUI.showLoginError("Please fill in all fields");
       return;
     }
@@ -76,7 +92,7 @@ function initializeAuth() {
     AuthUI.setLoginLoading(loginBtn, true);
 
     try {
-      await Auth.login(email, password);
+      await Auth.login(usernameOrEmail, password);
       AuthUI.clearLoginForm();
       AuthUI.hideLoginPanel();
       AuthUI.showLoginSuccess('Login successful');

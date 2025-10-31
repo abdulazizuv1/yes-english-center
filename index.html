@@ -74,7 +74,7 @@
         </div>
         <img class="close_btn" src="./image/close.png" alt="Close" onclick="closeLogin()">
         <div class="input-group">
-          <input id="login_email" type="text" placeholder="Username (email)" autocomplete="off" class="glass-input">
+          <input id="login_email" type="text" placeholder="email" autocomplete="off" class="glass-input">
         </div>
         <div class="input-group">
           <input id="login_password" type="password" placeholder="Password" autocomplete="off" class="glass-input">
@@ -84,6 +84,26 @@
           <div class="btn-shimmer"></div>
         </button>
         <p class="login-note">Note: Usernames and passwords are provided to YES students by their teachers.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Username Setup Panel -->
+  <div class="username_panel" style="display: none;">
+    <div class="username-setup glass-morphism">
+      <form id="username-setup-form" autocomplete="off">
+        <div class="login-header">
+          <h2>Welcome!</h2>
+          <p>Please enter your full name to complete your profile</p>
+        </div>
+        <div class="input-group">
+          <input id="setup_username" type="text" placeholder="Your Full Name" autocomplete="off" class="glass-input" required>
+        </div>
+        <button class="username_submit glass-btn" type="submit">
+          <span>Save</span>
+          <div class="btn-shimmer"></div>
+        </button>
+        <p class="login-note">This is your real name and will be visible to teachers.</p>
       </form>
     </div>
   </div>
@@ -108,8 +128,11 @@
               <li><a class="lng_nav_feedbacks nav-glass-item" href="#feedbacks">Feedback</a></li>
               <li><a class="lng_nav_contact nav-glass-item" href="#contact">Contact</a></li>
               <li><a class="lng_nav_mock nav-glass-item" id="mockLink" href="#">Mock Tests</a></li>
+              <li class="student-settings-link" style="display: none;">
+                <a href="settings/user/index.html" class="nav-glass-item">My Settings</a>
+              </li>
               <li class="settings-link" style="display: none;">
-                <a href="settings/admin/index.html" class="nav-glass-item">Settings</a>
+                <a href="settings/admin/index.html" class="nav-glass-item">Admin Panel</a>
               </li>
             </ul>
           </div>
@@ -146,8 +169,11 @@
           <li><a class="lng_nav_feedbacks nav-glass-item" href="#feedbacks" onclick="closeMobileMenu()">Feedback</a></li>
           <li><a class="lng_nav_contact nav-glass-item" href="#contact" onclick="closeMobileMenu()">Contact</a></li>
           <li><a class="lng_nav_mock nav-glass-item" id="mobileTokenLink" href="#" onclick="closeMobileMenu()">Mock Tests</a></li>
+          <li class="student-settings-link" style="display: none;">
+            <a href="settings/user/index.html" class="nav-glass-item" onclick="closeMobileMenu()">My Settings</a>
+          </li>
           <li class="settings-link" style="display: none;">
-            <a href="settings/admin/index.html" class="nav-glass-item" onclick="closeMobileMenu()">Settings</a>
+            <a href="settings/admin/index.html" class="nav-glass-item" onclick="closeMobileMenu()">Admin Panel</a>
           </li>
         </ul>
         

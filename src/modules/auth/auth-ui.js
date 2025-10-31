@@ -15,6 +15,7 @@ export function updateAuthUI(user, userData = null) {
   const mobileLoginBtn = document.getElementById('mobileLoginBtn');
   const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
   const settingsLinks = document.querySelectorAll('.settings-link');
+  const studentSettingsLinks = document.querySelectorAll('.student-settings-link');
   
   const isLoggedIn = !!user;
   const isAdmin = userData && userData.role === 'admin';
@@ -41,10 +42,17 @@ export function updateAuthUI(user, userData = null) {
     if (isLoggedIn) mobileLogoutBtn.textContent = 'Logout';
   }
 
-  // Settings link (admin only)
+  // Admin settings link (admin only)
   settingsLinks.forEach(link => {
     if (link) {
       link.style.display = isAdmin ? 'block' : 'none';
+    }
+  });
+
+  // Student settings link (all authenticated users)
+  studentSettingsLinks.forEach(link => {
+    if (link) {
+      link.style.display = isLoggedIn ? 'block' : 'none';
     }
   });
 
@@ -151,6 +159,46 @@ export function showLoginSuccess(message) {
 }
 
 /**
+ * Show username setup panel
+ */
+export function showUsernamePanel() {
+  const usernamePanel = document.querySelector('.username_panel');
+  if (usernamePanel) {
+    usernamePanel.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on username input
+    setTimeout(() => {
+      const usernameInput = document.querySelector('#setup_username');
+      if (usernameInput) usernameInput.focus();
+    }, 100);
+    
+    console.log('👤 Username setup panel shown');
+  }
+}
+
+/**
+ * Hide username setup panel
+ */
+export function hideUsernamePanel() {
+  const usernamePanel = document.querySelector('.username_panel');
+  if (usernamePanel) {
+    usernamePanel.style.display = 'none';
+    document.body.style.overflow = '';
+    console.log('✅ Username setup panel hidden');
+  }
+}
+
+/**
+ * Clear username form
+ */
+export function clearUsernameForm() {
+  const usernameInput = document.querySelector('#setup_username');
+  if (usernameInput) usernameInput.value = '';
+  console.log('🧹 Username form cleared');
+}
+
+/**
  * Initialize login form handlers
  * @param {Function} onLogin - Login handler function
  */
@@ -234,6 +282,45 @@ export function initMockRedirect(isUserAuthenticated) {
   console.log('✅ Mock redirect handlers initialized');
 }
 
+/**
+ * Initialize username setup form handlers
+ * @param {Function} onUsernameSubmit - Username submit handler function
+ */
+export function initUsernameForm(onUsernameSubmit) {
+  const form = document.querySelector('#username-setup-form');
+  const usernameInput = document.querySelector('#setup_username');
+  const submitButton = document.querySelector('.username_submit');
+
+  // Form submit handler
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = usernameInput?.value.trim();
+
+      if (!username) {
+        showLoginError('Please enter your name');
+        return;
+      }
+
+      setLoginLoading(submitButton, true);
+
+      try {
+        await onUsernameSubmit(username);
+        clearUsernameForm();
+        hideUsernamePanel();
+        showLoginSuccess('Name saved successfully');
+      } catch (error) {
+        showLoginError('Failed to save name: ' + error.message);
+      } finally {
+        setLoginLoading(submitButton, false);
+      }
+    });
+  }
+
+  console.log('✅ Username form handlers initialized');
+}
+
 // Make functions globally available for compatibility
 window.toggleLogin = toggleLoginPanel;
 window.closeLogin = hideLoginPanel;
@@ -249,6 +336,10 @@ export default {
   showLoginError,
   showLoginSuccess,
   initLoginForm,
-  initMockRedirect
+  initMockRedirect,
+  showUsernamePanel,
+  hideUsernamePanel,
+  clearUsernameForm,
+  initUsernameForm
 };
 

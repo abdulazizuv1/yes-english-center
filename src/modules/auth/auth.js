@@ -16,6 +16,11 @@ import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let auth = null;
@@ -45,19 +50,57 @@ export function getCurrentUser() {
 }
 
 /**
- * Login user with email and password
- * @param {string} email - User email
+ * Get email from username
+ * @param {string} username - Username to search for
+ * @returns {Promise<string|null>} Email or null if not found
+ */
+export async function getEmailFromUsername(username) {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+    
+    const userData = querySnapshot.docs[0].data();
+    return userData.email;
+  } catch (error) {
+    console.error('❌ Error getting email from username:', error);
+    throw error;
+  }
+}
+
+/**
+ * Login user with username/email and password
+ * @param {string} usernameOrEmail - Username or email
  * @param {string} password - User password
  * @returns {Promise<Object>} User credential
  */
-export async function login(email, password) {
-  if (!email || !password) {
-    throw new Error('Email and password are required');
+export async function login(usernameOrEmail, password) {
+  if (!usernameOrEmail || !password) {
+    throw new Error('Username and password are required');
   }
 
-  console.log('🔐 Attempting login for:', email);
+  console.log('🔐 Attempting login for:', usernameOrEmail);
   
   try {
+    let email = usernameOrEmail;
+    
+    // Check if input is email (contains @) or username
+    if (!usernameOrEmail.includes('@')) {
+      console.log('🔍 Looking up email for username:', usernameOrEmail);
+      const foundEmail = await getEmailFromUsername(usernameOrEmail);
+      
+      if (!foundEmail) {
+        throw new Error('Username not found');
+      }
+      
+      email = foundEmail;
+      console.log('✅ Email found for username');
+    }
+    
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     
     // Check/create user document
@@ -180,6 +223,34 @@ export function isStudent(userData) {
   return userData?.role === 'student';
 }
 
+/**
+ * Update user's name in Firestore
+ * @param {string} uid - User ID
+ * @param {string} name - User's full name
+ * @returns {Promise<void>}
+ */
+export async function updateUserName(uid, name) {
+  try {
+    const userDocRef = doc(db, "users", uid);
+    await updateDoc(userDocRef, {
+      name: name,
+    });
+    console.log('✅ User name updated successfully');
+  } catch (error) {
+    console.error('❌ Error updating user name:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if user has a valid name (not "No name")
+ * @param {Object} userData - User data from Firestore
+ * @returns {boolean}
+ */
+export function hasValidName(userData) {
+  return userData && userData.name && userData.name !== "No name";
+}
+
 export default {
   initAuth,
   getCurrentUser,
@@ -190,6 +261,9 @@ export default {
   isAuthenticated,
   isAdmin,
   isTeacher,
-  isStudent
+  isStudent,
+  updateUserName,
+  hasValidName,
+  getEmailFromUsername
 };
 

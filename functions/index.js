@@ -13,7 +13,7 @@ export const createUser = functions.https.onRequest((req, res) => {
       return res.status(405).send("Only POST requests are allowed");
     }
 
-    const { email, password, role } = req.body;
+    const { email, password, role, username, name } = req.body;
 
     if (!email || !password || !role) {
       return res.status(400).send("Missing data fields.");
@@ -47,12 +47,32 @@ export const createUser = functions.https.onRequest((req, res) => {
         return res.status(403).send("Permission denied");
       }
 
+      // Check if username is unique (if provided)
+      if (username) {
+        const usernameQuery = await db.collection("users")
+          .where("username", "==", username)
+          .get();
+        
+        if (!usernameQuery.empty) {
+          return res.status(400).send("Username already exists. Please choose a different username.");
+        }
+      }
+
       const userRecord = await auth.createUser({ email, password });
-      await db.collection("users").doc(userRecord.uid).set({
+      
+      // Prepare user data
+      const userData = {
         email,
         role,
-        name: "No name",
-      });
+        name: name || "No name",
+      };
+      
+      // Add username if provided
+      if (username) {
+        userData.username = username;
+      }
+      
+      await db.collection("users").doc(userRecord.uid).set(userData);
 
       return res.status(200).json({ success: true, uid: userRecord.uid });
     } catch (err) {

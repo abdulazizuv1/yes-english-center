@@ -78,7 +78,7 @@ async function checkAdminAccess() {
   });
 }
 
-async function callCreateUser({ email, password, role }) {
+async function callCreateUser({ email, password, role, username, name }) {
   const currentUser = auth.currentUser;
   if (!currentUser) throw new Error("Пользователь не авторизован");
 
@@ -92,7 +92,7 @@ async function callCreateUser({ email, password, role }) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ email, password, role, username, name }),
     }
   );
 
@@ -237,12 +237,19 @@ function setupFormEventListeners() {
     createUserForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      const username = createUserForm["new-username"].value.trim();
+      const name = createUserForm["new-name"].value.trim();
       const email = createUserForm["new-email"].value.trim();
       const password = createUserForm["new-password"].value.trim();
       const role = createUserForm["new-role"].value;
 
+      if (!username || !name) {
+        alert("❌ Please provide username and full name");
+        return;
+      }
+
       try {
-        const result = await callCreateUser({ email, password, role });
+        const result = await callCreateUser({ email, password, role, username, name });
         if (result?.uid) {
           alert("✅ Пользователь создан. UID: " + result.uid);
         } else {
