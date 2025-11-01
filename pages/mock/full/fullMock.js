@@ -37,6 +37,7 @@ let audioWasPaused = false;
 let audioCurrentTime = 0;
 let currentAudioSection = 0; // Какая секция аудио сейчас играет
 let audioInitialized = false; // Было ли аудио инициализировано
+let hasUnlimitedTime = false; // Track if user has unlimited time
 
 // Highlight system variables
 let savedHighlights = {};
@@ -467,7 +468,10 @@ window.togglePause = function () {
       currentAudio.play().catch(console.warn);
     }
     toggleTestInteraction(true);
-    startTimer(pausedTime, document.getElementById("time"));
+    // Only resume timer if user doesn't have unlimited time
+    if (!hasUnlimitedTime) {
+      startTimer(pausedTime, document.getElementById("time"));
+    }
   }
 };
 
@@ -804,9 +808,22 @@ function initializeStage(stageName) {
   generateQuestionNav();
   updateStageIndicator();
 
-  // Start timer for the stage
-  const duration = stageDurations[stageName] * 60;
-  startTimer(duration, document.getElementById("time"));
+  // Check if user has unlimited time before starting timer
+  onAuthStateChanged(auth, (user) => {
+    const display = document.getElementById("time");
+    if (user && user.email === "alisher@yescenter.uz") {
+      // Unlimited time for this account
+      hasUnlimitedTime = true;
+      display.textContent = "∞";
+      display.style.fontSize = "24px";
+      console.log("✨ Unlimited time mode activated for", user.email);
+    } else {
+      // Normal timer for other users
+      hasUnlimitedTime = false;
+      const duration = stageDurations[stageName] * 60;
+      startTimer(duration, display);
+    }
+  });
 
   // Initialize stage-specific content
   if (stageName === "listening") {

@@ -28,6 +28,7 @@ let questionHighlights = {};
 let selectedText = "";
 let selectedRange = null;
 let highlightEventListeners = [];
+let hasUnlimitedTime = false; // Track if user has unlimited time
 
 function cleanupHighlightListeners() {
   highlightEventListeners.forEach(({ element, type, listener }) => {
@@ -153,7 +154,10 @@ window.togglePause = function () {
     document.querySelector(".question-nav").style.pointerEvents = "auto";
 
     const display = document.getElementById("time");
-    startTimer(pausedTime, display);
+    // Only resume timer if user doesn't have unlimited time
+    if (!hasUnlimitedTime) {
+      startTimer(pausedTime, display);
+    }
   }
 };
 
@@ -1693,6 +1697,20 @@ window.onload = () => {
   initializeHighlightSystem();
   loadTest().then(() => {
     const display = document.getElementById("time");
-    startTimer(60 * 60, display);
+    
+    // Check if user has unlimited time
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email === "alisher@yescenter.uz") {
+        // Unlimited time for this account
+        hasUnlimitedTime = true;
+        display.textContent = "∞";
+        display.style.fontSize = "24px";
+        console.log("✨ Unlimited time mode activated for", user.email);
+      } else {
+        // Normal timer for other users
+        hasUnlimitedTime = false;
+        startTimer(60 * 60, display);
+      }
+    });
   });
 };

@@ -41,6 +41,7 @@ let timerInterval = null;
 // Pause functionality variables
 let isPaused = false;
 let pausedTime = 0;
+let hasUnlimitedTime = false; // Track if user has unlimited time
 
 // DOM elements
 const elements = {
@@ -95,9 +96,11 @@ window.togglePause = function() {
         document.querySelector('.container').style.pointerEvents = 'auto';
         document.querySelector('.navigation').style.pointerEvents = 'auto';
         
-        // Resume timer with remaining time
-        totalTimeLeft = pausedTime;
-        startTimer();
+        // Resume timer with remaining time (only if user doesn't have unlimited time)
+        if (!hasUnlimitedTime) {
+            totalTimeLeft = pausedTime;
+            startTimer();
+        }
     }
 };
 
@@ -161,8 +164,21 @@ async function initializeTest() {
       // Load Task 1
       loadTask(1);
 
-      // Start timer
-      startTimer();
+      // Check if user has unlimited time before starting timer
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user && user.email === "alisher@yescenter.uz") {
+          // Unlimited time for this account
+          hasUnlimitedTime = true;
+          elements.timer.textContent = "∞";
+          elements.timer.style.fontSize = "24px";
+          console.log("✨ Unlimited time mode activated for", user.email);
+        } else {
+          // Normal timer for other users
+          hasUnlimitedTime = false;
+          startTimer();
+        }
+      });
 
       // Hide loading screen
       setTimeout(() => {

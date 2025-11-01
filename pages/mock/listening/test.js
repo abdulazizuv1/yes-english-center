@@ -30,6 +30,7 @@ let isPaused = false,
   audioCurrentTime = 0;
 let currentQuestionNumber = 1;
 let savedHighlights = {};
+let hasUnlimitedTime = false; // Track if user has unlimited time
 
 function saveCurrentHighlights() {
   const questionList = document.getElementById("question-list");
@@ -229,7 +230,10 @@ window.togglePause = function () {
       currentAudio.play().catch(console.warn);
     }
     toggleTestInteraction(true);
-    startTimer(pausedTime, document.getElementById("time"));
+    // Only resume timer if user doesn't have unlimited time
+    if (!hasUnlimitedTime) {
+      startTimer(pausedTime, document.getElementById("time"));
+    }
   }
 };
 
@@ -486,7 +490,22 @@ function initializeTest() {
   
   renderSection(0);
   updateQuestionNav();
-  startTimer(40 * 60, document.getElementById("time"));
+  
+  // Check if user has unlimited time
+  onAuthStateChanged(auth, (user) => {
+    const display = document.getElementById("time");
+    if (user && user.email === "alisher@yescenter.uz") {
+      // Unlimited time for this account
+      hasUnlimitedTime = true;
+      display.textContent = "∞";
+      display.style.fontSize = "24px";
+      console.log("✨ Unlimited time mode activated for", user.email);
+    } else {
+      // Normal timer for other users
+      hasUnlimitedTime = false;
+      startTimer(40 * 60, display);
+    }
+  });
 }
 function renderSection(index) {
   // Сохраняем highlights текущей секции перед переключением
