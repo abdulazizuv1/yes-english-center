@@ -480,6 +480,17 @@ async function submitTest() {
         `;
     elements.finishBtn.disabled = true;
 
+    // Recalculate word counts from actual answers to ensure accuracy
+    const finalTask1WordCount = countWords(task1Answer);
+    const finalTask2WordCount = countWords(task2Answer);
+    const finalTotalWordCount = finalTask1WordCount + finalTask2WordCount;
+
+    console.log("📊 Final word counts:", {
+      task1: finalTask1WordCount,
+      task2: finalTask2WordCount,
+      total: finalTotalWordCount
+    });
+
     // Save to Firestore
     const resultData = {
       userId: user.uid,
@@ -492,15 +503,15 @@ async function submitTest() {
       task1Question: testData?.task1?.question || "Question not available",
       task1ImageUrl: testData?.task1?.imageUrl || null,
       task1Content: task1Answer,
-      task1WordCount: task1WordCount,
+      task1WordCount: finalTask1WordCount,
 
       // Task 2 data
       task2Question: testData?.task2?.question || "Question not available",
       task2Content: task2Answer,
-      task2WordCount: task2WordCount,
+      task2WordCount: finalTask2WordCount,
 
       // Metadata
-      totalWordCount: task1WordCount + task2WordCount,
+      totalWordCount: finalTotalWordCount,
       submittedAt: serverTimestamp(),
     };
 
@@ -518,8 +529,8 @@ async function submitTest() {
     // Stop timer
     clearInterval(timerInterval);
 
-    // Show success modal
-    showSuccessModal();
+    // Show success modal with correct word counts
+    showSuccessModal(finalTask1WordCount, finalTask2WordCount);
   } catch (error) {
     console.error("❌ Error submitting test:", error);
     alert("Error submitting test: " + error.message);
@@ -618,7 +629,7 @@ ${data.task1ImageUrl ? `🖼️ [View Image](${data.task1ImageUrl})` : ""}
 }
 
 // Show success modal
-function showSuccessModal() {
+function showSuccessModal(task1Words, task2Words) {
  elements.successModal.classList.add("show");
 
  // Update modal content
@@ -627,8 +638,8 @@ function showSuccessModal() {
  document.getElementById("submittedName").textContent = user?.email || "Student";
  document.getElementById("submittedTest").textContent =
    testData?.title || "IELTS Writing Test";
- document.getElementById("submittedTask1Words").textContent = task1WordCount;
- document.getElementById("submittedTask2Words").textContent = task2WordCount;
+ document.getElementById("submittedTask1Words").textContent = task1Words;
+ document.getElementById("submittedTask2Words").textContent = task2Words;
 }
 
 // Event listeners
