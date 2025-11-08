@@ -523,12 +523,12 @@ label input[type="checkbox"] {
 
 /* Audio specific styles */
 audio {
-    background: #1f2937;
+    background: #ffffff;
     border-radius: 8px;
 }
 
 audio::-webkit-media-controls-panel {
-    background-color: #1f2937;
+    background-color: #ffffff;
 }
 
 /* Section content styles */
