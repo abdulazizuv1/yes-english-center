@@ -70,7 +70,6 @@ function applyTranslations(lang) {
     }
   });
 
-  console.log(`🌐 Translations applied: ${lang}`);
 }
 
 /**
@@ -104,7 +103,6 @@ export function initLanguageOnLoad() {
   // Apply translations
   applyTranslations(currentLang);
   
-  console.log(`✅ Language initialized: ${currentLang}`);
 }
 
 /**
@@ -135,7 +133,6 @@ export function initLanguageSwitchers() {
     });
   });
 
-  console.log('✅ Language switchers initialized');
 }
 
 /**

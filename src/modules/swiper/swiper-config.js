@@ -54,7 +54,6 @@ export function createSwiper(selector, customOptions = {}) {
   try {
     const swiper = new Swiper(selector, options);
     swiperInstances[selector] = swiper;
-    console.log(`✅ Swiper initialized: ${selector}`);
     return swiper;
   } catch (error) {
     console.error(`Error creating Swiper for ${selector}:`, error);
@@ -122,7 +121,6 @@ export function initAllSwipers() {
     feedbacks: initFeedbacksSwiper(),
   };
 
-  console.log('✅ All Swipers initialized');
   return swipers;
 }
 
@@ -134,7 +132,6 @@ export function updateSwiper(selector) {
   const swiper = swiperInstances[selector];
   if (swiper && swiper.update) {
     swiper.update();
-    console.log(`🔄 Swiper updated: ${selector}`);
   } else {
     console.warn(`Swiper not found or cannot be updated: ${selector}`);
   }
@@ -147,7 +144,6 @@ export function updateAllSwipers() {
   Object.keys(swiperInstances).forEach(selector => {
     updateSwiper(selector);
   });
-  console.log('🔄 All Swipers updated');
 }
 
 /**
@@ -159,7 +155,6 @@ export function destroySwiper(selector) {
   if (swiper && swiper.destroy) {
     swiper.destroy(true, true);
     delete swiperInstances[selector];
-    console.log(`🗑️ Swiper destroyed: ${selector}`);
   }
 }
 
@@ -170,7 +165,6 @@ export function destroyAllSwipers() {
   Object.keys(swiperInstances).forEach(selector => {
     destroySwiper(selector);
   });
-  console.log('🗑️ All Swipers destroyed');
 }
 
 /**
@@ -198,7 +192,6 @@ export function pauseAutoplay(selector) {
   const swiper = swiperInstances[selector];
   if (swiper && swiper.autoplay) {
     swiper.autoplay.stop();
-    console.log(`⏸️ Autoplay paused: ${selector}`);
   }
 }
 
@@ -210,7 +203,6 @@ export function resumeAutoplay(selector) {
   const swiper = swiperInstances[selector];
   if (swiper && swiper.autoplay) {
     swiper.autoplay.start();
-    console.log(`▶️ Autoplay resumed: ${selector}`);
   }
 }
 

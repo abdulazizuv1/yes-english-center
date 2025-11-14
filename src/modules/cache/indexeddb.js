@@ -24,7 +24,6 @@ export function initDB() {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
-        console.log('✅ IndexedDB store created');
       }
     };
   });
@@ -46,14 +45,8 @@ export async function getFromCache(key) {
       request.onsuccess = () => {
         const result = request.result;
         if (result && (Date.now() - result.timestamp < CACHE_DURATION)) {
-          console.log(`📦 Cache hit for "${key}"`);
           resolve(result.data);
         } else {
-          if (result) {
-            console.log(`⏰ Cache expired for "${key}"`);
-          } else {
-            console.log(`❌ Cache miss for "${key}"`);
-          }
           resolve(null);
         }
       };
@@ -87,7 +80,6 @@ export async function saveToCache(key, data) {
       }, key);
       
       request.onsuccess = () => {
-        console.log(`💾 Cached "${key}"`);
         resolve();
       };
       
@@ -115,7 +107,6 @@ export async function clearCache(key) {
       const request = store.delete(key);
       
       request.onsuccess = () => {
-        console.log(`🗑️ Cleared cache for "${key}"`);
         resolve();
       };
       
@@ -139,7 +130,6 @@ export async function clearAllCache() {
       const request = store.clear();
       
       request.onsuccess = () => {
-        console.log('🗑️ Cleared all cache');
         resolve();
       };
       

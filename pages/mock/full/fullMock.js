@@ -68,71 +68,89 @@ function addTrackedListener(element, type, listener) {
 function initializeHighlightSystem() {
   cleanupHighlightListeners();
   
+  let justShownMenu = false;
+  
   const mouseUpHandler = function(e) {
     const selection = window.getSelection();
+    const contextMenu = document.getElementById("contextMenu");
+    
     if (selection.toString().length > 0) {
       selectedText = selection.toString();
       try {
         selectedRange = selection.getRangeAt(0);
+        
+        const passagePanel = document.querySelector(".passage-panel");
+        const questionsPanel = document.querySelector(".questions-panel");
+        const listeningQuestions = document.getElementById("listening-questions");
+        
+        let isInHighlightableArea = false;
+        
+        if (passagePanel?.contains(e.target) || questionsPanel?.contains(e.target)) {
+          isInHighlightableArea = true;
+        }
+        
+        if (listeningQuestions?.contains(e.target)) {
+          isInHighlightableArea = true;
+        }
+        
+        if (currentStage === "reading" || currentStage === "listening") {
+          const target = e.target.closest(".passage-panel, .questions-panel");
+          if (target) {
+            isInHighlightableArea = true;
+          }
+        }
+        
+        if (isInHighlightableArea && contextMenu) {
+          contextMenu.style.display = "block";
+          contextMenu.style.position = "absolute";
+          contextMenu.style.left = e.pageX + "px";
+          contextMenu.style.top = e.pageY + 10 + "px";
+          contextMenu.style.zIndex = "99999";
+          
+          justShownMenu = true;
+          setTimeout(() => {
+            justShownMenu = false;
+          }, 200);
+        }
       } catch (err) {
         selectedRange = null;
+      }
+    } else {
+      if (contextMenu && !justShownMenu) {
+        contextMenu.style.display = "none";
       }
     }
   };
   
   const contextMenuHandler = function(e) {
-    console.log("Context menu triggered, selectedText:", selectedText.length);
+    const passagePanel = document.querySelector(".passage-panel");
+    const questionsPanel = document.querySelector(".questions-panel");
+    const listeningQuestions = document.getElementById("listening-questions");
     
-    if (selectedText.length > 0) {
-      const passagePanel = document.querySelector(".passage-panel");
-      const questionsPanel = document.querySelector(".questions-panel");
-      
-      console.log("Passage panel:", !!passagePanel, "Questions panel:", !!questionsPanel);
-      console.log("Target element:", e.target);
-      console.log("Target in passage:", passagePanel?.contains(e.target));
-      console.log("Target in questions:", questionsPanel?.contains(e.target));
-      
-      // Check if target is in any reading-related element
-      let isInReadingArea = false;
-      
-      // Check direct containment
-      if (passagePanel?.contains(e.target) || questionsPanel?.contains(e.target)) {
-        isInReadingArea = true;
-      }
-      
-      // Check if target is inside a reading stage
-      const readingStage = document.getElementById("readingStage");
-      if (readingStage?.contains(e.target)) {
-        isInReadingArea = true;
-      }
-      
-      // Check if we're currently in reading stage
-      if (currentStage === "reading") {
-        isInReadingArea = true;
-      }
-      
-      console.log("Is in reading area:", isInReadingArea);
-      
-      if (isInReadingArea) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        
-        console.log("Showing custom context menu");
-        const contextMenu = document.getElementById("contextMenu");
-        if (contextMenu) {
-          contextMenu.style.display = "block";
-          contextMenu.style.left = e.pageX + "px";
-          contextMenu.style.top = e.pageY + "px";
-          contextMenu.style.zIndex = "10000";
-        }
-      }
+    let isInHighlightableArea = false;
+    
+    if (passagePanel?.contains(e.target) || questionsPanel?.contains(e.target)) {
+      isInHighlightableArea = true;
+    }
+    
+    if (listeningQuestions?.contains(e.target)) {
+      isInHighlightableArea = true;
+    }
+    
+    if (currentStage === "reading" || currentStage === "listening") {
+      isInHighlightableArea = true;
+    }
+    
+    if (isInHighlightableArea) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
     }
   };
   
   const clickHandler = function(e) {
     const contextMenu = document.getElementById("contextMenu");
-    if (contextMenu && !contextMenu.contains(e.target)) {
+    if (contextMenu && !contextMenu.contains(e.target) && !justShownMenu) {
       contextMenu.style.display = "none";
     }
   };

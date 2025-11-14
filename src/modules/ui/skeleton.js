@@ -39,7 +39,6 @@ export function showSkeletons(selector, count = 3) {
     wrapper.appendChild(createSkeletonCard());
   }
 
-  console.log(`💀 Showing ${count} skeletons in ${selector}`);
 }
 
 /**
@@ -56,7 +55,6 @@ export function showAllSkeletons() {
     showSkeletons(section.selector, section.count);
   });
 
-  console.log('💀 All skeletons displayed');
 }
 
 /**
@@ -71,7 +69,6 @@ export function hideSkeletons(selector) {
   const skeletons = wrapper.querySelectorAll('.skeleton-card');
   skeletons.forEach(skeleton => skeleton.remove());
 
-  console.log(`✅ Skeletons hidden from ${selector}`);
 }
 
 /**
@@ -86,7 +83,6 @@ export function hideAllSkeletons() {
 
   selectors.forEach(selector => hideSkeletons(selector));
 
-  console.log('✅ All skeletons hidden');
 }
 
 /**

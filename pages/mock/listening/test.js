@@ -367,32 +367,51 @@ function updateSectionIndicator() {
 }
 
 let selectedRange = null;
-document.addEventListener("mouseup", () => {
+let justShownMenu = false;
+
+document.addEventListener("mouseup", (e) => {
   const selection = window.getSelection();
+  const menu = document.getElementById("contextMenu");
+  
   if (selection.toString().length > 0) {
     try {
       selectedRange = selection.getRangeAt(0);
+      
+      if (e.target.closest(".questions-panel")) {
+        if (menu) {
+          menu.style.display = "block";
+          menu.style.position = "absolute";
+          menu.style.left = e.pageX + "px";
+          menu.style.top = e.pageY + 10 + "px";
+          menu.style.zIndex = "99999";
+          
+          justShownMenu = true;
+          setTimeout(() => {
+            justShownMenu = false;
+          }, 200);
+        }
+      }
     } catch (e) {
       selectedRange = null;
+    }
+  } else {
+    if (menu && !justShownMenu) {
+      menu.style.display = "none";
     }
   }
 });
 
 document.addEventListener("contextmenu", (e) => {
-  if (selectedRange && e.target.closest(".questions-panel")) {
+  if (e.target.closest(".questions-panel")) {
     e.preventDefault();
-    const menu = document.getElementById("contextMenu");
-    if (menu) {
-      menu.style.display = "block";
-      menu.style.left = Math.min(e.pageX, window.innerWidth - 150) + "px";
-      menu.style.top = Math.min(e.pageY, window.innerHeight - 100) + "px";
-    }
   }
 });
 
 document.addEventListener("click", (e) => {
   const menu = document.getElementById("contextMenu");
-  if (menu && !e.target.closest("#contextMenu")) menu.style.display = "none";
+  if (menu && !e.target.closest("#contextMenu") && !justShownMenu) {
+    menu.style.display = "none";
+  }
 });
 window.highlightSelection = () => {
   if (selectedRange) {

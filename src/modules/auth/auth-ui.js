@@ -55,13 +55,6 @@ export function updateAuthUI(user, userData = null) {
       link.style.display = isLoggedIn ? 'block' : 'none';
     }
   });
-
-  if (isLoggedIn) {
-    console.log('✅ User authenticated, UI updated');
-    console.log('👤 User role:', userData?.role || 'unknown');
-  } else {
-    console.log('❌ User not authenticated, UI updated');
-  }
 }
 
 /**
@@ -79,7 +72,6 @@ export function showLoginPanel() {
       if (emailInput) emailInput.focus();
     }, 100);
     
-    console.log('🔓 Login panel shown');
   }
 }
 
@@ -91,7 +83,6 @@ export function hideLoginPanel() {
   if (loginPanel) {
     loginPanel.style.display = 'none';
     document.body.style.overflow = '';
-    console.log('🔒 Login panel hidden');
   }
 }
 
@@ -120,7 +111,6 @@ export function clearLoginForm() {
   if (emailInput) emailInput.value = '';
   if (passwordInput) passwordInput.value = '';
   
-  console.log('🧹 Login form cleared');
 }
 
 /**
@@ -154,7 +144,6 @@ export function showLoginError(message) {
  * @param {string} message - Success message
  */
 export function showLoginSuccess(message) {
-  console.log('✅', message);
   // TODO: Add success toast notification
 }
 
@@ -173,7 +162,6 @@ export function showUsernamePanel() {
       if (usernameInput) usernameInput.focus();
     }, 100);
     
-    console.log('👤 Username setup panel shown');
   }
 }
 
@@ -185,7 +173,6 @@ export function hideUsernamePanel() {
   if (usernamePanel) {
     usernamePanel.style.display = 'none';
     document.body.style.overflow = '';
-    console.log('✅ Username setup panel hidden');
   }
 }
 
@@ -195,7 +182,6 @@ export function hideUsernamePanel() {
 export function clearUsernameForm() {
   const usernameInput = document.querySelector('#setup_username');
   if (usernameInput) usernameInput.value = '';
-  console.log('🧹 Username form cleared');
 }
 
 /**
@@ -252,7 +238,6 @@ export function initLoginForm(onLogin) {
     });
   }
 
-  console.log('✅ Login form handlers initialized');
 }
 
 /**
@@ -268,7 +253,6 @@ export function initMockRedirect(isUserAuthenticated) {
         e.preventDefault();
         
         const isAuthenticated = isUserAuthenticated();
-        console.log('🎯 Mock test link clicked, authenticated:', isAuthenticated);
         
         if (isAuthenticated) {
           window.location.href = "pages/mock.html";
@@ -279,7 +263,6 @@ export function initMockRedirect(isUserAuthenticated) {
     }
   });
 
-  console.log('✅ Mock redirect handlers initialized');
 }
 
 /**
@@ -318,7 +301,6 @@ export function initUsernameForm(onUsernameSubmit) {
     });
   }
 
-  console.log('✅ Username form handlers initialized');
 }
 
 // Make functions globally available for compatibility

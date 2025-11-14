@@ -23,7 +23,6 @@ let db = null;
  */
 export function initFirestore(firebaseApp) {
   db = getFirestore(firebaseApp);
-  console.log('✅ Firestore initialized');
 }
 
 /**
@@ -36,7 +35,6 @@ async function loadDataWithCache(collectionName, cacheKey) {
   // Level 1: Check memory cache
   const memoryCached = memoryCache.get(cacheKey);
   if (memoryCached) {
-    console.log(`⚡ Memory cache hit: ${cacheKey}`);
     return memoryCached;
   }
 
@@ -48,7 +46,6 @@ async function loadDataWithCache(collectionName, cacheKey) {
   }
 
   // Level 3: Load from Firebase
-  console.log(`🔄 Loading from Firebase: ${collectionName}`);
   const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
   

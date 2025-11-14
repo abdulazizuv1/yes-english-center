@@ -37,7 +37,6 @@ export function initAuth(firebaseApp) {
   // Make auth available globally for compatibility
   window.auth = auth;
   
-  console.log('✅ Auth initialized');
   return auth;
 }
 
@@ -83,14 +82,12 @@ export async function login(usernameOrEmail, password) {
     throw new Error('Username and password are required');
   }
 
-  console.log('🔐 Attempting login for:', usernameOrEmail);
   
   try {
     let email = usernameOrEmail;
     
     // Check if input is email (contains @) or username
     if (!usernameOrEmail.includes('@')) {
-      console.log('🔍 Looking up email for username:', usernameOrEmail);
       const foundEmail = await getEmailFromUsername(usernameOrEmail);
       
       if (!foundEmail) {
@@ -98,7 +95,6 @@ export async function login(usernameOrEmail, password) {
       }
       
       email = foundEmail;
-      console.log('✅ Email found for username');
     }
     
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -113,10 +109,8 @@ export async function login(usernameOrEmail, password) {
         email: userCredential.user.email,
         role: "student",
       });
-      console.log('✅ New user document created');
     }
 
-    console.log('✅ Login successful');
     return userCredential;
     
   } catch (error) {
@@ -131,9 +125,7 @@ export async function login(usernameOrEmail, password) {
  */
 export async function logout() {
   try {
-    console.log('🔐 Logging out user');
     await signOut(auth);
-    console.log('✅ User logged out successfully');
   } catch (error) {
     console.error('❌ Logout error:', error);
     throw error;
@@ -235,7 +227,6 @@ export async function updateUserName(uid, name) {
     await updateDoc(userDocRef, {
       name: name,
     });
-    console.log('✅ User name updated successfully');
   } catch (error) {
     console.error('❌ Error updating user name:', error);
     throw error;

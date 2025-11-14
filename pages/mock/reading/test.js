@@ -45,39 +45,59 @@ function addTrackedListener(element, type, listener) {
 function initializeHighlightSystem() {
   cleanupHighlightListeners();
   
+  let justShownMenu = false;
+  
   const mouseUpHandler = function(e) {
     const selection = window.getSelection();
+    const contextMenu = document.getElementById("contextMenu");
+    
     if (selection.toString().length > 0) {
       selectedText = selection.toString();
       try {
         selectedRange = selection.getRangeAt(0);
+        
+        const passagePanel = document.querySelector(".passage-panel");
+        const questionsPanel = document.querySelector(".questions-panel");
+        
+        if (passagePanel && questionsPanel && 
+            (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
+          
+          if (contextMenu) {
+            contextMenu.style.display = "block";
+            contextMenu.style.position = "absolute";
+            contextMenu.style.left = e.pageX + "px";
+            contextMenu.style.top = e.pageY + 10 + "px";
+            contextMenu.style.zIndex = "99999";
+            
+            justShownMenu = true;
+            setTimeout(() => {
+              justShownMenu = false;
+            }, 200);
+          }
+        }
       } catch (err) {
         selectedRange = null;
+      }
+    } else {
+      if (contextMenu && !justShownMenu) {
+        contextMenu.style.display = "none";
       }
     }
   };
   
   const contextMenuHandler = function(e) {
-    if (selectedText.length > 0) {
-      const passagePanel = document.querySelector(".passage-panel");
-      const questionsPanel = document.querySelector(".questions-panel");
-      
-      if (passagePanel && questionsPanel && 
-          (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
-        e.preventDefault();
-        const contextMenu = document.getElementById("contextMenu");
-        if (contextMenu) {
-          contextMenu.style.display = "block";
-          contextMenu.style.left = e.pageX + "px";
-          contextMenu.style.top = e.pageY + "px";
-        }
-      }
+    const passagePanel = document.querySelector(".passage-panel");
+    const questionsPanel = document.querySelector(".questions-panel");
+    
+    if (passagePanel && questionsPanel && 
+        (passagePanel.contains(e.target) || questionsPanel.contains(e.target))) {
+      e.preventDefault();
     }
   };
   
   const clickHandler = function(e) {
     const contextMenu = document.getElementById("contextMenu");
-    if (contextMenu && !contextMenu.contains(e.target)) {
+    if (contextMenu && !contextMenu.contains(e.target) && !justShownMenu) {
       contextMenu.style.display = "none";
     }
   };

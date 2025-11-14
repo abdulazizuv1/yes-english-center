@@ -107,7 +107,6 @@ export function renderGroups(groups, wrapper) {
     }, index * 100);
   });
 
-  console.log(`✅ Rendered ${groups.length} groups`);
 }
 
 /**
@@ -164,7 +163,6 @@ export function renderResults(results, wrapper) {
     }, index * 100);
   });
 
-  console.log(`✅ Rendered ${results.length} results`);
 }
 
 /**
@@ -211,7 +209,6 @@ export function renderFeedbacks(feedbacks, wrapper) {
     }, index * 100);
   });
 
-  console.log(`✅ Rendered ${feedbacks.length} feedbacks`);
 }
 
 /**
@@ -234,7 +231,6 @@ export function renderAll(data) {
     renderFeedbacks(data.feedbacks, feedbacksWrapper);
   }
 
-  console.log('✅ All data rendered');
 }
 
 export default {

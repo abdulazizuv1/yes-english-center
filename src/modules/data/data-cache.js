@@ -30,7 +30,6 @@ export function get(key) {
  */
 export function set(key, data) {
   cache[key] = data;
-  console.log(`💾 Memory cached: ${key}`);
 }
 
 /**
@@ -48,7 +47,6 @@ export function has(key) {
  */
 export function clear(key) {
   cache[key] = null;
-  console.log(`🗑️ Cleared memory cache: ${key}`);
 }
 
 /**
@@ -58,7 +56,6 @@ export function clearAll() {
   Object.keys(cache).forEach(key => {
     cache[key] = null;
   });
-  console.log('🗑️ Cleared all memory cache');
 }
 
 /**

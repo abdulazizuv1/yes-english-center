@@ -37,7 +37,6 @@ function initializeFirebase() {
     AppState.auth = Auth.initAuth(AppState.firebaseApp);
     DataLoader.initFirestore(AppState.firebaseApp);
     
-    console.log('✅ Firebase initialized');
     return true;
   } catch (error) {
     console.error('❌ Firebase initialization failed:', error);
@@ -55,7 +54,6 @@ function initializeAuth() {
     
     // Check if user needs to set up username
     if (user && userData && !Auth.hasValidName(userData)) {
-      console.log('👤 User needs to set up name');
       setTimeout(() => {
         AuthUI.showUsernamePanel();
       }, 500);
@@ -107,14 +105,12 @@ function initializeAuth() {
     try {
       await Auth.logout();
       AuthUI.clearLoginForm();
-      console.log("✅ User logged out successfully");
     } catch (err) {
       console.error("❌ Logout error:", err);
       alert("Logout failed: " + err.message);
     }
   };
 
-  console.log('✅ Authentication initialized');
 }
 
 /**
@@ -149,7 +145,6 @@ async function loadAndRenderData() {
     // Update all swipers
     SwiperConfig.updateAllSwipers();
 
-    console.log('✅ All data loaded and rendered');
   } catch (error) {
     console.error('Error loading and rendering data:', error);
   }
@@ -171,7 +166,6 @@ async function initializeUI() {
   // Load and render data
   await loadAndRenderData();
 
-  console.log('✅ UI initialized');
 }
 
 /**
@@ -180,7 +174,6 @@ async function initializeUI() {
 function initializeLanguage() {
   Language.initLanguageOnLoad();
   Language.initLanguageSwitchers();
-  console.log('✅ Language initialized');
 }
 
 /**
@@ -192,7 +185,6 @@ async function startApp() {
     return;
   }
 
-  console.log('🚀 Initializing YES English Center...');
 
   try {
     // 1. Initialize Firebase
@@ -210,7 +202,6 @@ async function startApp() {
     await initializeUI();
 
     AppState.initialized = true;
-    console.log('✅ Application initialized successfully!');
 
   } catch (error) {
     console.error('❌ Application initialization failed:', error);
@@ -223,7 +214,6 @@ async function startApp() {
  * DOM Content Loaded Event
  */
 document.addEventListener("DOMContentLoaded", () => {
-  console.log('📄 DOM loaded, starting initialization...');
   startApp();
 });
 
