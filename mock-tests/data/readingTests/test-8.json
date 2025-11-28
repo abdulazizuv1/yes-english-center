@@ -28,18 +28,26 @@
         },
         {
           "groupInstruction": "Questions 5-10\nComplete the notes below.\nChoose NO MORE THAN TWO WORDS from the passage for each answer. Write your answers in boxes 5 - 10 on your answer sheet.",
+          "type": "text-question",
+          "title": "Non-Pesticide-Management Programme."
+        },
+        {
           "type": "gap-fill",
-          "question": "Non-Pesticide-Management Programme.\n\nBased on use of an 5_____________ called neem",
+          "question": "Based on the use of an _____________",
           "answer": [
             "evergreen tree"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "Neem contains many 6_____________ that target plant-eating predators",
+          "question": "Neem contains many _____________ that target plant-eating predators",
           "answer": [
             "natural pesticides"
           ]
+        },
+        {
+          "type": "text-question",
+          "subheading": "Neem:"
         },
         {
           "type": "text-question",
@@ -47,14 +55,14 @@
         },
         {
           "type": "gap-fill",
-          "question": "7_____________ formed by grinding seeds",
+          "question": "_____________ formed by grinding seeds",
           "answer": [
             "powder"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "left 8_____________ to soak in water",
+          "question": "Left _____________ to soak in water",
           "answer": [
             "overnight"
           ]
@@ -69,14 +77,14 @@
         },
         {
           "type": "gap-fill",
-          "question": "added in 9_____________ form to soil",
+          "question": "Added in _____________ form to soil",
           "answer": [
             "cake"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "contains a lot of 10_____________",
+          "question": "Contains a lot of _____________",
           "answer": [
             "nitrogen"
           ]

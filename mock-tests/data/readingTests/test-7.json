@@ -43,7 +43,7 @@
         },
         {
           "type": "text-question",
-          "text": "Lifespan"
+          "subheading": "Lifespan"
         },
         {
           "type": "text-question",
@@ -51,43 +51,43 @@
         },
         {
           "type": "gap-fill",
-          "question": "- many live to at least 7__________ years old",
+          "question": "- many live to at least __________ years old",
           "answer": [
             "80"
           ]
         },
         {
           "type": "text-question",
-          "text": "Behaviour"
+          "subheading": "Behaviour"
         },
         {
           "type": "gap-fill",
-          "question": "- attack other creatures with their 8__________",
+          "question": "- attack other creatures with their __________",
           "answer": [
             "teeth"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "- eat young 9__________ that live in the same burrows, invertebrates and reptiles",
+          "question": "- eat young __________ that live in the same burrows, invertebrates and reptiles",
           "answer": [
             "seabirds"
           ]
         },
         {
           "type": "text-question",
-          "text": "Population"
+          "subheading": "Population"
         },
         {
           "type": "gap-fill",
-          "question": "- abundant until rats were introduced by 10__________ people",
+          "question": "- abundant until rats were introduced by __________ people",
           "answer": [
             "Polynesian"
           ]
         },
         {
           "type": "gap-fill",
-          "question": "- by the 1840s, hardly any tuatara found on the 11__________",
+          "question": "- by the 1840s, hardly any tuatara found on the __________",
           "answer": [
             "mainland"
           ]
@@ -98,7 +98,7 @@
         },
         {
           "type": "gap-fill",
-          "question": "12__________ tuatara",
+          "question": "__________ tuatara",
           "answer": [
             "common"
           ]
@@ -109,14 +109,14 @@
         },
         {
           "type": "gap-fill",
-          "question": "- density of tuatara on Stephens Island is up to 13__________ tuatara for every hectare",
+          "question": "- density of tuatara on Stephens Island is up to __________ tuatara for every hectare",
           "answer": [
             "2500"
           ]
         },
         {
           "type": "text-question",
-          "text": "Protection of the species"
+          "subheading": "Protection of the species"
         },
         {
           "type": "text-question",
@@ -152,7 +152,7 @@
           "type": "gap-fill",
           "question": "but started to disappear from that area around 16__________ ago because of climate change.",
           "answer": [
-            "12 million"
+            "12 million years"
           ]
         },
         {
