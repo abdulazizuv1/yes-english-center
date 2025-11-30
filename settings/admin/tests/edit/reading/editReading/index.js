@@ -154,20 +154,22 @@ function syncDOMToData() {
     if (instructionsInput) currentTest.passages[passageIndex].instructions = instructionsInput.value;
     if (textInput) currentTest.passages[passageIndex].text = textInput.value;
     
-    // Update questions data
-    const questionElements = passageEl.querySelectorAll(".question-item");
-    questionElements.forEach((questionEl) => {
-      const passageIndexAttr = questionEl.dataset.passageIndex;
-      const questionIndexAttr = questionEl.dataset.questionIndex;
-      
-      if (passageIndexAttr === undefined || questionIndexAttr === undefined) return;
-      
-      const questionIndex = parseInt(questionIndexAttr);
-      const type = questionEl.dataset.type;
-      
-      if (!currentTest.passages[passageIndex].questions[questionIndex]) {
-        currentTest.passages[passageIndex].questions[questionIndex] = { type: type };
-      }
+      // Update questions data - only sync existing questions, don't create new ones
+      const questionElements = passageEl.querySelectorAll(".question-item");
+      questionElements.forEach((questionEl) => {
+        const passageIndexAttr = questionEl.dataset.passageIndex;
+        const questionIndexAttr = questionEl.dataset.questionIndex;
+        
+        if (passageIndexAttr === undefined || questionIndexAttr === undefined) return;
+        
+        const questionIndex = parseInt(questionIndexAttr);
+        const type = questionEl.dataset.type;
+        
+        // Only update if question exists in data - don't create new questions from DOM
+        if (!currentTest.passages[passageIndex].questions || 
+            !currentTest.passages[passageIndex].questions[questionIndex]) {
+          return; // Skip if question doesn't exist in data
+        }
       
       // Update group instruction
       const groupInstructionEl = questionEl.querySelector(".group-instruction");
@@ -262,9 +264,11 @@ function syncDOMToData() {
 }
 
 // Display all passages
-function displayPassages() {
-  // First, sync all current DOM values to data model
-  syncDOMToData();
+function displayPassages(skipSync = false) {
+  // First, sync all current DOM values to data model (unless skipping sync)
+  if (!skipSync) {
+    syncDOMToData();
+  }
   
   const container = document.getElementById("passagesContainer");
   
@@ -1097,8 +1101,10 @@ function updateQuestionNumbers() {
 window.removeQuestion = function (questionId, passageIndex, questionIndex) {
   const question = document.querySelector(`[data-question-id="${questionId}"]`);
   if (question && confirm("Are you sure you want to remove this question?")) {
+    // Remove question directly from data without syncing DOM first
     currentTest.passages[passageIndex].questions.splice(questionIndex, 1);
-    displayPassages();
+    // Skip sync to avoid restoring deleted question from DOM
+    displayPassages(true);
     updateQuestionNumbers();
   }
 };
