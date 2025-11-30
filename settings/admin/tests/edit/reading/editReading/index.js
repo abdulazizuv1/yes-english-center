@@ -301,10 +301,11 @@ function displayPassages() {
     createPassageCard(passage, passageIndex + 1)
   ).join('');
   
-  // Update question numbers for all passages and set up auto-propagation
+  // Update question numbers globally and set up auto-propagation
+  updateQuestionNumbers();
+  
   currentTest.passages.forEach((passage, passageIndex) => {
     const passageNumber = passageIndex + 1;
-    updateQuestionNumbers(passageNumber);
     
     // Set up auto-propagation for all matching questions
     ['paragraph-matching', 'match-person'].forEach(type => {
@@ -526,6 +527,7 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
       <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
         <span class="question-type-badge ${matchingTypeClass}">${matchingTypeLabel}</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
@@ -1067,20 +1069,28 @@ window.addQuestion = function (passageNumber, type) {
     }, 100);
   }
   
-  updateQuestionNumbers(passageNumber);
+  updateQuestionNumbers();
 };
 
-// Update question numbers (excluding text-question)
-function updateQuestionNumbers(passageNumber) {
-  const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
-  let counter = 0;
-  items.forEach((item) => {
-    const numEl = item.querySelector('.question-index');
-    if (numEl && item.dataset.type !== 'text-question') {
-      counter++;
-      numEl.textContent = counter;
-    }
-  });
+// Update question numbers globally across all passages (excluding text-question)
+function updateQuestionNumbers() {
+  let globalCounter = 0;
+  
+  // Go through all passages in order from currentTest.passages
+  if (currentTest && currentTest.passages) {
+    currentTest.passages.forEach((passage, passageIndex) => {
+      const passageNumber = passageIndex + 1;
+      const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
+      
+      items.forEach((item) => {
+        const numEl = item.querySelector('.question-index');
+        if (numEl && item.dataset.type !== 'text-question') {
+          globalCounter++;
+          numEl.textContent = globalCounter;
+        }
+      });
+    });
+  }
 }
 
 // Remove a question
@@ -1089,8 +1099,7 @@ window.removeQuestion = function (questionId, passageIndex, questionIndex) {
   if (question && confirm("Are you sure you want to remove this question?")) {
     currentTest.passages[passageIndex].questions.splice(questionIndex, 1);
     displayPassages();
-    const passageNumber = passageIndex + 1;
-    updateQuestionNumbers(passageNumber);
+    updateQuestionNumbers();
   }
 };
 
