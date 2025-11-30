@@ -26,12 +26,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function downloadDocument() {
-  const ref = doc(db, "readingTests", "test-13");
+  const ref = doc(db, "listeningTests", "test-12");
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
     const data = snap.data();
-    fs.writeFileSync("test-13.json", JSON.stringify(data, null, 2));
+    fs.writeFileSync("test-12.json", JSON.stringify(data, null, 2));
     console.log("Документ сохранён как document.json");
   } else {
     console.log("Документ не найден");

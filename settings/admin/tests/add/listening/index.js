@@ -323,6 +323,14 @@ function setupDragAndDrop(sectionNumber) {
   });
 }
 
+window.handleCancel = function(event) {
+  if (event) event.preventDefault();
+  const message = "All unsaved progress will be lost. Are you sure you want to cancel?";
+  if (confirm(message)) {
+    window.location.href = "../index.html";
+  }
+};
+
 // Handle audio file upload
 window.handleAudioUpload = function(sectionNumber) {
   const fileInput = document.getElementById(`audioFile${sectionNumber}`);
@@ -866,11 +874,23 @@ function getNextQuestionNumber(questionId) {
     });
     
     // Check question group questions
-    const questionGroups = section.querySelectorAll('.question-item[data-type="question-group"]');
-    questionGroups.forEach(qg => {
-      const individualQuestions = qg.querySelectorAll('.group-question-item');
+  const questionGroups = section.querySelectorAll('.question-item[data-type="question-group"]');
+  questionGroups.forEach(qg => {
+    const groupType = qg.querySelector('.group-type')?.value || 'multi-select';
+    if (groupType === 'matching') {
+      const individualQuestions = qg.querySelectorAll('.group-question-item, .matching-question');
       maxNumber += individualQuestions.length;
-    });
+    } else {
+      const answersInput = qg.querySelector('.group-correct-answers');
+      const answersCount = answersInput
+        ? answersInput.value
+            .split(',')
+            .map(answer => answer.trim())
+            .filter(answer => answer).length
+        : 0;
+      maxNumber += answersCount > 0 ? answersCount : 1;
+    }
+  });
   });
   
   return maxNumber + 1;
@@ -948,8 +968,20 @@ window.recalculateTableQuestionNumbers = function(questionId) {
           currentQuestionNumber += questionCells;
         }
       } else if (type === 'question-group') {
-        const groupQuestions = item.querySelectorAll('.group-question-item');
-        currentQuestionNumber += groupQuestions.length;
+        const groupType = item.querySelector('.group-type')?.value || 'multi-select';
+        if (groupType === 'matching') {
+          const groupQuestions = item.querySelectorAll('.group-question-item, .matching-question');
+          currentQuestionNumber += groupQuestions.length;
+        } else {
+          const answersInput = item.querySelector('.group-correct-answers');
+          const answersCount = answersInput
+            ? answersInput.value
+                .split(',')
+                .map(answer => answer.trim())
+                .filter(answer => answer).length
+            : 0;
+          currentQuestionNumber += answersCount > 0 ? answersCount : 1;
+        }
       }
     });
   });
@@ -1557,6 +1589,48 @@ function collectTestData() {
   
   const sections = [];
   const sectionElements = document.querySelectorAll(".section-container");
+  let nextQuestionNumber = 1;
+  let totalQuestionCount = 0;
+
+  const allocateQuestionNumbers = (count) => {
+    const allocationSize = Math.max(0, count);
+    const numbers = [];
+    for (let i = 0; i < allocationSize; i++) {
+      numbers.push(nextQuestionNumber++);
+    }
+    if (numbers.length) {
+      totalQuestionCount += numbers.length;
+    }
+    return numbers;
+  };
+
+  const registerExistingQuestionNumbers = (numbers) => {
+    if (!Array.isArray(numbers) || numbers.length === 0) return;
+    const uniqueNumbers = Array.from(
+      new Set(
+        numbers
+          .map((num) => parseInt(num, 10))
+          .filter((num) => Number.isFinite(num))
+      )
+    ).sort((a, b) => a - b);
+    if (!uniqueNumbers.length) return;
+    totalQuestionCount += uniqueNumbers.length;
+    const highest = uniqueNumbers[uniqueNumbers.length - 1];
+    if (highest >= nextQuestionNumber) {
+      nextQuestionNumber = highest + 1;
+    }
+  };
+
+  const toQuestionId = (number) => `q${number}`;
+  const formatMultiSelectGroupId = (numbers) => {
+    if (!numbers.length) return "";
+    return `q${numbers.join("_")}`;
+  };
+  const formatMatchingGroupId = (numbers) => {
+    if (!numbers.length) return "";
+    if (numbers.length === 1) return `q${numbers[0]}`;
+    return `q${numbers[0]}_${numbers[numbers.length - 1]}`;
+  };
 
   sectionElements.forEach((sectionEl) => {
     const sectionData = {
@@ -1578,7 +1652,6 @@ function collectTestData() {
 
       let questionData = {
         type: type,
-        questionId: `q${questionId}`,
       };
 
       switch (type) {
@@ -1605,8 +1678,9 @@ function collectTestData() {
           const gapFillAnswer = gapFillAnswerElement ? gapFillAnswerElement.value.trim() : "";
           const gapFillWordLimitValue = questionEl.querySelector(".question-word-limit")?.value;
           
+          const [gapFillNumber] = allocateQuestionNumbers(1);
           questionData.type = "question";
-          questionData.questionId = `q${questionId}`;
+          questionData.questionId = toQuestionId(gapFillNumber);
           questionData.format = "gap-fill";
           if (gapFillGroupInstruction) questionData.groupInstruction = gapFillGroupInstruction;
           questionData.text = gapFillText;
@@ -1620,8 +1694,9 @@ function collectTestData() {
           const mcTextElement = questionEl.querySelector(".question-text");
           const mcText = mcTextElement ? mcTextElement.value.trim() : "";
           
+          const [multipleChoiceNumber] = allocateQuestionNumbers(1);
           questionData.type = "question";
-          questionData.questionId = `q${questionId}`;
+          questionData.questionId = toQuestionId(multipleChoiceNumber);
           questionData.format = "multiple-choice";
           if (mcGroupInstruction) questionData.groupInstruction = mcGroupInstruction;
           questionData.text = mcText;
@@ -1915,6 +1990,11 @@ function collectTestData() {
             questions: questionData.questions,
             answers: questionData.answer
           });
+
+          const tableQuestionNumbers = Object.keys(questionData.questions || {})
+            .map(num => parseInt(num, 10))
+            .filter(num => Number.isFinite(num));
+          registerExistingQuestionNumbers(tableQuestionNumbers);
           break;
 
         case "question-group":
@@ -1924,7 +2004,6 @@ function collectTestData() {
           
           questionData.type = "question-group";
           questionData.groupType = groupType;
-          questionData.questionId = `q${questionId}`;
           if (questionGroupGroupInstruction) questionData.groupInstruction = questionGroupGroupInstruction;
           
           // Get options (common for both types)
@@ -1945,31 +2024,49 @@ function collectTestData() {
             
             // Get group answers (comma-separated correct answers)
             const groupCorrectAnswers = questionEl.querySelector(".group-correct-answers")?.value.trim();
-            if (groupCorrectAnswers) {
-              const answersArray = groupCorrectAnswers.split(',').map(a => a.trim()).filter(a => a);
-              questionData.questions = answersArray.map((answer, index) => ({
-                questionId: `q${questionId}_${index + 1}`,
-                correctAnswer: answer
+            const answersArray = groupCorrectAnswers
+              ? groupCorrectAnswers.split(',').map(a => a.trim()).filter(a => a)
+              : [];
+
+            if (answersArray.length) {
+              const questionNumbers = allocateQuestionNumbers(answersArray.length);
+              questionData.questionId = formatMultiSelectGroupId(questionNumbers);
+              questionData.questions = questionNumbers.map((number, index) => ({
+                type: "question",
+                questionId: toQuestionId(number),
+                correctAnswer: answersArray[index]
               }));
             } else {
               questionData.questions = [];
             }
           } else if (groupType === "matching") {
             // Matching: has individual questions with text
-            questionData.questions = [];
-            questionEl.querySelectorAll(".group-question-item").forEach((qEl, index) => {
-              const questionTextElement = qEl.querySelector(".group-question-text");
-              const correctAnswerElement = qEl.querySelector(".group-question-answer");
+            const matchingQuestions = [];
+            const matchingItems = questionEl.querySelectorAll(".group-question-item, .matching-question");
+            matchingItems.forEach((qEl) => {
+              const questionTextElement = qEl.querySelector(".group-question-text") || qEl.querySelector(".matching-question-text");
+              const correctAnswerElement = qEl.querySelector(".group-question-answer") || qEl.querySelector(".matching-answer");
               const questionText = questionTextElement ? questionTextElement.value.trim() : "";
               const correctAnswer = correctAnswerElement ? correctAnswerElement.value.trim() : "";
               if (questionText && correctAnswer) {
-                questionData.questions.push({
-                  questionId: `q${questionId}_${index + 1}`,
+                matchingQuestions.push({
                   text: questionText,
                   correctAnswer: correctAnswer
                 });
               }
             });
+
+            if (matchingQuestions.length) {
+              const questionNumbers = allocateQuestionNumbers(matchingQuestions.length);
+              questionData.questionId = formatMatchingGroupId(questionNumbers);
+              questionData.questions = matchingQuestions.map((question, index) => ({
+                ...question,
+                type: "question",
+                questionId: toQuestionId(questionNumbers[index])
+              }));
+            } else {
+              questionData.questions = [];
+            }
           }
           break;
 
@@ -2005,66 +2102,100 @@ function collectTestData() {
 
         case "multi-select":
           questionData.groupType = "multi-select";
-          const multiSelectGroupInstruction = questionEl.querySelector(".group-instruction");
-          questionData.groupInstruction = multiSelectGroupInstruction ? multiSelectGroupInstruction.value.trim() : "";
-          const multiSelectText = questionEl.querySelector(".question-text");
-          questionData.text = multiSelectText ? multiSelectText.value.trim() : "";
-          const multiSelectInstructions = questionEl.querySelector(".question-select-count");
-          questionData.instructions = multiSelectInstructions ? multiSelectInstructions.value.trim() : "";
-          const multiSelectAnswer = questionEl.querySelector(".question-answer");
-          questionData.correctAnswers = multiSelectAnswer ? multiSelectAnswer.value.trim().split(",").map(a => a.trim()).filter(a => a) : [];
-          
-          // Get options from preview
-          const optionsPreview = document.getElementById(`options-preview-${questionId}`);
-          if (optionsPreview) {
-            const optionSpans = optionsPreview.querySelectorAll("span");
-            questionData.options = {};
-            optionSpans.forEach(span => {
-              const text = span.textContent;
-              const match = text.match(/^([A-Z]):\s*(.+)$/);
-              if (match) {
-                questionData.options[match[1]] = match[2];
-              }
-            });
+          {
+            const multiSelectGroupInstruction = questionEl.querySelector(".group-instruction");
+            questionData.groupInstruction = multiSelectGroupInstruction ? multiSelectGroupInstruction.value.trim() : "";
+            const multiSelectText = questionEl.querySelector(".question-text");
+            questionData.text = multiSelectText ? multiSelectText.value.trim() : "";
+            const multiSelectInstructions = questionEl.querySelector(".question-select-count");
+            questionData.instructions = multiSelectInstructions ? multiSelectInstructions.value.trim() : "";
+            const multiSelectAnswer = questionEl.querySelector(".question-answer");
+            const answersArray = multiSelectAnswer
+              ? multiSelectAnswer.value
+                  .trim()
+                  .split(",")
+                  .map(a => a.trim())
+                  .filter(a => a)
+              : [];
+            questionData.correctAnswers = answersArray;
+
+            if (answersArray.length) {
+              const questionNumbers = allocateQuestionNumbers(answersArray.length);
+              questionData.questionId = formatMultiSelectGroupId(questionNumbers);
+              questionData.questions = questionNumbers.map((number, index) => ({
+                type: "question",
+                questionId: toQuestionId(number),
+                correctAnswer: answersArray[index]
+              }));
+            } else {
+              questionData.questions = [];
+            }
+
+            // Get options from preview
+            const optionsPreview = document.getElementById(`options-preview-${questionId}`);
+            if (optionsPreview) {
+              const optionSpans = optionsPreview.querySelectorAll("span");
+              questionData.options = {};
+              optionSpans.forEach(span => {
+                const text = span.textContent;
+                const match = text.match(/^([A-Z]):\s*(.+)$/);
+                if (match) {
+                  questionData.options[match[1]] = match[2];
+                }
+              });
+            }
           }
           break;
 
         case "matching":
           questionData.groupType = "matching";
-          const matchingGroupInstruction = questionEl.querySelector(".group-instruction");
-          questionData.groupInstruction = matchingGroupInstruction ? matchingGroupInstruction.value.trim() : "";
-          const matchingText = questionEl.querySelector(".question-text");
-          questionData.text = matchingText ? matchingText.value.trim() : "";
-          
-          // Get options
-          const matchingOptionsPreview = document.getElementById(`options-preview-${questionId}`);
-          if (matchingOptionsPreview) {
-            const matchingOptionSpans = matchingOptionsPreview.querySelectorAll("span");
-            questionData.options = {};
-            matchingOptionSpans.forEach(span => {
-              const text = span.textContent;
-              const match = text.match(/^([A-Z]):\s*(.+)$/);
-              if (match) {
-                questionData.options[match[1]] = match[2];
-              }
-            });
-          }
-          
-          // Get matching questions
-          questionData.questions = [];
-          sectionEl.querySelectorAll(".matching-question").forEach((matchQ, index) => {
-            const questionTextElement = matchQ.querySelector(".matching-question-text");
-            const correctAnswerElement = matchQ.querySelector(".matching-answer");
-            const questionText = questionTextElement ? questionTextElement.value.trim() : "";
-            const correctAnswer = correctAnswerElement ? correctAnswerElement.value.trim() : "";
-            if (questionText && correctAnswer) {
-              questionData.questions.push({
-                questionId: `q${questionId}_${index + 1}`,
-                text: questionText,
-                correctAnswer: correctAnswer,
+          {
+            const matchingGroupInstruction = questionEl.querySelector(".group-instruction");
+            questionData.groupInstruction = matchingGroupInstruction ? matchingGroupInstruction.value.trim() : "";
+            const matchingText = questionEl.querySelector(".question-text");
+            questionData.text = matchingText ? matchingText.value.trim() : "";
+            
+            // Get options
+            const matchingOptionsPreview = document.getElementById(`options-preview-${questionId}`);
+            if (matchingOptionsPreview) {
+              const matchingOptionSpans = matchingOptionsPreview.querySelectorAll("span");
+              questionData.options = {};
+              matchingOptionSpans.forEach(span => {
+                const text = span.textContent;
+                const match = text.match(/^([A-Z]):\s*(.+)$/);
+                if (match) {
+                  questionData.options[match[1]] = match[2];
+                }
               });
             }
-          });
+            
+            // Collect matching questions within this block
+            const matchingQuestions = [];
+            questionEl.querySelectorAll(".matching-question").forEach(matchQ => {
+              const questionTextElement = matchQ.querySelector(".matching-question-text");
+              const correctAnswerElement = matchQ.querySelector(".matching-answer");
+              const questionText = questionTextElement ? questionTextElement.value.trim() : "";
+              const correctAnswer = correctAnswerElement ? correctAnswerElement.value.trim() : "";
+              if (questionText && correctAnswer) {
+                matchingQuestions.push({
+                  text: questionText,
+                  correctAnswer: correctAnswer
+                });
+              }
+            });
+
+            if (matchingQuestions.length) {
+              const questionNumbers = allocateQuestionNumbers(matchingQuestions.length);
+              questionData.questionId = formatMatchingGroupId(questionNumbers);
+              questionData.questions = matchingQuestions.map((question, index) => ({
+                ...question,
+                type: "question",
+                questionId: toQuestionId(questionNumbers[index])
+              }));
+            } else {
+              questionData.questions = [];
+            }
+          }
           break;
       }
 
@@ -2081,7 +2212,7 @@ function collectTestData() {
       title: testTitle,
       sections: sections,
       metadata: {
-        totalQuestions: sections.reduce((total, section) => total + section.content.length, 0),
+        totalQuestions: totalQuestionCount,
         timeLimit: timeLimit,
         version: "1.0",
         createdAt: new Date().toISOString().split('T')[0],
