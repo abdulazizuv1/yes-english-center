@@ -207,8 +207,8 @@ function syncDOMToData() {
           const options = [];
           questionEl.querySelectorAll(".option-text").forEach((optionEl) => {
             const optionLetter = optionEl.dataset.option;
-            const optionText = optionEl.value.trim();
-            if (optionLetter && optionText) {
+            const optionText = optionEl.value; // не обрезаем и не фильтруем по пустоте
+            if (optionLetter) {
               options.push({ label: optionLetter, text: optionText });
             }
           });
@@ -238,9 +238,9 @@ function syncDOMToData() {
               if (labelEl && textEl) {
                 const label = labelEl.value.trim();
                 const text = textEl.value;
-                if (label) {
-                  newOptions.push({ label, text });
-                }
+                // Разрешаем пустые метки, чтобы админ мог стереть букву,
+                // не подставляя автоматически следующую
+                newOptions.push({ label, text });
               }
             });
             
@@ -485,9 +485,26 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
       <div class="mc-options" id="mc-options-${questionId}">
         ${mcOptions.map((opt, optIdx) => `
         <div class="mc-option">
-          <input type="radio" name="mc-answer-${questionId}" value="${opt.label}" ${question.answer === opt.label ? 'checked' : ''} onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
-          <label>${opt.label}</label>
-          <input type="text" placeholder="Option ${opt.label} text" class="option-text" data-option="${opt.label}" value="${(opt.text || '').replace(/"/g, '&quot;')}" onchange="updateMCOption(${passageIndex}, ${questionIndex}, ${optIdx}, this.value)">
+          <input 
+            type="radio" 
+            id="mc-answer-${questionId}-${optIdx}" 
+            name="mc-answer-${questionId}"
+            value="${opt.label}" 
+            ${question.answer === opt.label ? 'checked' : ''} 
+            onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)"
+          >
+          <label for="mc-answer-${questionId}-${optIdx}">${opt.label}</label>
+          <input 
+            type="text" 
+            id="mc-option-${questionId}-${optIdx}"
+            name="mc-option-${questionId}-${optIdx}"
+            aria-label="Option ${opt.label} text"
+            placeholder="Option ${opt.label} text" 
+            class="option-text" 
+            data-option="${opt.label}" 
+            value="${(opt.text || '').replace(/"/g, '&quot;')}" 
+            onchange="updateMCOption(${passageIndex}, ${questionIndex}, ${optIdx}, this.value)"
+          >
           <button type="button" onclick="removeMCOption(${questionId}, ${passageIndex}, ${questionIndex}, ${optIdx})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
         `).join('')}
@@ -1191,28 +1208,59 @@ window.updateMCOption = function(passageIndex, questionIndex, optionIndex, value
   currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex].text = value;
 };
 
+// Helper: reindex multiple-choice option labels to A, B, C... after add/remove
+function reindexMCOptions(passageIndex, questionIndex) {
+  const question = currentTest.passages[passageIndex]?.questions?.[questionIndex];
+  if (!question || !question.options) return;
+
+  // Сохраняем старые опции, чтобы корректно пересчитать правильный ответ
+  const oldOptions = question.options;
+
+  const newOptions = oldOptions.map((opt, idx) => ({
+    label: String.fromCharCode(65 + idx), // A, B, C, D, E...
+    text: opt.text || "",
+  }));
+
+  // Пересчитываем правильный ответ так, чтобы он указывал на ту же опцию по индексу
+  if (question.answer) {
+    const oldIndex = oldOptions.findIndex((opt) => opt.label === question.answer);
+    if (oldIndex !== -1 && newOptions[oldIndex]) {
+      question.answer = newOptions[oldIndex].label;
+    } else if (newOptions.length === 0) {
+      // Если вариантов больше нет — очищаем ответ
+      question.answer = "";
+    } else if (oldIndex >= newOptions.length) {
+      // Если удалили последний вариант с правильным ответом,
+      // сдвигаем ответ на последний доступный
+      question.answer = newOptions[newOptions.length - 1].label;
+    }
+  }
+
+  question.options = newOptions;
+}
+
 window.addMCOption = function(questionId, passageIndex, questionIndex) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
     currentTest.passages[passageIndex].questions[questionIndex].options = [];
   }
-  const existingOptions = currentTest.passages[passageIndex].questions[questionIndex].options.length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
   currentTest.passages[passageIndex].questions[questionIndex].options.push({
-    label: nextLetter,
-    text: ''
+    label: "", // буквы будут пересчитаны в reindexMCOptions
+    text: ""
   });
-  displayPassages();
+  // после добавления пересчитываем метки A, B, C...
+  reindexMCOptions(passageIndex, questionIndex);
+  // при перерисовке пропускаем syncDOMToData, чтобы не затереть новые опции старыми из DOM
+  displayPassages(true);
 };
 
 window.removeMCOption = function(questionId, passageIndex, questionIndex, optionIndex) {
   const options = currentTest.passages[passageIndex].questions[questionIndex].options;
-  if (options.length <= 2) {
-    alert("Multiple choice question must have at least 2 options");
-    return;
-  }
   if (confirm("Remove this option?")) {
     options.splice(optionIndex, 1);
-    displayPassages();
+    // после удаления также пересчитываем метки
+    reindexMCOptions(passageIndex, questionIndex);
+    // при перерисовке пропускаем syncDOMToData, чтобы не восстанавливать удалённую опцию из DOM
+    displayPassages(true);
   }
 };
 
@@ -1261,9 +1309,8 @@ function updateSharedOptionsFromQuestion(questionId, type, passageNumber) {
     if (labelEl && textEl) {
       const label = labelEl.value.trim();
       const text = textEl.value;
-      if (label) {
-        newOptions.push({ label, text });
-      }
+      // Не фильтруем по label, чтобы можно было стереть букву
+      newOptions.push({ label, text });
     }
   });
 
@@ -1398,9 +1445,8 @@ function updateSharedOptionsFromContainer(container, type, passageNumber) {
   container.querySelectorAll(".option-row").forEach((row) => {
     const label = row.querySelector(".option-label").value.trim();
     const text = row.querySelector(".option-text").value.trim();
-    if (label) {
-      newOptions.push({ label, text });
-    }
+    // Сохраняем вариант даже с пустой буквой
+    newOptions.push({ label, text });
   });
 
   if (!sharedOptions[passageNumber]) {
