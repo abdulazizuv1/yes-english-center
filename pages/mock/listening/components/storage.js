@@ -28,14 +28,34 @@ export function setupAnswerPersistence() {
     const target = e.target;
     const qId = target.name || target.dataset.qid;
     const groupId = target.dataset.groupId;
+    const questionIds = target.dataset.questionIds;
 
     if (!qId && !groupId) return;
 
     if (target.type === "radio") {
       listeningState.answersSoFar[qId] = target.value;
     } else if (target.type === "checkbox") {
-      if (groupId && groupId.includes("_")) {
-        // логика multi-select обрабатывается в render через отдельную функцию
+      if (groupId && questionIds) {
+        // Multi-select группа: распределяем выбранные опции по вопросам
+        const questionIdsArray = questionIds.split(",");
+        const allCheckboxes = Array.from(
+          document.querySelectorAll(`input[type="checkbox"][data-group-id="${groupId}"]`)
+        );
+        const checkedOptions = allCheckboxes
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.value)
+          .sort(); // Сортируем для консистентности
+
+        // Распределяем выбранные опции по вопросам по порядку
+        // Каждая опция назначается следующему вопросу
+        questionIdsArray.forEach((qId, index) => {
+          if (index < checkedOptions.length) {
+            listeningState.answersSoFar[qId] = checkedOptions[index];
+          } else {
+            // Если опций меньше, чем вопросов, очищаем оставшиеся
+            listeningState.answersSoFar[qId] = null;
+          }
+        });
       } else if (qId) {
         const checked = Array.from(
           document.querySelectorAll(`input[type="checkbox"][data-qid="${qId}"]`)

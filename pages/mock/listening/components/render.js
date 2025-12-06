@@ -268,6 +268,10 @@ export function renderQuestionGroup(group) {
       questionCount = questionIds.length;
     }
 
+    // Добавляем ID для контейнера группы, чтобы навигация могла найти его
+    groupDiv.id = `multi-select-group-${group.questionId || questionIds.join("-")}`;
+    groupDiv.setAttribute("data-question-ids", JSON.stringify(questionIds));
+
     groupDiv.innerHTML = `
             ${instructionsHtml}
             <div style="margin: 25px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 10px; background: #f8fafc;">
@@ -290,7 +294,7 @@ export function renderQuestionGroup(group) {
                         }">
                             <input type="checkbox" data-group-id="${
                               group.questionId
-                            }" value="${key}" ${
+                            }" data-question-ids="${questionIds.join(",")}" value="${key}" ${
                           isOptionSelectedInMultiGroup(group, key, questionIds)
                             ? "checked"
                             : ""
@@ -303,6 +307,14 @@ export function renderQuestionGroup(group) {
                 </div>
             </div>
         `;
+    
+    // Добавляем ID для каждого вопроса в группе для навигации (после innerHTML)
+    questionIds.forEach((qId) => {
+      const questionMarker = document.createElement("div");
+      questionMarker.id = qId;
+      questionMarker.style.display = "none"; // Скрытый маркер для навигации
+      groupDiv.appendChild(questionMarker);
+    });
   } else if (group.groupType === "matching") {
     groupDiv.innerHTML = `
             ${instructionsHtml}

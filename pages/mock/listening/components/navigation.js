@@ -65,7 +65,17 @@ export function jumpToQuestion(questionNum) {
   setTimeout(
     () => {
       const el = document.getElementById(`q${questionNum}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (el) {
+        // Если элемент скрыт (маркер в multi-select группе), находим родительскую группу
+        if (el.style.display === "none" || el.offsetParent === null) {
+          const groupContainer = el.closest('[id^="multi-select-group-"]');
+          if (groupContainer) {
+            groupContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+          }
+        }
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     },
     shouldRender ? 200 : 0
   );
@@ -93,7 +103,7 @@ export function updateSectionIndicator() {
     `;
 }
 
-export function attachNavButtons() {
+export function attachNavButtons(handleFinish) {
   const nextBtn = document.getElementById("nextBtn");
   const backBtn = document.getElementById("backBtn");
   const finishBtn = document.getElementById("finishBtn");
@@ -124,8 +134,8 @@ export function attachNavButtons() {
     };
   }
 
-  if (finishBtn) {
-    // будет привязано в init через handleFinishTest
+  if (finishBtn && handleFinish) {
+    finishBtn.onclick = handleFinish;
   }
 }
 

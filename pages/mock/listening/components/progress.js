@@ -20,10 +20,18 @@ export function analyzeTestProgress() {
           total++;
           if (isAnswerValid(listeningState.answersSoFar[item.questionId])) answered++;
         } else if (item.type === "question-group" && item.questions) {
-          item.questions.forEach((q) => {
-            total++;
-            if (isAnswerValid(listeningState.answersSoFar[q.questionId])) answered++;
-          });
+          // Обрабатываем multi-select и matching группы
+          if (item.groupType === "multi-select" || item.groupType === "matching") {
+            item.questions.forEach((q) => {
+              total++;
+              if (isAnswerValid(listeningState.answersSoFar[q.questionId])) answered++;
+            });
+          } else if (item.questions) {
+            item.questions.forEach((q) => {
+              total++;
+              if (isAnswerValid(listeningState.answersSoFar[q.questionId])) answered++;
+            });
+          }
         } else if (item.type === "matching" && item.questions) {
           item.questions.forEach((q) => {
             total++;

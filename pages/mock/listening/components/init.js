@@ -91,7 +91,7 @@ export function initListeningTest(deps) {
   }
 
   window.addEventListener("DOMContentLoaded", () => {
-    attachNavButtons();
+    attachNavButtons(handleFinish);
     setupAnswerPersistence();
     setupOpenReview();
     setupTogglePause(handleFinish);
