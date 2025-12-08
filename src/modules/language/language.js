@@ -6,6 +6,7 @@
 
 const ALL_LANGUAGES = ["en", "ru", "uz"];
 const DEFAULT_LANGUAGE = "en";
+const STORAGE_KEY = "yes-language";
 
 let langChangeTimeout = null;
 
@@ -14,13 +15,20 @@ let langChangeTimeout = null;
  * @returns {string} Current language code
  */
 export function getCurrentLanguage() {
-  let hash = window.location.hash;
-  hash = hash.substr(1);
-  
+  // 1) Prefer stored value
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored && ALL_LANGUAGES.includes(stored)) {
+    return stored;
+  }
+
+  // 2) Fallback to URL hash
+  const hash = window.location.hash.replace("#", "");
   if (ALL_LANGUAGES.includes(hash)) {
+    // persist for future loads
+    localStorage.setItem(STORAGE_KEY, hash);
     return hash;
   }
-  
+
   return DEFAULT_LANGUAGE;
 }
 
@@ -33,9 +41,18 @@ export function setLanguage(lang) {
     console.warn(`Invalid language: ${lang}, using default: ${DEFAULT_LANGUAGE}`);
     lang = DEFAULT_LANGUAGE;
   }
-  
-  location.href = window.location.pathname + "#" + lang;
-  location.reload();
+
+  localStorage.setItem(STORAGE_KEY, lang);
+
+  // keep hash for backward compatibility
+  const newUrl = `${window.location.pathname}#${lang}`;
+  if (window.location.href !== newUrl) {
+    window.location.replace(newUrl);
+  }
+
+  // apply immediately without hard reload
+  updateLanguageSelectors(lang);
+  applyTranslations(lang);
 }
 
 /**
@@ -89,20 +106,21 @@ function changeLanguage(select) {
  */
 export function initLanguageOnLoad() {
   let currentLang = getCurrentLanguage();
-  
-  // Redirect to default if invalid
+
+  // Fallback to default and persist if invalid
   if (!ALL_LANGUAGES.includes(currentLang)) {
-    location.href = window.location.pathname + "#" + DEFAULT_LANGUAGE;
-    location.reload();
-    return;
+    currentLang = DEFAULT_LANGUAGE;
+    localStorage.setItem(STORAGE_KEY, currentLang);
   }
-  
-  // Update selectors
+
+  // Keep hash in sync
+  const expectedHash = `#${currentLang}`;
+  if (window.location.hash !== expectedHash) {
+    window.location.replace(`${window.location.pathname}${expectedHash}`);
+  }
+
   updateLanguageSelectors(currentLang);
-  
-  // Apply translations
   applyTranslations(currentLang);
-  
 }
 
 /**
