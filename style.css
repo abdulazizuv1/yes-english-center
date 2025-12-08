@@ -568,6 +568,7 @@ nav {
   height: 40px;
   gap: 4px;
   z-index: 102;
+  margin-left: auto; /* keeps toggle within container when nav items collapse */
 }
 
 .hamburger-line {
@@ -619,20 +620,20 @@ nav {
 .mobile-menu-content {
   position: absolute;
   top: 80px;
-  left: 20px;
-  right: 20px;
+  left: 50%;
+  width: min(520px, calc(100% - 32px));
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(25px);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-glass);
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 30px 25px;
-  transform: translateY(-20px);
+  transform: translate(-50%, -20px);
   transition: var(--transition);
 }
 
 .mobile-menu.active .mobile-menu-content {
-  transform: translateY(0);
+  transform: translate(-50%, 0);
 }
 
 .mobile-nav-links {
@@ -2240,9 +2241,10 @@ nav {
 
 @media (max-width: 480px) {
   .mobile-menu-content {
-    left: 15px;
-    right: 15px;
+    width: calc(100% - 24px);
+    left: 50%;
     padding: 25px 20px;
+    transform: translate(-50%, -20px);
   }
   
   .mobile-nav-links .nav-glass-item {

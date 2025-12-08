@@ -3,7 +3,6 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import fs from "fs";
 import 'dotenv/config';
 
-// Read Firebase config from environment variables
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -14,14 +13,12 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
-// Basic validation to help local devs
 for (const [key, value] of Object.entries(firebaseConfig)) {
   if (!value) {
     throw new Error(`Missing environment variable for Firebase config: ${key}`);
   }
 }
 
-// Инициализация
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 

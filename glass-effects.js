@@ -32,12 +32,10 @@ const glassStyles = `
     }
 `;
 
-// Inject styles
 const styleSheet = document.createElement('style');
 styleSheet.textContent = glassStyles;
 document.head.appendChild(styleSheet);
 
-// Mobile Menu Functions (работают с вашим main.js)
 window.toggleMobileMenu = function() {
     const toggle = document.querySelector('.glass-toggle');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -58,14 +56,12 @@ window.closeMobileMenu = function() {
     body.classList.remove('menu-open');
 };
 
-// Login/Logout Functions (работают с Firebase от main.js)
 window.toggleLogin = function() {
     const loginPanel = document.querySelector('.login_panel');
     if (loginPanel) {
         loginPanel.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
-        // Focus на email input
         setTimeout(() => {
             const emailInput = document.querySelector('#login_email');
             if (emailInput) emailInput.focus();
@@ -81,7 +77,6 @@ window.closeLogin = function() {
     }
 };
 
-// Enhanced Mobile Menu Functions (интегрированы с вашим main.js)
 window.toggleMenu = function() {
     const nav = document.querySelector("nav");
     const navRight = document.querySelector(".nav_right");
@@ -101,10 +96,8 @@ window.toggleMenu = function() {
     }
 };
 
-// Glass Effects Initialization
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Parallax effect for background blurs
     function updateParallax() {
         const scrolled = window.pageYOffset;
         const parallaxElements = document.querySelectorAll('.bg-blur');
@@ -115,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Smooth parallax with RAF
     let ticking = false;
     function requestTick() {
         if (!ticking) {
@@ -126,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.addEventListener('scroll', requestTick);
     
-    // Glass element hover effects
     const glassElements = document.querySelectorAll('.glass-morphism, .glass-btn, .glass-feature, .glass-stat');
     
     glassElements.forEach(element => {
@@ -139,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Advanced ripple effect
     function createRipple(event, element) {
         const rect = element.getBoundingClientRect();
         const size = Math.max(rect.width, rect.height);
@@ -169,7 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 600);
     }
     
-    // Add ripple to buttons
     const rippleButtons = document.querySelectorAll('.glass-btn, .glass-btn-primary, .glass-cta, .glass-btn-nav');
     rippleButtons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -177,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Dynamic navbar blur on scroll
     const navbar = document.querySelector('.glass-nav');
     if (navbar) {
         window.addEventListener('scroll', () => {
@@ -187,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Intersection Observer for glass cards animation
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -202,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, observerOptions);
     
-    // Observe all swiper slides when they're added
     const observeSlides = () => {
         const slides = document.querySelectorAll('.swiper-slide');
         slides.forEach(slide => {
@@ -213,10 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    // Call after swiper initialization
     setTimeout(observeSlides, 1000);
     
-    // Glass particle animation
     function animateParticles() {
         const particles = document.querySelectorAll('.particle');
         particles.forEach((particle, index) => {
@@ -231,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     animateParticles();
     
-    // Glass morphism intensity based on scroll
     window.addEventListener('scroll', () => {
         const scrollPercent = window.pageYOffset / (document.body.offsetHeight - window.innerHeight);
         const intensity = 10 + (scrollPercent * 10);
@@ -242,23 +225,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Mock redirect handled centrally in main.js
 });
 
-// Event Handlers for Mobile Menu
 document.addEventListener('click', function(event) {
     const mobileMenu = document.getElementById('mobileMenu');
     const toggle = document.querySelector('.glass-toggle');
     const nav = document.querySelector('nav');
     
-    // Close mobile menu when clicking outside
     if (mobileMenu && mobileMenu.classList.contains('active')) {
         if (!nav.contains(event.target)) {
             closeMobileMenu();
         }
     }
     
-    // Close login panel when clicking outside
     const loginPanel = document.querySelector('.login_panel');
     const login = document.querySelector('.login');
     
@@ -269,14 +248,12 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Close mobile menu on window resize to desktop
 window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
         closeMobileMenu();
     }
 });
 
-// Handle escape key for mobile menu and login
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeMobileMenu();
@@ -284,7 +261,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Active link management (работает с вашей навигацией)
 document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.nav-glass-item');
     

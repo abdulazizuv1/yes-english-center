@@ -18,7 +18,6 @@ for (const [key, value] of Object.entries(firebaseConfig)) {
   }
 }
 
-// Инициализация
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
