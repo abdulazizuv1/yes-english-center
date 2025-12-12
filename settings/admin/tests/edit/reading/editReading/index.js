@@ -12,6 +12,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { firebaseConfig } from "/config.js";
 
+// Helper function to safely convert answer to string
+function safeAnswerString(answer) {
+  if (answer === null || answer === undefined) {
+    return "";
+  }
+  if (Array.isArray(answer)) {
+    return answer.join(", ");
+  }
+  return String(answer);
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -74,44 +85,43 @@ async function checkAdminAccess() {
 // Get test ID from URL parameters
 function getTestIdFromUrl() {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('testId');
+  return urlParams.get("testId");
 }
 
 // Load test data from Firebase
 async function loadTest() {
   try {
     console.log("📚 Loading test from Firebase...");
-    
+
     const testDocRef = doc(db, "readingTests", testId);
     const testDoc = await getDoc(testDocRef);
-    
+
     if (!testDoc.exists()) {
       throw new Error("Test not found");
     }
 
     currentTest = testDoc.data();
     console.log("✅ Test loaded successfully");
-    
+
     // Initialize questionIdCounter to avoid conflicts
     questionIdCounter = 0;
     if (currentTest.passages) {
-      currentTest.passages.forEach(passage => {
+      currentTest.passages.forEach((passage) => {
         if (passage.questions) {
           questionIdCounter += passage.questions.length;
         }
       });
     }
-    
+
     // Hide loading, show content
     document.getElementById("loadingContainer").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
-    
+
     // Populate test info
     populateTestInfo();
-    
+
     // Display passages
     displayPassages();
-    
   } catch (error) {
     console.error("❌ Error loading test:", error);
     document.getElementById("loadingContainer").innerHTML = `
@@ -128,8 +138,12 @@ async function loadTest() {
 
 // Populate test information
 function populateTestInfo() {
-  document.getElementById("testNumber").textContent = `Reading Test ${testId.replace("test-", "")}`;
-  document.getElementById("testTitle").textContent = `Reading Test ${testId.replace("test-", "")}`;
+  document.getElementById(
+    "testNumber"
+  ).textContent = `Reading Test ${testId.replace("test-", "")}`;
+  document.getElementById(
+    "testTitle"
+  ).textContent = `Reading Test ${testId.replace("test-", "")}`;
   passageCount = currentTest.passages ? currentTest.passages.length : 0;
   updatePassageCount();
   updateAddPassageButton();
@@ -138,70 +152,129 @@ function populateTestInfo() {
 // Sync all current DOM values to currentTest.passages before regenerating HTML
 function syncDOMToData() {
   const passageElements = document.querySelectorAll(".passage-container");
-  
+
   passageElements.forEach((passageEl) => {
     const passageNumber = parseInt(passageEl.dataset.passage);
     const passageIndex = passageNumber - 1;
-    
+
     if (!currentTest.passages[passageIndex]) return;
-    
+
     // Update passage data
     const titleInput = passageEl.querySelector(".passage-title-input");
     const instructionsInput = passageEl.querySelector(".passage-instructions");
     const textInput = passageEl.querySelector(".passage-text");
-    
+
     if (titleInput) currentTest.passages[passageIndex].title = titleInput.value;
-    if (instructionsInput) currentTest.passages[passageIndex].instructions = instructionsInput.value;
+    if (instructionsInput)
+      currentTest.passages[passageIndex].instructions = instructionsInput.value;
     if (textInput) currentTest.passages[passageIndex].text = textInput.value;
-    
-      // Update questions data - only sync existing questions, don't create new ones
-      const questionElements = passageEl.querySelectorAll(".question-item");
-      questionElements.forEach((questionEl) => {
-        const passageIndexAttr = questionEl.dataset.passageIndex;
-        const questionIndexAttr = questionEl.dataset.questionIndex;
-        
-        if (passageIndexAttr === undefined || questionIndexAttr === undefined) return;
-        
-        const questionIndex = parseInt(questionIndexAttr);
-        const type = questionEl.dataset.type;
-        
-        // Only update if question exists in data - don't create new questions from DOM
-        if (!currentTest.passages[passageIndex].questions || 
-            !currentTest.passages[passageIndex].questions[questionIndex]) {
-          return; // Skip if question doesn't exist in data
-        }
-      
+
+    // Update questions data - only sync existing questions, don't create new ones
+    const questionElements = passageEl.querySelectorAll(".question-item");
+    questionElements.forEach((questionEl) => {
+      const passageIndexAttr = questionEl.dataset.passageIndex;
+      const questionIndexAttr = questionEl.dataset.questionIndex;
+
+      if (passageIndexAttr === undefined || questionIndexAttr === undefined)
+        return;
+
+      const questionIndex = parseInt(questionIndexAttr);
+      const type = questionEl.dataset.type;
+
+      // Only update if question exists in data - don't create new questions from DOM
+      if (
+        !currentTest.passages[passageIndex].questions ||
+        !currentTest.passages[passageIndex].questions[questionIndex]
+      ) {
+        return; // Skip if question doesn't exist in data
+      }
+
       // Update group instruction
       const groupInstructionEl = questionEl.querySelector(".group-instruction");
       if (groupInstructionEl) {
-        currentTest.passages[passageIndex].questions[questionIndex].groupInstruction = groupInstructionEl.value;
+        currentTest.passages[passageIndex].questions[
+          questionIndex
+        ].groupInstruction = groupInstructionEl.value;
       }
-      
+
       if (type === "text-question") {
         const titleEl = questionEl.querySelector(".question-title");
         const subheadingEl = questionEl.querySelector(".question-subheading");
         const textEl = questionEl.querySelector(".question-text");
-        if (titleEl) currentTest.passages[passageIndex].questions[questionIndex].title = titleEl.value;
-        if (subheadingEl) currentTest.passages[passageIndex].questions[questionIndex].subheading = subheadingEl.value;
-        if (textEl) currentTest.passages[passageIndex].questions[questionIndex].text = textEl.value;
+        if (titleEl)
+          currentTest.passages[passageIndex].questions[questionIndex].title =
+            titleEl.value;
+        if (subheadingEl)
+          currentTest.passages[passageIndex].questions[
+            questionIndex
+          ].subheading = subheadingEl.value;
+        if (textEl)
+          currentTest.passages[passageIndex].questions[questionIndex].text =
+            textEl.value;
+      } else if (type === "multi-select") {
+        // Update multi-select question
+        const textEl = questionEl.querySelector(".multi-select-text");
+        if (textEl) {
+          currentTest.passages[passageIndex].questions[questionIndex].text =
+            textEl.value;
+        }
+
+        // Update sub-questions
+        const subQuestionElements = questionEl.querySelectorAll(
+          ".multi-select-subquestion"
+        );
+        const subQuestions = [];
+        subQuestionElements.forEach((subQEl) => {
+          const subQAnswer =
+            subQEl
+              .querySelector(".subquestion-answer-input")
+              ?.value.trim()
+              .toUpperCase() || "";
+          subQuestions.push({
+            question: `Statement ${subQuestions.length + 1}`,
+            answer: subQAnswer,
+          });
+        });
+        currentTest.passages[passageIndex].questions[questionIndex].questions =
+          subQuestions;
+
+        // Update options
+        const options = {};
+        questionEl
+          .querySelectorAll(".multi-select-options-list .option-row")
+          .forEach((row) => {
+            const label = row.querySelector(".option-label")?.value.trim();
+            const text = row.querySelector(".option-text")?.value.trim();
+            if (label && text) {
+              options[label] = text;
+            }
+          });
+        currentTest.passages[passageIndex].questions[questionIndex].options =
+          options;
       } else {
         // Update question text
         const questionTextEl = questionEl.querySelector(".question-text");
         if (questionTextEl) {
-          currentTest.passages[passageIndex].questions[questionIndex].question = questionTextEl.value;
+          currentTest.passages[passageIndex].questions[questionIndex].question =
+            questionTextEl.value;
         }
-        
+
         // Update answer
         const answerEl = questionEl.querySelector(".question-answer");
         if (answerEl) {
           if (type === "gap-fill") {
             const answerText = answerEl.value.trim();
-            currentTest.passages[passageIndex].questions[questionIndex].answer = answerText.split(",").map((a) => a.trim()).filter((a) => a);
+            currentTest.passages[passageIndex].questions[questionIndex].answer =
+              answerText
+                .split(",")
+                .map((a) => a.trim())
+                .filter((a) => a);
           } else {
-            currentTest.passages[passageIndex].questions[questionIndex].answer = answerEl.value;
+            currentTest.passages[passageIndex].questions[questionIndex].answer =
+              answerEl.value;
           }
         }
-        
+
         // Update multiple choice options
         if (type === "multiple-choice") {
           const options = [];
@@ -212,23 +285,29 @@ function syncDOMToData() {
               options.push({ label: optionLetter, text: optionText });
             }
           });
-          currentTest.passages[passageIndex].questions[questionIndex].options = options;
-          
+          currentTest.passages[passageIndex].questions[questionIndex].options =
+            options;
+
           // Update selected answer
-          const selectedAnswer = questionEl.querySelector('input[type="radio"]:checked');
+          const selectedAnswer = questionEl.querySelector(
+            'input[type="radio"]:checked'
+          );
           if (selectedAnswer) {
-            currentTest.passages[passageIndex].questions[questionIndex].answer = selectedAnswer.value;
+            currentTest.passages[passageIndex].questions[questionIndex].answer =
+              selectedAnswer.value;
           }
         }
-        
+
         // Update paragraph-matching and match-person shared options
         if (type === "paragraph-matching" || type === "match-person") {
           // Sync options from any visible container of this type in the passage
           const questionId = questionEl.dataset.questionId;
           const container = document.getElementById(
-            `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+            `${
+              type === "paragraph-matching" ? "pm" : "match"
+            }-options-${questionId}`
           );
-          
+
           // If container exists and is visible, sync from it
           if (container && container.style.display !== "none") {
             const newOptions = [];
@@ -243,17 +322,18 @@ function syncDOMToData() {
                 newOptions.push({ label, text });
               }
             });
-            
+
             // Update shared options (even if empty, as user might have deleted all options)
             if (!sharedOptions[passageNumber]) {
               sharedOptions[passageNumber] = {};
             }
             sharedOptions[passageNumber][type] = newOptions;
-            
+
             // Save to all questions of this type in the passage
             currentTest.passages[passageIndex].questions.forEach((q, idx) => {
               if (q.type === type) {
-                currentTest.passages[passageIndex].questions[idx].options = newOptions;
+                currentTest.passages[passageIndex].questions[idx].options =
+                  newOptions;
               }
             });
           }
@@ -269,11 +349,11 @@ function displayPassages(skipSync = false) {
   if (!skipSync) {
     syncDOMToData();
   }
-  
+
   const container = document.getElementById("passagesContainer");
-  
+
   if (!currentTest.passages || currentTest.passages.length === 0) {
-    container.innerHTML = '';
+    container.innerHTML = "";
     return;
   }
 
@@ -283,38 +363,55 @@ function displayPassages(skipSync = false) {
     if (!sharedOptions[passageNumber]) {
       sharedOptions[passageNumber] = {};
     }
-    
+
     // Initialize paragraph-matching options from first question
-    if (!sharedOptions[passageNumber]['paragraph-matching']) {
-      const firstPMQuestion = passage.questions?.find(q => q.type === 'paragraph-matching');
-      if (firstPMQuestion && firstPMQuestion.options && firstPMQuestion.options.length > 0) {
-        sharedOptions[passageNumber]['paragraph-matching'] = firstPMQuestion.options;
+    if (!sharedOptions[passageNumber]["paragraph-matching"]) {
+      const firstPMQuestion = passage.questions?.find(
+        (q) => q.type === "paragraph-matching"
+      );
+      if (
+        firstPMQuestion &&
+        firstPMQuestion.options &&
+        firstPMQuestion.options.length > 0
+      ) {
+        sharedOptions[passageNumber]["paragraph-matching"] =
+          firstPMQuestion.options;
       }
     }
-    
+
     // Initialize match-person options from first question
-    if (!sharedOptions[passageNumber]['match-person']) {
-      const firstMPQuestion = passage.questions?.find(q => q.type === 'match-person');
-      if (firstMPQuestion && firstMPQuestion.options && firstMPQuestion.options.length > 0) {
-        sharedOptions[passageNumber]['match-person'] = firstMPQuestion.options;
+    if (!sharedOptions[passageNumber]["match-person"]) {
+      const firstMPQuestion = passage.questions?.find(
+        (q) => q.type === "match-person"
+      );
+      if (
+        firstMPQuestion &&
+        firstMPQuestion.options &&
+        firstMPQuestion.options.length > 0
+      ) {
+        sharedOptions[passageNumber]["match-person"] = firstMPQuestion.options;
       }
     }
   });
 
-  container.innerHTML = currentTest.passages.map((passage, passageIndex) => 
-    createPassageCard(passage, passageIndex + 1)
-  ).join('');
-  
+  container.innerHTML = currentTest.passages
+    .map((passage, passageIndex) =>
+      createPassageCard(passage, passageIndex + 1)
+    )
+    .join("");
+
   // Update question numbers globally and set up auto-propagation
   updateQuestionNumbers();
-  
+
   currentTest.passages.forEach((passage, passageIndex) => {
     const passageNumber = passageIndex + 1;
-    
+
     // Set up auto-propagation for all matching questions
-    ['paragraph-matching', 'match-person'].forEach(type => {
-      const questions = document.querySelectorAll(`#questions${passageNumber} .question-item[data-type="${type}"]`);
-      questions.forEach(question => {
+    ["paragraph-matching", "match-person"].forEach((type) => {
+      const questions = document.querySelectorAll(
+        `#questions${passageNumber} .question-item[data-type="${type}"]`
+      );
+      questions.forEach((question) => {
         const questionId = question.dataset.questionId;
         setupOptionAutoPropagate(questionId, type, passageNumber);
       });
@@ -325,8 +422,10 @@ function displayPassages(skipSync = false) {
 // Create passage card HTML
 function createPassageCard(passage, passageNumber) {
   const passageIndex = passageNumber - 1;
-  const questionCount = passage.questions ? passage.questions.filter(q => q.type !== 'text-question').length : 0;
-  
+  const questionCount = passage.questions
+    ? passage.questions.filter((q) => q.type !== "text-question").length
+    : 0;
+
   return `
     <div class="passage-container" data-passage="${passageNumber}">
       <div class="passage-header">
@@ -343,19 +442,31 @@ function createPassageCard(passage, passageNumber) {
       
           <div class="form-group">
         <label>Passage Title *</label>
-        <input type="text" class="passage-title-input" placeholder="e.g., The discovery of a baby mammoth" value="${(passage.title || '').replace(/"/g, '&quot;')}" onchange="updatePassage(${passageIndex}, 'title', this.value)" required>
+        <input type="text" class="passage-title-input" placeholder="e.g., The discovery of a baby mammoth" value="${(
+          passage.title || ""
+        ).replace(
+          /"/g,
+          "&quot;"
+        )}" onchange="updatePassage(${passageIndex}, 'title', this.value)" required>
           </div>
       
           <div class="form-group">
         <label>Instructions</label>
         <input type="text" class="passage-instructions" placeholder="e.g., You should spend about 20 minutes on Questions 1-13" 
-       value="${(passage.instructions || '').replace(/"/g, '&quot;')}" onchange="updatePassage(${passageIndex}, 'instructions', this.value)">
+       value="${(passage.instructions || "").replace(
+         /"/g,
+         "&quot;"
+       )}" onchange="updatePassage(${passageIndex}, 'instructions', this.value)">
         <span class="helper-text">Customize the question numbers for this passage (e.g., Questions 1-13 or Questions 14-26)</span>     
           </div>
       
           <div class="form-group">
         <label>Passage Text *</label>
-        <textarea class="passage-text" rows="10" placeholder="Paste or type the full reading passage text here..." onchange="updatePassage(${passageIndex}, 'text', this.value)" required>${(passage.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+        <textarea class="passage-text" rows="10" placeholder="Paste or type the full reading passage text here..." onchange="updatePassage(${passageIndex}, 'text', this.value)" required>${(
+    passage.text || ""
+  )
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")}</textarea>
         <span class="helper-text">This is the main text students will read</span>
         </div>
         
@@ -364,9 +475,20 @@ function createPassageCard(passage, passageNumber) {
           <span class="questions-title">Questions</span>
         </div>
         <div class="questions-container" id="questions${passageNumber}">
-          ${passage.questions ? passage.questions.map((question, questionIndex) => 
-            createQuestionItem(question, passageNumber, questionIndex, passageIndex)
-          ).join('') : ''}
+          ${
+            passage.questions
+              ? passage.questions
+                  .map((question, questionIndex) =>
+                    createQuestionItem(
+                      question,
+                      passageNumber,
+                      questionIndex,
+                      passageIndex
+                    )
+                  )
+                  .join("")
+              : ""
+          }
         </div>
         <div class="add-question-dropdown" style="margin-top: 10px;">
           <button type="button" class="add-question-btn" onclick="toggleQuestionMenu(${passageNumber})">
@@ -385,6 +507,7 @@ function createPassageCard(passage, passageNumber) {
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multiple-choice')">Multiple Choice</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multi-select')">Multi-Select</div>
           </div>
           </div>
         </div>
@@ -393,10 +516,15 @@ function createPassageCard(passage, passageNumber) {
 }
 
 // Create question item HTML (matching add reading structure)
-function createQuestionItem(question, passageNumber, questionIndex, passageIndex) {
+function createQuestionItem(
+  question,
+  passageNumber,
+  questionIndex,
+  passageIndex
+) {
   const questionId = ++questionIdCounter;
-  const type = question.type || 'gap-fill';
-  let questionHTML = '';
+  const type = question.type || "gap-fill";
+  let questionHTML = "";
 
   switch (type) {
     case "gap-fill":
@@ -407,9 +535,22 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
         <span class="question-type-badge gap-fill">Gap Fill</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text" value="${(question.question || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
-      <input type="text" placeholder="Answer(s) - separate multiple with comma" class="question-answer" value="${Array.isArray(question.answer) ? question.answer.join(', ') : (question.answer || '')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+      <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text" value="${(
+        question.question || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
+      <input type="text" placeholder="Answer(s) - separate multiple with comma" class="question-answer" value="${
+        Array.isArray(question.answer)
+          ? question.answer.join(", ")
+          : question.answer || ""
+      }" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
     </div>
   `;
       break;
@@ -420,10 +561,29 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
         <span class="question-type-badge" style="background: #607D8B;">Text/Header</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="3" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="Title (optional)" class="question-title" value="${(question.title || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
-      <input type="text" placeholder="Subheading (optional)" class="question-subheading" value="${(question.subheading || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'subheading', this.value)">
-      <input type="text" placeholder="Plain text (optional)" class="question-text" value="${(question.text || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'text', this.value)">
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="3" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+      <input type="text" placeholder="Title (optional)" class="question-title" value="${(
+        question.title || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
+      <input type="text" placeholder="Subheading (optional)" class="question-subheading" value="${(
+        question.subheading || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'subheading', this.value)">
+      <input type="text" placeholder="Plain text (optional)" class="question-text" value="${(
+        question.text || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'text', this.value)">
       <small style="color: #888;">Fill any or all fields - they will appear as headers/text</small>
     </div>
   `;
@@ -436,13 +596,28 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
         <span class="question-type-badge tfng">True/False/Not Given</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="Statement" class="question-text" value="${(question.question || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+      <input type="text" placeholder="Statement" class="question-text" value="${(
+        question.question || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
       <select class="question-answer" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
         <option value="">Select answer</option>
-        <option value="TRUE" ${question.answer === 'TRUE' ? 'selected' : ''}>TRUE</option>
-        <option value="FALSE" ${question.answer === 'FALSE' ? 'selected' : ''}>FALSE</option>
-        <option value="NOT GIVEN" ${question.answer === 'NOT GIVEN' ? 'selected' : ''}>NOT GIVEN</option>
+        <option value="TRUE" ${
+          question.answer === "TRUE" ? "selected" : ""
+        }>TRUE</option>
+        <option value="FALSE" ${
+          question.answer === "FALSE" ? "selected" : ""
+        }>FALSE</option>
+        <option value="NOT GIVEN" ${
+          question.answer === "NOT GIVEN" ? "selected" : ""
+        }>NOT GIVEN</option>
       </select>
     </div>
   `;
@@ -455,23 +630,38 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
         <span class="question-type-badge ynng">Yes/No/Not Given</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="Statement" class="question-text" value="${(question.question || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+      <input type="text" placeholder="Statement" class="question-text" value="${(
+        question.question || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
       <select class="question-answer" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
         <option value="">Select answer</option>
-        <option value="YES" ${question.answer === 'YES' ? 'selected' : ''}>YES</option>
-        <option value="NO" ${question.answer === 'NO' ? 'selected' : ''}>NO</option>
-        <option value="NOT GIVEN" ${question.answer === 'NOT GIVEN' ? 'selected' : ''}>NOT GIVEN</option>
+        <option value="YES" ${
+          question.answer === "YES" ? "selected" : ""
+        }>YES</option>
+        <option value="NO" ${
+          question.answer === "NO" ? "selected" : ""
+        }>NO</option>
+        <option value="NOT GIVEN" ${
+          question.answer === "NOT GIVEN" ? "selected" : ""
+        }>NOT GIVEN</option>
       </select>
     </div>
   `;
       break;
     case "multiple-choice":
       const mcOptions = question.options || [
-        { label: 'A', text: '' },
-        { label: 'B', text: '' },
-        { label: 'C', text: '' },
-        { label: 'D', text: '' }
+        { label: "A", text: "" },
+        { label: "B", text: "" },
+        { label: "C", text: "" },
+        { label: "D", text: "" },
       ];
       questionHTML = `
     <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
@@ -480,17 +670,28 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
         <span class="question-type-badge mc">Multiple Choice</span>
         <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
       </div>
-      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="Question" class="question-text" value="${(question.question || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+      <input type="text" placeholder="Question" class="question-text" value="${(
+        question.question || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
       <div class="mc-options" id="mc-options-${questionId}">
-        ${mcOptions.map((opt, optIdx) => `
+        ${mcOptions
+          .map(
+            (opt, optIdx) => `
         <div class="mc-option">
           <input 
             type="radio" 
             id="mc-answer-${questionId}-${optIdx}" 
             name="mc-answer-${questionId}"
             value="${opt.label}" 
-            ${question.answer === opt.label ? 'checked' : ''} 
+            ${question.answer === opt.label ? "checked" : ""} 
             onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)"
           >
           <label for="mc-answer-${questionId}-${optIdx}">${opt.label}</label>
@@ -502,12 +703,14 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
             placeholder="Option ${opt.label} text" 
             class="option-text" 
             data-option="${opt.label}" 
-            value="${(opt.text || '').replace(/"/g, '&quot;')}" 
+            value="${(opt.text || "").replace(/"/g, "&quot;")}" 
             onchange="updateMCOption(${passageIndex}, ${questionIndex}, ${optIdx}, this.value)"
           >
           <button type="button" onclick="removeMCOption(${questionId}, ${passageIndex}, ${questionIndex}, ${optIdx})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
         </div>
-        `).join('')}
+        `
+          )
+          .join("")}
       </div>
       <button type="button" onclick="addMCOption(${questionId}, ${passageIndex}, ${questionIndex})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
     </div>
@@ -541,52 +744,163 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
 
       const pmOptions = sharedOptions[passageNumber][type];
 
-      const matchingTypeLabel = type === 'paragraph-matching' ? 'Paragraph Matching' : 'Match Person/Feature';
-      const matchingTypeClass = type === 'paragraph-matching' ? 'pm' : 'mp';
-      const matchingIdPrefix = type === 'paragraph-matching' ? 'pm' : 'match';
-      
+      const matchingTypeLabel =
+        type === "paragraph-matching"
+          ? "Paragraph Matching"
+          : "Match Person/Feature";
+      const matchingTypeClass = type === "paragraph-matching" ? "pm" : "mp";
+      const matchingIdPrefix = type === "paragraph-matching" ? "pm" : "match";
+
       questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
-        <span class="question-type-badge ${matchingTypeClass}">${matchingTypeLabel}</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 14-18\nReading Passage 2 has six paragraphs...')" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
-      <input type="text" placeholder="${type === 'paragraph-matching' ? 'Question/Information to find' : 'Statement to match'}" class="question-text" value="${(question.question || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
-      <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="question-answer" value="${(question.answer || '').replace(/"/g, '&quot;')}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
-      <div class="options-container">
-        <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
-          Options (shared across all ${matchingTypeLabel.toLowerCase()} questions in this passage):
-          <button type="button" onclick="toggleOptionsEdit(${questionId}, '${type}', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit Options</button>
-        </label>
-        <div class="${matchingIdPrefix}-options" id="${matchingIdPrefix}-options-${questionId}" style="display: none;" data-passage="${passageNumber}">
-          ${pmOptions
-            .map(
-              (opt) => `
-            <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;">
-              <input type="text" value="${(opt.text || '').replace(/"/g, '&quot;')}" class="option-text" data-label="${opt.label}" style="flex: 1;">
-              <button type="button" onclick="removeOption(this, '${type}', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+            <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
+              <div class="question-header">
+                <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
+                <span class="question-type-badge ${matchingTypeClass}">${matchingTypeLabel}</span>
+                <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
+              </div>
+              <textarea placeholder="Group instruction (optional, e.g., 'Questions 14-18\nReading Passage 2 has six paragraphs...')" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+        question.groupInstruction || ""
+      )
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</textarea>
+              <input type="text" placeholder="${
+                type === "paragraph-matching"
+                  ? "Question/Information to find"
+                  : "Statement to match"
+              }" class="question-text" value="${(
+        question.question || ""
+      ).replace(
+        /"/g,
+        "&quot;"
+      )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">
+              <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="question-answer" value="${safeAnswerString(
+                question.answer
+              ).replace(
+                /"/g,
+                "&quot;"
+              )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
+              <div class="options-container">
+                <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
+                  Options (shared across all ${matchingTypeLabel.toLowerCase()} questions in this passage):
+                  <button type="button" onclick="toggleOptionsEdit(${questionId}, '${type}', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">Edit Options</button>
+                </label>
+                <div class="${matchingIdPrefix}-options" id="${matchingIdPrefix}-options-${questionId}" style="display: none;" data-passage="${passageNumber}">
+                  ${pmOptions
+                    .map(
+                      (opt) => `
+                    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
+                      <input type="text" value="${
+                        opt.label
+                      }" class="option-label" style="width: 40px; text-align: center;">
+                      <input type="text" value="${(opt.text || "").replace(
+                        /"/g,
+                        "&quot;"
+                      )}" class="option-text" data-label="${
+                        opt.label
+                      }" style="flex: 1;">
+                      <button type="button" onclick="removeOption(this, '${type}', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                  <button type="button" onclick="addOption(${questionId}, '${type}', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+                </div>
+                <div class="options-preview" id="options-preview-${questionId}">
+                  ${pmOptions
+                    .map(
+                      (opt) =>
+                        `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
+                          opt.label
+                        }: ${opt.text || "(empty)"}</span>`
+                    )
+                    .join("")}
+                </div>
+              </div>
             </div>
-          `
-            )
-            .join("")}
-          <button type="button" onclick="addOption(${questionId}, '${type}', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
-        </div>
-        <div class="options-preview" id="options-preview-${questionId}">
-          ${pmOptions
-            .map(
-              (opt) =>
-                `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
-                  opt.label
-                }: ${opt.text || "(empty)"}</span>`
-            )
-            .join("")}
-        </div>
-      </div>
-    </div>
-  `;
+          `;
+      break;
+
+    case "question-group":
+      // Handle question-group with groupType multi-select
+      if (question.groupType === "multi-select") {
+        const options = question.options || {};
+        const subQuestions = question.questions || [
+          { question: "", answer: "" },
+          { question: "", answer: "" },
+        ];
+
+        const optionKeys = Object.keys(options).sort();
+
+        questionHTML = `
+              <div class="question-item" data-question-id="${questionId}" data-type="multi-select" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
+                <div class="question-header">
+                  <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>-<span class="question-index-end"></span>.</span>
+                  <span class="question-type-badge" style="background: #FF6B6B;">Multi-Select</span>
+                  <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <textarea placeholder="Group instruction (e.g., 'Questions 22 and 23\nChoose TWO letters, A–E.')" class="group-instruction" rows="2" style="min-height:70px;" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(
+          question.groupInstruction || ""
+        )
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")}</textarea>
+                  <input type="text" placeholder="Question text" class="multi-select-text" value="${(
+                    question.text || ""
+                  ).replace(
+                    /"/g,
+                    "&quot;"
+                  )}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'text', this.value)">
+                </div>
+                <div class="multi-select-subquestions" id="multi-select-questions-${questionId}" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+                  ${subQuestions
+                    .map(
+                      (subQ, subQIdx) => `
+                  <div class="multi-select-subquestion" style="padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                    <label style="font-weight:600; display:block; margin-bottom:6px;">Statement ${
+                      subQIdx + 1
+                    }:</label>
+                    <input class="subquestion-answer-input" placeholder="Answer letter" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" value="${safeAnswerString(
+                      subQ.answer
+                    ).toUpperCase()}" oninput="this.value = this.value.toUpperCase(); updateMultiSelectSubquestion(${passageIndex}, ${questionIndex}, ${subQIdx}, 'answer', this.value);">
+                    <button type="button" onclick="removeMultiSelectSubquestion(${questionId}, ${passageIndex}, ${questionIndex}, ${subQIdx})" style="padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;">Remove Sub-question</button>
+                  </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+                <button type="button" onclick="addMultiSelectSubquestion(${questionId}, ${passageIndex}, ${questionIndex})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Sub-question</button>
+                <div class="options-container" style="margin-top: 15px;">
+                  <label style="display: block; margin: 10px 0 5px; font-weight: 600;">Options:</label>
+                  <div class="multi-select-options-list" id="multi-select-options-${questionId}">
+                    ${optionKeys
+                      .map(
+                        (key) => `
+                    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
+                      <input type="text" value="${key}" class="option-label" style="width: 40px; text-align: center;" readonly>
+                      <input type="text" placeholder="Option ${key} text" class="option-text" data-option="${key}" style="flex: 1;" value="${(
+                          options[key] || ""
+                        ).replace(
+                          /"/g,
+                          "&quot;"
+                        )}" onchange="updateMultiSelectOptionValue(${passageIndex}, ${questionIndex}, '${key}', this.value, ${questionId})">
+                      <button type="button" onclick="removeMultiSelectOption(this, ${questionId}, ${passageIndex}, ${questionIndex})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+                    </div>
+                    `
+                      )
+                      .join("")}
+                  </div>
+                  <button type="button" onclick="addMultiSelectOption(${questionId}, ${passageIndex}, ${questionIndex})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+                </div>
+              </div>
+            `;
+        // Initialize dropdowns after HTML is inserted
+        setTimeout(() => {
+          updateMultiSelectOptionDropdowns(questionId);
+        }, 0);
+      } else {
+        // Handle other question-group types if needed
+        questionHTML = "";
+      }
       break;
   }
 
@@ -595,9 +909,9 @@ function createQuestionItem(question, passageNumber, questionIndex, passageIndex
 
 // Create question card HTML (old function - keeping for compatibility but not used)
 function createQuestionCard(question, passageIndex, questionIndex) {
-  const questionType = question.type || 'gap-fill';
+  const questionType = question.type || "gap-fill";
   const typeLabel = QUESTION_TYPES[questionType] || questionType;
-  
+
   return `
     <div class="question-card question-type-${questionType}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
       <div class="question-header">
@@ -631,72 +945,101 @@ function createQuestionCard(question, passageIndex, questionIndex) {
 // Create question form based on type
 function createQuestionForm(question, passageIndex, questionIndex) {
   const isFirstQuestion = questionIndex === 0;
-  const isTextQuestion = question.type === 'text-question';
-  
+  const isTextQuestion = question.type === "text-question";
+
   let baseForm = `
     <div class="form-group">
       <label>Question Type:</label>
       <select onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'type', this.value); location.reload();">
-        ${Object.entries(QUESTION_TYPES).map(([value, label]) => 
-          `<option value="${value}" ${question.type === value ? 'selected' : ''}>${label}</option>`
-        ).join('')}
+        ${Object.entries(QUESTION_TYPES)
+          .map(
+            ([value, label]) =>
+              `<option value="${value}" ${
+                question.type === value ? "selected" : ""
+              }>${label}</option>`
+          )
+          .join("")}
       </select>
     </div>
   `;
-  
+
   // Only show group instruction for first question
   if (isFirstQuestion) {
     baseForm += `
       <div class="form-group">
         <label>Group Instruction (optional):</label>
-        <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${question.groupInstruction || ''}</textarea>
+        <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${
+      question.groupInstruction || ""
+    }</textarea>
       </div>
     `;
   }
-  
+
   // Only show title, subheading, and text for text-question type
   if (isTextQuestion) {
     baseForm += `
       <div class="form-group">
         <label>Title (optional):</label>
-        <input type="text" value="${question.title || ''}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
+        <input type="text" value="${
+          question.title || ""
+        }" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
       </div>
       
       <div class="form-group">
         <label>Subheading (optional):</label>
-        <input type="text" value="${question.subheading || ''}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'subheading', this.value)">
+        <input type="text" value="${
+          question.subheading || ""
+        }" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'subheading', this.value)">
       </div>
       
       <div class="form-group">
         <label>Text (optional):</label>
-        <input type="text" value="${question.text || ''}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'text', this.value)">
+        <input type="text" value="${
+          question.text || ""
+        }" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'text', this.value)">
       </div>
     `;
   }
 
   // Add type-specific form elements
-  let typeSpecificForm = '';
-  
+  let typeSpecificForm = "";
+
   switch (question.type) {
-    case 'gap-fill':
-      typeSpecificForm = createGapFillForm(question, passageIndex, questionIndex);
+    case "gap-fill":
+      typeSpecificForm = createGapFillForm(
+        question,
+        passageIndex,
+        questionIndex
+      );
       break;
-    case 'true-false-notgiven':
-    case 'yes-no-notgiven':
-      typeSpecificForm = createTrueFalseForm(question, passageIndex, questionIndex);
+    case "true-false-notgiven":
+    case "yes-no-notgiven":
+      typeSpecificForm = createTrueFalseForm(
+        question,
+        passageIndex,
+        questionIndex
+      );
       break;
-    case 'multiple-choice':
-      typeSpecificForm = createMultipleChoiceForm(question, passageIndex, questionIndex);
+    case "multiple-choice":
+      typeSpecificForm = createMultipleChoiceForm(
+        question,
+        passageIndex,
+        questionIndex
+      );
       break;
-    case 'paragraph-matching':
-    case 'match-person':
-    case 'match-purpose':
-      typeSpecificForm = createMatchingForm(question, passageIndex, questionIndex);
+    case "paragraph-matching":
+    case "match-person":
+    case "match-purpose":
+      typeSpecificForm = createMatchingForm(
+        question,
+        passageIndex,
+        questionIndex
+      );
       break;
-    case 'table':
+    case "table":
       typeSpecificForm = createTableForm(question, passageIndex, questionIndex);
       break;
-    case 'text-question':
+    case "text-question":
       // Text questions don't need additional form elements
       break;
   }
@@ -709,18 +1052,24 @@ function createGapFillForm(question, passageIndex, questionIndex) {
   return `
     <div class="form-group">
       <label>Question:</label>
-      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${question.question || ''}</textarea>
+      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${
+    question.question || ""
+  }</textarea>
     </div>
     
     <div class="form-group">
       <label>Answer(s):</label>
       <div class="answer-input">
-        ${(question.answer || []).map((answer, answerIndex) => `
+        ${(question.answer || [])
+          .map(
+            (answer, answerIndex) => `
           <div class="option-item">
             <input type="text" value="${answer}" onchange="updateAnswer(${passageIndex}, ${questionIndex}, ${answerIndex}, this.value)">
             <button class="option-remove" onclick="removeAnswer(${passageIndex}, ${questionIndex}, ${answerIndex})">Remove</button>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
         <button class="add-option-btn" onclick="addAnswer(${passageIndex}, ${questionIndex})">Add Answer</button>
       </div>
     </div>
@@ -729,22 +1078,30 @@ function createGapFillForm(question, passageIndex, questionIndex) {
 
 // Create true/false form
 function createTrueFalseForm(question, passageIndex, questionIndex) {
-  const options = question.type === 'true-false-notgiven' 
-    ? ['TRUE', 'FALSE', 'NOT GIVEN']
-    : ['YES', 'NO', 'NOT GIVEN'];
-    
+  const options =
+    question.type === "true-false-notgiven"
+      ? ["TRUE", "FALSE", "NOT GIVEN"]
+      : ["YES", "NO", "NOT GIVEN"];
+
   return `
     <div class="form-group">
       <label>Question:</label>
-      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${question.question || ''}</textarea>
+      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${
+    question.question || ""
+  }</textarea>
     </div>
     
     <div class="form-group">
       <label>Answer:</label>
       <select class="answer-select" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
-        ${options.map(option => 
-          `<option value="${option}" ${question.answer === option ? 'selected' : ''}>${option}</option>`
-        ).join('')}
+        ${options
+          .map(
+            (option) =>
+              `<option value="${option}" ${
+                question.answer === option ? "selected" : ""
+              }>${option}</option>`
+          )
+          .join("")}
       </select>
     </div>
   `;
@@ -755,19 +1112,25 @@ function createMultipleChoiceForm(question, passageIndex, questionIndex) {
   return `
     <div class="form-group">
       <label>Question:</label>
-      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${question.question || ''}</textarea>
+      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${
+    question.question || ""
+  }</textarea>
     </div>
     
     <div class="form-group">
       <label>Options:</label>
       <div class="options-container">
-        ${(question.options || []).map((option, optionIndex) => `
+        ${(question.options || [])
+          .map(
+            (option, optionIndex) => `
           <div class="option-item">
             <span class="option-label">${option.label}:</span>
             <input type="text" class="option-text" value="${option.text}" onchange="updateOption(${passageIndex}, ${questionIndex}, ${optionIndex}, 'text', this.value)">
             <button class="option-remove" onclick="removeOption(${passageIndex}, ${questionIndex}, ${optionIndex})">Remove</button>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
         <button class="add-option-btn" onclick="addOption(${passageIndex}, ${questionIndex})">Add Option</button>
       </div>
     </div>
@@ -775,9 +1138,14 @@ function createMultipleChoiceForm(question, passageIndex, questionIndex) {
     <div class="form-group">
       <label>Correct Answer:</label>
       <select onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
-        ${(question.options || []).map(option => 
-          `<option value="${option.label}" ${question.answer === option.label ? 'selected' : ''}>${option.label}</option>`
-        ).join('')}
+        ${(question.options || [])
+          .map(
+            (option) =>
+              `<option value="${option.label}" ${
+                question.answer === option.label ? "selected" : ""
+              }>${option.label}</option>`
+          )
+          .join("")}
       </select>
     </div>
   `;
@@ -788,19 +1156,25 @@ function createMatchingForm(question, passageIndex, questionIndex) {
   return `
     <div class="form-group">
       <label>Question:</label>
-      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${question.question || ''}</textarea>
+      <textarea onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'question', this.value)">${
+    question.question || ""
+  }</textarea>
     </div>
     
     <div class="form-group">
       <label>Options:</label>
       <div class="options-container">
-        ${(question.options || []).map((option, optionIndex) => `
+        ${(question.options || [])
+          .map(
+            (option, optionIndex) => `
           <div class="option-item">
             <span class="option-label">${option.label}:</span>
             <input type="text" class="option-text" value="${option.text}" onchange="updateOption(${passageIndex}, ${questionIndex}, ${optionIndex}, 'text', this.value)">
             <button class="option-remove" onclick="removeOption(${passageIndex}, ${questionIndex}, ${optionIndex})">Remove</button>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
         <button class="add-option-btn" onclick="addOption(${passageIndex}, ${questionIndex})">Add Option</button>
       </div>
     </div>
@@ -808,9 +1182,14 @@ function createMatchingForm(question, passageIndex, questionIndex) {
     <div class="form-group">
       <label>Correct Answer:</label>
       <select onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'answer', this.value)">
-        ${(question.options || []).map(option => 
-          `<option value="${option.label}" ${question.answer === option.label ? 'selected' : ''}>${option.label}</option>`
-        ).join('')}
+        ${(question.options || [])
+          .map(
+            (option) =>
+              `<option value="${option.label}" ${
+                question.answer === option.label ? "selected" : ""
+              }>${option.label}</option>`
+          )
+          .join("")}
       </select>
     </div>
   `;
@@ -821,7 +1200,9 @@ function createTableForm(question, passageIndex, questionIndex) {
   return `
     <div class="form-group">
       <label>Table Title:</label>
-      <input type="text" value="${question.title || ''}" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
+      <input type="text" value="${
+        question.title || ""
+      }" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'title', this.value)">
     </div>
     
     <div class="form-group">
@@ -830,29 +1211,43 @@ function createTableForm(question, passageIndex, questionIndex) {
         <table class="table-editor">
           <thead>
             <tr>
-              ${(question.columns || []).map((column, columnIndex) => `
+              ${(question.columns || [])
+                .map(
+                  (column, columnIndex) => `
                 <th>
                   <input type="text" value="${column}" onchange="updateTableColumn(${passageIndex}, ${questionIndex}, ${columnIndex}, this.value)">
                 </th>
-              `).join('')}
+              `
+                )
+                .join("")}
               <th>
                 <button class="add-option-btn" onclick="addTableColumn(${passageIndex}, ${questionIndex})">Add Column</button>
               </th>
             </tr>
           </thead>
           <tbody>
-            ${(question.rows || []).map((row, rowIndex) => `
+            ${(question.rows || [])
+              .map(
+                (row, rowIndex) => `
               <tr>
-                ${(question.columns || []).map((column, columnIndex) => `
+                ${(question.columns || [])
+                  .map(
+                    (column, columnIndex) => `
                   <td>
-                    <input type="text" value="${row[Object.keys(row)[columnIndex]] || ''}" onchange="updateTableRow(${passageIndex}, ${questionIndex}, ${rowIndex}, ${columnIndex}, this.value)">
+                    <input type="text" value="${
+                      row[Object.keys(row)[columnIndex]] || ""
+                    }" onchange="updateTableRow(${passageIndex}, ${questionIndex}, ${rowIndex}, ${columnIndex}, this.value)">
                   </td>
-                `).join('')}
+                `
+                  )
+                  .join("")}
                 <td>
                   <button class="option-remove" onclick="removeTableRow(${passageIndex}, ${questionIndex}, ${rowIndex})">Remove</button>
                 </td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join("")}
             <tr>
               <td colspan="${(question.columns || []).length + 1}">
                 <button class="add-option-btn" onclick="addTableRow(${passageIndex}, ${questionIndex})">Add Row</button>
@@ -866,13 +1261,17 @@ function createTableForm(question, passageIndex, questionIndex) {
     <div class="form-group">
       <label>Answers:</label>
       <div class="answer-input">
-        ${Object.entries(question.answer || {}).map(([key, value]) => `
+        ${Object.entries(question.answer || {})
+          .map(
+            ([key, value]) => `
           <div class="option-item">
             <span class="option-label">${key}:</span>
             <input type="text" value="${value}" onchange="updateTableAnswer(${passageIndex}, ${questionIndex}, '${key}', this.value)">
             <button class="option-remove" onclick="removeTableAnswer(${passageIndex}, ${questionIndex}, '${key}')">Remove</button>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
         <button class="add-option-btn" onclick="addTableAnswer(${passageIndex}, ${questionIndex})">Add Answer</button>
       </div>
     </div>
@@ -896,26 +1295,45 @@ function updateQuestion(passageIndex, questionIndex, field, value) {
     currentTest.passages[passageIndex].questions[questionIndex] = {};
   }
   currentTest.passages[passageIndex].questions[questionIndex][field] = value;
-  console.log(`Updated question ${passageIndex}-${questionIndex} ${field}:`, value);
+  console.log(
+    `Updated question ${passageIndex}-${questionIndex} ${field}:`,
+    value
+  );
 }
 
 function updateAnswer(passageIndex, questionIndex, answerIndex, value) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].answer) {
     currentTest.passages[passageIndex].questions[questionIndex].answer = [];
   }
-  currentTest.passages[passageIndex].questions[questionIndex].answer[answerIndex] = value;
-  console.log(`Updated answer ${passageIndex}-${questionIndex}-${answerIndex}:`, value);
+  currentTest.passages[passageIndex].questions[questionIndex].answer[
+    answerIndex
+  ] = value;
+  console.log(
+    `Updated answer ${passageIndex}-${questionIndex}-${answerIndex}:`,
+    value
+  );
 }
 
 function updateOption(passageIndex, questionIndex, optionIndex, field, value) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
     currentTest.passages[passageIndex].questions[questionIndex].options = [];
   }
-  if (!currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex]) {
-    currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex] = {};
+  if (
+    !currentTest.passages[passageIndex].questions[questionIndex].options[
+      optionIndex
+    ]
+  ) {
+    currentTest.passages[passageIndex].questions[questionIndex].options[
+      optionIndex
+    ] = {};
   }
-  currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex][field] = value;
-  console.log(`Updated option ${passageIndex}-${questionIndex}-${optionIndex} ${field}:`, value);
+  currentTest.passages[passageIndex].questions[questionIndex].options[
+    optionIndex
+  ][field] = value;
+  console.log(
+    `Updated option ${passageIndex}-${questionIndex}-${optionIndex} ${field}:`,
+    value
+  );
 }
 
 // Add/Remove functions
@@ -923,39 +1341,54 @@ function addAnswer(passageIndex, questionIndex) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].answer) {
     currentTest.passages[passageIndex].questions[questionIndex].answer = [];
   }
-  currentTest.passages[passageIndex].questions[questionIndex].answer.push('');
+  currentTest.passages[passageIndex].questions[questionIndex].answer.push("");
   displayPassages(); // Refresh to show new answer field
 }
 
 function removeAnswer(passageIndex, questionIndex, answerIndex) {
-  currentTest.passages[passageIndex].questions[questionIndex].answer.splice(answerIndex, 1);
+  currentTest.passages[passageIndex].questions[questionIndex].answer.splice(
+    answerIndex,
+    1
+  );
   displayPassages(); // Refresh to remove answer field
 }
 
 // Legacy functions for old question types (not used in new structure)
 function addLegacyOption(passageIndex, questionIndex) {
-  if (!currentTest.passages[passageIndex] || !currentTest.passages[passageIndex].questions || !currentTest.passages[passageIndex].questions[questionIndex]) {
+  if (
+    !currentTest.passages[passageIndex] ||
+    !currentTest.passages[passageIndex].questions ||
+    !currentTest.passages[passageIndex].questions[questionIndex]
+  ) {
     console.error("Cannot add option: invalid passage or question index");
     return;
   }
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
     currentTest.passages[passageIndex].questions[questionIndex].options = [];
   }
-  const optionCount = currentTest.passages[passageIndex].questions[questionIndex].options.length;
+  const optionCount =
+    currentTest.passages[passageIndex].questions[questionIndex].options.length;
   const newLabel = String.fromCharCode(65 + optionCount); // A, B, C, D, etc.
   currentTest.passages[passageIndex].questions[questionIndex].options.push({
     label: newLabel,
-    text: ''
+    text: "",
   });
   displayPassages(); // Refresh to show new option
 }
 
 function removeLegacyOption(passageIndex, questionIndex, optionIndex) {
-  if (!currentTest.passages[passageIndex] || !currentTest.passages[passageIndex].questions || !currentTest.passages[passageIndex].questions[questionIndex]) {
+  if (
+    !currentTest.passages[passageIndex] ||
+    !currentTest.passages[passageIndex].questions ||
+    !currentTest.passages[passageIndex].questions[questionIndex]
+  ) {
     console.error("Cannot remove option: invalid passage or question index");
     return;
   }
-  currentTest.passages[passageIndex].questions[questionIndex].options.splice(optionIndex, 1);
+  currentTest.passages[passageIndex].questions[questionIndex].options.splice(
+    optionIndex,
+    1
+  );
   displayPassages(); // Refresh to remove option
 }
 
@@ -964,7 +1397,9 @@ function updateTableColumn(passageIndex, questionIndex, columnIndex, value) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].columns) {
     currentTest.passages[passageIndex].questions[questionIndex].columns = [];
   }
-  currentTest.passages[passageIndex].questions[questionIndex].columns[columnIndex] = value;
+  currentTest.passages[passageIndex].questions[questionIndex].columns[
+    columnIndex
+  ] = value;
   displayPassages(); // Refresh to update table structure
 }
 
@@ -972,19 +1407,33 @@ function addTableColumn(passageIndex, questionIndex) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].columns) {
     currentTest.passages[passageIndex].questions[questionIndex].columns = [];
   }
-  currentTest.passages[passageIndex].questions[questionIndex].columns.push('');
+  currentTest.passages[passageIndex].questions[questionIndex].columns.push("");
   displayPassages(); // Refresh to show new column
 }
 
-function updateTableRow(passageIndex, questionIndex, rowIndex, columnIndex, value) {
+function updateTableRow(
+  passageIndex,
+  questionIndex,
+  rowIndex,
+  columnIndex,
+  value
+) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].rows) {
     currentTest.passages[passageIndex].questions[questionIndex].rows = [];
   }
-  if (!currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex]) {
-    currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex] = {};
+  if (
+    !currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex]
+  ) {
+    currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex] =
+      {};
   }
-  const columnName = currentTest.passages[passageIndex].questions[questionIndex].columns[columnIndex];
-  currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex][columnName] = value;
+  const columnName =
+    currentTest.passages[passageIndex].questions[questionIndex].columns[
+      columnIndex
+    ];
+  currentTest.passages[passageIndex].questions[questionIndex].rows[rowIndex][
+    columnName
+  ] = value;
 }
 
 function addTableRow(passageIndex, questionIndex) {
@@ -992,15 +1441,20 @@ function addTableRow(passageIndex, questionIndex) {
     currentTest.passages[passageIndex].questions[questionIndex].rows = [];
   }
   const newRow = {};
-  currentTest.passages[passageIndex].questions[questionIndex].columns.forEach(column => {
-    newRow[column] = '';
-  });
+  currentTest.passages[passageIndex].questions[questionIndex].columns.forEach(
+    (column) => {
+      newRow[column] = "";
+    }
+  );
   currentTest.passages[passageIndex].questions[questionIndex].rows.push(newRow);
   displayPassages(); // Refresh to show new row
 }
 
 function removeTableRow(passageIndex, questionIndex, rowIndex) {
-  currentTest.passages[passageIndex].questions[questionIndex].rows.splice(rowIndex, 1);
+  currentTest.passages[passageIndex].questions[questionIndex].rows.splice(
+    rowIndex,
+    1
+  );
   displayPassages(); // Refresh to remove row
 }
 
@@ -1008,25 +1462,28 @@ function updateTableAnswer(passageIndex, questionIndex, key, value) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].answer) {
     currentTest.passages[passageIndex].questions[questionIndex].answer = {};
   }
-  currentTest.passages[passageIndex].questions[questionIndex].answer[key] = value;
+  currentTest.passages[passageIndex].questions[questionIndex].answer[key] =
+    value;
 }
 
 function addTableAnswer(passageIndex, questionIndex) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].answer) {
     currentTest.passages[passageIndex].questions[questionIndex].answer = {};
   }
-  const newKey = prompt('Enter answer key (e.g., q1, q2):');
+  const newKey = prompt("Enter answer key (e.g., q1, q2):");
   if (newKey) {
-    currentTest.passages[passageIndex].questions[questionIndex].answer[newKey] = '';
+    currentTest.passages[passageIndex].questions[questionIndex].answer[newKey] =
+      "";
     displayPassages(); // Refresh to show new answer
   }
 }
 
 function removeTableAnswer(passageIndex, questionIndex, key) {
-  delete currentTest.passages[passageIndex].questions[questionIndex].answer[key];
+  delete currentTest.passages[passageIndex].questions[questionIndex].answer[
+    key
+  ];
   displayPassages(); // Refresh to remove answer
 }
-
 
 // Toggle question type menu
 window.toggleQuestionMenu = function (passageNumber) {
@@ -1045,67 +1502,115 @@ window.toggleQuestionMenu = function (passageNumber) {
 window.addQuestion = function (passageNumber, type) {
   // Sync DOM to data before adding new question
   syncDOMToData();
-  
+
   const passageIndex = passageNumber - 1;
   if (!currentTest.passages[passageIndex].questions) {
     currentTest.passages[passageIndex].questions = [];
   }
-  
+
   // Preserve shared options for paragraph-matching and match-person
   let options = undefined;
-  if (type === 'multiple-choice') {
+  if (type === "multiple-choice") {
     options = [
-      { label: 'A', text: '' },
-      { label: 'B', text: '' },
-      { label: 'C', text: '' },
-      { label: 'D', text: '' }
+      { label: "A", text: "" },
+      { label: "B", text: "" },
+      { label: "C", text: "" },
+      { label: "D", text: "" },
     ];
-  } else if (type === 'paragraph-matching' || type === 'match-person') {
+  } else if (type === "paragraph-matching" || type === "match-person") {
     // If shared options exist, use them; otherwise use empty array
     if (sharedOptions[passageNumber] && sharedOptions[passageNumber][type]) {
       options = sharedOptions[passageNumber][type];
     } else {
       options = [];
     }
+  } else if (type === "multi-select") {
+    // Multi-select uses question-group structure
+    options = {
+      A: "",
+      B: "",
+      C: "",
+    };
   }
-  
-  const newQuestion = {
-    type: type,
-    question: '',
-    answer: type === 'gap-fill' ? [''] : (type === 'multiple-choice' ? '' : ''),
-    options: options
-  };
-  
+
+  let newQuestion;
+  if (type === "multi-select") {
+    newQuestion = {
+      type: "question-group",
+      groupType: "multi-select",
+      groupInstruction: "",
+      text: "",
+      questions: [
+        { question: "", answer: "" },
+        { question: "", answer: "" },
+      ],
+      options: options,
+    };
+  } else {
+    newQuestion = {
+      type: type,
+      question: "",
+      answer: type === "gap-fill" ? [""] : type === "multiple-choice" ? "" : "",
+      options: options,
+    };
+  }
+
   currentTest.passages[passageIndex].questions.push(newQuestion);
   displayPassages(); // Refresh to show new question
-  
+
   // Set up auto-propagation for all matching questions
-  if ((type === "paragraph-matching" || type === "match-person")) {
+  if (type === "paragraph-matching" || type === "match-person") {
     setTimeout(() => {
-      const questions = document.querySelectorAll(`#questions${passageNumber} .question-item[data-type="${type}"]`);
-      questions.forEach(question => {
+      const questions = document.querySelectorAll(
+        `#questions${passageNumber} .question-item[data-type="${type}"]`
+      );
+      questions.forEach((question) => {
         const questionId = question.dataset.questionId;
         setupOptionAutoPropagate(questionId, type, passageNumber);
       });
     }, 100);
   }
-  
+
   updateQuestionNumbers();
 };
 
 // Update question numbers globally across all passages (excluding text-question)
 function updateQuestionNumbers() {
   let globalCounter = 0;
-  
+
   // Go through all passages in order from currentTest.passages
   if (currentTest && currentTest.passages) {
     currentTest.passages.forEach((passage, passageIndex) => {
       const passageNumber = passageIndex + 1;
-      const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
-      
+      const items = document.querySelectorAll(
+        `#questions${passageNumber} .question-item`
+      );
+
       items.forEach((item) => {
-        const numEl = item.querySelector('.question-index');
-        if (numEl && item.dataset.type !== 'text-question') {
+        const type = item.dataset.type;
+        const numEl = item.querySelector(".question-index");
+        const numEndEl = item.querySelector(".question-index-end");
+
+        if (type === "multi-select") {
+          // Multi-select counts as multiple questions based on sub-questions
+          const subQuestions = item.querySelectorAll(
+            ".multi-select-subquestion"
+          );
+          const subQuestionCount = subQuestions.length;
+
+          if (numEl && numEndEl && subQuestionCount > 0) {
+            globalCounter++;
+            numEl.textContent = globalCounter;
+            globalCounter += subQuestionCount - 1;
+            numEndEl.textContent = globalCounter;
+          } else if (numEl) {
+            globalCounter++;
+            numEl.textContent = globalCounter;
+            if (numEndEl) {
+              numEndEl.textContent = globalCounter;
+            }
+          }
+        } else if (numEl && type !== "text-question") {
           globalCounter++;
           numEl.textContent = globalCounter;
         }
@@ -1128,7 +1633,11 @@ window.removeQuestion = function (questionId, passageIndex, questionIndex) {
 
 // Remove a passage
 window.removePassage = function (passageNumber) {
-  if (confirm("Are you sure you want to remove this passage and all its questions?")) {
+  if (
+    confirm(
+      "Are you sure you want to remove this passage and all its questions?"
+    )
+  ) {
     const passageIndex = passageNumber - 1;
     currentTest.passages.splice(passageIndex, 1);
     passageCount--;
@@ -1170,7 +1679,7 @@ function updateAddPassageButton() {
 }
 
 // Add new passage (matching add reading)
-window.addPassage = function() {
+window.addPassage = function () {
   if (passageCount >= 3) {
     alert("Maximum 3 passages allowed per test");
     return;
@@ -1183,14 +1692,14 @@ window.addPassage = function() {
   passageCount++;
   const passageNumber = passageCount;
   const passageIndex = passageNumber - 1;
-  
+
   const newPassage = {
-    title: '',
+    title: "",
     instructions: `You should spend about 20 minutes on Questions corresponding to this passage`,
-    text: '',
-    questions: []
+    text: "",
+    questions: [],
   };
-  
+
   currentTest.passages.push(newPassage);
   displayPassages();
   updatePassageCount();
@@ -1198,19 +1707,33 @@ window.addPassage = function() {
 };
 
 // Helper functions for question options
-window.updateMCOption = function(passageIndex, questionIndex, optionIndex, value) {
+window.updateMCOption = function (
+  passageIndex,
+  questionIndex,
+  optionIndex,
+  value
+) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
     currentTest.passages[passageIndex].questions[questionIndex].options = [];
   }
-  if (!currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex]) {
-    currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex] = { label: String.fromCharCode(65 + optionIndex), text: '' };
+  if (
+    !currentTest.passages[passageIndex].questions[questionIndex].options[
+      optionIndex
+    ]
+  ) {
+    currentTest.passages[passageIndex].questions[questionIndex].options[
+      optionIndex
+    ] = { label: String.fromCharCode(65 + optionIndex), text: "" };
   }
-  currentTest.passages[passageIndex].questions[questionIndex].options[optionIndex].text = value;
+  currentTest.passages[passageIndex].questions[questionIndex].options[
+    optionIndex
+  ].text = value;
 };
 
 // Helper: reindex multiple-choice option labels to A, B, C... after add/remove
 function reindexMCOptions(passageIndex, questionIndex) {
-  const question = currentTest.passages[passageIndex]?.questions?.[questionIndex];
+  const question =
+    currentTest.passages[passageIndex]?.questions?.[questionIndex];
   if (!question || !question.options) return;
 
   // Сохраняем старые опции, чтобы корректно пересчитать правильный ответ
@@ -1223,7 +1746,9 @@ function reindexMCOptions(passageIndex, questionIndex) {
 
   // Пересчитываем правильный ответ так, чтобы он указывал на ту же опцию по индексу
   if (question.answer) {
-    const oldIndex = oldOptions.findIndex((opt) => opt.label === question.answer);
+    const oldIndex = oldOptions.findIndex(
+      (opt) => opt.label === question.answer
+    );
     if (oldIndex !== -1 && newOptions[oldIndex]) {
       question.answer = newOptions[oldIndex].label;
     } else if (newOptions.length === 0) {
@@ -1239,13 +1764,13 @@ function reindexMCOptions(passageIndex, questionIndex) {
   question.options = newOptions;
 }
 
-window.addMCOption = function(questionId, passageIndex, questionIndex) {
+window.addMCOption = function (questionId, passageIndex, questionIndex) {
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
     currentTest.passages[passageIndex].questions[questionIndex].options = [];
   }
   currentTest.passages[passageIndex].questions[questionIndex].options.push({
     label: "", // буквы будут пересчитаны в reindexMCOptions
-    text: ""
+    text: "",
   });
   // после добавления пересчитываем метки A, B, C...
   reindexMCOptions(passageIndex, questionIndex);
@@ -1253,8 +1778,14 @@ window.addMCOption = function(questionId, passageIndex, questionIndex) {
   displayPassages(true);
 };
 
-window.removeMCOption = function(questionId, passageIndex, questionIndex, optionIndex) {
-  const options = currentTest.passages[passageIndex].questions[questionIndex].options;
+window.removeMCOption = function (
+  questionId,
+  passageIndex,
+  questionIndex,
+  optionIndex
+) {
+  const options =
+    currentTest.passages[passageIndex].questions[questionIndex].options;
   if (confirm("Remove this option?")) {
     options.splice(optionIndex, 1);
     // после удаления также пересчитываем метки
@@ -1269,17 +1800,19 @@ function setupOptionAutoPropagate(questionId, type, passageNumber) {
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
-  
+
   if (!container) return;
-  
+
   // Add input listeners to all option inputs
-  const optionInputs = container.querySelectorAll('.option-label, .option-text');
-  optionInputs.forEach(input => {
+  const optionInputs = container.querySelectorAll(
+    ".option-label, .option-text"
+  );
+  optionInputs.forEach((input) => {
     // Remove existing listeners to avoid duplicates
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
-    
-    newInput.addEventListener('input', () => {
+
+    newInput.addEventListener("input", () => {
       updateSharedOptionsFromQuestion(questionId, type, passageNumber);
       updateAllOptionsInPassage(type, passageNumber);
     });
@@ -1289,19 +1822,26 @@ function setupOptionAutoPropagate(questionId, type, passageNumber) {
 // Update shared options from any question as user types
 function updateSharedOptionsFromQuestion(questionId, type, passageNumber) {
   if (!questionId || !type || !passageNumber) {
-    console.error("updateSharedOptionsFromQuestion: Invalid parameters", { questionId, type, passageNumber });
+    console.error("updateSharedOptionsFromQuestion: Invalid parameters", {
+      questionId,
+      type,
+      passageNumber,
+    });
     return;
   }
-  
+
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
-  
+
   if (!container) {
-    console.warn("updateSharedOptionsFromQuestion: Container not found", `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`);
+    console.warn(
+      "updateSharedOptionsFromQuestion: Container not found",
+      `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+    );
     return;
   }
-  
+
   const newOptions = [];
   container.querySelectorAll(".option-row").forEach((row) => {
     const labelEl = row.querySelector(".option-label");
@@ -1318,7 +1858,7 @@ function updateSharedOptionsFromQuestion(questionId, type, passageNumber) {
     sharedOptions[passageNumber] = {};
   }
   sharedOptions[passageNumber][type] = newOptions;
-  
+
   // Update all questions of this type in the same passage in the data model
   const passageIndex = passageNumber - 1;
   if (currentTest.passages[passageIndex]) {
@@ -1335,55 +1875,64 @@ function updateAllOptionsInPassage(type, passageNumber) {
   const questions = document.querySelectorAll(
     `#questions${passageNumber} .question-item[data-type="${type}"]`
   );
-  
+
   const options = sharedOptions[passageNumber]?.[type] || [];
-  
+
   questions.forEach((question) => {
     const questionId = question.dataset.questionId;
     const container = document.getElementById(
       `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
     );
     const previewDiv = document.getElementById(`options-preview-${questionId}`);
-    
+
     if (!container || !previewDiv) return;
-    
+
     // Check if this container is currently being edited (visible)
     const isBeingEdited = container.style.display !== "none";
-    
+
     // If not being edited, update the options HTML
     if (!isBeingEdited) {
       const matchingIdPrefix = type === "paragraph-matching" ? "pm" : "match";
-      const optionsHTML = options
-        .map(
-          (opt) => `
+      const optionsHTML =
+        options
+          .map(
+            (opt) => `
         <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-          <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;">
-          <input type="text" value="${(opt.text || '').replace(/"/g, '&quot;')}" class="option-text" data-label="${opt.label}" style="flex: 1;">
+          <input type="text" value="${
+            opt.label
+          }" class="option-label" style="width: 40px; text-align: center;">
+          <input type="text" value="${(opt.text || "").replace(
+            /"/g,
+            "&quot;"
+          )}" class="option-text" data-label="${opt.label}" style="flex: 1;">
           <button type="button" onclick="removeOption(this, '${type}', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
         </div>
       `
-        )
-        .join("") +
+          )
+          .join("") +
         `<button type="button" onclick="addOption(${questionId}, '${type}', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>`;
-      
+
       container.innerHTML = optionsHTML;
     } else {
       // If being edited, just update the values in existing inputs
-      const optionRows = container.querySelectorAll('.option-row');
+      const optionRows = container.querySelectorAll(".option-row");
       optionRows.forEach((row, index) => {
         if (options[index]) {
-          const labelEl = row.querySelector('.option-label');
-          const textEl = row.querySelector('.option-text');
+          const labelEl = row.querySelector(".option-label");
+          const textEl = row.querySelector(".option-text");
           if (labelEl) labelEl.value = options[index].label;
           if (textEl) textEl.value = options[index].text;
         }
       });
     }
-    
+
     // Update preview for all questions
     previewDiv.innerHTML = options
-      .map(opt => 
-        `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${opt.label}: ${opt.text || "(empty)"}</span>`
+      .map(
+        (opt) =>
+          `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
+            opt.label
+          }: ${opt.text || "(empty)"}</span>`
       )
       .join("");
   });
@@ -1393,7 +1942,7 @@ function updateAllOptionsInPassage(type, passageNumber) {
 window.toggleOptionsEdit = function (questionId, type, passageNumber) {
   // First sync any currently open editor
   syncDOMToData();
-  
+
   const optionsDiv = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
@@ -1403,8 +1952,10 @@ window.toggleOptionsEdit = function (questionId, type, passageNumber) {
 
   if (optionsDiv.style.display === "none" || optionsDiv.style.display === "") {
     // Close any other open editors in this passage for this type
-    const allQuestions = document.querySelectorAll(`#questions${passageNumber} .question-item[data-type="${type}"]`);
-    allQuestions.forEach(question => {
+    const allQuestions = document.querySelectorAll(
+      `#questions${passageNumber} .question-item[data-type="${type}"]`
+    );
+    allQuestions.forEach((question) => {
       const qId = question.dataset.questionId;
       const otherOptionsDiv = document.getElementById(
         `${type === "paragraph-matching" ? "pm" : "match"}-options-${qId}`
@@ -1417,11 +1968,11 @@ window.toggleOptionsEdit = function (questionId, type, passageNumber) {
         otherPreviewDiv.style.display = "block";
       }
     });
-    
+
     // Open this editor
     optionsDiv.style.display = "block";
     previewDiv.style.display = "none";
-    
+
     // Set up auto-propagation for this question
     setupOptionAutoPropagate(questionId, type, passageNumber);
   } else {
@@ -1453,25 +2004,35 @@ function updateSharedOptionsFromContainer(container, type, passageNumber) {
     sharedOptions[passageNumber] = {};
   }
   sharedOptions[passageNumber][type] = newOptions;
-  console.log(`📝 Updated ${type} options for passage ${passageNumber}:`, newOptions);
+  console.log(
+    `📝 Updated ${type} options for passage ${passageNumber}:`,
+    newOptions
+  );
 }
 
 // Add new option
 window.addOption = function (questionId, type, passageNumber) {
   if (!questionId || !type || !passageNumber) {
-    console.error("addOption: Invalid parameters", { questionId, type, passageNumber });
+    console.error("addOption: Invalid parameters", {
+      questionId,
+      type,
+      passageNumber,
+    });
     return;
   }
-  
+
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
-  
+
   if (!container) {
-    console.error("addOption: Container not found", `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`);
+    console.error(
+      "addOption: Container not found",
+      `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
+    );
     return;
   }
-  
+
   const existingOptions = container.querySelectorAll(".option-row").length;
   const nextLetter = String.fromCharCode(65 + existingOptions);
 
@@ -1485,17 +2046,17 @@ window.addOption = function (questionId, type, passageNumber) {
 
   const addButton = container.querySelector('button[onclick*="addOption"]');
   addButton.insertAdjacentHTML("beforebegin", optionHTML);
-  
+
   // Set up listeners for newly added inputs
   const newRow = addButton.previousElementSibling;
-  const newInputs = newRow.querySelectorAll('.option-label, .option-text');
-  newInputs.forEach(input => {
-    input.addEventListener('input', () => {
+  const newInputs = newRow.querySelectorAll(".option-label, .option-text");
+  newInputs.forEach((input) => {
+    input.addEventListener("input", () => {
       updateSharedOptionsFromQuestion(questionId, type, passageNumber);
       updateAllOptionsInPassage(type, passageNumber);
     });
   });
-  
+
   // Immediately update shared options and propagate
   updateSharedOptionsFromQuestion(questionId, type, passageNumber);
   updateAllOptionsInPassage(type, passageNumber);
@@ -1504,24 +2065,30 @@ window.addOption = function (questionId, type, passageNumber) {
 // Remove option
 window.removeOption = function (button, type, passageNumber) {
   if (!button || !type || !passageNumber) {
-    console.error("removeOption: Invalid parameters", { button, type, passageNumber });
+    console.error("removeOption: Invalid parameters", {
+      button,
+      type,
+      passageNumber,
+    });
     return;
   }
-  
-  const container = button.closest(`[id^="pm-options-"], [id^="match-options-"]`);
+
+  const container = button.closest(
+    `[id^="pm-options-"], [id^="match-options-"]`
+  );
   if (!container) {
     console.error("removeOption: Container not found");
     return;
   }
-  
-  const questionId = container.id.split('-').pop();
+
+  const questionId = container.id.split("-").pop();
   if (!questionId) {
     console.error("removeOption: Question ID not found");
     return;
   }
-  
+
   button.parentElement.remove();
-  
+
   // Update shared options and propagate
   updateSharedOptionsFromQuestion(questionId, type, passageNumber);
   updateAllOptionsInPassage(type, passageNumber);
@@ -1530,14 +2097,14 @@ window.removeOption = function (button, type, passageNumber) {
 // Delete functions
 function confirmDelete(type, passageIndex, questionIndex = null) {
   itemToDelete = { type, passageIndex, questionIndex };
-  
-  let message = '';
-  if (type === 'passage') {
+
+  let message = "";
+  if (type === "passage") {
     message = `passage ${passageIndex + 1}`;
-  } else if (type === 'question') {
+  } else if (type === "question") {
     message = `question ${questionIndex + 1} in passage ${passageIndex + 1}`;
   }
-  
+
   document.getElementById("deleteModal").style.display = "flex";
 }
 
@@ -1550,20 +2117,24 @@ function deleteItem() {
   if (!itemToDelete) return;
 
   const { type, passageIndex, questionIndex } = itemToDelete;
-  
-  if (type === 'passage') {
+
+  if (type === "passage") {
     currentTest.passages.splice(passageIndex, 1);
-  } else if (type === 'question') {
+  } else if (type === "question") {
     currentTest.passages[passageIndex].questions.splice(questionIndex, 1);
   }
-  
+
   closeDeleteModal();
   displayPassages(); // Refresh to show changes
 }
 
 // Save functions
 function saveTest() {
-  if (confirm("Are you sure you want to save the changes to this test?\n\nThis will update the test in the database and affect all users.")) {
+  if (
+    confirm(
+      "Are you sure you want to save the changes to this test?\n\nThis will update the test in the database and affect all users."
+    )
+  ) {
     document.getElementById("saveModal").style.display = "flex";
   }
 }
@@ -1572,7 +2143,33 @@ function closeSaveModal() {
   document.getElementById("saveModal").style.display = "none";
 }
 
-// Collect test data from form (matching add reading structure)
+function cleanUndefined(obj) {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj
+      .map((item) => cleanUndefined(item))
+      .filter((item) => item !== null && item !== undefined);
+  }
+
+  if (typeof obj === "object") {
+    const cleaned = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = cleanUndefined(obj[key]);
+        if (value !== null && value !== undefined) {
+          cleaned[key] = value;
+        }
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+}
+
 function collectTestData() {
   const passages = [];
   const passageElements = document.querySelectorAll(".passage-container");
@@ -1581,17 +2178,23 @@ function collectTestData() {
     const passageNumber = parseInt(passageEl.dataset.passage);
     const passageIndex = passageNumber - 1;
     const passageData = {
-      title: passageEl.querySelector(".passage-title-input").value.trim(),
-      instructions: passageEl.querySelector(".passage-instructions").value.trim(),
-      text: passageEl.querySelector(".passage-text").value.trim(),
+      title:
+        passageEl.querySelector(".passage-title-input")?.value.trim() || "",
+      instructions:
+        passageEl.querySelector(".passage-instructions")?.value.trim() || "",
+      text: passageEl.querySelector(".passage-text")?.value.trim() || "",
       questions: [],
     };
 
     const questionElements = passageEl.querySelectorAll(".question-item");
     questionElements.forEach((questionEl) => {
       const type = questionEl.dataset.type;
-      const questionText = questionEl.querySelector(".question-text")?.value.trim();
-      const groupInstruction = questionEl.querySelector(".group-instruction")?.value.trim();
+      const questionText = questionEl
+        .querySelector(".question-text")
+        ?.value.trim();
+      const groupInstruction = questionEl
+        .querySelector(".group-instruction")
+        ?.value.trim();
 
       let questionData = {
         type: type,
@@ -1603,42 +2206,88 @@ function collectTestData() {
 
       if (type === "text-question") {
         const title = questionEl.querySelector(".question-title")?.value.trim();
-        const subheading = questionEl.querySelector(".question-subheading")?.value.trim();
+        const subheading = questionEl
+          .querySelector(".question-subheading")
+          ?.value.trim();
         const text = questionEl.querySelector(".question-text")?.value.trim();
 
         if (title) questionData.title = title;
         if (subheading) questionData.subheading = subheading;
         if (text) questionData.text = text;
+      } else if (type === "multi-select") {
+        questionData.type = "question-group";
+        questionData.groupType = "multi-select";
+        questionData.text =
+          questionEl.querySelector(".multi-select-text")?.value.trim() || "";
+
+        // Collect sub-questions
+        const subQuestions = [];
+        const subQuestionElements = questionEl.querySelectorAll(
+          ".multi-select-subquestion"
+        );
+        subQuestionElements.forEach((subQEl) => {
+          const subQAnswer =
+            subQEl
+              .querySelector(".subquestion-answer-input")
+              ?.value.trim()
+              .toUpperCase() || "";
+          subQuestions.push({
+            question: `Statement ${subQuestions.length + 1}`,
+            answer: subQAnswer,
+          });
+        });
+        questionData.questions = subQuestions;
+
+        // Collect options
+        const options = {};
+        questionEl
+          .querySelectorAll(".multi-select-options-list .option-row")
+          .forEach((row) => {
+            const label = row.querySelector(".option-label")?.value.trim();
+            const text = row.querySelector(".option-text")?.value.trim();
+            if (label && text) {
+              options[label] = text;
+            }
+          });
+        questionData.options = options;
       } else {
-        questionData.question = questionText;
+        questionData.question = questionText || "";
 
         if (type === "gap-fill") {
-          const answerText = questionEl.querySelector(".question-answer").value.trim();
-          questionData.answer = answerText.split(",").map((a) => a.trim()).filter((a) => a);
+          const answerText =
+            questionEl.querySelector(".question-answer")?.value.trim() || "";
+          questionData.answer = answerText
+            .split(",")
+            .map((a) => a.trim())
+            .filter((a) => a);
         } else if (type === "multiple-choice") {
-          const selectedAnswer = questionEl.querySelector('input[type="radio"]:checked');
+          const selectedAnswer = questionEl.querySelector(
+            'input[type="radio"]:checked'
+          );
           questionData.answer = selectedAnswer ? selectedAnswer.value : "";
           questionData.options = [];
 
           questionEl.querySelectorAll(".option-text").forEach((optionEl) => {
             const optionLetter = optionEl.dataset.option;
             const optionText = optionEl.value.trim();
-            if (optionText) {
+            if (optionLetter) {
               questionData.options.push({
                 label: optionLetter,
-                text: optionText,
+                text: optionText || "",
               });
             }
           });
         } else if (type === "paragraph-matching" || type === "match-person") {
-          questionData.answer = questionEl.querySelector(".question-answer").value.trim();
+          questionData.answer =
+            questionEl.querySelector(".question-answer")?.value.trim() || "";
           const passageOptions = sharedOptions[passageNumber]?.[type] || [];
           questionData.options = passageOptions.map((opt) => ({
-            label: opt.label,
-            text: opt.text,
+            label: opt.label || "",
+            text: opt.text || "",
           }));
         } else {
-          questionData.answer = questionEl.querySelector(".question-answer").value.trim();
+          questionData.answer =
+            questionEl.querySelector(".question-answer")?.value.trim() || "";
         }
       }
 
@@ -1651,7 +2300,7 @@ function collectTestData() {
   return {
     passages: passages,
     updatedAt: new Date().toISOString(),
-    updatedBy: currentUser.email,
+    updatedBy: currentUser?.email || "unknown",
   };
 }
 
@@ -1667,32 +2316,37 @@ async function confirmSave() {
 
   try {
     console.log("💾 Saving test to Firebase...");
-    
+
     // Collect data from form
     const testData = collectTestData();
-    
+
     // Preserve original metadata
     const updateData = {
       ...testData,
-      createdAt: currentTest.createdAt,
-      createdBy: currentTest.createdBy,
+      createdAt: currentTest.createdAt || new Date().toISOString(),
+      createdBy: currentTest.createdBy || "unknown",
+      testId: testId,
     };
-    
+
+    // Clean undefined values
+    const cleanedData = cleanUndefined(updateData);
+
+    console.log("💾 Cleaned data:", cleanedData);
+
     // Update in Firebase
     const testDocRef = doc(db, "readingTests", testId);
-    await updateDoc(testDocRef, updateData);
-    
+    await updateDoc(testDocRef, cleanedData);
+
     // Update local copy
-    currentTest = { ...currentTest, ...updateData };
-    
+    currentTest = { ...currentTest, ...cleanedData };
+
     console.log("✅ Test saved successfully");
-    
+
     // Close modal
     closeSaveModal();
-    
+
     // Show success message
     showNotification("✅ Test saved successfully!", "success");
-    
   } catch (error) {
     console.error("❌ Error saving test:", error);
     alert(`❌ Error saving test: ${error.message}`);
@@ -1706,8 +2360,12 @@ async function confirmSave() {
 
 // Navigation functions
 function goBack() {
-  if (confirm("Are you sure you want to cancel?\n\nAll unsaved changes will be lost.")) {
-    window.location.href = '../index.html';
+  if (
+    confirm(
+      "Are you sure you want to cancel?\n\nAll unsaved changes will be lost."
+    )
+  ) {
+    window.location.href = "../index.html";
   }
 }
 
@@ -1790,6 +2448,202 @@ window.closeSaveModal = closeSaveModal;
 window.confirmSave = confirmSave;
 window.goBack = goBack;
 
+// Multi-select helper functions for edit page
+window.updateMultiSelectOptionValue = function (
+  passageIndex,
+  questionIndex,
+  optionKey,
+  value,
+  questionId
+) {
+  if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
+    currentTest.passages[passageIndex].questions[questionIndex].options = {};
+  }
+  currentTest.passages[passageIndex].questions[questionIndex].options[
+    optionKey
+  ] = value;
+};
+
+window.addMultiSelectOption = function (
+  questionId,
+  passageIndex,
+  questionIndex
+) {
+  const container = document.getElementById(
+    `multi-select-options-${questionId}`
+  );
+  const existingOptions = container.querySelectorAll(".option-row").length;
+  const nextLetter = String.fromCharCode(65 + existingOptions);
+
+  const optionHTML = `
+    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
+      <input type="text" value="${nextLetter}" class="option-label" style="width: 40px; text-align: center;" readonly>
+      <input type="text" placeholder="Option ${nextLetter} text" class="option-text" data-option="${nextLetter}" style="flex: 1;" onchange="updateMultiSelectOptionValue(${passageIndex}, ${questionIndex}, '${nextLetter}', this.value, ${questionId})">
+      <button type="button" onclick="removeMultiSelectOption(this, ${questionId}, ${passageIndex}, ${questionIndex})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+    </div>
+  `;
+
+  const addButton = container.parentElement.querySelector(
+    'button[onclick*="addMultiSelectOption"]'
+  );
+  addButton?.insertAdjacentHTML("beforebegin", optionHTML);
+
+  // Update dropdowns and add option to data
+  if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
+    currentTest.passages[passageIndex].questions[questionIndex].options = {};
+  }
+  currentTest.passages[passageIndex].questions[questionIndex].options[
+    nextLetter
+  ] = "";
+  updateMultiSelectOptionDropdowns(questionId);
+};
+
+window.removeMultiSelectOption = function (
+  button,
+  questionId,
+  passageIndex,
+  questionIndex
+) {
+  const container = document.getElementById(
+    `multi-select-options-${questionId}`
+  );
+  if (container.querySelectorAll(".option-row").length <= 2) {
+    alert("Multi-select question must have at least 2 options");
+    return;
+  }
+
+  const optionLabel = button.parentElement
+    .querySelector(".option-label")
+    ?.value.trim();
+  if (
+    optionLabel &&
+    currentTest.passages[passageIndex].questions[questionIndex].options
+  ) {
+    delete currentTest.passages[passageIndex].questions[questionIndex].options[
+      optionLabel
+    ];
+  }
+
+  if (confirm("Remove this option?")) {
+    button.parentElement.remove();
+    updateMultiSelectOptionDropdowns(questionId);
+  }
+};
+
+window.updateMultiSelectOptionDropdowns = function (questionId) {
+  const container = document.getElementById(
+    `multi-select-options-${questionId}`
+  );
+  const subQuestionsContainer = document.getElementById(
+    `multi-select-questions-${questionId}`
+  );
+
+  if (!container || !subQuestionsContainer) return;
+
+  // No dropdowns now; answers are free text (uppercased via oninput)
+};
+
+window.addMultiSelectSubquestion = function (
+  questionId,
+  passageIndex,
+  questionIndex
+) {
+  const container = document.getElementById(
+    `multi-select-questions-${questionId}`
+  );
+  const existingSubQuestions = container.querySelectorAll(
+    ".multi-select-subquestion"
+  ).length;
+
+  if (!currentTest.passages[passageIndex].questions[questionIndex].questions) {
+    currentTest.passages[passageIndex].questions[questionIndex].questions = [];
+  }
+
+  currentTest.passages[passageIndex].questions[questionIndex].questions.push({
+    question: "",
+    answer: "",
+  });
+
+  // Render simple block without full re-render
+  const block = `
+    <div class="multi-select-subquestion" style="padding: 10px; background: #f8f9fa; border-radius: 5px;">
+      <label style="font-weight:600; display:block; margin-bottom:6px;">Statement ${
+        existingSubQuestions + 1
+      }:</label>
+      <input class="subquestion-answer-input" placeholder="Answer letter" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" oninput="this.value = this.value.toUpperCase(); updateMultiSelectSubquestion(${passageIndex}, ${questionIndex}, ${existingSubQuestions}, 'answer', this.value);">
+      <button type="button" onclick="removeMultiSelectSubquestion(${questionId}, ${passageIndex}, ${questionIndex}, ${existingSubQuestions})" style="padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;">Remove Sub-question</button>
+    </div>`;
+  const addBtn = container.parentElement.querySelector(
+    'button[onclick*="addMultiSelectSubquestion"]'
+  );
+  addBtn?.insertAdjacentHTML("beforebegin", block);
+  updateMultiSelectOptionDropdowns(questionId);
+  updateQuestionNumbers();
+};
+
+window.removeMultiSelectSubquestion = function (
+  questionId,
+  passageIndex,
+  questionIndex,
+  subQuestionIndex
+) {
+  if (!currentTest.passages[passageIndex].questions[questionIndex].questions) {
+    return;
+  }
+
+  if (
+    currentTest.passages[passageIndex].questions[questionIndex].questions
+      .length <= 1
+  ) {
+    alert("Multi-select question must have at least 1 sub-question");
+    return;
+  }
+
+  if (confirm("Remove this sub-question?")) {
+    currentTest.passages[passageIndex].questions[
+      questionIndex
+    ].questions.splice(subQuestionIndex, 1);
+    const container = document.getElementById(
+      `multi-select-questions-${questionId}`
+    );
+    const subQuestions = container?.querySelectorAll(
+      ".multi-select-subquestion"
+    );
+    subQuestions?.[subQuestionIndex]?.remove();
+    // Re-label statements
+    container
+      ?.querySelectorAll(".multi-select-subquestion label")
+      .forEach((lbl, idx) => {
+        lbl.textContent = `Statement ${idx + 1}:`;
+      });
+    updateQuestionNumbers();
+  }
+};
+
+window.updateMultiSelectSubquestion = function (
+  passageIndex,
+  questionIndex,
+  subQuestionIndex,
+  field,
+  value
+) {
+  if (!currentTest.passages[passageIndex].questions[questionIndex].questions) {
+    currentTest.passages[passageIndex].questions[questionIndex].questions = [];
+  }
+  if (
+    !currentTest.passages[passageIndex].questions[questionIndex].questions[
+      subQuestionIndex
+    ]
+  ) {
+    currentTest.passages[passageIndex].questions[questionIndex].questions[
+      subQuestionIndex
+    ] = { question: "", answer: "" };
+  }
+  currentTest.passages[passageIndex].questions[questionIndex].questions[
+    subQuestionIndex
+  ][field] = value;
+};
+
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("📚 Edit Reading Test page loaded");
@@ -1801,7 +2655,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   testId = getTestIdFromUrl();
   if (!testId) {
     alert("❌ No test ID provided in URL");
-    window.location.href = '../test-reading-edit-select.html';
+    window.location.href = "../test-reading-edit-select.html";
     return;
   }
 
@@ -1809,11 +2663,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadTest();
 
   // Connect add passage button
-  document.getElementById("addPassageBtn").addEventListener("click", addPassage);
+  document
+    .getElementById("addPassageBtn")
+    .addEventListener("click", addPassage);
 
   // Connect modal buttons
-  document.getElementById("confirmSaveBtn").addEventListener("click", confirmSave);
-  document.getElementById("confirmDeleteBtn").addEventListener("click", deleteItem);
+  document
+    .getElementById("confirmSaveBtn")
+    .addEventListener("click", confirmSave);
+  document
+    .getElementById("confirmDeleteBtn")
+    .addEventListener("click", deleteItem);
 
   // Close modals on outside click
   document.getElementById("saveModal").addEventListener("click", (e) => {

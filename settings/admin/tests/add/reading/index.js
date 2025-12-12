@@ -169,6 +169,7 @@ function addPassage() {
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multiple-choice')">Multiple Choice</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multi-select')">Multi-Select</div>
           </div>
         </div>
       </div>
@@ -432,11 +433,68 @@ window.addQuestion = function (passageNumber, type) {
         </div>
       </div>
     </div>
+      `;
+      break;
+
+    case "multi-select":
+      questionHTML = `
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+      <div class="question-header">
+        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>-<span class="question-index-end"></span>.</span>
+        <span class="question-type-badge" style="background: #FF6B6B;">Multi-Select</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <textarea placeholder="Group instruction (e.g., 'Questions 22 and 23\nChoose TWO letters, A–E.')" class="group-instruction" rows="2" style="min-height:70px;"></textarea>
+        <input type="text" placeholder="Question text" class="multi-select-text" value="">
+      </div>
+      <div class="multi-select-subquestions" id="multi-select-questions-${questionId}" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+        <div class="multi-select-subquestion" style="padding:10px; background:#f8f9fa; border-radius:6px;">
+          <label style="font-weight:600; display:block; margin-bottom:6px;">Statement 1:</label>
+          <input class="subquestion-answer-input" placeholder="Answer letter" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;" oninput="this.value = this.value.toUpperCase();">
+        </div>
+        <div class="multi-select-subquestion" style="padding:10px; background:#f8f9fa; border-radius:6px;">
+          <label style="font-weight:600; display:block; margin-bottom:6px;">Statement 2:</label>
+          <input class="subquestion-answer-input" placeholder="Answer letter" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;" oninput="this.value = this.value.toUpperCase();">
+        </div>
+      </div>
+      <button type="button" onclick="addMultiSelectSubquestion(${questionId})" style="margin-top: 10px; padding: 6px 14px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">+ Add Sub-question</button>
+      <div class="options-container" style="margin-top: 15px;">
+        <label style="display: block; margin: 10px 0 5px; font-weight: 600;">Options:</label>
+        <div class="multi-select-options-list" id="multi-select-options-${questionId}" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
+            <input type="text" value="A" class="option-label" style="width: 40px; text-align: center;" readonly>
+            <input type="text" placeholder="Option A text" class="option-text" data-option="A" style="flex: 1;">
+            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+          </div>
+          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
+            <input type="text" value="B" class="option-label" style="width: 40px; text-align: center;" readonly>
+            <input type="text" placeholder="Option B text" class="option-text" data-option="B" style="flex: 1;">
+            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+          </div>
+          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
+            <input type="text" value="C" class="option-label" style="width: 40px; text-align: center;" readonly>
+            <input type="text" placeholder="Option C text" class="option-text" data-option="C" style="flex: 1;">
+            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+          </div>
+        </div>
+        <button type="button" onclick="addMultiSelectOption(${questionId})" style="margin-top: 8px; padding: 6px 14px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">+ Add Option</button>
+      </div>
+    </div>
   `;
+      // Initialize option dropdowns after HTML is inserted
+      setTimeout(() => {
+        updateMultiSelectOptionDropdowns(questionId);
+      }, 0);
       break;
   }
 
   container.insertAdjacentHTML("beforeend", questionHTML);
+  
+  // For multi-select, update question numbers after insertion
+  if (type === "multi-select") {
+    updateQuestionNumbers(passageNumber);
+  }
 
   // Set up auto-propagation for first matching questions
   if ((type === "paragraph-matching" || type === "match-person") && 
@@ -688,6 +746,96 @@ window.removeMCOption = function (button) {
   }
 };
 
+// Multi-select helper functions
+window.addMultiSelectOption = function (questionId) {
+  const container = document.getElementById(`multi-select-options-${questionId}`);
+  const existingOptions = container.querySelectorAll(".option-row").length;
+  const nextLetter = String.fromCharCode(65 + existingOptions);
+
+  const optionHTML = `
+    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
+      <input type="text" value="${nextLetter}" class="option-label" style="width: 40px; text-align: center;" readonly>
+      <input type="text" placeholder="Option ${nextLetter} text" class="option-text" data-option="${nextLetter}" style="flex: 1;">
+      <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
+    </div>
+  `;
+
+  const addButton =
+    container.parentElement.querySelector('button[onclick*="addMultiSelectOption"]');
+  addButton?.insertAdjacentHTML("beforebegin", optionHTML);
+  updateMultiSelectOptionDropdowns(questionId);
+};
+
+window.removeMultiSelectOption = function (button, questionId) {
+  const container = document.getElementById(`multi-select-options-${questionId}`);
+  if (container.querySelectorAll(".option-row").length <= 2) {
+    alert("Multi-select question must have at least 2 options");
+    return;
+  }
+  
+  if (confirm("Remove this option?")) {
+    button.parentElement.remove();
+    updateMultiSelectOptionDropdowns(questionId);
+  }
+};
+
+window.updateMultiSelectOptionDropdowns = function (questionId) {
+  const container = document.getElementById(`multi-select-options-${questionId}`);
+  const subQuestionsContainer = document.getElementById(`multi-select-questions-${questionId}`);
+  
+  if (!container || !subQuestionsContainer) return;
+  
+  // No dropdowns now; answers are free text (uppercased via oninput)
+};
+
+window.addMultiSelectSubquestion = function (questionId) {
+  const container = document.getElementById(`multi-select-questions-${questionId}`);
+  const existingSubQuestions = container.querySelectorAll(".multi-select-subquestion").length;
+  const subQuestionHTML = `
+    <div class="multi-select-subquestion" style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+      <label style="font-weight:600; display:block; margin-bottom:6px;">Statement ${existingSubQuestions + 1}:</label>
+      <input class="subquestion-answer-input" placeholder="Answer letter" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" oninput="this.value = this.value.toUpperCase();">
+      <button type="button" onclick="removeMultiSelectSubquestion(this, ${questionId})" style="padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;">Remove Sub-question</button>
+    </div>
+  `;
+  
+  const addButton = container.parentElement.querySelector('button[onclick*="addMultiSelectSubquestion"]');
+  addButton.insertAdjacentHTML("beforebegin", subQuestionHTML);
+  
+  // Update dropdowns for the new sub-question
+  updateMultiSelectOptionDropdowns(questionId);
+  
+  // Update question numbers
+  const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
+  const passage = questionItem.closest('.passage-container');
+  const passageNumber = parseInt(passage.dataset.passage);
+  updateQuestionNumbers(passageNumber);
+};
+
+window.removeMultiSelectSubquestion = function (button, questionId) {
+  const subQuestion = button.closest(".multi-select-subquestion");
+  const container = subQuestion.parentElement;
+  
+  if (container.querySelectorAll(".multi-select-subquestion").length <= 1) {
+    alert("Multi-select question must have at least 1 sub-question");
+    return;
+  }
+  
+  if (confirm("Remove this sub-question?")) {
+    subQuestion.remove();
+    
+    // Update question numbers
+    const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
+    const passage = questionItem.closest('.passage-container');
+    const passageNumber = parseInt(passage.dataset.passage);
+    updateQuestionNumbers(passageNumber);
+    // relabel statements
+    container.querySelectorAll(".multi-select-subquestion label").forEach((lbl, idx) => {
+      lbl.textContent = `Statement ${idx + 1}:`;
+    });
+  }
+};
+
 // Remove a question
 window.removeQuestion = function (questionId) {
   const question = document.querySelector(`[data-question-id="${questionId}"]`);
@@ -703,8 +851,28 @@ function updateQuestionNumbers(passageNumber) {
   const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
   let counter = 0;
   items.forEach((item) => {
+    const type = item.dataset.type;
     const numEl = item.querySelector('.question-index');
-    if (numEl) {
+    const numEndEl = item.querySelector('.question-index-end');
+    
+    if (type === "multi-select") {
+      // Multi-select counts as multiple questions based on sub-questions
+      const subQuestions = item.querySelectorAll(".multi-select-subquestion");
+      const subQuestionCount = subQuestions.length;
+      
+      if (numEl && numEndEl && subQuestionCount > 0) {
+        counter++;
+        numEl.textContent = counter;
+        counter += subQuestionCount - 1;
+        numEndEl.textContent = counter;
+      } else if (numEl) {
+        counter++;
+        numEl.textContent = counter;
+        if (numEndEl) {
+          numEndEl.textContent = counter;
+        }
+      }
+    } else if (numEl && type !== "text-question") {
       counter++;
       numEl.textContent = counter;
     }
@@ -845,19 +1013,30 @@ window.previewTest = function () {
         <h3>Passage ${index + 1}: ${title}</h3>
         <div class="preview-text">${text.substring(0, 200)}...</div>
         <div class="preview-questions">
-          <strong>Questions (${questions.length}):</strong>
+          <strong>Questions:</strong>
           ${Array.from(questions)
             .map((q, i) => {
               const type = q.dataset.type;
-              const questionText =
-                q.querySelector(".question-text").value || "No question text";
-              return `
-              <div class="preview-question">
-                <span class="preview-question-number">${i + 1}.</span>
-                ${questionText}
-                <span class="preview-answer">[${type.replace(/-/g, " ")}]</span>
-              </div>
-            `;
+              if (type === "multi-select") {
+                const questionText = q.querySelector(".multi-select-text")?.value || "No question text";
+                const subQuestions = q.querySelectorAll(".multi-select-subquestion");
+                return `
+                <div class="preview-question">
+                  <span class="preview-question-number">Multi-Select:</span>
+                  ${questionText}
+                  <span class="preview-answer">[${subQuestions.length} sub-questions]</span>
+                </div>
+              `;
+              } else {
+                const questionText = q.querySelector(".question-text")?.value || "No question text";
+                return `
+                <div class="preview-question">
+                  <span class="preview-question-number">${i + 1}.</span>
+                  ${questionText}
+                  <span class="preview-answer">[${type.replace(/-/g, " ")}]</span>
+                </div>
+              `;
+              }
             })
             .join("")}
         </div>
@@ -912,6 +1091,7 @@ function updateAllSharedOptions() {
 }
 
 // Collect test data
+// Collect test data
 function collectTestData() {
   // Update all shared options before collecting data
   updateAllSharedOptions();
@@ -922,66 +1102,78 @@ function collectTestData() {
   passageElements.forEach((passageEl) => {
     const passageNumber = parseInt(passageEl.dataset.passage);
     const passageData = {
-      title: passageEl.querySelector(".passage-title-input").value.trim(),
-      instructions: passageEl
-        .querySelector(".passage-instructions")
-        .value.trim(),
-      text: passageEl.querySelector(".passage-text").value.trim(),
+      title: passageEl.querySelector(".passage-title-input")?.value.trim() || "",
+      instructions: passageEl.querySelector(".passage-instructions")?.value.trim() || "",
+      text: passageEl.querySelector(".passage-text")?.value.trim() || "",
       questions: [],
     };
 
     const questionElements = passageEl.querySelectorAll(".question-item");
     questionElements.forEach((questionEl) => {
       const type = questionEl.dataset.type;
-      const questionText = questionEl
-        .querySelector(".question-text")
-        ?.value.trim();
 
       let questionData = {
         type: type,
       };
 
-      const groupInstruction = questionEl
-        .querySelector(".group-instruction")
-        ?.value.trim();
+      const groupInstruction = questionEl.querySelector(".group-instruction")?.value.trim();
       if (groupInstruction) {
         questionData.groupInstruction = groupInstruction;
       }
 
       if (type === "text-question") {
         const title = questionEl.querySelector(".question-title")?.value.trim();
-        const subheading = questionEl
-          .querySelector(".question-subheading")
-          ?.value.trim();
+        const subheading = questionEl.querySelector(".question-subheading")?.value.trim();
         const text = questionEl.querySelector(".question-text")?.value.trim();
 
         if (title) questionData.title = title;
         if (subheading) questionData.subheading = subheading;
         if (text) questionData.text = text;
+      } else if (type === "multi-select") {
+        questionData.type = "question-group";
+        questionData.groupType = "multi-select";
+        questionData.text = questionEl.querySelector(".multi-select-text")?.value.trim() || "";
+        
+        // Collect sub-questions
+        const subQuestions = [];
+        const subQuestionElements = questionEl.querySelectorAll(".multi-select-subquestion");
+        subQuestionElements.forEach((subQEl) => {
+          const subQAnswer = subQEl.querySelector(".subquestion-answer-input")?.value.trim().toUpperCase() || "";
+          subQuestions.push({
+            question: `Statement ${subQuestions.length + 1}`,
+            answer: subQAnswer
+          });
+        });
+        questionData.questions = subQuestions;
+        
+        // Collect options
+        const options = {};
+        questionEl.querySelectorAll(".multi-select-options-list .option-row").forEach((row) => {
+          const label = row.querySelector(".option-label")?.value.trim();
+          const text = row.querySelector(".option-text")?.value.trim();
+          if (label && text) {
+            options[label] = text;
+          }
+        });
+        questionData.options = options;
       } else {
+        // Get question text (different selector for different types)
+        const questionText = questionEl.querySelector(".question-text")?.value.trim() || "";
         questionData.question = questionText;
 
         if (type === "gap-fill") {
-          const title = questionEl
-            .querySelector(".question-title")
-            ?.value.trim();
-          const subheading = questionEl
-            .querySelector(".question-subheading")
-            ?.value.trim();
+          const title = questionEl.querySelector(".question-title")?.value.trim();
+          const subheading = questionEl.querySelector(".question-subheading")?.value.trim();
           if (title) questionData.title = title;
           if (subheading) questionData.subheading = subheading;
 
-          const answerText = questionEl
-            .querySelector(".question-answer")
-            .value.trim();
+          const answerText = questionEl.querySelector(".question-answer")?.value.trim() || "";
           questionData.answer = answerText
             .split(",")
             .map((a) => a.trim())
             .filter((a) => a);
         } else if (type === "multiple-choice") {
-          const selectedAnswer = questionEl.querySelector(
-            'input[type="radio"]:checked'
-          );
+          const selectedAnswer = questionEl.querySelector('input[type="radio"]:checked');
           questionData.answer = selectedAnswer ? selectedAnswer.value : "";
           questionData.options = [];
 
@@ -996,21 +1188,17 @@ function collectTestData() {
             }
           });
         } else if (type === "paragraph-matching" || type === "match-person") {
-          questionData.answer = questionEl
-            .querySelector(".question-answer")
-            .value.trim();
+          questionData.answer = questionEl.querySelector(".question-answer")?.value.trim() || "";
 
           // Use the passage-specific shared options
           const passageOptions = sharedOptions[passageNumber]?.[type] || [];
           questionData.options = passageOptions.map((opt) => ({
-            label: opt.label,
-            text: opt.text,
+            label: opt.label || "",
+            text: opt.text || "",
           }));
           console.log(`💾 Saving ${type} options for question in passage ${passageNumber}:`, questionData.options);
         } else {
-          questionData.answer = questionEl
-            .querySelector(".question-answer")
-            .value.trim();
+          questionData.answer = questionEl.querySelector(".question-answer")?.value.trim() || "";
         }
       }
 
@@ -1024,7 +1212,7 @@ function collectTestData() {
     testId: `test-${nextTestNumber}`,
     passages: passages,
     createdAt: new Date().toISOString(),
-    createdBy: currentUser.email,
+    createdBy: currentUser?.email || "unknown",
   };
 }
 
@@ -1070,6 +1258,48 @@ function validateForm() {
           alert("Please fill in at least one field for text-only items");
           return false;
         }
+        continue;
+      }
+
+      if (type === "multi-select") {
+        const questionText = question.querySelector(".multi-select-text")?.value.trim();
+        if (!questionText) {
+          alert("Please fill in the question text for all multi-select questions");
+          return false;
+        }
+        
+        const subQuestions = question.querySelectorAll(".multi-select-subquestion");
+        if (subQuestions.length === 0) {
+          alert("Multi-select questions must have at least one sub-question");
+          return false;
+        }
+        
+        let hasAllAnswers = true;
+        subQuestions.forEach((subQ, index) => {
+          const answer = subQ.querySelector(".subquestion-answer-input")?.value.trim();
+          if (!answer) {
+            alert(`Please enter an answer for sub-question ${index + 1} in multi-select question`);
+            hasAllAnswers = false;
+          }
+        });
+        if (!hasAllAnswers) return false;
+        
+        const optionRows = question.querySelectorAll(".multi-select-options-list .option-row");
+        if (optionRows.length < 2) {
+          alert("Multi-select questions must have at least 2 options");
+          return false;
+        }
+        
+        let hasAllOptions = true;
+        optionRows.forEach((row, index) => {
+          const text = row.querySelector(".option-text")?.value.trim();
+          if (!text) {
+            alert(`Please fill in text for option ${row.querySelector(".option-label")?.value || index + 1} in multi-select question`);
+            hasAllOptions = false;
+          }
+        });
+        if (!hasAllOptions) return false;
+        
         continue;
       }
 
