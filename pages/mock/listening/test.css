@@ -757,3 +757,15 @@ hr {
   margin: 0;
   color: #666;
 }
+.clear-btn{
+    padding: 8px 15px;
+    border: none;
+    background-color: #007bff;
+    border-radius: 5px;
+    color: white;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.clear-btn:hover{
+    background-color: #0553a5;
+}

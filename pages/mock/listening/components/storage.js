@@ -76,4 +76,53 @@ export function setupAnswerPersistence() {
   });
 }
 
+export function clearListeningAnswers() {
+  // Clear in-memory answers and saved highlights
+  listeningState.answersSoFar = {};
+  listeningState.savedHighlights = {};
+
+  // Clear localStorage
+  try {
+    localStorage.removeItem('listeningTestAnswers');
+  } catch (e) {
+    console.warn('Failed to clear listening storage:', e);
+  }
+
+  // Clear inputs/selects/radios/checkboxes in the DOM
+  const inputs = document.querySelectorAll('input, textarea, select');
+  inputs.forEach((el) => {
+    if (el.tagName === 'INPUT') {
+      const t = el.type.toLowerCase();
+      if (t === 'radio' || t === 'checkbox') el.checked = false;
+      else el.value = '';
+    } else if (el.tagName === 'TEXTAREA') {
+      el.value = '';
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    }
+  });
+
+  // Remove highlight spans
+  document.querySelectorAll('.highlighted').forEach((node) => {
+    const parent = node.parentNode;
+    while (node.firstChild) parent.insertBefore(node.firstChild, node);
+    node.remove();
+  });
+
+  // Update navigation/UI and persist cleared state
+  try {
+    localStorage.setItem('listeningTestAnswers', JSON.stringify(listeningState.answersSoFar));
+  } catch (e) {
+    console.warn('Failed to persist cleared listening answers', e);
+  }
+
+  try {
+    import('./navigation.js').then((mod) => {
+      if (mod.updateQuestionNav) mod.updateQuestionNav();
+    });
+  } catch (e) {
+    if (window.updateQuestionNav) window.updateQuestionNav();
+  }
+}
+
 

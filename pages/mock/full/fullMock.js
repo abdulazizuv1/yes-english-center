@@ -433,6 +433,59 @@ function saveState() {
   localStorage.setItem(testStorageKey, JSON.stringify(data));
 }
 
+// Clear all answers/highlights and reset UI for the full mock test
+function clearAllAnswers() {
+  if (!confirm('Clear all answers and highlights for this full mock test?')) return;
+
+  answersSoFar = {};
+  passageHighlights = {};
+  questionHighlights = {};
+  savedHighlights = {};
+
+  try {
+    localStorage.removeItem(testStorageKey);
+  } catch (e) {
+    console.warn('Failed to remove full mock storage', e);
+  }
+
+  // Clear inputs/selects/radios/checkboxes/textareas
+  document.querySelectorAll('input, textarea, select').forEach((el) => {
+    if (el.tagName === 'INPUT') {
+      const t = el.type && el.type.toLowerCase();
+      if (t === 'radio' || t === 'checkbox') el.checked = false;
+      else el.value = '';
+    } else if (el.tagName === 'TEXTAREA') {
+      el.value = '';
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    }
+  });
+
+  // Remove highlight spans
+  document.querySelectorAll('.highlighted').forEach((node) => {
+    const parent = node.parentNode;
+    while (node.firstChild) parent.insertBefore(node.firstChild, node);
+    node.remove();
+  });
+
+  // Update UI/navigation
+  try {
+    saveState();
+  } catch (e) {
+    console.warn('saveState failed after clear', e);
+  }
+
+  try {
+    if (typeof updateQuestionNav === 'function') updateQuestionNav();
+  } catch (e) {
+    console.warn('updateQuestionNav not available', e);
+  }
+
+  alert('All answers and highlights cleared.');
+}
+// Expose to global scope for the Clear button
+window.clearAllAnswers = clearAllAnswers;
+
 // Функция для полной остановки аудио
 function stopAllAudio() {
   if (currentAudio) {

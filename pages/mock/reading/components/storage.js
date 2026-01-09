@@ -59,4 +59,55 @@ export function assignQuestionIds() {
   }
 }
 
+export function clearReadingAnswers() {
+  // Clear in-memory answers and highlights
+  readingState.answersSoFar = {};
+  readingState.passageHighlights = {};
+  readingState.questionHighlights = {};
+
+  // Clear localStorage for this test
+  try {
+    localStorage.removeItem(readingState.testStorageKey);
+  } catch (e) {
+    console.warn('Failed to clear reading storage:', e);
+  }
+
+  // Clear inputs/selects/radios/checkboxes in the DOM
+  const inputs = document.querySelectorAll('input, textarea, select');
+  inputs.forEach((el) => {
+    if (el.tagName === 'INPUT') {
+      const t = el.type.toLowerCase();
+      if (t === 'radio' || t === 'checkbox') el.checked = false;
+      else el.value = '';
+    } else if (el.tagName === 'TEXTAREA') {
+      el.value = '';
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    }
+    el.classList && el.classList.remove('has-value');
+  });
+
+  // Remove highlight spans
+  document.querySelectorAll('.highlighted').forEach((node) => {
+    const parent = node.parentNode;
+    while (node.firstChild) parent.insertBefore(node.firstChild, node);
+    node.remove();
+  });
+
+  // Update UI/navigation and persist cleared state
+  try {
+    saveState();
+  } catch (e) {
+    console.warn('saveState not available after clear', e);
+  }
+
+  try {
+    import("./navigation.js").then((mod) => {
+      if (mod.updateQuestionNav) mod.updateQuestionNav();
+    });
+  } catch (e) {
+    if (window.updateQuestionNav) window.updateQuestionNav();
+  }
+}
+
 

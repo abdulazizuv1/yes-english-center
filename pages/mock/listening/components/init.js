@@ -1,6 +1,6 @@
 import { listeningState } from "./state.js";
 import { saveCurrentHighlights, loadSavedHighlights } from "./highlights.js";
-import { loadSavedAnswers, setupAnswerPersistence } from "./storage.js";
+import { loadSavedAnswers, setupAnswerPersistence, clearListeningAnswers } from "./storage.js";
 import {
   generateQuestionNav,
   updateQuestionNav,
@@ -104,6 +104,14 @@ export function initListeningTest(deps) {
         loadTest();
       }
     });
+
+    // expose clearAllAnswers for the Clear button
+    window.clearAllAnswers = function () {
+      if (confirm('Clear all answers and highlights for this listening test?')) {
+        clearListeningAnswers();
+        alert('All answers cleared.');
+      }
+    };
   });
 }
 

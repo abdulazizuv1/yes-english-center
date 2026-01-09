@@ -1,6 +1,6 @@
 import { readingState } from "./state.js";
 import { initializeHighlightSystem, setupWindowHighlightActions, saveCurrentHighlights } from "./highlights.js";
-import { loadSavedState, assignQuestionIds, saveState } from "./storage.js";
+import { loadSavedState, assignQuestionIds, saveState, clearReadingAnswers } from "./storage.js";
 import { generateQuestionNav, updateQuestionNav, startTimer, setRenderPassageFn } from "./navigation.js";
 import { renderPassage } from "./render.js";
 import { createHandleFinish } from "./finish.js";
@@ -121,6 +121,13 @@ export function initReadingTest(deps) {
 
     loadTest().then(() => {
       setupTimerAfterLoad();
+      // expose clear button handler
+      window.clearAllAnswers = function () {
+        if (confirm('Clear all answers and highlights for this reading test?')) {
+          clearReadingAnswers();
+          alert('All answers cleared.');
+        }
+      };
     });
   };
 }

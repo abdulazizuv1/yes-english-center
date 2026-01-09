@@ -1134,7 +1134,6 @@ function collectTestData() {
         questionData.groupType = "multi-select";
         questionData.text = questionEl.querySelector(".multi-select-text")?.value.trim() || "";
         
-        // Collect sub-questions
         const subQuestions = [];
         const subQuestionElements = questionEl.querySelectorAll(".multi-select-subquestion");
         subQuestionElements.forEach((subQEl) => {
@@ -1146,7 +1145,6 @@ function collectTestData() {
         });
         questionData.questions = subQuestions;
         
-        // Collect options
         const options = {};
         questionEl.querySelectorAll(".multi-select-options-list .option-row").forEach((row) => {
           const label = row.querySelector(".option-label")?.value.trim();
@@ -1157,7 +1155,6 @@ function collectTestData() {
         });
         questionData.options = options;
       } else {
-        // Get question text (different selector for different types)
         const questionText = questionEl.querySelector(".question-text")?.value.trim() || "";
         questionData.question = questionText;
 
