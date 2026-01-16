@@ -244,7 +244,7 @@ body {
 
 .start-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 8px 20px rgba(5, 34, 150, 0.4);
 }
 
 /* Info Section */

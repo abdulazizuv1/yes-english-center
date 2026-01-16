@@ -190,7 +190,7 @@ async function initializeTest() {
                 <h2>Error Loading Test</h2>
                 <p>${error.message}</p>
                 <p style="margin-top: 20px; font-size: 14px; opacity: 0.8;">Test ID: ${currentTestId}</p>
-                <button onclick="location.href='/pages/mock.html'" style="margin-top: 20px; padding: 12px 24px; background: white; color: #059669; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button onclick="location.href='/pages/mock.html'" style="margin-top: 20px; padding: 12px 24px; background: white; color: #054196ff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     🏠 Back to Tests
                 </button>
             </div>

@@ -325,7 +325,7 @@ body {
 
 .nav-btn.primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+    box-shadow: 0 8px 20px rgba(5, 48, 150, 0.4);
 }
 
 .nav-btn.secondary {
