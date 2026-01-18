@@ -276,6 +276,10 @@ html {
   color: #1763e1;
   font-weight: 700;
 }
+.logo_icon{
+  width: 15px;
+  height: 4px;
+}
 
 @keyframes slideUpGlass {
   from {
