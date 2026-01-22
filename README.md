@@ -44,8 +44,7 @@ export const firebaseConfig = {
 
 ## Запуск локально (статический фронт)
 1) Убедитесь, что `config.js` заполнен.
-2) Поднимите простой сервер из корня, чтобы корректно работали ES-модули:
-- `npx serve .` **или** `python -m http.server 8080` и откройте `http://localhost:8080`.
+2) Запустите local сервер
 
 ## Работа с Cloud Functions
 - Установить зависимости: `npm install --prefix functions`.
