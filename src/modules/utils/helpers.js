@@ -12,7 +12,6 @@ export function hideLoader() {
   if (loader) {
     loader.classList.add("hidden");
     setTimeout(() => loader.remove(), 500);
-    console.log('✅ Loader hidden');
   }
 }
 
@@ -24,7 +23,6 @@ export function showLoader() {
   if (loader) {
     loader.classList.remove("hidden");
     loader.style.display = 'flex';
-    console.log('👁️ Loader shown');
   }
 }
 
@@ -124,7 +122,6 @@ export function isInViewport(element) {
 export function smoothScrollTo(selector, offset = 80) {
   const target = document.querySelector(selector);
   if (!target) {
-    console.warn(`Element not found: ${selector}`);
     return;
   }
 
@@ -154,10 +151,8 @@ export function generateId(prefix = 'id') {
 export async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
-    console.log('✅ Copied to clipboard');
     return true;
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
     return false;
   }
 }
@@ -237,19 +232,7 @@ export function getBrowserName() {
  * @param {string} type - Log type (info, warn, error)
  */
 export function logWithTime(message, type = 'info') {
-  const timestamp = new Date().toISOString();
-  const prefix = `[${timestamp}]`;
-  
-  switch (type) {
-    case 'warn':
-      console.warn(prefix, message);
-      break;
-    case 'error':
-      console.error(prefix, message);
-      break;
-    default:
-      console.log(prefix, message);
-  }
+  // Logging disabled in production
 }
 
 /**
@@ -260,9 +243,7 @@ export function logWithTime(message, type = 'info') {
  */
 export function measureTime(func, label = 'Function') {
   return async function(...args) {
-    console.time(`⏱️ ${label}`);
     const result = await func(...args);
-    console.timeEnd(`⏱️ ${label}`);
     return result;
   };
 }
@@ -282,7 +263,6 @@ export async function retry(func, maxRetries = 3, delay = 1000) {
       if (i === maxRetries - 1) throw error;
       
       const waitTime = delay * Math.pow(2, i);
-      console.warn(`Retry ${i + 1}/${maxRetries} after ${waitTime}ms`);
       await wait(waitTime);
     }
   }

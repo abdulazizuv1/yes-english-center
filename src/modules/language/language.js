@@ -38,7 +38,6 @@ export function getCurrentLanguage() {
  */
 export function setLanguage(lang) {
   if (!ALL_LANGUAGES.includes(lang)) {
-    console.warn(`Invalid language: ${lang}, using default: ${DEFAULT_LANGUAGE}`);
     lang = DEFAULT_LANGUAGE;
   }
 
@@ -72,7 +71,6 @@ function updateLanguageSelectors(lang) {
  */
 function applyTranslations(lang) {
   if (typeof window.langArr === 'undefined') {
-    console.warn('Language translations not loaded');
     return;
   }
 
@@ -130,7 +128,6 @@ export function initLanguageSwitchers() {
   const selects = document.querySelectorAll(".lang_change");
   
   if (selects.length === 0) {
-    console.warn('No language selectors found');
     return;
   }
 

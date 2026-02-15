@@ -27,7 +27,6 @@ function createSkeletonCard() {
 export function showSkeletons(selector, count = 3) {
   const wrapper = document.querySelector(selector);
   if (!wrapper) {
-    console.warn(`Skeleton target not found: ${selector}`);
     return;
   }
 

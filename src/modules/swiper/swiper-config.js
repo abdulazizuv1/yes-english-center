@@ -28,7 +28,6 @@ const defaultBreakpoints = {
 export function createSwiper(selector, customOptions = {}) {
   const container = document.querySelector(selector);
   if (!container) {
-    console.warn(`Swiper container not found: ${selector}`);
     return null;
   }
 
@@ -56,7 +55,6 @@ export function createSwiper(selector, customOptions = {}) {
     swiperInstances[selector] = swiper;
     return swiper;
   } catch (error) {
-    console.error(`Error creating Swiper for ${selector}:`, error);
     return null;
   }
 }
@@ -132,8 +130,6 @@ export function updateSwiper(selector) {
   const swiper = swiperInstances[selector];
   if (swiper && swiper.update) {
     swiper.update();
-  } else {
-    console.warn(`Swiper not found or cannot be updated: ${selector}`);
   }
 }
 

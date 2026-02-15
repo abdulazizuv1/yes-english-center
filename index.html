@@ -4,21 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YES English Center - Your Future Starts Here</title>
+    <meta name="description" content="YES English Center - Achieve high IELTS and SAT scores with courses from the best teachers. Founded in 2015, we've helped 5000+ students reach their goals.">
+    <meta name="keywords" content="IELTS, SAT, English learning, English courses, YES English Center, Fergana, Uzbekistan, language school, test preparation">
+    <meta name="author" content="YES English Center">
+    <link rel="canonical" href="https://yescenteruz.com/">
     <link rel="icon" class="logo_icon" href="./image/logo_copy.png">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yescenteruz.com/">
+    <meta property="og:title" content="YES English Center - Your Future Starts Here">
+    <meta property="og:description" content="Achieve high IELTS and SAT scores with courses from the best teachers. Join thousands of successful students who achieved their dreams with YES English Center.">
+    <meta property="og:image" content="https://yescenteruz.com/image/logo.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yescenteruz.com/">
+    <meta name="twitter:title" content="YES English Center - Your Future Starts Here">
+    <meta name="twitter:description" content="Achieve high IELTS and SAT scores with courses from the best teachers.">
+    <meta name="twitter:image" content="https://yescenteruz.com/image/logo.png">
     
     <!-- Preconnect для быстрой загрузки шрифтов -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Preload шрифта для моментальной загрузки (исправление мигания) -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Optimized font loading - only needed weights -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- AOS - Animate On Scroll Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" crossorigin="anonymous">
     
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" crossorigin="anonymous" />
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
@@ -34,8 +52,38 @@
             opacity: 1;
         }
     </style>
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "YES English Center",
+      "description": "YES English Center - Achieve high IELTS and SAT scores with courses from the best teachers. Founded in 2015, we've helped 5000+ students reach their goals.",
+      "url": "https://yescenteruz.com",
+      "logo": "https://yescenteruz.com/image/logo.png",
+      "foundingDate": "2015",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. А.Навои 72, Напротив Теннисного корта",
+        "addressLocality": "Фергана",
+        "addressCountry": "UZ"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+998-97-271-77-72",
+        "contactType": "Customer Service"
+      },
+      "sameAs": [
+        "https://www.instagram.com/yescenteruz/",
+        "https://t.me/yescenteruz"
+      ]
+    }
+    </script>
 </head>
 <body>
+  <!-- Skip to content link for accessibility -->
+  
   <!-- Dynamic Background -->
   <div class="dynamic-bg">
     <div class="bg-blur bg-blur-1"></div>
@@ -72,7 +120,7 @@
           <h2>Welcome Back</h2>
           <p>Sign in to access your mock tests</p>
         </div>
-        <img class="close_btn" src="./image/close.png" alt="Close" onclick="closeLogin()">
+        <img class="close_btn" src="./image/close.png" alt="Close" onclick="closeLogin()" role="button" aria-label="Close login panel" tabindex="0">
         <div class="input-group">
           <input id="login_email" type="text" placeholder="email" autocomplete="off" class="glass-input">
         </div>
@@ -144,16 +192,16 @@
               <option value="ru">RU</option>
               <option value="uz">UZ</option>
             </select>
-            <button id="loginBtn" onclick="toggleLogin()" class="glass-btn-nav lng_nav_btn">Login</button>
-            <button id="logoutBtn" onclick="logoutUser()" class="glass-btn-nav" style="display: none;">Logout</button>
+            <button id="loginBtn" onclick="toggleLogin()" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
+            <button id="logoutBtn" onclick="logoutUser()" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
           </div>
           
           <!-- Mobile Hamburger -->
-          <div class="glass-toggle" onclick="toggleMobileMenu()">
+          <button class="glass-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu" aria-expanded="false">
             <span class="hamburger-line"></span>
             <span class="hamburger-line"></span>
             <span class="hamburger-line"></span>
-          </div>
+          </button>
         </nav>
       </div>
     </div>
@@ -183,8 +231,8 @@
             <option value="ru">RU</option>
             <option value="uz">UZ</option>
           </select>
-          <button id="mobileLoginBtn" onclick="toggleLogin(); closeMobileMenu();" class="glass-btn-nav lng_nav_btn">Login</button>
-          <button id="mobileLogoutBtn" onclick="logoutUser(); closeMobileMenu();" class="glass-btn-nav" style="display: none;">Logout</button>
+          <button id="mobileLoginBtn" onclick="toggleLogin(); closeMobileMenu();" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
+          <button id="mobileLogoutBtn" onclick="logoutUser(); closeMobileMenu();" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
         </div>
       </div>
     </div>
@@ -231,7 +279,7 @@
         <div class="header_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="300">
           <div class="hero-image-container glass-image-container">
             <div class="glass-frame"></div>
-            <img src="./image/header_img.png" alt="English Learning" class="hero-image">
+            <img src="./image/header_img.png" alt="English Learning" class="hero-image" fetchpriority="high" width="600" height="400">
             <div class="floating-elements">
               <div class="floating-item glass-float item-1">📚</div>
               <div class="floating-item glass-float item-2">🎯</div>
@@ -243,12 +291,12 @@
     </div>
   </header>
 
-  <main>
-    <section id="groups" class="teachers_page glass-section">
+  <main id="main-content">
+    <section id="groups" class="teachers_page glass-section" aria-labelledby="groups-heading">
       <div class="container">
         <div class="section-header" data-aos="fade-up" data-aos-duration="800">
           <div class="section-badge glass-badge">👥 Our Team</div>
-          <h1 class="lng_teacher_title">Meet Our <span class="gradient-text">Expert Groups</span></h1>
+          <h1 id="groups-heading" class="lng_teacher_title">Meet Our <span class="gradient-text">Expert Groups</span></h1>
           <p class="lng_groups_sub section-subtitle">Experienced teachers dedicated to your success</p>
         </div>
         <div class="swiper mySwiper glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
@@ -345,7 +393,7 @@
           <img class="con_line" src="./image/contact_line.png" alt="">
           <div class="contact-image-wrapper glass-image-container">
             <div class="glass-frame"></div>
-            <img class="con_img" src="./image/con_example.png" alt="">
+            <img class="con_img" src="./image/con_example.png" alt="Contact YES English Center" loading="lazy" width="500" height="400">
             <div class="contact-badge glass-floating-badge">
               <span class="badge-icon">📞</span>
               <span>Available 24/7</span>
@@ -440,14 +488,14 @@
       <div class="footer_right">
         <h3>Find Us</h3>
         <div class="map-container glass-map">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1382.3976920393861!2d71.78132095936523!3d40.36552145617315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38bb84bc0317a6bd%3A0x7b071af85c3f8719!2sYES%20English%20Center!5e0!3m2!1sru!2s!4v1752496438099!5m2!1sru!2s" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1382.3976920393861!2d71.78132095936523!3d40.36552145617315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38bb84bc0317a6bd%3A0x7b071af85c3f8719!2sYES%20English%20Center!5e0!3m2!1sru!2s!4v1752496438099!5m2!1sru!2s" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="YES English Center Location"></iframe>
         </div>
       </div>
     </div>
     <div class="footer-bottom glass-bottom">
       <div class="container">
         <div class="footer-bottom-content">
-          <p>&copy; 2025 YES English Center. All rights reserved. Empowering students since 2015</p>
+          <p>&copy; 2026 YES English Center. All rights reserved. Empowering students since 2015</p>
         </div>
       </div>
     </div>
@@ -455,28 +503,56 @@
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 
-<script src="lang.js"></script>
+<script src="lang.js" defer></script>
 
-<script src="glass-effects.js"></script>
+<script src="glass-effects.js" defer></script>
 
 <script type="module" src="src/main.js"></script>
 
+<!-- Service Worker Registration -->
 <script>
-  // Initialize AOS (Animate On Scroll)
-  AOS.init({
-    duration: 1000,
-    easing: 'ease-out-cubic',
-    once: true,
-    offset: 100,
-    delay: 100,
-  });
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          // Service worker registered successfully
+        })
+        .catch((error) => {
+          // Service worker registration failed
+        });
+    });
+  }
+</script>
+
+<script>
+  // Initialize AOS (Animate On Scroll) after it loads
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 100,
+      delay: 100,
+    });
+  } else {
+    window.addEventListener('load', () => {
+      if (typeof AOS !== 'undefined') {
+        AOS.init({
+          duration: 1000,
+          easing: 'ease-out-cubic',
+          once: true,
+          offset: 100,
+          delay: 100,
+        });
+      }
+    });
+  }
 
   // Font loading optimization (prevent FOUT - Flash of Unstyled Text)
   document.fonts.ready.then(function () {
     document.body.classList.add('fonts-loaded');
-    console.log('✅ Fonts loaded successfully');
   });
 
   // Fallback for older browsers
@@ -486,15 +562,7 @@
     }, 100);
   });
 
-  // Performance monitoring
-  window.addEventListener('load', function() {
-    if (window.performance) {
-      const perfData = window.performance.timing;
-      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-      const connectTime = perfData.responseEnd - perfData.requestStart;
-      const renderTime = perfData.domComplete - perfData.domLoading;
-    }
-  });
+  // Performance monitoring removed - will be implemented in performance.js module
 </script>
 </body>
 </html>

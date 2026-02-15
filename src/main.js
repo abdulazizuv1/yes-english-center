@@ -17,6 +17,7 @@ import * as Skeleton from './modules/ui/skeleton.js';
 import * as SwiperConfig from './modules/swiper/swiper-config.js';
 import * as Language from './modules/language/language.js';
 import * as Helpers from './modules/utils/helpers.js';
+import * as Performance from './modules/utils/performance.js';
 
 /**
  * Application State
@@ -39,7 +40,6 @@ function initializeFirebase() {
     
     return true;
   } catch (error) {
-    console.error('❌ Firebase initialization failed:', error);
     return false;
   }
 }
@@ -106,7 +106,6 @@ function initializeAuth() {
       await Auth.logout();
       AuthUI.clearLoginForm();
     } catch (err) {
-      console.error("❌ Logout error:", err);
       alert("Logout failed: " + err.message);
     }
   };
@@ -146,7 +145,7 @@ async function loadAndRenderData() {
     SwiperConfig.updateAllSwipers();
 
   } catch (error) {
-    console.error('Error loading and rendering data:', error);
+    // Error loading and rendering data
   }
 }
 
@@ -181,7 +180,6 @@ function initializeLanguage() {
  */
 async function startApp() {
   if (AppState.initialized) {
-    console.warn('App already initialized');
     return;
   }
 
@@ -198,13 +196,15 @@ async function startApp() {
     // 3. Initialize Language
     initializeLanguage();
 
-    // 4. Initialize UI
+    // 4. Initialize Performance Tracking
+    Performance.initPerformanceTracking();
+
+    // 5. Initialize UI
     await initializeUI();
 
     AppState.initialized = true;
 
   } catch (error) {
-    console.error('❌ Application initialization failed:', error);
     Helpers.hideLoader();
     alert('Failed to initialize application. Please refresh the page.');
   }
@@ -230,7 +230,8 @@ export default {
   Skeleton,
   SwiperConfig,
   Language,
-  Helpers
+  Helpers,
+  Performance
 };
 
 // Make modules available globally for debugging
@@ -244,6 +245,7 @@ window.App = {
   SwiperConfig,
   Language,
   Helpers,
+  Performance,
   AppState
 };
 

@@ -21,6 +21,9 @@ function setupLazyLoading(img, src) {
         imageObserver.unobserve(targetImg);
       }
     });
+  }, {
+    rootMargin: '50px',
+    threshold: 0.01
   });
   
   imageObserver.observe(img);
@@ -39,8 +42,6 @@ export function loadImageWithCorsHandling(imgElement, originalUrl) {
   };
   
   imgElement.onerror = () => {
-    console.warn('Failed to load image:', originalUrl);
-    
     // Try adding alt=media
     if (!originalUrl.includes('alt=media')) {
       const newUrl = originalUrl + (originalUrl.includes('?') ? '&' : '?') + 'alt=media';
@@ -51,7 +52,6 @@ export function loadImageWithCorsHandling(imgElement, originalUrl) {
         // Fallback image
         imgElement.src = './image/placeholder.svg';
         imgElement.style.opacity = "1";
-        console.error('All loading attempts failed for:', originalUrl);
       };
     } else {
       // Fallback image
@@ -68,7 +68,6 @@ export function loadImageWithCorsHandling(imgElement, originalUrl) {
  */
 export function renderGroups(groups, wrapper) {
   if (!wrapper) {
-    console.error('Groups wrapper not found');
     return;
   }
 
@@ -86,8 +85,10 @@ export function renderGroups(groups, wrapper) {
       <div class="image-placeholder">
         <img 
           data-src="${group.photoURL}" 
-          alt="${group.name}"
+          alt="${group.name || 'Group photo'}"
           loading="lazy"
+          width="400"
+          height="300"
           style="opacity: 0; transition: opacity 0.3s ease;"
         />
       </div>
@@ -116,7 +117,6 @@ export function renderGroups(groups, wrapper) {
  */
 export function renderResults(results, wrapper) {
   if (!wrapper) {
-    console.error('Results wrapper not found');
     return;
   }
 
@@ -132,8 +132,10 @@ export function renderResults(results, wrapper) {
 
     slide.innerHTML = `
       <img 
-        alt="${result.name}"
+        alt="${result.name || 'Student result'}"
         loading="lazy"
+        width="400"
+        height="300"
         style="opacity: 0; transition: opacity 0.3s ease;"
       />
       <h3>${result.name}</h3>
@@ -150,6 +152,9 @@ export function renderResults(results, wrapper) {
           imageObserver.unobserve(img);
         }
       });
+    }, {
+      rootMargin: '50px',
+      threshold: 0.01
     });
     
     imageObserver.observe(img);
@@ -172,7 +177,6 @@ export function renderResults(results, wrapper) {
  */
 export function renderFeedbacks(feedbacks, wrapper) {
   if (!wrapper) {
-    console.error('Feedbacks wrapper not found');
     return;
   }
 
@@ -188,7 +192,7 @@ export function renderFeedbacks(feedbacks, wrapper) {
 
     slide.innerHTML = `
       <div class="feedback_info">
-        <img src="./image/no_user.webp" alt="" loading="lazy"> 
+        <img src="./image/no_user.webp" alt="${feedback.name || 'User'}" loading="lazy" width="60" height="60"> 
         <div class="feedback_info_detail">
           <h3>${feedback.name}</h3> 
           <p class="lng_feedbacks_group">Group: ${feedback.group}</p>

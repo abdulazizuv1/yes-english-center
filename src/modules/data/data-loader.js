@@ -99,17 +99,13 @@ export async function loadAllData() {
 
   try {
     // Priority: Load groups first (visible on page load)
-    console.time('⚡ Groups loading');
     try {
       result.groups = await loadGroups();
-      console.timeEnd('⚡ Groups loading');
     } catch (error) {
-      console.error('Error loading groups:', error);
       result.errors.groups = error;
     }
 
     // Load results and feedbacks in parallel
-    console.time('⚡ Results & Feedbacks loading');
     const [resultsData, feedbacksData] = await Promise.allSettled([
       loadResults(),
       loadFeedbacks()
@@ -118,21 +114,16 @@ export async function loadAllData() {
     if (resultsData.status === 'fulfilled') {
       result.results = resultsData.value;
     } else {
-      console.error('Error loading results:', resultsData.reason);
       result.errors.results = resultsData.reason;
     }
 
     if (feedbacksData.status === 'fulfilled') {
       result.feedbacks = feedbacksData.value;
     } else {
-      console.error('Error loading feedbacks:', feedbacksData.reason);
       result.errors.feedbacks = feedbacksData.reason;
     }
 
-    console.timeEnd('⚡ Results & Feedbacks loading');
-
   } catch (error) {
-    console.error('Error loading data:', error);
     result.errors.general = error;
   }
 

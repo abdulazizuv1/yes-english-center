@@ -66,7 +66,6 @@ export async function getEmailFromUsername(username) {
     const userData = querySnapshot.docs[0].data();
     return userData.email;
   } catch (error) {
-    console.error('❌ Error getting email from username:', error);
     throw error;
   }
 }
@@ -114,7 +113,6 @@ export async function login(usernameOrEmail, password) {
     return userCredential;
     
   } catch (error) {
-    console.error('❌ Login error:', error);
     throw error;
   }
 }
@@ -127,7 +125,6 @@ export async function logout() {
   try {
     await signOut(auth);
   } catch (error) {
-    console.error('❌ Logout error:', error);
     throw error;
   }
 }
@@ -145,11 +142,9 @@ export async function getUserData(uid) {
     if (docSnap.exists()) {
       return docSnap.data();
     } else {
-      console.warn('User document not found for UID:', uid);
       return null;
     }
   } catch (error) {
-    console.error('Error fetching user data:', error);
     throw error;
   }
 }
@@ -161,7 +156,6 @@ export async function getUserData(uid) {
  */
 export function onAuthChange(callback) {
   if (!auth) {
-    console.error('Auth not initialized');
     return () => {};
   }
 
@@ -171,7 +165,6 @@ export function onAuthChange(callback) {
         const userData = await getUserData(user.uid);
         callback(user, userData);
       } catch (error) {
-        console.error('Error in auth state change handler:', error);
         callback(user, null);
       }
     } else {
@@ -228,7 +221,6 @@ export async function updateUserName(uid, name) {
       name: name,
     });
   } catch (error) {
-    console.error('❌ Error updating user name:', error);
     throw error;
   }
 }

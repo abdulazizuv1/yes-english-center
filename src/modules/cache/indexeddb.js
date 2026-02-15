@@ -52,12 +52,10 @@ export async function getFromCache(key) {
       };
       
       request.onerror = () => {
-        console.error(`Error reading cache for "${key}":`, request.error);
         resolve(null);
       };
     });
   } catch (error) {
-    console.error('IndexedDB error:', error);
     return null;
   }
 }
@@ -84,12 +82,11 @@ export async function saveToCache(key, data) {
       };
       
       request.onerror = () => {
-        console.error(`Error saving cache for "${key}":`, request.error);
         reject(request.error);
       };
     });
   } catch (error) {
-    console.error('IndexedDB save error:', error);
+    // IndexedDB save error - silently fail
   }
 }
 
@@ -113,7 +110,7 @@ export async function clearCache(key) {
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.error('Error clearing cache:', error);
+    // Error clearing cache - silently fail
   }
 }
 
@@ -136,7 +133,7 @@ export async function clearAllCache() {
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.error('Error clearing all cache:', error);
+    // Error clearing all cache - silently fail
   }
 }
 
