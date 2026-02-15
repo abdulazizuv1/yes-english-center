@@ -282,10 +282,8 @@ async function loadResults() {
 // Authentication check
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("✅ User authenticated:", user.email);
     loadResults();
   } else {
-    console.log("❌ User not authenticated");
     alert("🔒 Please login first to view results");
     window.location.href = "/login.html";
   }

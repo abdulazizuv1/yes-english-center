@@ -71,7 +71,6 @@ function getOverallScoreColor(score, total) {
 async function loadResults() {
   showLoader();
   try {
-    console.log("🔄 Loading full mock test results...");
     
     // Query results ordered by creation date (newest first)
     const q = query(
@@ -80,7 +79,6 @@ async function loadResults() {
     );
     const querySnapshot = await getDocs(q);
 
-    console.log("📊 Found results:", querySnapshot.size);
 
     // Create table header
     resultsTable.innerHTML = `
@@ -114,7 +112,6 @@ async function loadResults() {
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      console.log("📋 Processing result:", {
         id: docSnap.id,
         name: data.name,
         totalScore: data.totalScore,
@@ -179,7 +176,6 @@ async function loadResults() {
       // Navigate to result page on row click (except delete button)
       row.addEventListener("click", (e) => {
         if (!e.target.closest(".deleteBtn")) {
-          console.log(`🔍 Opening result page for: ${docSnap.id}`);
           window.location.href = `/pages/mock/full/resultFullMock.html?id=${docSnap.id}`;
         }
       });
@@ -201,7 +197,6 @@ async function loadResults() {
         
         if (confirmed) {
           try {
-            console.log(`🗑️ Deleting result: ${docSnap.id}`);
             
             // Show loading state on button
             const deleteBtn = e.target.closest(".deleteBtn");
@@ -211,7 +206,6 @@ async function loadResults() {
 
             await deleteDoc(doc(db, "resultFullmock", docSnap.id));
             
-            console.log("✅ Result deleted successfully");
             
             // Animate row removal
             row.style.transition = "all 0.3s ease";
@@ -267,7 +261,6 @@ async function loadResults() {
       }, index * 100);
     });
 
-    console.log("✅ Results loaded successfully");
 
   } catch (error) {
     console.error("❌ Error loading results:", error);
@@ -301,10 +294,8 @@ async function loadResults() {
 // Authentication check
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("✅ User authenticated:", user.email);
     loadResults();
   } else {
-    console.log("❌ User not authenticated");
     alert("🔒 Please login first to view results");
     window.location.href = "/login.html";
   }

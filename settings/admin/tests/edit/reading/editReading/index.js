@@ -43,7 +43,6 @@ async function checkAdminAccess() {
       unsubscribe();
 
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -54,7 +53,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -64,13 +62,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         currentUser = user;
         resolve({ user, userData });
       } catch (error) {
@@ -91,7 +87,6 @@ function getTestIdFromUrl() {
 // Load test data from Firebase
 async function loadTest() {
   try {
-    console.log("📚 Loading test from Firebase...");
 
     const testDocRef = doc(db, "readingTests", testId);
     const testDoc = await getDoc(testDocRef);
@@ -101,7 +96,6 @@ async function loadTest() {
     }
 
     currentTest = testDoc.data();
-    console.log("✅ Test loaded successfully");
 
     // Initialize questionIdCounter to avoid conflicts
     questionIdCounter = 0;
@@ -1284,7 +1278,6 @@ function updatePassage(passageIndex, field, value) {
     currentTest.passages[passageIndex] = {};
   }
   currentTest.passages[passageIndex][field] = value;
-  console.log(`Updated passage ${passageIndex} ${field}:`, value);
 }
 
 function updateQuestion(passageIndex, questionIndex, field, value) {
@@ -1295,7 +1288,6 @@ function updateQuestion(passageIndex, questionIndex, field, value) {
     currentTest.passages[passageIndex].questions[questionIndex] = {};
   }
   currentTest.passages[passageIndex].questions[questionIndex][field] = value;
-  console.log(
     `Updated question ${passageIndex}-${questionIndex} ${field}:`,
     value
   );
@@ -1308,7 +1300,6 @@ function updateAnswer(passageIndex, questionIndex, answerIndex, value) {
   currentTest.passages[passageIndex].questions[questionIndex].answer[
     answerIndex
   ] = value;
-  console.log(
     `Updated answer ${passageIndex}-${questionIndex}-${answerIndex}:`,
     value
   );
@@ -1330,7 +1321,6 @@ function updateOption(passageIndex, questionIndex, optionIndex, field, value) {
   currentTest.passages[passageIndex].questions[questionIndex].options[
     optionIndex
   ][field] = value;
-  console.log(
     `Updated option ${passageIndex}-${questionIndex}-${optionIndex} ${field}:`,
     value
   );
@@ -2004,7 +1994,6 @@ function updateSharedOptionsFromContainer(container, type, passageNumber) {
     sharedOptions[passageNumber] = {};
   }
   sharedOptions[passageNumber][type] = newOptions;
-  console.log(
     `📝 Updated ${type} options for passage ${passageNumber}:`,
     newOptions
   );
@@ -2315,7 +2304,6 @@ async function confirmSave() {
   saveLoader.style.display = "inline-block";
 
   try {
-    console.log("💾 Saving test to Firebase...");
 
     // Collect data from form
     const testData = collectTestData();
@@ -2331,7 +2319,6 @@ async function confirmSave() {
     // Clean undefined values
     const cleanedData = cleanUndefined(updateData);
 
-    console.log("💾 Cleaned data:", cleanedData);
 
     // Update in Firebase
     const testDocRef = doc(db, "readingTests", testId);
@@ -2340,7 +2327,6 @@ async function confirmSave() {
     // Update local copy
     currentTest = { ...currentTest, ...cleanedData };
 
-    console.log("✅ Test saved successfully");
 
     // Close modal
     closeSaveModal();
@@ -2646,7 +2632,6 @@ window.updateMultiSelectSubquestion = function (
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("📚 Edit Reading Test page loaded");
 
   // Check admin access
   await checkAdminAccess();
@@ -2688,5 +2673,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  console.log("✅ Page initialized successfully");
 });

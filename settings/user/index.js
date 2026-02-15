@@ -49,19 +49,16 @@ let selectedProfilePicture = null;
  * Initialize the settings panel
  */
 async function initializeSettings() {
-  console.log('🚀 Initializing Student Settings Panel...');
   
   // Check authentication
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      console.log('❌ User not authenticated, redirecting to home');
       alert('Please login to access settings');
       window.location.href = '/';
       return;
     }
 
     currentUser = user;
-    console.log('✅ User authenticated:', user.email);
 
     // Load user data from Firestore
     await loadUserData();
@@ -73,7 +70,6 @@ async function initializeSettings() {
     // Load initial content based on active tab
     await loadResultsData();
     
-    console.log('✅ Application initialized successfully');
   });
 }
 
@@ -87,7 +83,6 @@ async function loadUserData() {
 
     if (userDoc.exists()) {
       userData = userDoc.data();
-      console.log('📊 User data loaded:', userData);
       
       // Update profile header
       updateProfileHeader();
@@ -167,7 +162,6 @@ function initializeTabSwitching() {
     });
   });
   
-  console.log('✅ Tab switching initialized');
 }
 
 /**
@@ -221,7 +215,6 @@ async function loadResultsData(category = 'all') {
     // Render results
     renderResults(results);
 
-    console.log(`✅ Loaded ${results.length} results for category: ${category}`);
   } catch (error) {
     console.error('❌ Error loading results:', error);
     resultsContainer.innerHTML = `
@@ -683,7 +676,6 @@ async function updateName() {
     updateProfileHeader();
     showMessage(nameMessage, 'Name updated successfully!', 'success');
     
-    console.log('✅ Name updated');
   } catch (error) {
     console.error('Error updating name:', error);
     showMessage(nameMessage, 'Failed to update name: ' + error.message, 'error');
@@ -735,7 +727,6 @@ async function updateUsername() {
     userData.username = newUsername;
     showMessage(usernameMessage, 'Username updated successfully!', 'success');
     
-    console.log('✅ Username updated');
   } catch (error) {
     console.error('Error updating username:', error);
     showMessage(usernameMessage, 'Failed to update username: ' + error.message, 'error');
@@ -796,7 +787,6 @@ async function changePassword() {
     
     showMessage(passwordMessage, 'Password changed successfully!', 'success');
     
-    console.log('✅ Password changed');
   } catch (error) {
     console.error('Error changing password:', error);
     let errorMsg = 'Failed to change password';
@@ -875,11 +865,9 @@ async function uploadProfilePicture() {
     const fileRef = storageRef(storage, `profilePictures/${currentUser.uid}/${fileName}`);
     
     await uploadBytes(fileRef, selectedProfilePicture);
-    console.log('✅ File uploaded');
     
     // Get download URL
     const downloadURL = await getDownloadURL(fileRef);
-    console.log('✅ Got download URL:', downloadURL);
     
     // Update Firestore
     await updateDoc(doc(db, "users", currentUser.uid), {
@@ -896,7 +884,6 @@ async function uploadProfilePicture() {
     
     alert('Profile picture updated successfully!');
     
-    console.log('✅ Profile picture updated');
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     alert('Failed to upload profile picture: ' + error.message);
@@ -923,5 +910,4 @@ function showMessage(element, message, type) {
 // Initialize settings panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeSettings);
 
-console.log('📝 Student Settings Panel script loaded');
 

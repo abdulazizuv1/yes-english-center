@@ -3,6 +3,8 @@ import admin from "firebase-admin";
 import cors from "cors";
 
 admin.initializeApp();
+const functions = require('firebase-functions');
+const cors = require('cors');
 const db = admin.firestore();
 const auth = admin.auth();
 const corsHandler = cors({ origin: true });
@@ -117,3 +119,11 @@ export const deleteUser = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+const corsOptions = {
+    origin: 'https://yescenter.uz',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, // Allow cookies if needed
+};
+
+const corsMiddleware = cors(corsOptions);

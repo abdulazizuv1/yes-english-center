@@ -28,7 +28,6 @@ async function checkAdminAccess() {
       unsubscribe();
 
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -39,7 +38,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -49,13 +47,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         currentUser = user;
         resolve({ user, userData });
       } catch (error) {
@@ -70,7 +66,6 @@ async function checkAdminAccess() {
 // Load all tests from Firebase
 async function loadTests() {
   try {
-    console.log("📚 Loading tests from Firebase...");
     
     const testsRef = collection(db, "readingTests");
     const testsSnapshot = await getDocs(testsRef);
@@ -90,7 +85,6 @@ async function loadTests() {
       return numA - numB;
     });
 
-    console.log(`✅ Loaded ${allTests.length} tests`);
     
     // Hide loading, show content
     document.getElementById("loadingContainer").style.display = "none";
@@ -175,7 +169,6 @@ function displayTests() {
 
 // Edit test - redirect to edit page
 window.editTest = function(testId) {
-  console.log(`✏️ Editing test: ${testId}`);
   // Redirect to edit page with test ID as parameter
   window.location.href = `editReading/index.html?testId=${testId}`;
 };
@@ -207,12 +200,10 @@ window.deleteTest = async function() {
   loader.style.display = "inline-block";
 
   try {
-    console.log(`🗑️ Deleting test: ${testToDelete}`);
     
     // Delete from Firebase
     await deleteDoc(doc(db, "readingTests", testToDelete));
     
-    console.log("✅ Test deleted successfully");
     
     // Remove from local array
     allTests = allTests.filter(test => test.id !== testToDelete);
@@ -299,7 +290,6 @@ document.head.appendChild(style);
 
 // Connect delete button in modal
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("📚 Test Edit/Delete page loaded");
 
   // Check admin access
   await checkAdminAccess();
@@ -317,5 +307,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  console.log("✅ Page initialized successfully");
 });

@@ -23,7 +23,6 @@ async function checkAdminAccess() {
       unsubscribe();
       
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -34,7 +33,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
         
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -44,13 +42,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         resolve({ user, userData });
 
       } catch (error) {
@@ -69,10 +65,8 @@ window.showComingSoon = function(testType) {
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🎯 Add Tests page loaded");
   
   // Check admin access
   await checkAdminAccess();
   
-  console.log("✅ Page initialized successfully");
 });

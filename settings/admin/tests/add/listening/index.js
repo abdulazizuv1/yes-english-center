@@ -38,7 +38,6 @@ async function checkAdminAccess() {
       unsubscribe();
 
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -49,7 +48,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -59,13 +57,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         currentUser = user;
         resolve({ user, userData });
       } catch (error) {
@@ -98,7 +94,6 @@ async function getNextTestNumber() {
     document.getElementById(
       "testNumber"
     ).textContent = `This will be Listening Test ${nextTestNumber}`;
-    console.log("📊 Next test number will be:", nextTestNumber);
 
     return nextTestNumber;
   } catch (error) {
@@ -114,12 +109,10 @@ async function uploadAudioFile(file, testNumber, sectionNumber) {
     const storagePath = `listening-audio/test-${testNumber}/${fileName}`;
     const storageRef = ref(storage, storagePath);
     
-    console.log(`🎵 Uploading audio file: ${storagePath}`);
     
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
     
-    console.log(`✅ Audio uploaded successfully: ${downloadURL}`);
     return downloadURL;
   } catch (error) {
     console.error("❌ Error uploading audio file:", error);
@@ -281,7 +274,6 @@ function addSection() {
   // Debug: Check if the Add Question button was created
   const addQuestionBtn = document.querySelector(`button[onclick="toggleQuestionMenu(${sectionNumber})"]`);
   if (addQuestionBtn) {
-    console.log(`✅ Add Question button created for section ${sectionNumber}:`, addQuestionBtn);
   } else {
     console.error(`❌ Add Question button NOT found for section ${sectionNumber}`);
   }
@@ -360,7 +352,6 @@ window.handleAudioUpload = function(sectionNumber) {
   
   preview.classList.add('show');
   
-  console.log(`🎵 Audio file selected for section ${sectionNumber}:`, file.name);
 };
 
 // Format file size
@@ -396,14 +387,12 @@ window.removeAudio = function(sectionNumber) {
     audioPlayer.src = '';
     audioPlayer.dataset.fileName = '';
     
-    console.log(`🗑 Audio file removed for section ${sectionNumber}`);
   }
 };
 
 // Toggle question type menu
 window.toggleQuestionMenu = function (sectionNumber) {
   const menu = document.getElementById(`questionMenu${sectionNumber}`);
-  console.log(`🎯 Toggling question menu for section ${sectionNumber}`, menu);
   
   if (!menu) {
     console.error(`❌ Menu not found for section ${sectionNumber}`);
@@ -411,7 +400,6 @@ window.toggleQuestionMenu = function (sectionNumber) {
   }
   
   menu.classList.toggle("show");
-  console.log(`✅ Menu toggled. Classes:`, menu.className);
 
   document.addEventListener("click", function closeMenu(e) {
     if (!e.target.closest(".add-question-dropdown")) {
@@ -739,7 +727,6 @@ window.addTableColumn = function(questionId) {
     });
   });
   
-  console.log(`✅ Added column to table ${questionId}`);
 };
 
 window.addTableRow = function(questionId) {
@@ -788,7 +775,6 @@ window.addTableRow = function(questionId) {
   }
   
   tbody.appendChild(row);
-  console.log(`✅ Added row to table ${questionId}`);
 };
 
 window.removeTableColumn = function(questionId, columnIndex) {
@@ -813,7 +799,6 @@ window.removeTableColumn = function(questionId, columnIndex) {
       }
     });
     
-    console.log(`✅ Removed column ${columnIndex} from table ${questionId}`);
   }
 };
 
@@ -828,7 +813,6 @@ window.removeTableRow = function(button) {
   
   if (confirm("Remove this row?")) {
     button.closest('.data-row').remove();
-    console.log(`✅ Removed row from table`);
   }
 };
 
@@ -927,7 +911,6 @@ function updateQuestionNumbersInTable(questionId) {
     }
   });
   
-  console.log(`📊 Updated question numbers for table ${questionId}:`, Array.from(questionNumbers).sort((a, b) => a - b));
 }
 
 // Recalculate and reassign all question numbers in a table to be sequential
@@ -1014,7 +997,6 @@ window.recalculateTableQuestionNumbers = function(questionId) {
     });
   });
   
-  console.log(`✅ Recalculated table ${questionId} question numbers. Next number: ${currentQuestionNumber}`);
   alert(`✅ Question numbers recalculated! Questions now numbered from their correct starting position.`);
 };
 
@@ -1085,7 +1067,6 @@ window.updateCellType = function(select, questionId, rowIndex, colIndex) {
     });
   });
   
-  console.log(`✅ Updated cell type to ${cellType} for table ${questionId}, row ${rowIndex}, col ${colIndex}`);
 };
 
 // Add another question to the same cell
@@ -1168,7 +1149,6 @@ window.addQuestionToCell = function(button, questionId, rowIndex, colIndex) {
   };
   separator.appendChild(removeBtn);
   
-  console.log(`✅ Added question ${nextQuestionNumber} to cell ${rowIndex},${colIndex} in table ${questionId}`);
 };
 
 // Single Audio Upload Functions
@@ -1194,7 +1174,6 @@ window.handleSingleAudioUpload = function() {
   const audioURL = URL.createObjectURL(file);
   audioPlayer.src = audioURL;
   
-  console.log(`🎵 Single audio file uploaded: ${file.name}`);
 };
 
 window.playSingleAudio = function() {
@@ -1218,7 +1197,6 @@ window.removeSingleAudio = function() {
   preview.style.display = 'none';
   audioPlayer.src = '';
   
-  console.log('🗑 Single audio file removed');
 };
 
 // Question Group functions
@@ -1982,7 +1960,6 @@ function collectTestData() {
           }
           
           // Debug logging
-          console.log(`📋 Table data collected:`, {
             title: questionData.title,
             columns: questionData.columns,
             rowCount: questionData.rows.length,
@@ -2224,7 +2201,6 @@ function collectTestData() {
 
 // Validate form
 function validateForm() {
-  console.log(`🔍 Starting validation. Audio upload type: ${audioUploadType}`);
   
   const testTitle = document.getElementById("testTitle").value.trim();
   const timeLimit = document.getElementById("timeLimit").value;
@@ -2256,7 +2232,6 @@ function validateForm() {
     // Validate questions
     for (let question of questions) {
       const type = question.dataset.type;
-      console.log(`🔍 Validating question type: ${type}`);
       
       if (type === "text" || type === "subheading") {
         const textElement = question.querySelector(".question-value");
@@ -2275,7 +2250,6 @@ function validateForm() {
       // Check question text only for types that have it (skip table and question-group as they have their own validation)
       if (type !== "table" && type !== "question-group") {
         const questionTextElement = question.querySelector(".question-text");
-        console.log(`🔍 Checking question text for type ${type}:`, {
           element: questionTextElement,
           value: questionTextElement ? questionTextElement.value.trim() : 'no element'
         });
@@ -2290,7 +2264,6 @@ function validateForm() {
           return false;
         }
       } else {
-        console.log(`🔍 Skipping question text validation for ${type} type`);
       }
 
       if (type === "multiple-choice") {
@@ -2536,7 +2509,6 @@ async function handleFormSubmit(e) {
 
     if (audioUploadType === 'single') {
       // Upload single audio file for all sections
-      console.log(`🎵 Uploading single audio file for test ${nextTestNumber}...`);
       const audioUrl = await uploadAudioFile(singleAudioFile, nextTestNumber, 0);
       
       // Assign same audio URL to all sections
@@ -2551,7 +2523,6 @@ async function handleFormSubmit(e) {
         const audioFileInput = document.getElementById(`audioFile${sectionNumber}`);
         const audioFile = audioFileInput ? audioFileInput.files[0] : null;
         
-        console.log(`🎵 Uploading audio for section ${sectionNumber}...`);
         const audioUrl = await uploadAudioFile(audioFile, nextTestNumber, sectionNumber);
         audioUrls[sectionNumber] = audioUrl;
       }
@@ -2565,11 +2536,9 @@ async function handleFormSubmit(e) {
       section.audioUrl = audioUrls[section.sectionNumber];
     });
 
-    console.log("💾 Saving test data:", testData);
 
     const docId = `test-${nextTestNumber}`;
     await setDoc(doc(db, "listeningTests", docId), testData);
-    console.log("✅ Test added with ID:", docId);
 
     const successModal = document.getElementById("successModal");
     const successMessage = document.getElementById("successMessage");
@@ -2607,7 +2576,6 @@ window.resetForm = function () {
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🎧 Listening Test Add page loaded");
 
   await checkAdminAccess();
 
@@ -2650,5 +2618,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Show single audio upload initially (since single is checked by default)
   document.getElementById('singleAudioUpload').style.display = 'block';
   
-  console.log("✅ Page initialized successfully");
 });

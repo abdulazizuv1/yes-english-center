@@ -32,7 +32,6 @@ async function checkAdminAccess() {
       unsubscribe();
 
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -43,7 +42,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -53,13 +51,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         currentUser = user;
         resolve({ user, userData });
       } catch (error) {
@@ -92,7 +88,6 @@ async function getNextTestNumber() {
     document.getElementById(
       "testNumber"
     ).textContent = `This will be Reading Test ${nextTestNumber}`;
-    console.log("📊 Next test number will be:", nextTestNumber);
 
     return nextTestNumber;
   } catch (error) {
@@ -655,7 +650,6 @@ function updateSharedOptionsFromContainer(container, type, passageNumber) {
     sharedOptions[passageNumber] = {};
   }
   sharedOptions[passageNumber][type] = newOptions;
-  console.log(`📝 Updated ${type} options for passage ${passageNumber}:`, newOptions);
 }
 
 // Update all previews of the same type (deprecated - use updateAllOptionsInPassage instead)
@@ -1193,7 +1187,6 @@ function collectTestData() {
             label: opt.label || "",
             text: opt.text || "",
           }));
-          console.log(`💾 Saving ${type} options for question in passage ${passageNumber}:`, questionData.options);
         } else {
           questionData.answer = questionEl.querySelector(".question-answer")?.value.trim() || "";
         }
@@ -1366,11 +1359,9 @@ async function handleFormSubmit(e) {
   try {
     const testData = collectTestData();
 
-    console.log("💾 Saving test data:", testData);
 
     const docId = `test-${nextTestNumber}`;
     await setDoc(doc(db, "readingTests", docId), testData);
-    console.log("✅ Test added with ID:", docId);
 
     const successModal = document.getElementById("successModal");
     const successMessage = document.getElementById("successMessage");
@@ -1407,7 +1398,6 @@ window.resetForm = function () {
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("📚 Reading Test Add page loaded");
 
   await checkAdminAccess();
 
@@ -1423,5 +1413,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   addPassage();
 
-  console.log("✅ Page initialized successfully");
 });

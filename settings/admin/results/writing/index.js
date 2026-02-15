@@ -97,7 +97,6 @@ function getWordCountColor(totalWords) {
 async function loadResults() {
   showLoader();
   try {
-    console.log("🔍 Loading Writing results...");
     
     // Сначала попробуем загрузить без сортировки для отладки
     let querySnapshot;
@@ -107,14 +106,11 @@ async function loadResults() {
         orderBy("submittedAt", "desc")
       );
       querySnapshot = await getDocs(q);
-      console.log("✅ Query with orderBy successful");
     } catch (orderError) {
-      console.log("⚠️ OrderBy failed, trying without ordering:", orderError);
       // Если orderBy не работает, загружаем без сортировки
       querySnapshot = await getDocs(collection(db, "resultsWriting"));
     }
     
-    console.log("📊 Query results:", {
       empty: querySnapshot.empty,
       size: querySnapshot.size,
       docs: querySnapshot.docs.length
@@ -138,7 +134,6 @@ async function loadResults() {
     const resultsBody = document.getElementById("resultsBody");
 
     if (querySnapshot.empty) {
-      console.log("❌ No documents found in resultsWriting collection");
       resultsBody.innerHTML = `
         <tr>
           <td colspan="6" class="no-results">
@@ -152,12 +147,10 @@ async function loadResults() {
       return;
     }
 
-    console.log("📝 Processing documents...");
     let processedCount = 0;
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      console.log(`📄 Document ${docSnap.id}:`, data);
       
       const email = data.email || data.name || "Unknown Student";
       const task1 = data.task1Content || data.task1 || "";
@@ -165,7 +158,6 @@ async function loadResults() {
       const testId = data.testId || "test-1";
       const createdAt = data.submittedAt || data.createdAt;
       
-      console.log(`Processing doc ${docSnap.id}:`, {
         email,
         task1Length: task1.length,
         task2Length: task2.length,
@@ -280,7 +272,6 @@ async function loadResults() {
       processedCount++;
     });
 
-    console.log(`✅ Processed ${processedCount} documents successfully`);
     
     // Добавляем обработчик поиска
     const searchInput = document.getElementById('searchInput');
@@ -373,10 +364,8 @@ async function loadResults() {
 // Authentication check
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("✅ User authenticated:", user.email);
     loadResults();
   } else {
-    console.log("❌ User not authenticated");
     alert("🔒 Please login first to view results");
     window.location.href = "/login.html";
   }

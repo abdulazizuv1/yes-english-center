@@ -21,7 +21,6 @@ db.collection("readingTests")
   .doc(docId)
   .set(readingTest)
   .then(() => {
-    console.log(`✅ Успешно добавлено: ${docId}`);
     process.exit(0);
   })
   .catch((error) => {

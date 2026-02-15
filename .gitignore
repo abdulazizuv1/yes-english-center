@@ -52,6 +52,10 @@ functions/node_modules/
 # Optional npm cache directory
 .npm
 
+vscode/
+
+functions/node_modules/
+
 # Optional eslint cache
 .eslintcache
 

@@ -38,7 +38,6 @@ async function checkAdminAccess() {
       unsubscribe();
       
       if (!user) {
-        console.log("❌ User not authenticated, redirecting to home page");
         alert("🔒 Please login first to access admin panel");
         window.location.href = "/";
         return;
@@ -50,7 +49,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
         
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -60,13 +58,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         resolve({ user, userData });
 
       } catch (error) {
@@ -211,7 +207,6 @@ async function initializeAdminPanel() {
     const { user, userData } = await checkAdminAccess();
     if (!user) return; // Will redirect if not admin
 
-    console.log("🔧 Initializing admin panel for:", user.email);
 
     // Setup form event listeners only after admin verification
     setupFormEventListeners();
@@ -220,7 +215,6 @@ async function initializeAdminPanel() {
     await loadUsers();
     await loadGroups();
 
-    console.log("✅ Admin panel initialized successfully");
 
   } catch (error) {
     console.error("❌ Error initializing admin panel:", error);
@@ -394,7 +388,6 @@ function createUsersContainer() {
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("🌐 Admin panel page loaded");
   createUsersContainer();
   initializeAdminPanel();
 });
@@ -406,7 +399,6 @@ function setupLogoutButton() {
     logoutBtn.addEventListener("click", async () => {
       try {
         await auth.signOut();
-        console.log("👋 Admin logged out");
         window.location.href = "/";
       } catch (error) {
         console.error("❌ Logout error:", error);

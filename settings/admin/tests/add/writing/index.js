@@ -38,7 +38,6 @@ async function checkAdminAccess() {
       unsubscribe();
 
       if (!user) {
-        console.log("❌ User not authenticated");
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
@@ -49,7 +48,6 @@ async function checkAdminAccess() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          console.log("❌ User document not found");
           alert("❌ User data not found. Access denied.");
           window.location.href = "/";
           return;
@@ -59,13 +57,11 @@ async function checkAdminAccess() {
         const userRole = userData.role;
 
         if (userRole !== "admin") {
-          console.log("❌ User is not admin. Role:", userRole);
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
 
-        console.log("✅ Admin access granted for:", user.email);
         currentUser = user;
         resolve({ user, userData });
       } catch (error) {
@@ -107,7 +103,6 @@ async function getNextTestNumber() {
     document.getElementById(
       "testNumber"
     ).textContent = `This will be Test ${nextTestNumber}`;
-    console.log("📊 Next test number will be:", nextTestNumber);
 
     return nextTestNumber;
   } catch (error) {
@@ -166,10 +161,8 @@ async function uploadImage(file, testNumber) {
     const storagePath = `writing-tasks/test-${testNumber}/${fileName}`;
     const storageRef = ref(storage, storagePath);
 
-    console.log("📤 Uploading image to:", storagePath);
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
-    console.log("✅ Image uploaded successfully:", downloadURL);
 
     return downloadURL;
   } catch (error) {
@@ -203,7 +196,6 @@ async function handleFormSubmit(e) {
     }
 
     // Upload image
-    console.log("📸 Uploading Task 1 image...");
     const imageUrl = await uploadImage(task1ImageFile, nextTestNumber);
 
     // Prepare test data
@@ -221,13 +213,11 @@ async function handleFormSubmit(e) {
       createdBy: currentUser.email,
     };
 
-    console.log("💾 Saving test data:", testData);
 
     // Save to Firestore
     // Save to Firestore with specific document ID
     const docId = `test-${nextTestNumber}`;
     await setDoc(doc(db, "writingTests", docId), testData);
-    console.log("✅ Test added with ID:", docId);
 
     // Show success message
     const successModal = document.getElementById("successModal");
@@ -268,7 +258,6 @@ window.resetForm = function () {
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("📝 Writing Test Add page loaded");
 
   // Check admin access
   await checkAdminAccess();
@@ -283,5 +272,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("writingTestForm");
   form.addEventListener("submit", handleFormSubmit);
 
-  console.log("✅ Page initialized successfully");
 });
