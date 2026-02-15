@@ -1,2 +1,12 @@
 node_modules/
 *.local
+# Ignore node_modules
+node_modules/
+functions/node_modules/
+
+# Ignore package-lock.json if you don't want it in the repo
+package-lock.json
+functions/package-lock.json
+
+# Ignore .gitignore in subfolders if not needed
+functions/.gitignore

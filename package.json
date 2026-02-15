@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "cors": "^2.8.6",
-    "firebase": "^12.2.1",
-    "swiper": "^11.2.10"
-  }
-}
