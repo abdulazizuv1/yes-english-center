@@ -154,4 +154,49 @@ window.langArr = {
         "ru":"Быстрые ссылки",
         "uz":"Tezkor havolalar",
     },
+    "lng_callback_badge":{
+        "en":"Get in Touch",
+        "ru":"Свяжитесь с нами",
+        "uz":"Biz bilan bog'laning",
+    },
+    "lng_callback_title":{
+        "en":"Contact Us",
+        "ru":"Обратная связь",
+        "uz":"Qayta aloqa",
+    },
+    "lng_callback_subtitle":{
+        "en":"Describe your request and we will help you",
+        "ru":"Опишите ваш запрос и мы вам поможем",
+        "uz":"Muammoingizni tushuntiring va biz sizga yordam beramiz",
+    },
+    "lng_callback_name_ph":{
+        "en":"Full Name",
+        "ru":"ФИО",
+        "uz":"F.I.SH",
+    },
+    "lng_callback_phone_ph":{
+        "en":"+998",
+        "ru":"+998",
+        "uz":"+998",
+    },
+    "lng_callback_group_default":{
+        "en":"Choose a group",
+        "ru":"Выберите группу",
+        "uz":"Guruhni tanlang",
+    },
+    "lng_callback_submit":{
+        "en":"Submit",
+        "ru":"Отправить",
+        "uz":"Yuborish",
+    },
+    "lng_callback_privacy":{
+        "en":"By submitting this form, you agree that your personal data will be used solely within our company and will not be shared with third parties.",
+        "ru":"Отправляя эту форму, вы соглашаетесь с тем, что ваши персональные данные будут использоваться исключительно в рамках нашей компании и не будут переданы третьим лицам.",
+        "uz":"Shaxsiy ma'lumotlarni ko'rib chiqishga roziligingizni tasdiqlang. Biz olingan ma'lumotlardan faqatgina bizning kompaniyamizda ichida foydalanishga kafolat beramiz, va uchinchi shaxslarga bermaslk.",
+    },
+    "lng_callback_comment_ph":{
+        "en":"Comments (your level, goals...)",
+        "ru":"Комментарий (ваш уровень, цели...)",
+        "uz":"Izohlar (darajangiz, maqsadlaringiz...)",
+    },
 };

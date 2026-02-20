@@ -17,6 +17,7 @@ import * as Skeleton from './modules/ui/skeleton.js';
 import * as SwiperConfig from './modules/swiper/swiper-config.js';
 import * as Language from './modules/language/language.js';
 import * as Helpers from './modules/utils/helpers.js';
+import * as Callback from './modules/callback/callback.js';
 import * as Performance from './modules/utils/performance.js';
 
 /**
@@ -199,7 +200,10 @@ async function startApp() {
     // 4. Initialize Performance Tracking
     Performance.initPerformanceTracking();
 
-    // 5. Initialize UI
+    // 5. Initialize Callback Form
+    Callback.initCallbackForm();
+
+    // 6. Initialize UI
     await initializeUI();
 
     AppState.initialized = true;
@@ -246,6 +250,7 @@ window.App = {
   Language,
   Helpers,
   Performance,
+  Callback,
   AppState
 };
 

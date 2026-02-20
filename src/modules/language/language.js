@@ -76,10 +76,19 @@ function applyTranslations(lang) {
 
   requestAnimationFrame(() => {
     for (let key in window.langArr) {
+      // Standard text content via class names
       const elements = document.querySelectorAll(`.${key}`);
       if (elements.length > 0) {
         elements.forEach((elem) => {
           elem.innerHTML = window.langArr[key][lang];
+        });
+      }
+
+      // Placeholder translations via data-lng-placeholder attribute
+      const placeholderEls = document.querySelectorAll(`[data-lng-placeholder="${key}"]`);
+      if (placeholderEls.length > 0) {
+        placeholderEls.forEach((elem) => {
+          elem.placeholder = window.langArr[key][lang];
         });
       }
     }

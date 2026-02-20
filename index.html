@@ -430,6 +430,47 @@
         </div>
       </div>
     </section>
+
+    <!-- Feedback Form / Обратная форма -->
+    <section id="callback-form" class="callback-section">
+      <div class="container">
+        <div class="callback-wrapper glass-morphism" data-aos="fade-up" data-aos-duration="800">
+          <div class="callback-header" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+            <div class="section-badge glass-badge">📝 <span class="lng_callback_badge">Get in Touch</span></div>
+            <h2 class="lng_callback_title">Contact <span class="gradient-text">Us</span></h2>
+            <p class="lng_callback_subtitle">Describe your request and we will help you</p>
+          </div>
+          <form class="callback-form" id="callbackForm" onsubmit="event.preventDefault();" autocomplete="off">
+            <div class="callback-fields">
+              <div class="callback-field">
+                <input type="text" id="callback_name" class="glass-input" placeholder="Full Name" required data-lng-placeholder="lng_callback_name_ph">
+              </div>
+              <div class="callback-field">
+                <input type="tel" id="callback_phone" class="glass-input" placeholder="+998" required data-lng-placeholder="lng_callback_phone_ph">
+              </div>
+              <div class="callback-field">
+                <select id="callback_group" class="glass-input glass-select-form" required>
+                  <option value="" disabled selected class="lng_callback_group_default">Choose a group</option>
+                  <option value="general_english">General English</option>
+                  <option value="ielts">IELTS</option>
+                  <option value="sat">SAT</option>
+                </select>
+              </div>
+            </div>
+            <div class="callback-field callback-field-full">
+              <textarea id="callback_comment" class="glass-input callback-textarea" rows="4" placeholder="Comments (your level, goals...)" data-lng-placeholder="lng_callback_comment_ph"></textarea>
+            </div>
+            <button type="submit" class="callback-submit glass-btn">
+              <span class="lng_callback_submit">Submit</span>
+              <div class="btn-shimmer"></div>
+            </button>
+            <div class="callback-privacy">
+              <p class="lng_callback_privacy">By submitting this form, you agree that your personal data will be used solely within our company and will not be shared with third parties.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="glass-footer">

@@ -2253,6 +2253,32 @@ nav {
     text-align: center;
   }
 
+  /* Mobile Callback Form */
+  .callback-section {
+    padding: 60px 0;
+  }
+
+  .callback-wrapper {
+    padding: 35px 30px;
+  }
+
+  .callback-header h2 {
+    font-size: 30px;
+  }
+
+  .callback-header p {
+    font-size: 15px;
+  }
+
+  .callback-fields {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .callback-submit {
+    max-width: 100%;
+  }
+
   /* Glass effects intensity on mobile */
   .bg-blur {
     width: 250px;
@@ -2368,6 +2394,166 @@ nav {
     height: 70px;
   }
 }
+
+/* ========== Callback Form Section ========== */
+.callback-section {
+  padding: 80px 0;
+  position: relative;
+}
+
+.callback-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px 60px;
+  border-radius: var(--border-radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.callback-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light), #764ba2);
+  background-size: 200% 200%;
+  animation: gradientFlow 4s ease infinite;
+}
+
+.callback-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.callback-header h2 {
+  font-size: 40px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+}
+
+.callback-header p {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.callback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.callback-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.callback-field .glass-input {
+  width: 100%;
+  height: 56px;
+  padding: 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--border-radius);
+  font-size: 15px;
+  outline: none;
+  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.callback-field .glass-input::placeholder {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.callback-field .glass-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(23, 99, 225, 0.12), 0 4px 16px rgba(23, 99, 225, 0.08);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.glass-select-form {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%235a6c7d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  padding-right: 44px !important;
+}
+
+.glass-select-form option {
+  background: #fff;
+  color: var(--text-primary);
+  padding: 12px;
+}
+
+.callback-submit {
+  max-width: 280px;
+  height: 54px;
+  margin: 10px auto 0;
+  border: none;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(23, 99, 225, 0.25);
+  letter-spacing: 0.5px;
+}
+
+.callback-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(23, 99, 225, 0.35);
+}
+
+.callback-submit:active {
+  transform: translateY(0);
+}
+
+.callback-privacy {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.callback-field-full {
+  width: 100%;
+}
+
+.callback-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 16px 20px !important;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.callback-privacy p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.8;
+}
+
+/* 480px callback overrides handled by 768px rules above */
 
 /* Skeleton Loading Screens */
 .skeleton-loader {
