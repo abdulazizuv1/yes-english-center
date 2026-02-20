@@ -465,6 +465,7 @@ html {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   transition: var(--transition);
+  overflow: hidden; /* prevent hamburger from overflowing on mobile */
 }
 
 nav {
@@ -579,7 +580,7 @@ nav {
   height: 40px;
   gap: 4px;
   z-index: 102;
-  margin-left: auto; /* keeps toggle within container when nav items collapse */
+  flex-shrink: 0;
 }
 
 .hamburger-line {
@@ -1902,13 +1903,24 @@ nav {
     height: 45px;
   }
 
+  nav {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+  }
+
+  .nav_media {
+    flex: 1;
+  }
+
   .glass-toggle {
     display: flex;
+    margin-left: 0;
   }
 
   .nav_info,
   .nav_right {
-    display: none;
+    display: none !important;
   }
 
   .mobile-menu {
