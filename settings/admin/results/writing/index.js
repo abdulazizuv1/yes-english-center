@@ -110,11 +110,7 @@ async function loadResults() {
       // Если orderBy не работает, загружаем без сортировки
       querySnapshot = await getDocs(collection(db, "resultsWriting"));
     }
-    
-      empty: querySnapshot.empty,
-      size: querySnapshot.size,
-      docs: querySnapshot.docs.length
-    });
+
 
     // Create table header
     resultsTable.innerHTML = `
@@ -157,13 +153,6 @@ async function loadResults() {
       const task2 = data.task2Content || data.task2 || "";
       const testId = data.testId || "test-1";
       const createdAt = data.submittedAt || data.createdAt;
-      
-        email,
-        task1Length: task1.length,
-        task2Length: task2.length,
-        testId,
-        createdAt
-      });
       
       // Calculate word counts
       const task1Words = countWords(task1);
