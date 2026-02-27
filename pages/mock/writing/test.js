@@ -538,7 +538,7 @@ async function sendEmailNotification(data) {
   try {
     console.log("📱 Sending Telegram notification...");
 
-    const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
+    const BOT_TOKEN = "8312079942:8220327961:AAFzwGxlcJflL_GYmek9qwvAam2pBRlADQU";
     const CHAT_ID = "53064348";
 
     const task1Preview = data.task1Content
