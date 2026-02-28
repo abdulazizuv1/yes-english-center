@@ -56,7 +56,9 @@ async function initializeResult() {
     const resultId = urlParams.get("id");
 
     if (!resultId) {
-      throw new Error("No result ID provided");
+      alert("No result ID found. Redirecting to your dashboard.");
+      window.location.href = "/pages/dashboard/";
+      return;
     }
 
     console.log("🔍 Loading result:", resultId);

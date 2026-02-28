@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v1';
-const STATIC_CACHE = 'yes-static-v1';
-const DYNAMIC_CACHE = 'yes-dynamic-v1';
+const CACHE_NAME = 'yes-english-center-v2';
+const STATIC_CACHE = 'yes-static-v2';
+const DYNAMIC_CACHE = 'yes-dynamic-v2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -74,6 +74,11 @@ self.addEventListener('fetch', (event) => {
     url.origin.includes('unpkg.com') ||
     url.origin.includes('cdn.jsdelivr.net')
   ) {
+    return;
+  }
+
+  // Skip dashboard SPA - it handles its own caching via Vite hashed assets
+  if (url.pathname.startsWith('/pages/dashboard') || url.pathname.startsWith('/settings/') || url.pathname.startsWith('/pages/mock/')) {
     return;
   }
 

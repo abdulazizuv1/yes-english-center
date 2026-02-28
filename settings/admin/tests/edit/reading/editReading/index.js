@@ -1288,9 +1288,6 @@ function updateQuestion(passageIndex, questionIndex, field, value) {
     currentTest.passages[passageIndex].questions[questionIndex] = {};
   }
   currentTest.passages[passageIndex].questions[questionIndex][field] = value;
-    `Updated question ${passageIndex}-${questionIndex} ${field}:`,
-    value
-  );
 }
 
 function updateAnswer(passageIndex, questionIndex, answerIndex, value) {
@@ -1300,9 +1297,6 @@ function updateAnswer(passageIndex, questionIndex, answerIndex, value) {
   currentTest.passages[passageIndex].questions[questionIndex].answer[
     answerIndex
   ] = value;
-    `Updated answer ${passageIndex}-${questionIndex}-${answerIndex}:`,
-    value
-  );
 }
 
 function updateOption(passageIndex, questionIndex, optionIndex, field, value) {
@@ -1321,9 +1315,6 @@ function updateOption(passageIndex, questionIndex, optionIndex, field, value) {
   currentTest.passages[passageIndex].questions[questionIndex].options[
     optionIndex
   ][field] = value;
-    `Updated option ${passageIndex}-${questionIndex}-${optionIndex} ${field}:`,
-    value
-  );
 }
 
 // Add/Remove functions
@@ -1994,9 +1985,6 @@ function updateSharedOptionsFromContainer(container, type, passageNumber) {
     sharedOptions[passageNumber] = {};
   }
   sharedOptions[passageNumber][type] = newOptions;
-    `📝 Updated ${type} options for passage ${passageNumber}:`,
-    newOptions
-  );
 }
 
 // Add new option
@@ -2351,7 +2339,7 @@ function goBack() {
       "Are you sure you want to cancel?\n\nAll unsaved changes will be lost."
     )
   ) {
-    window.location.href = "../index.html";
+    window.location.href = "/pages/dashboard/#/admin/tests/reading";
   }
 }
 

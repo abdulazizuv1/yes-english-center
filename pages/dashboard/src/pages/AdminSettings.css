@@ -1,0 +1,107 @@
+.admin-page { display: flex; flex-direction: column; gap: 28px; }
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.admin-icon { color: var(--primary); }
+.admin-header h2 { font-size: 22px; font-weight: 700; }
+.admin-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.admin-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.admin-card {
+  padding: 20px;
+}
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.admin-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.admin-card-header h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.admin-card-actions {
+  display: flex;
+  gap: 8px;
+}
+.admin-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.admin-action-btn.add {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+.admin-action-btn.add:hover { background: rgba(16, 185, 129, 0.2); }
+.admin-action-btn.edit {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1e40af;
+}
+.admin-action-btn.edit:hover { background: rgba(59, 130, 246, 0.2); }
+
+.management-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.management-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  text-decoration: none;
+}
+.management-item:hover { border-color: var(--primary); }
+.management-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(23, 99, 225, 0.08);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.management-info { flex: 1; display: flex; flex-direction: column; }
+.management-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.management-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.management-arrow { color: var(--text-muted); flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .admin-grid { grid-template-columns: 1fr; }
+}

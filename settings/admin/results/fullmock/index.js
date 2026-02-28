@@ -112,11 +112,6 @@ async function loadResults() {
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
-        id: docSnap.id,
-        name: data.name,
-        totalScore: data.totalScore,
-        totalPossible: data.totalPossible
-      });
       
       const email = data.name || data.email || "Unknown Student";
       const totalScore = data.totalScore || 0;

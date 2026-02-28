@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Writing Test - YES English Center</title>
+  <link rel="stylesheet" href="/settings/admin/tests/edit/writing/editWriting/index.css">
+  <link rel="icon" href="/image/logo_copy.png" />
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="header-content">
+        <span>✍️</span><h1> Edit Writing Test</h1>
+        <p class="subtitle" id="testTitle">Loading test...</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-back" onclick="goBack()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Tests
+        </button>
+        <button class="btn-save" id="saveBtn" onclick="saveTest()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Save Changes
+        </button>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingContainer" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading test data...</p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content" style="display: none;">
+      <!-- Test Info Section -->
+      <section class="section">
+        <div class="section-header">
+          <h2>📋 Test Information</h2>
+        </div>
+        <div class="section-content">
+          <div class="form-group">
+            <label for="testId">Test ID:</label>
+            <input type="text" id="testId" readonly class="readonly-input">
+          </div>
+          <div class="form-group">
+            <label for="testNumber">Test Number:</label>
+            <input type="text" id="testNumber" readonly class="readonly-input">
+          </div>
+          <div class="form-group">
+            <label for="testTitleInput">Test Title:</label>
+            <input type="text" id="testTitleInput" placeholder="e.g. IELTS Academic Writing Test 1">
+          </div>
+        </div>
+      </section>
+
+      <!-- Task 1 Section -->
+      <section class="section">
+        <div class="section-header" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8, #60a5fa);">
+          <h2>📝 Task 1 — Report / Letter</h2>
+        </div>
+        <div class="section-content">
+          <div class="form-group">
+            <label for="task1Question">Task 1 Question:</label>
+            <textarea id="task1Question" rows="6" placeholder="Enter the Task 1 question/prompt..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Task 1 Image (optional):</label>
+            <div id="task1ImagePreview" style="margin-bottom: 12px;"></div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="task1ImageUrl" style="font-size: 0.9rem; color: #6b7280;">Image URL:</label>
+              <input type="text" id="task1ImageUrl" placeholder="https://... (paste image URL or upload)">
+            </div>
+            <div style="margin-top: 10px;">
+              <button type="button" class="btn-add" onclick="openImageUpload()" style="padding: 10px 20px; font-size: 0.85rem;">
+                📤 Upload Image
+              </button>
+              <button type="button" onclick="previewImage()" style="padding: 10px 20px; font-size: 0.85rem; background: #e0e7ff; color: #3730a3; border: none; border-radius: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 600; margin-left: 8px;">
+                👁️ Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task 2 Section -->
+      <section class="section">
+        <div class="section-header" style="background: linear-gradient(135deg, #10b981, #059669, #34d399);">
+          <h2>📝 Task 2 — Essay</h2>
+        </div>
+        <div class="section-content">
+          <div class="form-group">
+            <label for="task2Question">Task 2 Question:</label>
+            <textarea id="task2Question" rows="6" placeholder="Enter the Task 2 essay question/prompt..."></textarea>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Save Confirmation Modal -->
+    <div id="saveModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>💾 Save Changes</h2>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to save the changes to this writing test?</p>
+          <p class="warning-text">This will update the test in the database and affect all users.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeSaveModal()">Cancel</button>
+          <button class="btn-save-confirm" id="confirmSaveBtn">
+            <span id="saveText">Save Changes</span>
+            <span class="loader" id="saveLoader" style="display: none;"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div id="imageUploadModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🖼️ Upload Task 1 Image</h2>
+        </div>
+        <div class="modal-body">
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">🖼️</div>
+            <p>Drag and drop your image here or click to browse</p>
+            <p class="upload-hint">Supported formats: JPG, PNG, GIF, WebP</p>
+            <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+          </div>
+          <div class="upload-progress" id="uploadProgress" style="display: none;">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">Uploading...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeImageUploadModal()">Cancel</button>
+          <button class="btn-save-confirm" id="confirmUploadBtn" onclick="uploadImageFile()" disabled>
+            <span id="uploadText">Upload</span>
+            <span class="loader" id="uploadLoader" style="display: none;"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/settings/admin/tests/edit/writing/editWriting/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Test Results - IELTS Mock Test</title>
+    <link rel="stylesheet" href="/pages/mock/writing/resultWriting.css">
+    <link rel="icon" href="/image/logo_copy.png" />
+</head>
+<body>
+    <!-- Celebration Overlay -->
+    <div id="celebrationOverlay" class="celebration-overlay">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🎉</div>
+            <h2>Test Completed!</h2>
+            <p>Your writing responses have been submitted successfully</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎯 IELTS Writing Results</h1>
+            </div>
+            <div class="badge">Mock Test</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-header">
+                <div class="student-info">
+                    <div class="avatar">👤</div>
+                    <div class="student-details">
+                        <h2 id="email">Loading...</h2>
+                        <div class="completion-time">
+                            Completed on <span id="completionDate">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-badge" id="resultBadge">
+                    <div class="result-status">✅ Submitted</div>
+                    <div class="result-label">Writing Test</div>
+                </div>
+            </div>
+
+            <div class="test-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon">📝</div>
+                        <div class="info-content">
+                            <div class="info-label">Tasks Completed</div>
+                            <div class="info-value" id="tasksCompleted">0/2</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">⏰</div>
+                        <div class="info-content">
+                            <div class="info-label">Time Taken</div>
+                            <div class="info-value" id="timeTaken">60 min</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">📊</div>
+                        <div class="info-content">
+                            <div class="info-label">Total Words</div>
+                            <div class="info-value" id="totalWords">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Writing Analysis Card -->
+        <div class="analysis-card">
+            <h3>📊 Writing Analysis</h3>
+            <div class="analysis-grid">
+                <div class="analysis-item task1">
+                    <div class="analysis-icon">📈</div>
+                    <div class="analysis-content">
+                        <div class="analysis-label">Task 1</div>
+                        <div class="analysis-number" id="task1Words">0</div>
+                        <div class="analysis-sublabel">words</div>
+                        <div class="word-requirement" id="task1Status">Min 150 words</div>
+                    </div>
+                </div>
+                <div class="analysis-item task2">
+                    <div class="analysis-icon">📝</div>
+                    <div class="analysis-content">
+                        <div class="analysis-label">Task 2</div>
+                        <div class="analysis-number" id="task2Words">0</div>
+                        <div class="analysis-sublabel">words</div>
+                        <div class="word-requirement" id="task2Status">Min 250 words</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Writing Responses Card -->
+        <div class="responses-card">
+            <div class="responses-header">
+                <h3>📄 Your Writing Responses</h3>
+                <div class="view-toggles">
+                    <button class="toggle-btn active" data-view="formatted">Formatted View</button>
+                    <button class="toggle-btn" data-view="plain">Plain Text</button>
+                </div>
+            </div>
+
+            <!-- Task 1 Response -->
+            <div class="task-response" id="task1Response">
+                <div class="task-header">
+                    <div class="task-info">
+                        <h4>📈 Task 1 - Academic Writing</h4>
+                        <div class="task-meta">
+                            <span class="word-count" id="task1WordCount">0 words</span>
+                            <span class="task-status" id="task1ResponseStatus">Incomplete</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-content">
+                    <div class="content-formatted" id="task1Content">
+                        <p class="no-response">No response submitted</p>
+                    </div>
+                    <div class="content-plain" id="task1ContentPlain" style="display: none;">
+                        <textarea readonly id="task1TextArea">No response submitted</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 2 Response -->
+            <div class="task-response" id="task2Response">
+                <div class="task-header">
+                    <div class="task-info">
+                        <h4>📝 Task 2 - Essay Writing</h4>
+                        <div class="task-meta">
+                            <span class="word-count" id="task2WordCount">0 words</span>
+                            <span class="task-status" id="task2ResponseStatus">Incomplete</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-content">
+                    <div class="content-formatted" id="task2Content">
+                        <p class="no-response">No response submitted</p>
+                    </div>
+                    <div class="content-plain" id="task2ContentPlain" style="display: none;">
+                        <textarea readonly id="task2TextArea">No response submitted</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Writing Tips Card -->
+        <div class="tips-card">
+            <h3>💡 Writing Tips for Improvement</h3>
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <div class="tip-icon">🎯</div>
+                    <div class="tip-content">
+                        <h4>Task Achievement</h4>
+                        <p>Ensure you fully address all parts of the task and maintain focus throughout your response.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">🔗</div>
+                    <div class="tip-content">
+                        <h4>Coherence &amp; Cohesion</h4>
+                        <p>Use linking words and organize your ideas logically with clear paragraphs.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">📚</div>
+                    <div class="tip-content">
+                        <h4>Vocabulary</h4>
+                        <p>Use a wide range of vocabulary accurately and avoid repetition where possible.</p>
+                    </div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">✍️</div>
+                    <div class="tip-content">
+                        <h4>Grammar</h4>
+                        <p>Use a variety of sentence structures and check for grammatical accuracy.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="window.print()">
+                🖨️ Print Results
+            </button>
+            <button class="btn-secondary" onclick="location.href='/pages/mock/writing/select-test.html'">
+                📝 Take Another Test
+            </button>
+            <button class="btn-secondary" onclick="location.href='/index.html'">
+                🏠 Back to Home
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="/pages/mock/writing/resultWriting.js"></script>
+</body>
+</html>

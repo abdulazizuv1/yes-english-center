@@ -90,7 +90,7 @@ export function createHandleFinish(deps) {
         createdAt: serverTimestamp(),
       });
 
-      window.location.href = `/pages/mock/result.html?id=${docRef.id}`;
+      window.location.href = `/pages/mock/reading/result/?id=${docRef.id}`;
       localStorage.removeItem(readingState.testStorageKey);
       clearInterval(window.readingTimerInterval);
       window.finished = true;

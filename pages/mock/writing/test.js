@@ -509,8 +509,8 @@ async function submitTest() {
 
     console.log("💾 Saving to Firestore:", resultData);
 
-    await addDoc(collection(db, "resultsWriting"), resultData);
-    console.log("✅ Data saved to Firestore successfully");
+    const docRef = await addDoc(collection(db, "resultsWriting"), resultData);
+    console.log("✅ Data saved to Firestore successfully, ID:", docRef.id);
 
     // Send email
     await sendEmailNotification(resultData);
@@ -522,7 +522,7 @@ async function submitTest() {
     clearInterval(timerInterval);
 
     // Show success modal with correct word counts
-    showSuccessModal(finalTask1WordCount, finalTask2WordCount);
+    showSuccessModal(finalTask1WordCount, finalTask2WordCount, docRef.id);
   } catch (error) {
     console.error("❌ Error submitting test:", error);
     alert("Error submitting test: " + error.message);
@@ -538,7 +538,7 @@ async function sendEmailNotification(data) {
   try {
     console.log("📱 Sending Telegram notification...");
 
-    const BOT_TOKEN = "8312079942:8220327961:AAFzwGxlcJflL_GYmek9qwvAam2pBRlADQU";
+    const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
     const CHAT_ID = "53064348";
 
     const task1Preview = data.task1Content
@@ -621,7 +621,7 @@ ${data.task1ImageUrl ? `🖼️ [View Image](${data.task1ImageUrl})` : ""}
 }
 
 // Show success modal
-function showSuccessModal(task1Words, task2Words) {
+function showSuccessModal(task1Words, task2Words, resultId) {
  elements.successModal.classList.add("show");
 
  // Update modal content
@@ -632,6 +632,14 @@ function showSuccessModal(task1Words, task2Words) {
    testData?.title || "IELTS Writing Test";
  document.getElementById("submittedTask1Words").textContent = task1Words;
  document.getElementById("submittedTask2Words").textContent = task2Words;
+
+ // Set View Results button to link to the result page
+ const viewResultsBtn = document.getElementById("viewResultsBtn");
+ if (viewResultsBtn) {
+   viewResultsBtn.onclick = () => {
+     window.location.href = `/pages/mock/writing/result/?id=${resultId}`;
+   };
+ }
 }
 
 // Event listeners

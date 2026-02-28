@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Full Mock Test Result</title>
+    <link rel="icon" href="/image/logo_copy.png">
+    <link rel="stylesheet" href="/pages/mock/full/resultFullMock.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎓 IELTS Full Mock Test Result</h1>
+            </div>
+            <div class="test-type">
+                <span class="badge">Full Mock Test</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Overall Results Summary Card -->
+        <div class="result-card">
+            <div class="result-header">
+                <div class="student-info">
+                    <div class="avatar">👤</div>
+                    <div class="student-details">
+                        <h2 id="email">Loading...</h2>
+                        <p class="completion-time">Completed: <span id="completionDate"></span></p>
+                    </div>
+                </div>
+                <div class="result-badge" id="resultBadge">
+                    <div class="overall-score" id="overallBand">0.0</div>
+                    <div class="ielts-label" id="overallBandLabel">Overall Band Score</div>
+                </div>
+            </div>
+            
+            <div class="score-breakdown">
+                <div class="score-item listening">
+                    <div class="score-icon">👂</div>
+                    <div class="score-content">
+                        <span class="score-label">Listening</span>
+                        <span class="score-value" id="listeningScore">0 / 40</span>
+                        <div class="score-percentage" id="listeningPercentage">0%</div>
+                        <div class="band-score">Band <span id="listeningBand">0.0</span></div>
+                    </div>
+                </div>
+                <div class="score-item reading">
+                    <div class="score-icon">📖</div>
+                    <div class="score-content">
+                        <span class="score-label">Reading</span>
+                        <span class="score-value" id="readingScore">0 / 40</span>
+                        <div class="score-percentage" id="readingPercentage">0%</div>
+                        <div class="band-score">Band <span id="readingBand">0.0</span></div>
+                    </div>
+                </div>
+                <div class="score-item writing">
+                    <div class="score-icon">📝</div>
+                    <div class="score-content">
+                        <span class="score-label">Writing</span>
+                        <span class="score-value">Submitted</span>
+                        <div class="score-note">Manual review required</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Section Tabs -->
+        <div class="section-tabs">
+            <button class="tab-button active" onclick="showSection('overview')">📊 Overview</button>
+            <button class="tab-button" onclick="showSection('listening')">👂 Listening</button>
+            <button class="tab-button" onclick="showSection('reading')">📖 Reading</button>
+            <button class="tab-button" onclick="showSection('writing')">📝 Writing</button>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="result-section active" id="overviewSection">
+            <div class="analysis-card">
+                <h3>📊 Performance Analysis</h3>
+                <div class="analysis-grid">
+                    <div class="analysis-item listening">
+                        <div class="analysis-icon">👂</div>
+                        <div class="analysis-content">
+                            <div class="analysis-number" id="listeningBandDisplay">0.0</div>
+                            <div class="analysis-label">Listening Band</div>
+                        </div>
+                    </div>
+                    <div class="analysis-item reading">
+                        <div class="analysis-icon">📖</div>
+                        <div class="analysis-content">
+                            <div class="analysis-number" id="readingBandDisplay">0.0</div>
+                            <div class="analysis-label">Reading Band</div>
+                        </div>
+                    </div>
+                    <div class="analysis-item overall">
+                        <div class="analysis-icon">🎯</div>
+                        <div class="analysis-content">
+                            <div class="analysis-number" id="overallBandDisplay">0.0</div>
+                            <div class="analysis-label">Overall Band</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Band Score Guide -->
+            <div class="band-guide-card">
+                <h3>🎯 IELTS Band Score Guide</h3>
+                <div class="band-scale">
+                    <div class="band-item band-9"><div class="band-number">9.0</div><div class="band-description">Expert User</div><div class="band-range">39-40 correct</div></div>
+                    <div class="band-item band-8-5"><div class="band-number">8.5</div><div class="band-description">Very Good User</div><div class="band-range">37-38 correct</div></div>
+                    <div class="band-item band-8"><div class="band-number">8.0</div><div class="band-description">Very Good User</div><div class="band-range">35-36 correct</div></div>
+                    <div class="band-item band-7-5"><div class="band-number">7.5</div><div class="band-description">Good User</div><div class="band-range">32-34 correct</div></div>
+                    <div class="band-item band-7"><div class="band-number">7.0</div><div class="band-description">Good User</div><div class="band-range">30-31 correct</div></div>
+                    <div class="band-item band-6-5"><div class="band-number">6.5</div><div class="band-description">Competent User</div><div class="band-range">26-29 correct</div></div>
+                    <div class="band-item band-6"><div class="band-number">6.0</div><div class="band-description">Competent User</div><div class="band-range">23-25 correct</div></div>
+                    <div class="band-item band-5-5"><div class="band-number">5.5</div><div class="band-description">Modest User</div><div class="band-range">18-22 correct</div></div>
+                    <div class="band-item band-5"><div class="band-number">5.0</div><div class="band-description">Modest User</div><div class="band-range">16-17 correct</div></div>
+                    <div class="band-item band-4-5"><div class="band-number">4.5</div><div class="band-description">Limited User</div><div class="band-range">13-15 correct</div></div>
+                    <div class="band-item band-4"><div class="band-number">4.0</div><div class="band-description">Limited User</div><div class="band-range">10-12 correct</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listening Section -->
+        <div class="result-section" id="listeningSection">
+            <div class="section-header">
+                <h3>👂 Listening Results</h3>
+                <div class="section-score">
+                    Score: <span id="listeningDetailScore">0/40</span>
+                </div>
+            </div>
+            <div class="questions-grid" id="listeningQuestions">
+                <!-- Questions will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Reading Section -->
+        <div class="result-section" id="readingSection">
+            <div class="section-header">
+                <h3>📖 Reading Results</h3>
+                <div class="section-score">
+                    Score: <span id="readingDetailScore">0/40</span>
+                </div>
+            </div>
+            <div class="questions-grid" id="readingQuestions">
+                <!-- Questions will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Writing Section -->
+        <div class="result-section" id="writingSection">
+            <div class="writing-results">
+                <div class="writing-header">
+                    <h3>📝 Writing Results</h3>
+                    <div class="writing-status">
+                        <span class="status-badge submitted">✅ Submitted for Review</span>
+                    </div>
+                </div>
+                
+                <div class="writing-notice">
+                    <div class="notice-icon">ℹ️</div>
+                    <div class="notice-content">
+                        <h4>Manual Review Required</h4>
+                        <p>Your writing tasks have been submitted to our instructors for detailed evaluation. You will receive feedback within 24-48 hours.</p>
+                    </div>
+                </div>
+
+                <!-- Writing Tasks -->
+                <div class="writing-tasks">
+                    <div class="writing-task">
+                        <div class="task-header">
+                            <h4>📈 Task 1</h4>
+                            <div class="task-info">
+                                <span class="word-count" id="task1WordCount">0 words</span>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <div class="task-response" id="task1Response">
+                                Your Task 1 response will appear here...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="writing-task">
+                        <div class="task-header">
+                            <h4>📝 Task 2</h4>
+                            <div class="task-info">
+                                <span class="word-count" id="task2WordCount">0 words</span>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <div class="task-response" id="task2Response">
+                                Your Task 2 response will appear here...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-secondary" onclick="window.print()">
+                🖨️ Print Results
+            </button>
+            <button class="btn-primary" onclick="location.href='/pages/mock.html'">
+                🏠 Back to Tests
+            </button>
+            <button class="btn-secondary" onclick="retakeTest()">
+                🔄 Retake Test
+            </button>
+        </div>
+    </div>
+
+    <!-- Celebration Animation -->
+    <div id="celebrationOverlay" class="celebration-overlay">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🎉</div>
+            <h2>Full Mock Test Completed!</h2>
+            <p>You've successfully completed all three sections of the IELTS mock test!</p>
+        </div>
+    </div>
+
+    <script type="module" src="/pages/mock/full/resultFullMock.js"></script>
+</body>
+</html>

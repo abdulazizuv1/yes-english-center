@@ -255,7 +255,7 @@ export function initMockRedirect(isUserAuthenticated) {
         const isAuthenticated = isUserAuthenticated();
         
         if (isAuthenticated) {
-          window.location.href = "pages/mock.html";
+          window.location.href = "/pages/dashboard/";
         } else {
           showLoginPanel();
         }

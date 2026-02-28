@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Reading Result</title>
+    <link rel="icon" href="/image/logo_copy.png">
+    <link rel="stylesheet" href="/pages/mock/result.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎓 IELTS Result</h1>
+            </div>
+            <div class="test-type">
+                <span class="badge">Reading Test</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Results Summary Card -->
+        <div class="result-card">
+            <div class="result-header">
+                <div class="student-info">
+                    <div class="avatar">👤</div>
+                    <div class="student-details">
+                        <h2 id="email">Loading...</h2>
+                        <p class="completion-time">Completed: <span id="completionDate"></span></p>
+                    </div>
+                </div>
+                <div class="result-badge" id="resultBadge">
+                    <div class="ielts-score" id="ielts">0.0</div>
+                    <div class="ielts-label">IELTS Band</div>
+                </div>
+            </div>
+            
+            <div class="score-breakdown">
+                <div class="score-item">
+                    <span class="score-label">Correct Answers</span>
+                    <span class="score-value" id="score">0 / 40</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Accuracy</span>
+                    <span class="score-value" id="accuracy">0%</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Total Questions</span>
+                    <span class="score-value" id="totalQuestions">40</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span>Overall Performance</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Analysis -->
+        <div class="analysis-card">
+            <h3>📊 Performance Analysis</h3>
+            <div class="analysis-grid">
+                <div class="analysis-item correct">
+                    <div class="analysis-icon">✅</div>
+                    <div class="analysis-content">
+                        <div class="analysis-number" id="correctCount">0</div>
+                        <div class="analysis-label">Correct</div>
+                    </div>
+                </div>
+                <div class="analysis-item incorrect">
+                    <div class="analysis-icon">❌</div>
+                    <div class="analysis-content">
+                        <div class="analysis-number" id="incorrectCount">0</div>
+                        <div class="analysis-label">Incorrect</div>
+                    </div>
+                </div>
+                <div class="analysis-item unanswered">
+                    <div class="analysis-icon">⭕</div>
+                    <div class="analysis-content">
+                        <div class="analysis-number" id="unansweredCount">0</div>
+                        <div class="analysis-label">Unanswered</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Band Score Guide -->
+        <div class="band-guide-card">
+            <h3>🎯 IELTS Band Score Guide</h3>
+            <div class="band-scale">
+                <div class="band-item band-9">
+                    <div class="band-number">9.0</div>
+                    <div class="band-description">Expert User</div>
+                    <div class="band-range">39-40 correct</div>
+                </div>
+                <div class="band-item band-8">
+                    <div class="band-number">8.0-8.5</div>
+                    <div class="band-description">Very Good User</div>
+                    <div class="band-range">35-38 correct</div>
+                </div>
+                <div class="band-item band-7">
+                    <div class="band-number">7.0-7.5</div>
+                    <div class="band-description">Good User</div>
+                    <div class="band-range">30-34 correct</div>
+                </div>
+                <div class="band-item band-6">
+                    <div class="band-number">6.0-6.5</div>
+                    <div class="band-description">Competent User</div>
+                    <div class="band-range">23-29 correct</div>
+                </div>
+                <div class="band-item band-5">
+                    <div class="band-number">5.0-5.5</div>
+                    <div class="band-description">Modest User</div>
+                    <div class="band-range">15-22 correct</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Answers -->
+        <div class="answers-card">
+            <div class="answers-header">
+                <h3>📝 Detailed Answer Review</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="correct">Correct</button>
+                    <button class="filter-btn" data-filter="incorrect">Incorrect</button>
+                    <button class="filter-btn" data-filter="unanswered">Unanswered</button>
+                </div>
+            </div>
+            <div id="answers" class="answers-grid">
+                <!-- Answers will be populated here -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-secondary" onclick="window.print()">
+                🖨️ Print Results
+            </button>
+            <button class="btn-primary" onclick="location.href='/pages/mock.html'">
+                🏠 Back to Tests
+            </button>
+        </div>
+    </div>
+
+    <!-- Celebration Animation -->
+    <div id="celebrationOverlay" class="celebration-overlay">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🎉</div>
+            <h2>Congratulations!</h2>
+            <p>You've completed the IELTS Reading Test!</p>
+        </div>
+    </div>
+
+    <script type="module" src="/pages/mock/result.js"></script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+.feedback-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.feedback-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.feedback-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    background-color: var(--primary-light, #fcebeb); /* Primary color light tint */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--primary-color, #ffffff);
+}
+
+.feedback-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color, #0f172a);
+    margin-bottom: 0.5rem;
+}
+
+.feedback-header p {
+    color: var(--text-muted, #64748b);
+    font-size: 1rem;
+}
+
+.feedback-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.feedback-main {
+    flex: 1;
+}
+
+.feedback-form-card {
+    padding: 2rem;
+}
+
+.feedback-form-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.char-count {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.8rem;
+    margin-left: 0.25rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 8px;
+    background-color: white;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.readonly-input {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    cursor: not-allowed;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #ef4444);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.category-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: white;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.category-btn:hover {
+    background-color: #f8fafc;
+}
+
+.category-btn.active {
+    border-color: var(--primary-color, #ffffff);
+    background-color: var(--primary-light, #fcebeb);
+    color: var(--primary-color, #ffffff);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--primary-color, #235fc8);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+}
+
+.submit-btn:hover:not(:disabled) {
+    background-color: #235fc8;
+    transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.status-message {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-message.success {
+    color: #10b981;
+}
+
+.status-message.error {
+    color: #ef4444;
+}
+
+/* Sidebar Styles */
+.feedback-sidebar {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-card, .faq-card, .tips-card {
+    padding: 1.5rem;
+}
+
+.info-card h3,
+.faq-card h3,
+.tips-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 1.25rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-item:last-child {
+    margin-bottom: 0;
+}
+
+.contact-icon {
+    width: 32px;
+    height: 32px;
+    background: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.contact-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+}
+
+.contact-value {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.contact-value.highlight {
+    color: var(--primary-color, #000000);
+    text-decoration: none;
+}
+
+.faq-item {
+    margin-bottom: 1.25rem;
+}
+
+.faq-item:last-child {
+    margin-bottom: 0;
+}
+
+.faq-item h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.4rem;
+}
+
+.faq-item p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.tips-card {
+    background-color: #eff6ff !important;
+    border: 1px solid #bfdbfe;
+    box-shadow: none !important;
+}
+
+.tips-card h3 {
+    color: #1e3a8a;
+}
+
+.tips-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tips-card li {
+    position: relative;
+    padding-left: 1.25rem;
+    font-size: 0.9rem;
+    color: #1e40af;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.tips-card li:last-child {
+    margin-bottom: 0;
+}
+
+.tips-card li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .feedback-layout {
+        flex-direction: column;
+    }
+    
+    .feedback-sidebar {
+        width: 100%;
+    }
+    
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-row .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .feedback-banner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

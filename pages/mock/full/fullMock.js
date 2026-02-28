@@ -2897,7 +2897,7 @@ async function handleFinishTest() {
     });
 
     clearInterval(window.fullMockTimerInterval);
-    window.location.href = `/pages/mock/full/resultFullMock.html?id=${docRef.id}`;
+    window.location.href = `/pages/mock/full/result/?id=${docRef.id}`;
   } catch (e) {
     console.error("❌ Error saving result:", e);
     alert("Error submitting your result. Please try again.");

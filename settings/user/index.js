@@ -20,6 +20,7 @@ import {
   collection,
   query,
   where,
+  or,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
@@ -234,7 +235,10 @@ async function fetchResults(collectionName, type) {
     const resultsRef = collection(db, collectionName);
     const q = query(
       resultsRef,
-      where("userId", "==", currentUser.uid)
+      or(
+        where("userId", "==", currentUser.uid),
+        where("email", "==", currentUser.email || "MISSING_EMAIL")
+      )
     );
     
     const querySnapshot = await getDocs(q);

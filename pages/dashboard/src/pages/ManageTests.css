@@ -1,0 +1,80 @@
+.manage-tests-page { animation: fadeIn 0.3s ease; }
+
+.test-count { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem; }
+
+.mt-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap; }
+.mt-toolbar .search-box {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
+    background: var(--glass-bg); border: 1px solid var(--border-light); border-radius: 10px; flex: 1; max-width: 350px;
+}
+.mt-toolbar .search-box input { border: none; background: transparent; outline: none; font-size: 0.9rem; color: var(--text-primary); width: 100%; }
+
+/* Tests Grid */
+.tests-grid-mt { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.test-card-mt {
+    padding: 1rem 1.25rem; border-radius: 14px; background: var(--glass-bg);
+    border: 1px solid var(--border-light); transition: all 0.2s;
+}
+.test-card-mt:hover { border-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+.test-card-header { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid; }
+.test-icon-sm { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.test-info { flex: 1; min-width: 0; }
+.test-info h4 { font-size: 1rem; color: var(--text-primary); margin: 0 0 0.15rem; }
+.test-desc { font-size: 0.8rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
+
+.test-meta { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.meta-tag {
+    padding: 0.2rem 0.55rem; background: #f1f5f9; border-radius: 6px;
+    font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;
+}
+
+.test-card-actions { display: flex; gap: 0.5rem; }
+.tc-btn {
+    display: flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.75rem;
+    border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.tc-btn.edit { background: #dbeafe; color: #2563eb; }
+.tc-btn.edit:hover { background: #bfdbfe; }
+.tc-btn.delete { background: #fef2f2; color: #ef4444; }
+.tc-btn.delete:hover { background: #fee2e2; }
+
+/* Empty State */
+.empty-state-mt {
+    text-align: center; padding: 3rem; color: var(--text-secondary);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.empty-state-mt h3 { color: var(--text-primary); margin: 0; }
+.empty-state-mt p { margin: 0; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-box {
+    background: #fff; border-radius: 16px; padding: 1.5rem; max-width: 420px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-box h3 { margin: 0 0 0.75rem; font-size: 1.15rem; }
+.modal-box p { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 0.5rem; }
+.modal-warning { color: #ef4444; font-size: 0.85rem; font-weight: 500; }
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; justify-content: flex-end; }
+.modal-btn {
+    padding: 0.55rem 1.25rem; border: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+}
+.modal-btn.cancel { background: #f1f5f9; color: var(--text-primary); }
+.modal-btn.cancel:hover { background: #e2e8f0; }
+.modal-btn.confirm { background: #ef4444; color: #fff; }
+.modal-btn.confirm:hover { background: #dc2626; }
+.modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Loading */
+.loading-state { text-align: center; padding: 3rem; color: var(--text-secondary); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem; }
+
+@media (max-width: 768px) {
+    .tests-grid-mt { grid-template-columns: 1fr; }
+    .mt-toolbar { flex-direction: column; align-items: stretch; }
+    .mt-toolbar .search-box { max-width: 100%; }
+}

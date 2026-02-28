@@ -110,7 +110,8 @@ async function loadResults() {
       // Если orderBy не работает, загружаем без сортировки
       querySnapshot = await getDocs(collection(db, "resultsWriting"));
     }
-
+    
+    
 
     // Create table header
     resultsTable.innerHTML = `
@@ -153,6 +154,8 @@ async function loadResults() {
       const task2 = data.task2Content || data.task2 || "";
       const testId = data.testId || "test-1";
       const createdAt = data.submittedAt || data.createdAt;
+      
+      
       
       // Calculate word counts
       const task1Words = countWords(task1);

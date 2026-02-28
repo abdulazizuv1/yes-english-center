@@ -206,15 +206,8 @@ onAuthStateChanged(auth, async (user) => {
   let resultId = params.get("id");
 
   if (!resultId) {
-    const manualId = prompt(
-      "No result ID in URL. Please enter the result ID manually:"
-    );
-    if (manualId) {
-      window.location.href = `?id=${manualId.trim()}`;
-      return;
-    }
-    alert("No ID provided. Returning to homepage.");
-    window.location.href = "/index.html";
+    alert("No result ID found. Redirecting to your dashboard.");
+    window.location.href = "/pages/dashboard/";
     return;
   }
 

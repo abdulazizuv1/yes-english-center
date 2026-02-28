@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════
+   SKELETON LOADING ANIMATIONS
+   ═══════════════════════════════════════════ */
+
+/* Base skeleton element */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--skel-base, rgba(0, 0, 0, 0.06)) 25%,
+        var(--skel-shine, rgba(255, 255, 255, 0.6)) 50%,
+        var(--skel-base, rgba(0, 0, 0, 0.06)) 75%
+    );
+    background-size: 400% 100%;
+    animation: skeletonShimmer 2s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Variant styles */
+.skeleton-text { height: 14px; border-radius: 6px; }
+.skeleton-title { height: 22px; border-radius: 8px; }
+.skeleton-circle { border-radius: 50%; flex-shrink: 0; }
+.skeleton-card { height: 120px; border-radius: 16px; }
+.skeleton-image { height: 180px; border-radius: 12px; }
+
+/* ─── Home Skeleton ─── */
+.skeleton-home { display: flex; flex-direction: column; gap: 24px; padding-bottom: 24px; }
+
+.skeleton-header-top { display: flex; flex-direction: column; margin-bottom: 8px; }
+
+.skeleton-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.redesign-skeleton {
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 1024px) {
+    .skeleton-bottom-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+    .skeleton-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+    .skeleton-stats-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Test List Skeleton ─── */
+.skeleton-test-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.skeleton-test-card {
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.skeleton-test-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* ─── Manage Tests Skeleton ─── */
+.skeleton-manage-tests {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.skeleton-manage-card {
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skeleton-manage-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.skeleton-manage-meta {
+    display: flex;
+    gap: 8px;
+}
+
+.skeleton-manage-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* ─── Manage Users Skeleton ─── */
+.skeleton-manage-users { display: flex; flex-direction: column; gap: 12px; }
+
+.skeleton-user-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 14px;
+}
+
+/* ─── Glass card override for dark bg ─── */
+.skeleton-stat-card.glass-card,
+.redesign-skeleton.glass-card,
+.skeleton-test-card.glass-card,
+.skeleton-manage-card.glass-card,
+.skeleton-user-row.glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}

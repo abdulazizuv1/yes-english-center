@@ -25,9 +25,9 @@ window.langArr = {
         "uz": "Aloqa"
     },
     "lng_nav_mock": {
-        "en": "Mock",
-        "ru": "Пробный тест",
-        "uz": "Sinov testi"
+        "en": "Dashboard",
+        "ru": "Панель",
+        "uz": "Boshqaruv paneli"
     },
     "lng_nav_btn": {
         "en": "Login",

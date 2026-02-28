@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YES English Center - Your Future Starts Here</title>
+    <meta name="description" content="YES English Center - Achieve high IELTS and SAT scores with courses from the best teachers. Founded in 2015, we've helped 5000+ students reach their goals.">
+    <meta name="keywords" content="IELTS, SAT, English learning, English courses, YES English Center, Fergana, Uzbekistan, language school, test preparation">
+    <meta name="author" content="YES English Center">
+    <link rel="canonical" href="https://yescenteruz.com/">
+    <link rel="icon" class="logo_icon" href="./assets/logo_copy-B9VXhXlr.png">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yescenteruz.com/">
+    <meta property="og:title" content="YES English Center - Your Future Starts Here">
+    <meta property="og:description" content="Achieve high IELTS and SAT scores with courses from the best teachers. Join thousands of successful students who achieved their dreams with YES English Center.">
+    <meta property="og:image" content="https://yescenteruz.com/image/logo.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yescenteruz.com/">
+    <meta name="twitter:title" content="YES English Center - Your Future Starts Here">
+    <meta name="twitter:description" content="Achieve high IELTS and SAT scores with courses from the best teachers.">
+    <meta name="twitter:image" content="https://yescenteruz.com/image/logo.png">
+    
+    <!-- Preconnect для быстрой загрузки шрифтов -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Optimized font loading - only needed weights -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS - Animate On Scroll Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" crossorigin="anonymous">
+    
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" crossorigin="anonymous" />
+    
+    <!-- Custom Styles -->
+    
+    <style>
+        /* Предотвращение мигания шрифта */
+        body {
+            font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        body.fonts-loaded {
+            opacity: 1;
+        }
+    </style>
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "YES English Center",
+      "description": "YES English Center - Achieve high IELTS and SAT scores with courses from the best teachers. Founded in 2015, we've helped 5000+ students reach their goals.",
+      "url": "https://yescenteruz.com",
+      "logo": "https://yescenteruz.com/image/logo.png",
+      "foundingDate": "2015",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. А.Навои 72, Напротив Теннисного корта",
+        "addressLocality": "Фергана",
+        "addressCountry": "UZ"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+998-97-271-77-72",
+        "contactType": "Customer Service"
+      },
+      "sameAs": [
+        "https://www.instagram.com/yescenteruz/",
+        "https://t.me/yescenteruz"
+      ]
+    }
+    </script>
+  <script type="module" crossorigin src="./assets/index-Cw3AHdn2.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-4Co9ACH0.css">
+</head>
+<body>
+  <!-- Skip to content link for accessibility -->
+  
+  <!-- Dynamic Background -->
+  <div class="dynamic-bg">
+    <div class="bg-blur bg-blur-1"></div>
+    <div class="bg-blur bg-blur-2"></div>
+    <div class="bg-blur bg-blur-3"></div>
+    <div class="bg-blur bg-blur-4"></div>
+  </div>
+
+  <!-- Glass Particles -->
+  <div class="glass-particles">
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+    <div class="particle particle-5"></div>
+  </div>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="loader-content glass-morphism">
+      <div class="ios-spinner"></div>
+      <div class="loader-text">
+        <h3>YES English Center</h3>
+        <p>Loading your learning journey...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Panel -->
+  <div class="login_panel" style="display: none;">
+    <div class="login glass-morphism">
+      <form onsubmit="event.preventDefault(); loginUser();" autocomplete="off">
+        <div class="login-header">
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your mock tests</p>
+        </div>
+        <img class="close_btn" src="./assets/close-DvLCsTrv.png" alt="Close" onclick="closeLogin()" role="button" aria-label="Close login panel" tabindex="0">
+        <div class="input-group">
+          <input id="login_email" type="text" placeholder="email" autocomplete="off" class="glass-input">
+        </div>
+        <div class="input-group">
+          <input id="login_password" type="password" placeholder="Password" autocomplete="off" class="glass-input">
+        </div>
+        <button class="login_submit glass-btn" type="submit">
+          <span>Login</span>
+          <div class="btn-shimmer"></div>
+        </button>
+        <p class="login-note">Note: Usernames and passwords are provided to YES students by their teachers.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Username Setup Panel -->
+  <div class="username_panel" style="display: none;">
+    <div class="username-setup glass-morphism">
+      <form id="username-setup-form" autocomplete="off">
+        <div class="login-header">
+          <h2>Welcome!</h2>
+          <p>Please enter your full name to complete your profile</p>
+        </div>
+        <div class="input-group">
+          <input id="setup_username" type="text" placeholder="Your Full Name" autocomplete="off" class="glass-input" required>
+        </div>
+        <button class="username_submit glass-btn" type="submit">
+          <span>Save</span>
+          <div class="btn-shimmer"></div>
+        </button>
+        <p class="login-note">This is your real name and will be visible to teachers.</p>
+      </form>
+    </div>
+  </div>
+
+  <header id="home">
+    <div class="navbar glass-nav">
+      <div class="container">
+        <nav id="navbar">
+          <div class="nav_media">
+            <div class="logo_nav">
+              <a href="#"><img src="./assets/logo-CBp-_wxw.png" alt="YES Logo"></a>
+            </div>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <div class="nav_info">
+            <ul>
+              <li><a class="lng_nav_home nav-glass-item active" href="#home">Home</a></li>
+              <li><a class="lng_nav_teachers nav-glass-item" href="#groups">Groups</a></li>
+              <li><a class="lng_about_us_n_f nav-glass-item" href="#about-us">About Us</a></li>
+              <li><a class="lng_nav_results nav-glass-item" href="#results">Results</a></li>
+              <li><a class="lng_nav_feedbacks nav-glass-item" href="#feedbacks">Feedback</a></li>
+              <li><a class="lng_nav_contact nav-glass-item" href="#contact">Contact</a></li>
+              <li><a class="lng_nav_mock nav-glass-item" id="mockLink" href="#">Dashboard</a></li>
+            </ul>
+          </div>
+          
+          <!-- Desktop Controls -->
+          <div class="nav_right">
+            <select class="lang_change glass-select">
+              <option value="en" selected>EN</option>
+              <option value="ru">RU</option>
+              <option value="uz">UZ</option>
+            </select>
+            <button id="loginBtn" onclick="toggleLogin()" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
+            <button id="logoutBtn" onclick="logoutUser()" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
+          </div>
+          
+          <!-- Mobile Hamburger -->
+          <button class="glass-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu" aria-expanded="false">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Unified Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <div class="mobile-menu-content">
+        <ul class="mobile-nav-links">
+          <li><a class="lng_nav_home nav-glass-item active" href="#home" onclick="closeMobileMenu()">Home</a></li>
+          <li><a class="lng_nav_teachers nav-glass-item" href="#groups" onclick="closeMobileMenu()">Groups</a></li>
+          <li><a class="lng_about_us_n_f nav-glass-item" href="#about-us" onclick="closeMobileMenu()">About Us</a></li>
+          <li><a class="lng_nav_results nav-glass-item" href="#results" onclick="closeMobileMenu()">Results</a></li>
+          <li><a class="lng_nav_feedbacks nav-glass-item" href="#feedbacks" onclick="closeMobileMenu()">Feedback</a></li>
+          <li><a class="lng_nav_contact nav-glass-item" href="#contact" onclick="closeMobileMenu()">Contact</a></li>
+          <li><a class="lng_nav_mock nav-glass-item" id="mobileTokenLink" href="#" onclick="closeMobileMenu()">Dashboard</a></li>
+        </ul>
+        
+        <div class="mobile-nav-controls">
+          <select class="lang_change glass-select">
+            <option value="en" selected>EN</option>
+            <option value="ru">RU</option>
+            <option value="uz">UZ</option>
+          </select>
+          <button id="mobileLoginBtn" onclick="toggleLogin(); closeMobileMenu();" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
+          <button id="mobileLogoutBtn" onclick="logoutUser(); closeMobileMenu();" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="header_main">
+        <div class="header_left">
+          <div class="achievement-badge glass-badge" data-aos="fade-down" data-aos-duration="800">
+            <span class="badge-icon">🏆</span>
+            <span class="badge-text">Up To: 8.5 IELTS</span>
+            <div class="badge-shine"></div>
+          </div>
+          <h2 class="lng_header_title" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">YOUR FUTURE STARTS HERE</h2>
+          <h1 class="lng_header_sub_text" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+            Achieve high <span class="gradient-text">IELTS and SAT</span><br>
+            scores with courses from<br>
+            <span class="gradient-text">the best</span> teachers
+          </h1>
+          <p class="lng_header_sub_text2" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">Join thousands of successful students who achieved their dreams with YES English Center</p>
+          <div class="cta-buttons" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+            <a href="#contact" class="btn-primary glass-btn-primary">
+              <span>Start Learning</span>
+              <div class="btn-glow"></div>
+            </a>
+            <a href="#about-us" class="btn-secondary glass-btn-secondary">
+              <span>Learn More</span>
+            </a>
+          </div>
+          <div class="stats-row" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="600">
+              <div class="stat-number">2015</div>
+              <div class="stat-label">Founded</div>
+            </div>
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="700">
+              <div class="stat-number">5000+</div>
+              <div class="stat-label">Students</div>
+            </div>
+            <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="800">
+              <div class="stat-number">8.5</div>
+              <div class="stat-label">Highest IELTS</div>
+            </div>
+          </div>
+        </div>
+        <div class="header_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="300">
+          <div class="hero-image-container glass-image-container">
+            <div class="glass-frame"></div>
+            <img src="./assets/header_img-D9bEnfG7.png" alt="English Learning" class="hero-image" fetchpriority="high" width="600" height="400">
+            <div class="floating-elements">
+              <div class="floating-item glass-float item-1">📚</div>
+              <div class="floating-item glass-float item-2">🎯</div>
+              <div class="floating-item glass-float item-3">⭐</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section id="groups" class="teachers_page glass-section" aria-labelledby="groups-heading">
+      <div class="container">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
+          <div class="section-badge glass-badge">👥 Our Team</div>
+          <h1 id="groups-heading" class="lng_teacher_title">Meet Our <span class="gradient-text">Expert Groups</span></h1>
+          <p class="lng_groups_sub section-subtitle">Experienced teachers dedicated to your success</p>
+        </div>
+        <div class="swiper mySwiper glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          <div class="swiper-wrapper">
+            <!-- Cards will be dynamically added here by main.js -->
+          </div>
+          <div class="swiper-pagination glass-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-us" class="about-section">
+      <div class="container">
+        <div class="about_us_left">
+          <div class="section-badge glass-badge" data-aos="fade-right" data-aos-duration="800">🎓 Our Story</div>
+          <h1 class="lng_about_us" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">About <span class="gradient-text">YES English Center</span></h1>
+          <p class="lng_about_us_info" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">Founded in 2015, YES English Center has become one of the leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams.</p>
+          <div class="feature-list">
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+              <span class="feature-icon">🏆</span>
+              <div>
+                <h4>Record Achievement</h4>
+                <p>Our highest IELTS score: 8.5</p>
+              </div>
+            </div>
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="400">
+              <span class="feature-icon">👨‍🏫</span>
+              <div>
+                <h4>Expert Teachers</h4>
+                <p>Certified and experienced professionals</p>
+              </div>
+            </div>
+            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="500">
+              <span class="feature-icon">📈</span>
+              <div>
+                <h4>Proven Results</h4>
+                <p>Personalized learning approach</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="about_us_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+          <div class="about-image-container glass-image-container">
+            <div class="glass-frame about-frame"></div>
+            <img src="./assets/yes_info-CRWywbv9.jpeg" alt="YES English Center">
+            <div class="about-overlay glass-overlay">
+              <div class="about-stat">
+                <div class="stat-circle">
+                  <span class="stat-big">10+</span>
+                  <span class="stat-small">Years Experience</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="achievments_page glass-section">
+      <div class="container">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
+          <div class="section-badge glass-badge">🌟 Success Stories</div>
+          <h1 class="lng_results_title">Our Outstanding <span class="gradient-text">Results</span></h1>
+          <p  class="lng_results_sub section-subtitle">See how our students achieve their goals</p>
+        </div>
+        <div class="swiper mySwiper3 glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          <div class="swiper-wrapper">
+            
+          </div>
+          <div class="swiper-pagination glass-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="feedbacks" class="feedback_page">
+      <div class="container">
+        <div class="section-header" data-aos="fade-up" data-aos-duration="800">
+          <div class="section-badge glass-badge">💬 Testimonials</div>
+          <h1 class="lng_feedbacks_title">What Our <span class="gradient-text">Students Say</span></h1>
+          <p class="lng_feadback_sub section-subtitle">Real feedback from real students</p>
+        </div>
+        <div class="swiper swiper2 mySwiper2 glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          <div class="swiper-wrapper">
+            
+          </div>
+          <div class="swiper-pagination glass-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="contact">
+      <div class="container">
+        <div class="contact_left" data-aos="fade-right" data-aos-duration="1000">
+          <img class="con_line" src="./assets/contact_line-cU4Pplw2.png" alt="">
+          <div class="contact-image-wrapper glass-image-container">
+            <div class="glass-frame"></div>
+            <img class="con_img" src="./assets/con_example-CQ35nPNo.png" alt="Contact YES English Center" loading="lazy" width="500" height="400">
+            <div class="contact-badge glass-floating-badge">
+              <span class="badge-icon">📞</span>
+              <span>Available 24/7</span>
+            </div>
+          </div>
+        </div>
+        <div class="contact_right" data-aos="fade-left" data-aos-duration="1000">
+          <div class="section-badge glass-badge">📞 Get Started</div>
+          <h1 class="lng_contact_info" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">Join <span class="gradient-text">YES</span> – one of the <span class="gradient-text">leading</span> English learning centers in the region!</h1>
+          <p class="lng_info_sub" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">Ready to transform your English skills? Contact us today and take the first step towards your international success.</p>
+          <div class="contact-features" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
+            <div class="contact-feature glass-check">
+              <span class="feature-icon">✅</span>
+              <span>Free consultation</span>
+            </div>
+            <div class="contact-feature glass-check">
+              <span class="feature-icon">✅</span>
+              <span>Flexible schedules</span>
+            </div>
+            <div class="contact-feature glass-check">
+              <span class="feature-icon">✅</span>
+              <span>Expert guidance</span>
+            </div>
+          </div>
+          <a href="tel:+998972717772" class="contact-btn-wrapper" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="400">
+            <button class="lng_contact_btn glass-cta">
+              <span class="btn-content">
+                <span class="btn-icon">📞</span>
+                <span class="btn-text">Call Now!</span>
+              </span>
+              <div class="btn-ripple"></div>
+            </button>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Form / Обратная форма -->
+    <section id="callback-form" class="callback-section">
+      <div class="container">
+        <div class="callback-wrapper glass-morphism" data-aos="fade-up" data-aos-duration="800">
+          <div class="callback-header" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+            <div class="section-badge glass-badge">📝 <span class="lng_callback_badge">Get in Touch</span></div>
+            <h2 class="lng_callback_title">Contact <span class="gradient-text">Us</span></h2>
+            <p class="lng_callback_subtitle">Describe your request and we will help you</p>
+          </div>
+          <form class="callback-form" id="callbackForm" onsubmit="event.preventDefault();" autocomplete="off">
+            <div class="callback-fields">
+              <div class="callback-field">
+                <input type="text" id="callback_name" class="glass-input" placeholder="Full Name" required data-lng-placeholder="lng_callback_name_ph">
+              </div>
+              <div class="callback-field">
+                <input type="tel" id="callback_phone" class="glass-input" placeholder="+998" required data-lng-placeholder="lng_callback_phone_ph">
+              </div>
+              <div class="callback-field">
+                <select id="callback_group" class="glass-input glass-select-form" required>
+                  <option value="" disabled selected class="lng_callback_group_default">Choose a group</option>
+                  <option value="general_english">General English</option>
+                  <option value="ielts">IELTS</option>
+                  <option value="sat">SAT</option>
+                </select>
+              </div>
+            </div>
+            <div class="callback-field callback-field-full">
+              <textarea id="callback_comment" class="glass-input callback-textarea" rows="4" placeholder="Comments (your level, goals...)" data-lng-placeholder="lng_callback_comment_ph"></textarea>
+            </div>
+            <button type="submit" class="callback-submit glass-btn">
+              <span class="lng_callback_submit">Submit</span>
+              <div class="btn-shimmer"></div>
+            </button>
+            <div class="callback-privacy">
+              <p class="lng_callback_privacy">By submitting this form, you agree that your personal data will be used solely within our company and will not be shared with third parties.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="glass-footer">
+    <div class="footer-glass-bg"></div>
+    <div class="container">
+      <div class="footer_left">
+        <div class="footer-logo-section">
+          <img src="./assets/logo-CBp-_wxw.png" alt="YES Logo" class="footer-logo">
+          <div class="footer-brand">
+            <h3>YES English Center</h3>
+            <p>Your Future Starts Here</p>
+          </div>
+        </div>
+        <h3 class="lng_footer_left_title">Contact Information</h3>
+        <div class="contact-info">
+          <div class="contact-item glass-contact">
+            <span class="contact-icon">📞</span>
+            <div>
+              <p class="contact-label">Call us:</p>
+              <a class="lng_con_name" href="tel:+998972717772">+998 (97) 271 77 72</a>
+            </div>
+          </div>
+          <div class="contact-item glass-contact">
+            <span class="contact-icon">📍</span>
+            <div>
+              <p class="contact-label">Location:</p>
+              <p>город Фергана, ул. А.Навои 72<br>Напротив Теннисного корта</p>
+            </div>
+          </div>
+        </div>
+        <div class="social-section">
+          <p class="social-title">Follow Us</p>
+          <div class="logo">
+            <a target="_blank" href="https://www.instagram.com/yescenteruz/" class="social-link glass-social ig">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAJYSURBVHgBjVVRbtpAEJ0xG+hH2mx/KhX1A25AThByg3CCIpVI/YMb4NyA/FWiVcMJ0htAT1DfwP4pkfrTReoPwXg6s14HG2ySkQxmZ/btmzezA4IzPQp18u/VEIG6QNAC5OeYEUQcEyEmM6jVFubL+0iW0YJd/+kQxPcWSBYlOPUa/jQlYDaOskMFGFTPTN8FqD8/tGhLcwlCSm7h9cY3k7aBF5jshTjpE+DYgm7W5wq2YFPkVG/Mtw8+vNAkK4g3VxA/TrB2ogm8Iaj6SBHRRxuhvLujTCR3p5NNl+LvnGsHVR0Y1AfVGDLTCw/TAkT54MzeDB7GZ4PlX4oplOfsehnKGljZYGa1ZiLmrm0wLVJLOWEPwBhoDlJxJoYIP1gWTQQdlsZnX9d8bV6yb1LYxOQ892r2mfFXl8sd4Om6babNngCgwnNeD8SnB7/9AlbaEWABmW4BEJH6llnN6+UrLrJgvBZmhvUaQtF2gHmzBbBVh6BMV6sXwkJCs2Ll7QAwl8Sq0sN6VvkOAB0rSelC98ODjY5Vp6ozLCALWtjIlbyVvaTq83xact9pm9zLKxLNoMSQW4DktNW02c470rbhSqdiB/Zek/2tWd+Fa5sd80/LUFrQexoEe7aSNuHr6AaEXM8rx/5mHyyXWoQZE26Ht1LBsriyq7fvl5skzD0+8acsJvXGGCpMgKrA7N4Y0nnAsxGlknTS+CW9x2L6noLZsc0FZnYoN8bMbGTTreFl6YCF3YAtASbNbaGdv5XFPQ1YyOmQzkYeZ8L2mb8AN10iEMlOHyfZFf0PzxwrOMr7u+kAAAAASUVORK5CYII=" alt="Instagram">
+              <span class="social-label">Instagram</span>
+            </a>
+            <a target="_blank" href="https://t.me/yescenteruz" class="social-link glass-social tg">
+              <img src="./assets/tg-D63mAHy0.png" alt="Telegram">
+              <span class="social-label">Telegram</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer_center">
+        <h2 class="lng_footer_center_title">Quick Links</h2>
+        <div class="footer-links">
+          <a class="lng_nav_home footer-link glass-link" href="#"><span>Home</span></a>
+          <a class="lng_nav_teachers footer-link glass-link" href="#groups"><span>Groups</span></a>
+          <a class="lng_about_us_n_f footer-link glass-link" href="#about-us"><span>About Us</span></a>
+          <a class="lng_nav_results footer-link glass-link" href="#results"><span>Results</span></a>
+          <a class="lng_nav_feedbacks footer-link glass-link" href="#feedbacks"><span>Feedback</span></a>
+          <a class="lng_nav_contact footer-link glass-link" href="#contact"><span>Contact</span></a>
+        </div>
+      </div>
+      <div class="footer_right">
+        <h3>Find Us</h3>
+        <div class="map-container glass-map">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1382.3976920393861!2d71.78132095936523!3d40.36552145617315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38bb84bc0317a6bd%3A0x7b071af85c3f8719!2sYES%20English%20Center!5e0!3m2!1sru!2s!4v1752496438099!5m2!1sru!2s" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="YES English Center Location"></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom glass-bottom">
+      <div class="container">
+        <div class="footer-bottom-content">
+          <p>&copy; 2026 YES English Center. All rights reserved. Empowering students since 2015</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+
+
+
+<div id="root"></div>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          // Service worker registered successfully
+        })
+        .catch((error) => {
+          // Service worker registration failed
+        });
+    });
+  }
+</script>
+
+<script>
+  // Initialize AOS (Animate On Scroll) after it loads
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 100,
+      delay: 100,
+    });
+  } else {
+    window.addEventListener('load', () => {
+      if (typeof AOS !== 'undefined') {
+        AOS.init({
+          duration: 1000,
+          easing: 'ease-out-cubic',
+          once: true,
+          offset: 100,
+          delay: 100,
+        });
+      }
+    });
+  }
+
+  // Font loading optimization (prevent FOUT - Flash of Unstyled Text)
+  document.fonts.ready.then(function () {
+    document.body.classList.add('fonts-loaded');
+  });
+
+  // Fallback for older browsers
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      document.body.classList.add('fonts-loaded');
+    }, 100);
+  });
+
+  // Performance monitoring removed - will be implemented in performance.js module
+</script>
+</body>
+</html>
