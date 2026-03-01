@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
-import { Shield, BookOpen, Headphones, PenTool, Users, Database, Layers, ExternalLink, Plus, Edit3 } from 'lucide-react';
+import { Shield, BookOpen, Headphones, PenTool, Users, Database, Layers, ExternalLink, Plus, Edit3, ClipboardList } from 'lucide-react';
 import './AdminSettings.css';
 
 const TEST_SECTIONS = [
@@ -76,6 +76,16 @@ export default function AdminSettings() {
                         <div className="management-info">
                             <span className="management-label">Manage Users & Data</span>
                             <span className="management-desc">Create, delete users, groups, results, feedback</span>
+                        </div>
+                        <ExternalLink size={16} className="management-arrow" />
+                    </Link>
+                    <Link to="/admin/results" className="management-item glass-card">
+                        <div className="management-icon" style={{ background: 'rgba(139, 92, 246, 0.08)', color: '#8b5cf6' }}>
+                            <ClipboardList size={22} />
+                        </div>
+                        <div className="management-info">
+                            <span className="management-label">Users Test Results</span>
+                            <span className="management-desc">View all student test results by type</span>
                         </div>
                         <ExternalLink size={16} className="management-arrow" />
                     </Link>

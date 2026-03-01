@@ -9,6 +9,7 @@ import AdminSettings from './pages/AdminSettings';
 import ManageUsers from './pages/ManageUsers';
 import ManageTests from './pages/ManageTests';
 import Feedback from './pages/Feedback';
+import UsersTestResults from './pages/UsersTestResults';
 import './App.css';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
                         <Route path="admin" element={<AdminSettings />} />
                         <Route path="admin/users" element={<ManageUsers />} />
                         <Route path="admin/tests/:type" element={<ManageTests />} />
+                        <Route path="admin/results" element={<UsersTestResults />} />
                         <Route path=":type" element={<TestSection />} />
                     </Route>
                 </Routes>

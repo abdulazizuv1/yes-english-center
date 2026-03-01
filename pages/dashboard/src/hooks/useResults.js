@@ -229,6 +229,63 @@ export async function getUserTestResult(userId, type, testId) {
   }
 }
 
+/* ─── Hook: ALL users' results for a skill (admin) ─── */
+export function useAllUsersResults(type) {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!type) return;
+    const col = COLLECTIONS[type];
+    if (!col) { setLoading(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(collection(db, col));
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, type, ...d.data() }));
+
+        // Fetch display titles
+        await Promise.all(arr.map(async (r) => {
+          if (r.type === 'reading' || r.type === 'fullmock') {
+            const num = r.testId ? (r.testId.match(/\d+/) ? r.testId.match(/\d+/)[0] : '') : '';
+            r.displayTitle = `${formatType(r.type)} Test ${num}`.trim();
+          } else if (r.type === 'listening' || r.type === 'writing') {
+            if (r.testId) {
+              try {
+                const testDocRef = doc(db, TEST_COLLECTIONS[r.type], r.testId);
+                const testDocSnap = await getDoc(testDocRef);
+                if (testDocSnap.exists()) {
+                  const data = testDocSnap.data();
+                  r.displayTitle = data.title || data.name || `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
+                } else {
+                  r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
+                }
+              } catch {
+                r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
+              }
+            } else {
+              r.displayTitle = `${formatType(r.type)} Test`;
+            }
+          }
+        }));
+
+        arr.sort((a, b) => {
+          const da = a.createdAt?.toDate ? a.createdAt.toDate() : (a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0));
+          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : (b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0));
+          return db2 - da;
+        });
+        if (!cancelled) { setResults(arr); setLoading(false); }
+      } catch {
+        if (!cancelled) { setResults([]); setLoading(false); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [type]);
+
+  return { results, loading };
+}
+
 /* ─── Result URL mappings ─── */
 export function getResultUrl(type, resultId) {
   const urls = {
