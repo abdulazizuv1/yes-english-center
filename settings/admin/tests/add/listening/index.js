@@ -1202,8 +1202,15 @@ window.removeSingleAudio = function() {
 // Question Group functions
 window.addOption = function (questionId) {
   const optionsList = document.getElementById(`options-list-${questionId}`);
-  const existingOptions = optionsList.querySelectorAll(".option-item").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  optionsList.querySelectorAll(".option-label").forEach((labelInput) => {
+    const val = labelInput.value.trim();
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="option-item">
@@ -1268,8 +1275,15 @@ window.handleGroupTypeChange = function(questionId) {
 // Single Question functions
 window.addMCOptionToQuestion = function(questionId) {
   const optionsList = document.querySelector(`[data-question-id="${questionId}"] .mc-options-list`);
-  const existingOptions = optionsList.querySelectorAll(".mc-option-item").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  optionsList.querySelectorAll('input[type="radio"]').forEach((radio) => {
+    const val = radio.value;
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="mc-option-item">
@@ -1372,8 +1386,15 @@ window.removeMatchingQuestion = function (button) {
 // Add option for Multiple Choice
 window.addMCOption = function (questionId) {
   const container = document.getElementById(`mc-options-${questionId}`);
-  const existingOptions = container.querySelectorAll(".mc-option").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  container.querySelectorAll('input[type="radio"]').forEach((radio) => {
+    const val = radio.value;
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="mc-option">

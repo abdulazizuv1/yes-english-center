@@ -2010,8 +2010,18 @@ window.addOption = function (questionId, type, passageNumber) {
     return;
   }
 
-  const existingOptions = container.querySelectorAll(".option-row").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  const optionLabels = container.querySelectorAll(".option-label");
+  optionLabels.forEach((labelInput) => {
+    const val = labelInput.value.trim();
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) {
+        maxCode = code;
+      }
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
@@ -2446,8 +2456,20 @@ window.addMultiSelectOption = function (
   const container = document.getElementById(
     `multi-select-options-${questionId}`
   );
-  const existingOptions = container.querySelectorAll(".option-row").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  
+  let maxCode = 64; // ASCII for '@', just before 'A'
+  const optionLabels = container.querySelectorAll(".option-label");
+  optionLabels.forEach((labelInput) => {
+    const val = labelInput.value.trim();
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) {
+        maxCode = code;
+      }
+    }
+  });
+  
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
@@ -2457,10 +2479,7 @@ window.addMultiSelectOption = function (
     </div>
   `;
 
-  const addButton = container.parentElement.querySelector(
-    'button[onclick*="addMultiSelectOption"]'
-  );
-  addButton?.insertAdjacentHTML("beforebegin", optionHTML);
+  container.insertAdjacentHTML("beforeend", optionHTML);
 
   // Update dropdowns and add option to data
   if (!currentTest.passages[passageIndex].questions[questionIndex].options) {
@@ -2547,10 +2566,7 @@ window.addMultiSelectSubquestion = function (
       <input class="subquestion-answer-input" placeholder="Answer letter" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" oninput="this.value = this.value.toUpperCase(); updateMultiSelectSubquestion(${passageIndex}, ${questionIndex}, ${existingSubQuestions}, 'answer', this.value);">
       <button type="button" onclick="removeMultiSelectSubquestion(${questionId}, ${passageIndex}, ${questionIndex}, ${existingSubQuestions})" style="padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;">Remove Sub-question</button>
     </div>`;
-  const addBtn = container.parentElement.querySelector(
-    'button[onclick*="addMultiSelectSubquestion"]'
-  );
-  addBtn?.insertAdjacentHTML("beforebegin", block);
+  container.insertAdjacentHTML("beforeend", block);
   updateMultiSelectOptionDropdowns(questionId);
   updateQuestionNumbers();
 };

@@ -666,8 +666,15 @@ window.addOption = function (questionId, type, passageNumber) {
   const container = document.getElementById(
     `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
   );
-  const existingOptions = container.querySelectorAll(".option-row").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  container.querySelectorAll(".option-label").forEach((labelInput) => {
+    const val = labelInput.value.trim();
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
@@ -710,8 +717,15 @@ window.removeOption = function (button, type, passageNumber) {
 // Add option for Multiple Choice
 window.addMCOption = function (questionId) {
   const container = document.getElementById(`mc-options-${questionId}`);
-  const existingOptions = container.querySelectorAll(".mc-option").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  container.querySelectorAll('input[type="radio"]').forEach((radio) => {
+    const val = radio.value;
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="mc-option">
@@ -743,8 +757,15 @@ window.removeMCOption = function (button) {
 // Multi-select helper functions
 window.addMultiSelectOption = function (questionId) {
   const container = document.getElementById(`multi-select-options-${questionId}`);
-  const existingOptions = container.querySelectorAll(".option-row").length;
-  const nextLetter = String.fromCharCode(65 + existingOptions);
+  let maxCode = 64;
+  container.querySelectorAll(".option-label").forEach((labelInput) => {
+    const val = labelInput.value.trim();
+    if (val.length === 1) {
+      const code = val.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
+    }
+  });
+  const nextLetter = String.fromCharCode(maxCode + 1);
 
   const optionHTML = `
     <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
@@ -754,9 +775,7 @@ window.addMultiSelectOption = function (questionId) {
     </div>
   `;
 
-  const addButton =
-    container.parentElement.querySelector('button[onclick*="addMultiSelectOption"]');
-  addButton?.insertAdjacentHTML("beforebegin", optionHTML);
+  container.insertAdjacentHTML("beforeend", optionHTML);
   updateMultiSelectOptionDropdowns(questionId);
 };
 
@@ -793,8 +812,7 @@ window.addMultiSelectSubquestion = function (questionId) {
     </div>
   `;
   
-  const addButton = container.parentElement.querySelector('button[onclick*="addMultiSelectSubquestion"]');
-  addButton.insertAdjacentHTML("beforebegin", subQuestionHTML);
+  container.insertAdjacentHTML("beforeend", subQuestionHTML);
   
   // Update dropdowns for the new sub-question
   updateMultiSelectOptionDropdowns(questionId);

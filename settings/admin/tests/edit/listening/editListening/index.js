@@ -597,8 +597,17 @@ function addOption(sectionIndex, contentIndex) {
   if (!currentTest.parts.sections[sectionIndex].content[contentIndex].options) {
     currentTest.parts.sections[sectionIndex].content[contentIndex].options = {};
   }
-  const optionCount = Object.keys(currentTest.parts.sections[sectionIndex].content[contentIndex].options).length;
-  const newKey = String.fromCharCode(65 + optionCount); // A, B, C, D, etc.
+  let maxCode = 64;
+  const keys = Object.keys(currentTest.parts.sections[sectionIndex].content[contentIndex].options);
+  keys.forEach(key => {
+    if (key.length === 1) {
+      const code = key.charCodeAt(0);
+      if (code > maxCode && code >= 65 && code <= 90) {
+        maxCode = code;
+      }
+    }
+  });
+  const newKey = String.fromCharCode(maxCode + 1);
   currentTest.parts.sections[sectionIndex].content[contentIndex].options[newKey] = '';
   displaySections(); // Refresh to show new option
 }
