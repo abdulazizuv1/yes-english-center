@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Full Mock Test - YES English Center</title>
+    <!-- Use same base font styling as the rest of the app -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/settings/admin/tests/add/fullMock/css/style.css">
+    <link rel="icon" href="/image/logo_copy.png" />
+    <!-- SortableJS for drag & drop questions -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" id="backBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Tests
+            </button>
+            <div class="header-titles">
+                <h1>Create Full Mock Test</h1>
+                <p id="testNumberBadge" class="test-number-badge">Loading next test number...</p>
+            </div>
+            <button class="save-master-btn" id="saveTestBtn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                Save Entire Test
+            </button>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div class="wizard-stepper">
+            <div class="step active" data-target="step-info">
+                <div class="step-icon">1</div>
+                <div class="step-text">Basic Info</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-target="step-listening">
+                <div class="step-icon">2</div>
+                <div class="step-text">Listening (30m)</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-target="step-reading">
+                <div class="step-icon">3</div>
+                <div class="step-text">Reading (60m)</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-target="step-writing">
+                <div class="step-icon">4</div>
+                <div class="step-text">Writing (60m)</div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-target="step-review">
+                <div class="step-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="step-text">Review</div>
+            </div>
+        </div>
+
+        <div class="wizard-content-container">
+
+            <!-- STEP 1: Basic Info -->
+            <div id="step-info" class="wizard-step active-step">
+                <div class="step-header">
+                    <h2>Test Identification</h2>
+                    <p>Enter the title or display name for this Full Mock Test.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="testTitle">Test Title <span class="required">*</span></label>
+                    <input type="text" id="testTitle" class="form-input" placeholder="e.g., IELTS Full Mock Test 1" autocomplete="off">
+                </div>
+
+                <div class="info-card warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <div>
+                        <h4>Default Durations Applied</h4>
+                        <p>Total time will be locked to 150 minutes (Listening: 30m, Reading: 60m, Writing: 60m) following standard IELTS format.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- STEP 2: Listening -->
+            <div id="step-listening" class="wizard-step">
+                <div class="step-header">
+                    <h2>Listening Section</h2>
+                    <p>Add up to 4 parts with audio and questions.</p>
+                </div>
+
+                <div class="audio-type-selector">
+                    <label>Audio Upload Type:</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="listeningAudioType" value="single" checked>
+                            Single audio file for entire test
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="listeningAudioType" value="separate">
+                            Separate audio file for each section
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Single Audio Upload Zone -->
+                <div id="singleAudioZone" class="global-audio-zone">
+                    <div class="audio-upload" id="globalAudioUpload">
+                        <input type="file" id="globalAudioFile" accept="audio/*">
+                        <label for="globalAudioFile" class="audio-upload-label">
+                            <svg class="audio-upload-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            <div class="audio-upload-text">Upload Master Audio File</div>
+                            <div class="audio-upload-hint">MP3, WAV, etc.</div>
+                        </label>
+                    </div>
+                    
+                    <div class="audio-preview" id="globalAudioPreview">
+                        <div class="audio-preview-info">
+                            <span class="audio-preview-name" id="globalAudioPreviewName"></span>
+                            <span class="audio-preview-size" id="globalAudioPreviewSize"></span>
+                        </div>
+                        <div class="audio-preview-controls">
+                            <button type="button" id="playGlobalAudioBtn">▶ Play</button>
+                            <button type="button" id="pauseGlobalAudioBtn">⏸ Pause</button>
+                            <button type="button" id="removeGlobalAudioBtn" class="remove-audio">🗑 Remove</button>
+                        </div>
+                        <audio id="globalAudioPlayer" style="display: none;"></audio>
+                    </div>
+                </div>
+
+                <div id="listeningSectionsContainer" class="sections-container">
+                    <!-- Listening sections injected here -->
+                </div>
+
+                <button type="button" class="add-btn mt-4" id="addListeningSectionBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Listening Part
+                </button>
+            </div>
+
+
+            <!-- STEP 3: Reading -->
+            <div id="step-reading" class="wizard-step">
+                <div class="step-header">
+                    <h2>Reading Section</h2>
+                    <p>Add up to 3 passages with accompanying texts, images and questions.</p>
+                </div>
+
+                <div id="readingPassagesContainer" class="sections-container">
+                    <!-- Reading passages injected here -->
+                </div>
+
+                <button type="button" class="add-btn mt-4" id="addReadingPassageBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Reading Passage
+                </button>
+            </div>
+
+
+            <!-- STEP 4: Writing -->
+            <div id="step-writing" class="wizard-step">
+                <div class="step-header">
+                    <h2>Writing Section</h2>
+                    <p>Add Writing Task 1 and Task 2 prompts.</p>
+                </div>
+
+                <div id="writingTasksContainer" class="sections-container">
+                    <!-- Writing Tasks 1 & 2 injected here -->
+                </div>
+            </div>
+
+
+            <!-- STEP 5: Review -->
+            <div id="step-review" class="wizard-step">
+                <div class="step-header">
+                    <h2>Review Test</h2>
+                    <p>Check the summary of all parts before saving to the database.</p>
+                </div>
+
+                <div class="review-grid">
+                    <div class="review-card">
+                        <h3>Test Info</h3>
+                        <p><strong>Title:</strong> <span id="reviewTitle">-</span></p>
+                        <p><strong>Total Time:</strong> 150 minutes</p>
+                    </div>
+                    
+                    <div class="review-card">
+                        <h3>Listening</h3>
+                        <p><strong>Audio Mode:</strong> <span id="reviewListeningMode">-</span></p>
+                        <p><strong>Total Sections:</strong> <span id="reviewListeningSections">0</span></p>
+                        <p><strong>Total Questions:</strong> <span id="reviewListeningQuestions">0</span></p>
+                    </div>
+
+                    <div class="review-card">
+                        <h3>Reading</h3>
+                        <p><strong>Total Passages:</strong> <span id="reviewReadingPassages">0</span></p>
+                        <p><strong>Total Questions:</strong> <span id="reviewReadingQuestions">0</span></p>
+                    </div>
+
+                    <div class="review-card">
+                        <h3>Writing</h3>
+                        <p><strong>Task 1 Added:</strong> <span id="reviewWritingTask1">No</span></p>
+                        <p><strong>Task 2 Added:</strong> <span id="reviewWritingTask2">No</span></p>
+                    </div>
+                </div>
+
+                <div id="validationErrors" class="validation-errors" style="display: none;">
+                    <h4>Please fix the following issues:</h4>
+                    <ul id="validationErrorList"></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Wizard Navigation -->
+        <div class="wizard-footer">
+            <button type="button" class="nav-btn secondary" id="prevStepBtn" style="visibility: hidden;">Previous Step</button>
+            <button type="button" class="nav-btn primary" id="nextStepBtn">Next Step</button>
+        </div>
+    </div>
+
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">Saving Full Mock Test...</p>
+    </div>
+
+    <!-- Main scripts loaded as modules -->
+    <script type="module" src="/settings/admin/tests/add/fullMock/js/main.js"></script>
+</body>
+</html>

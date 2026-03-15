@@ -25,6 +25,13 @@ const TEST_SECTIONS = [
         addUrl: '/settings/admin/tests/add/writing/index.html',
         manageRoute: '/admin/tests/writing',
     },
+    {
+        type: 'full mock',
+        icon: Layers,
+        color: '#f59e0b',
+        addUrl: '/settings/admin/tests/add/fullMock/index.html',
+        manageRoute: '/admin/tests/fullmock',
+    },
 ];
 
 export default function AdminSettings() {
