@@ -1,6 +1,8 @@
 // main.js
 
 import { checkAdminAccess, getNextFullMockTestNumber, saveFullMockTest, uploadFile } from './modules/firebase.js';
+// IMPORTANT: import utils.js first to set up window.utils before other modules use it
+import './modules/utils.js';
 import { initListeningUI, collectListeningData } from './modules/listening.js';
 import { initReadingUI, collectReadingData } from './modules/reading.js';
 import { initWritingUI, collectWritingData } from './modules/writing.js';
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await checkAdminAccess();
         const nextTarget = await getNextFullMockTestNumber();
-        testId = `full-mock-test-${nextTarget}`;
+        testId = `test-${nextTarget}`;
         document.getElementById('testNumberBadge').textContent = `Test ID: ${testId}`;
 
         // Init modules
@@ -28,9 +30,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveTestBtn').addEventListener('click', handleSave);
         document.getElementById('backBtn').addEventListener('click', () => {
             if(confirm("Discard all progress and go back?")) {
-                window.location.href = '../index.html';
+                window.location.href = '/pages/dashboard/#/admin';
             }
         });
+
+        // Enforce digits-only PIN input (max 6)
+        const pinInput = document.getElementById('testAccessPin');
+        if (pinInput) {
+            pinInput.addEventListener('input', () => {
+                const digits = pinInput.value.replace(/\D/g, '').slice(0, 6);
+                if (pinInput.value !== digits) pinInput.value = digits;
+            });
+        }
 
     } catch(err) {
         console.error("Initialization Failed", err);
@@ -43,6 +54,13 @@ async function handleNext() {
         if (currentStepIndex === 0) {
             const title = document.getElementById('testTitle').value.trim();
             if (!title) throw new Error("Test Title is required.");
+
+            const accessPin = (document.getElementById('testAccessPin')?.value || '').trim();
+            if (accessPin) {
+                if (!/^\d{6}$/.test(accessPin)) {
+                    throw new Error("Test Access PIN must be exactly 6 digits.");
+                }
+            }
         } 
         else if (currentStepIndex === 1) {
             await collectListeningData(); // purely to trigger throw if invalid
@@ -110,25 +128,29 @@ async function generateReviewData() {
 
     try {
         const title = document.getElementById('testTitle').value.trim();
+        const accessPin = (document.getElementById('testAccessPin')?.value || '').trim();
         const listeningData = await collectListeningData();
         const readingData = await collectReadingData();
         const writingData = await collectWritingData();
 
-        fullMockDataCache = {
+        const payload = {
             testId: testId,
             title: title,
+            ...(accessPin ? { accessPin } : {}),
             totalTime: 150,
             stages: [listeningData, readingData, writingData]
         };
+        fullMockDataCache = payload;
 
         // Populate Review UI
         document.getElementById('reviewTitle').textContent = title;
+        document.getElementById('reviewAccessPin').textContent = accessPin || 'None';
         document.getElementById('reviewListeningMode').textContent = listeningData.audioMode === 'single' ? 'Single Master File' : 'Separate Files';
         document.getElementById('reviewListeningSections').textContent = listeningData.sections.length;
-        document.getElementById('reviewListeningQuestions').textContent = listeningData.sections.reduce((ac, s) => ac + s.content.length, 0); // Approx
+        document.getElementById('reviewListeningQuestions').textContent = listeningData.totalQuestions || 0;
         
         document.getElementById('reviewReadingPassages').textContent = readingData.passages.length;
-        document.getElementById('reviewReadingQuestions').textContent = readingData.passages.reduce((ac, s) => ac + s.questions.length, 0);
+        document.getElementById('reviewReadingQuestions').textContent = readingData.totalQuestions || 0;
         
         document.getElementById('reviewWritingTask1').textContent = writingData.tasks[0] ? 'Yes' : 'No';
         document.getElementById('reviewWritingTask2').textContent = writingData.tasks[1] ? 'Yes' : 'No';
@@ -154,11 +176,11 @@ async function handleSave() {
     try {
         // 1. Process Listening Audio Uploads
         const lData = fullMockDataCache.stages[0];
-        if (lData.audioMode === 'single' && lData.globalAudioUrl && typeof lData.globalAudioUrl === 'object') {
+        if (lData.audioMode === 'single' && lData.audioUrl && typeof lData.audioUrl === 'object') {
             loadingText.textContent = "Uploading master listening audio...";
-            const ext = lData.globalAudioUrl.file.name.split('.').pop();
+            const ext = lData.audioUrl.file.name.split('.').pop();
             const filePath = `fullmock-audio/${testId}/master.${ext}`;
-            lData.globalAudioUrl = await uploadFile(lData.globalAudioUrl.file, filePath);
+            lData.audioUrl = await uploadFile(lData.audioUrl.file, filePath);
         } else if (lData.audioMode === 'separate') {
             for (let i = 0; i < lData.sections.length; i++) {
                 const s = lData.sections[i];
@@ -170,21 +192,9 @@ async function handleSave() {
                 }
             }
         }
-        delete lData.audioMode; // Cleanup custom non-schema fields before saving
+        // Note: audioMode kept in data for rendering logic
 
-        // 2. Process Reading Images Uploads
-        const rData = fullMockDataCache.stages[1];
-        for(let i=0; i < rData.passages.length; i++) {
-             const p = rData.passages[i];
-             if(p.imageUrl && typeof p.imageUrl === 'object') {
-                  loadingText.textContent = `Uploading reading passage ${i+1} image...`;
-                  const ext = p.imageUrl.file.name.split('.').pop();
-                  const filePath = `fullmock-images/${testId}/passage${i+1}.${ext}`;
-                  p.imageUrl = await uploadFile(p.imageUrl.file, filePath);
-             } else {
-                  delete p.imageUrl;
-             }
-        }
+        // 2. Reading - no image uploads needed
 
         // 3. Process Writing Images Uploads
         const wData = fullMockDataCache.stages[2];
@@ -205,7 +215,7 @@ async function handleSave() {
         await saveFullMockTest(fullMockDataCache, testId);
 
         alert("Full Mock Test saved successfully!");
-        window.location.href = '../index.html';
+        window.location.href = '/pages/dashboard/#/admin';
 
     } catch(err) {
         console.error("Save Error:", err);

@@ -61,14 +61,14 @@ export async function checkAdminAccess() {
 // Get the next Full Mock Test number
 export async function getNextFullMockTestNumber() {
   try {
-    const testsRef = collection(db, "fullMockTests");
+    const testsRef = collection(db, "fullmockTests");
     const testsSnapshot = await getDocs(testsRef);
 
     let maxNumber = 0;
     testsSnapshot.forEach((docSnapshot) => {
       const docId = docSnapshot.id;
-      if (docId && docId.startsWith("full-mock-test-")) {
-        const number = parseInt(docId.replace("full-mock-test-", ""));
+      if (docId && docId.startsWith("test-")) {
+        const number = parseInt(docId.replace("test-", ""));
         if (!isNaN(number) && number > maxNumber) {
           maxNumber = number;
         }
@@ -97,7 +97,7 @@ export async function uploadFile(file, path) {
 // Save Full Mock Test
 export async function saveFullMockTest(testData, testId) {
     try {
-        const testRef = doc(db, "fullMockTests", testId);
+        const testRef = doc(db, "fullmockTests", testId);
         await setDoc(testRef, testData);
         return true;
     } catch(err) {

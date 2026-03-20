@@ -11,6 +11,7 @@ const TYPE_CONFIG = {
     listening: { label: 'Listening', icon: Headphones, collection: 'listeningTests', color: '#8b5cf6', editPath: '/settings/admin/tests/edit/listening/editListening/' },
     reading: { label: 'Reading', icon: BookOpen, collection: 'readingTests', color: '#3b82f6', editPath: '/settings/admin/tests/edit/reading/editReading/' },
     writing: { label: 'Writing', icon: PenTool, collection: 'writingTests', color: '#10b981', editPath: '/settings/admin/tests/edit/writing/editWriting/' },
+    fullmock: { label: 'Full Mock', icon: Headphones, collection: 'fullmockTests', color: '#f59e0b' },
 };
 
 export default function ManageTests() {
@@ -78,7 +79,7 @@ export default function ManageTests() {
                     <Search size={18} />
                     <input placeholder={`Search ${config.label.toLowerCase()} tests...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </div>
-                <a href={`/settings/admin/tests/add/${type}/index.html`} className="action-btn primary">
+                <a href={`/settings/admin/tests/add/${type}/`} className="action-btn primary">
                     + Add New Test
                 </a>
             </div>
@@ -90,7 +91,7 @@ export default function ManageTests() {
                     <Icon size={48} strokeWidth={1.5} />
                     <h3>No {config.label} Tests</h3>
                     <p>No tests found. Create one to get started.</p>
-                    <a href={`/settings/admin/tests/add/${type}/index.html`} className="action-btn primary" style={{ marginTop: '0.75rem' }}>
+                    <a href={`/settings/admin/tests/add/${type}/`} className="action-btn primary" style={{ marginTop: '0.75rem' }}>
                         + Add First Test
                     </a>
                 </div>
@@ -113,9 +114,11 @@ export default function ManageTests() {
                                 {test.duration && <span className="meta-tag">{test.duration} min</span>}
                             </div>
                             <div className="test-card-actions">
-                                <button className="tc-btn edit" title="Edit" onClick={() => window.location.assign(`${config.editPath}?testId=${test.id}`)}>
-                                    <Edit3 size={16} /> Edit
-                                </button>
+                                {config.editPath && (
+                                    <button className="tc-btn edit" title="Edit" onClick={() => window.location.assign(`${config.editPath}?testId=${test.id}`)}>
+                                        <Edit3 size={16} /> Edit
+                                    </button>
+                                )}
                                 <button className="tc-btn delete" onClick={() => setDeleteModal(test)} title="Delete">
                                     <Trash2 size={16} /> Delete
                                 </button>

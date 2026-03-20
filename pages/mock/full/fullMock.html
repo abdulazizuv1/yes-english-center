@@ -149,6 +149,39 @@
       </div>
     </div>
 
+    <!-- PIN Entry Modal -->
+    <div class="modal-overlay" id="pinModal" style="display: none; z-index: 10000; backdrop-filter: blur(10px); background: rgba(15, 23, 42, 0.7);">
+      <div class="modal-content" style="background: white; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); text-align: center; position: relative; overflow: hidden; margin:auto;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #3b82f6, #ec4899);"></div>
+        
+        <div style="width: 64px; height: 64px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; font-family: 'Montserrat', sans-serif;">Test Protected</h2>
+        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5;">This Full Mock test requires a 6-digit access PIN to continue.</p>
+        
+        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;" id="pinInputContainer">
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+          <input type="text" maxlength="1" class="pin-digit" style="width: 45px; height: 55px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; color: #0f172a; transition: all 0.2s; outline: none;" />
+        </div>
+        
+        <p id="pinErrorMsg" style="color: #ef4444; font-size: 0.875rem; min-height: 1.25rem; margin-bottom: 1.5rem; font-weight: 500;"></p>
+        
+        <div style="display: flex; gap: 1rem;">
+          <button id="cancelPinBtn" style="flex: 1; padding: 0.75rem; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Go Back</button>
+          <button id="submitPinBtn" style="flex: 2; padding: 0.75rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);">Access Test</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
       <div class="context-menu-item" onclick="highlightSelection()">

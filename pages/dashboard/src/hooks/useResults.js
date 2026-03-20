@@ -299,10 +299,10 @@ export function getResultUrl(type, resultId) {
 
 export function getTestUrl(type, testId) {
   const urls = {
-    listening: `/pages/mock/listening/test.html?testId=${testId}`,
-    reading: `/pages/mock/reading/test.html?testId=${testId}`,
-    writing: `/pages/mock/writing/test.html?testId=${testId}`,
-    fullmock: `/pages/mock/full/fullMock.html?testId=${testId}`,
+    listening: `/pages/mock/listening/test?testId=${testId}`,
+    reading: `/pages/mock/reading/test?testId=${testId}`,
+    writing: `/pages/mock/writing/test?testId=${testId}`,
+    fullmock: `/pages/mock/full/fullMock?testId=${testId}`,
   };
   return urls[type] || '#';
 }

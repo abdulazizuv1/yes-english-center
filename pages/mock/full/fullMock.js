@@ -411,6 +411,9 @@ function restorePassageHighlights(index) {
 }
 
 // State management functions
+let savedStage = null;
+let savedTimerRemaining = null;
+
 function loadSavedState() {
   const saved = localStorage.getItem(testStorageKey);
   if (saved) {
@@ -419,6 +422,8 @@ function loadSavedState() {
     passageHighlights = data.passageHighlights || {};
     questionHighlights = data.questionHighlights || {};
     savedHighlights = data.savedHighlights || {};
+    savedStage = data.currentStage || null;
+    savedTimerRemaining = data.timerRemaining || null;
   }
 }
 
@@ -428,6 +433,8 @@ function saveState() {
     passageHighlights: passageHighlights,
     questionHighlights: questionHighlights,
     savedHighlights: savedHighlights,
+    currentStage: currentStage,
+    timerRemaining: getCurrentRemainingTime(),
     timestamp: Date.now(),
   };
   localStorage.setItem(testStorageKey, JSON.stringify(data));
@@ -599,33 +606,37 @@ function generateQuestionNav() {
       questionNav.appendChild(navSection);
     }
   } else if (currentStage === "reading") {
-    // Generate reading navigation (3 passages with different question ranges)
-    const passageRanges = [
-      { start: 1, end: 13, name: "Passage 1" },
-      { start: 14, end: 26, name: "Passage 2" },
-      { start: 27, end: 40, name: "Passage 3" },
-    ];
-
-    passageRanges.forEach((passage, index) => {
+    // Generate reading navigation dynamically
+    let currentStartQ = 1;
+    stageData.reading.passages.forEach((passage, index) => {
       const navSection = document.createElement("div");
       navSection.className = "nav-section";
 
       const label = document.createElement("span");
       label.className = "nav-label";
-      label.textContent = `${passage.name}:`;
+      label.textContent = `Passage ${index + 1}:`;
 
       navSection.appendChild(label);
 
       const navNumbers = document.createElement("div");
       navNumbers.className = "nav-numbers";
 
-      for (let i = passage.start; i <= passage.end; i++) {
+      let qsInPassage = 0;
+      passage.questions.forEach(q => {
+         if (q.questionId) qsInPassage += 1;
+         else if (q.questionIds) qsInPassage += q.questionIds.length;
+      });
+
+      const endQ = currentStartQ + qsInPassage - 1;
+
+      for (let i = currentStartQ; i <= endQ; i++) {
         const num = document.createElement("div");
         num.className = "nav-number";
         num.textContent = i;
         num.onclick = () => jumpToQuestion(i);
         navNumbers.appendChild(num);
       }
+      currentStartQ = endQ + 1;
 
       navSection.appendChild(navNumbers);
       questionNav.appendChild(navSection);
@@ -720,10 +731,22 @@ function jumpToQuestion(questionNum) {
     }
     currentQuestionIndex = questionNum - 1;
   } else if (currentStage === "reading") {
-    // Determine which passage contains this question
+    // Determine which passage contains this question dynamically
     let targetPassage = 0;
-    if (questionNum >= 14 && questionNum <= 26) targetPassage = 1;
-    else if (questionNum >= 27) targetPassage = 2;
+    for (let pIdx = 0; pIdx < stageData.reading.passages.length; pIdx++) {
+       const passage = stageData.reading.passages[pIdx];
+       let found = false;
+       for (const q of passage.questions) {
+          if (q.questionId === `q${questionNum}` || (q.questionIds && q.questionIds.includes(`q${questionNum}`))) {
+             found = true;
+             break;
+          }
+       }
+       if (found) {
+          targetPassage = pIdx;
+          break;
+       }
+    }
 
     currentPassageIndex = targetPassage;
     currentQuestionIndex = questionNum - 1;
@@ -833,7 +856,6 @@ async function loadTest() {
     currentTestId = urlParams.get("testId") || "test-1";
     testStorageKey = `fullmockTest_${currentTestId}`;
     
-    console.log("🔄 Loading full mock test...");
     
     // Load saved state
     loadSavedState();
@@ -847,23 +869,125 @@ async function loadTest() {
     }
 
     testData = docSnap.data();
-    console.log("📋 Test data loaded:", testData);
+
+    // If the test is PIN-protected, require correct PIN before initializing stages
+    // Prompt with custom UI modal on every entry
+    const requiredPin = testData.accessPin ? String(testData.accessPin).trim() : "";
+    if (requiredPin) {
+      const isValid = await verifyPinUI(requiredPin);
+      if (!isValid) return; // verifyPinUI handles redirection on cancel
+    }
 
     // Extract stage data
     testData.stages.forEach((stage) => {
       stageData[stage.id] = stage;
     });
 
-    console.log("✅ Full mock test loaded successfully");
 
     // Initialize highlight system
     initializeHighlightSystem();
 
-    // Start with listening
-    initializeStage("listening");
+    // Start with saved stage or listening
+    initializeStage(savedStage || "listening");
   } catch (error) {
     console.error("❌ Error loading test:", error);
   }
+}
+
+// Global PIN Verification UI logic
+function verifyPinUI(requiredPin) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('pinModal');
+    const inputs = document.querySelectorAll('.pin-digit');
+    const submitBtn = document.getElementById('submitPinBtn');
+    const cancelBtn = document.getElementById('cancelPinBtn');
+    const errorMsg = document.getElementById('pinErrorMsg');
+
+    if (!modal) {
+      // Fallback if modal isn't loaded
+      const entered = prompt("This test is protected. Enter the 6-digit access PIN:");
+      if (entered && entered.trim() === requiredPin) resolve(true);
+      else {
+        window.location.href = "/pages/dashboard/#/fullmock";
+        resolve(false);
+      }
+      return;
+    }
+    
+    modal.style.display = 'flex';
+    inputs.forEach(i => i.value = ''); // clear initial
+    errorMsg.textContent = '';
+    
+    // Auto-focus first input slightly later to ensure modal is visible
+    setTimeout(() => inputs[0].focus(), 50);
+
+    // Setup input behaviors (only run once)
+    if (!modal.dataset.initialized) {
+      inputs.forEach((input, index) => {
+        // handle paste
+        if (index === 0) {
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').substring(0, 6);
+            for(let i = 0; i < pasted.length; i++) {
+               if(inputs[i]) {
+                  inputs[i].value = pasted[i];
+                  if(i < 5) inputs[i+1].focus();
+               }
+            }
+            if (pasted.length === 6) submitBtn.click();
+          });
+        }
+        
+        input.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, ''); // digits only
+          if (e.target.value && index < 5) {
+            inputs[index + 1].focus();
+          }
+        });
+        
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            inputs[index - 1].focus();
+            inputs[index - 1].value = '';
+          } else if (e.key === 'Enter') {
+            submitBtn.click();
+          }
+        });
+        
+        // Focus styling
+        input.addEventListener('focus', () => input.style.borderColor = '#3b82f6');
+        input.addEventListener('blur', () => input.style.borderColor = '#e2e8f0');
+      });
+      modal.dataset.initialized = 'true';
+    }
+
+    const finish = (result) => {
+      modal.style.display = 'none';
+      resolve(result);
+    };
+
+    submitBtn.onclick = () => {
+      const entered = Array.from(inputs).map(i => i.value).join('');
+      if (entered.length < 6) {
+        errorMsg.textContent = 'Please enter all 6 digits.';
+        return;
+      }
+      
+      if (entered === requiredPin) {
+        finish(true);
+      } else {
+        errorMsg.textContent = 'Incorrect PIN. Please try again.';
+        inputs.forEach(i => i.value = '');
+        inputs[0].focus();
+      }
+    };
+
+    cancelBtn.onclick = () => {
+      window.location.href = "/pages/dashboard/#/fullmock";
+      finish(false);
+    };
+  });
 }
 
 // Initialize stage
@@ -887,12 +1011,19 @@ function initializeStage(stageName) {
       hasUnlimitedTime = true;
       display.textContent = "∞";
       display.style.fontSize = "24px";
-      console.log("✨ Unlimited time mode activated for", user.email);
     } else {
       // Normal timer for other users
       hasUnlimitedTime = false;
-      const duration = stageDurations[stageName] * 60;
-      startTimer(duration, display);
+      const defaultDuration = stageDurations[stageName] * 60;
+      
+      // Use saved timer if we're restoring the specific stage we saved
+      if (savedStage === stageName && savedTimerRemaining !== null) {
+        startTimer(savedTimerRemaining, display);
+        // Clear it so it only applies once
+        savedTimerRemaining = null;
+      } else {
+        startTimer(defaultDuration, display);
+      }
     }
   });
 
@@ -955,7 +1086,6 @@ function renderListeningSection(index) {
   const section = stageData.listening.sections[index];
   if (!section) return;
 
-  console.log(`🎯 Rendering listening section ${index + 1}`);
 
   // Enhanced audio handling
   handleSectionAudio(section, index);
@@ -1015,6 +1145,26 @@ function handleSectionAudio(section, index) {
 
 function initializeSequentialAudio() {
   const container = document.getElementById("audio-container");
+  
+  // If we have a single master audio mode
+  if (stageData.listening.audioUrl && stageData.listening.audioMode === 'single') {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    container.innerHTML = `
+      <audio controls autoplay style="width:100%; margin-bottom: 20px;" id="sectionAudio">
+        <source src="${stageData.listening.audioUrl}" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+      <div style="text-align: center; margin-top: 10px; color: #6b7280;">
+        Playing: Master Audio
+      </div>
+    `;
+    currentAudio = document.getElementById('sectionAudio');
+    return;
+  }
+
   playAudioForSection(0); // Всегда начинаем с первой секции
   
   function playAudioForSection(sectionIndex) {
@@ -1227,6 +1377,7 @@ function renderListeningMultiSelectGroup(group) {
     const groupContainer = document.querySelector(
       `[data-group-id="${groupQId}"]`
     );
+
     if (groupContainer) {
       const counter = document.getElementById(`counter-${groupQId}`);
       const checkedBoxes = groupContainer.querySelectorAll(
@@ -2145,19 +2296,33 @@ function handleMultiSelectChange(group, container) {
 // Initialize Writing
 function initializeWriting() {
   const writingTasks = stageData.writing.tasks[0]; // Assuming first test
+  
+  // Backward compatibility for newly added tests that used the array format
+  let task1Data = writingTasks.task1;
+  let task2Data = writingTasks.task2;
+  
+  if (!task1Data && stageData.writing.tasks.length >= 2 && stageData.writing.tasks[0].instructions) {
+    task1Data = {
+       question: `${stageData.writing.tasks[0].instructions}\n\n${stageData.writing.tasks[0].prompt}`,
+       imageUrl: stageData.writing.tasks[0].imageUrl
+    };
+    task2Data = {
+       question: `${stageData.writing.tasks[1].instructions}\n\n${stageData.writing.tasks[1].topic || ''}\n\n${stageData.writing.tasks[1].prompt}`
+    };
+  }
 
   // Render Task 1
   document.getElementById("task1Question").textContent =
-    writingTasks.task1.question;
-  if (writingTasks.task1.imageUrl) {
+    task1Data.question;
+  if (task1Data.imageUrl) {
     document.getElementById("task1Image").innerHTML = `
-      <img src="${writingTasks.task1.imageUrl}" alt="Task 1 Image" style="max-width: 100%; height: auto; border-radius: 8px;">
+      <img src="${task1Data.imageUrl}" alt="Task 1 Image" style="max-width: 100%; height: auto; border-radius: 8px;">
     `;
   }
 
   // Render Task 2
   document.getElementById("task2Question").textContent =
-    writingTasks.task2.question;
+    task2Data.question;
 
   // Set up word count functionality
   setupWordCount("task1Answer", "task1WordCount");
@@ -2344,14 +2509,12 @@ document.addEventListener("change", (e) => {
 
         if (assignedQuestionId) {
           answersSoFar[assignedQuestionId] = optionKey;
-          console.log(`✅ Assigned ${optionKey} to ${assignedQuestionId}`);
         }
       } else {
         // Удаляем ответ
         for (const qId of questionIds) {
           if (answersSoFar[qId] === optionKey) {
             delete answersSoFar[qId];
-            console.log(`❌ Removed ${optionKey} from ${qId}`);
             break;
           }
         }
@@ -2605,8 +2768,6 @@ async function handleFinishTest() {
   let listeningCorrect = 0;
   let listeningTotal = 0;
 
-  console.log("🔍 Processing listening answers...");
-  console.log("Current answersSoFar:", answersSoFar);
 
   for (const section of stageData.listening.sections) {
     if (section.content) {
@@ -2626,10 +2787,6 @@ async function handleFinishTest() {
           if (isCorrect) listeningCorrect++;
           listeningTotal++;
 
-          console.log(
-            `✅ Question ${qId}: user="${userAns}", correct="${item.correctAnswer}", isCorrect=${isCorrect}`
-          );
-
           // ✅ 2. QUESTION GROUPS (multi-select, matching)
         } else if (item.type === "question-group") {
           // Multi-select группы
@@ -2648,9 +2805,6 @@ async function handleFinishTest() {
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
 
-              console.log(
-                `✅ Multi-select ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
-              );
             });
           }
 
@@ -2670,15 +2824,11 @@ async function handleFinishTest() {
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
 
-              console.log(
-                `✅ Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
-              );
             });
           }
 
           // ✅ 3. ИСПРАВЛЕНО: TABLE ВОПРОСЫ - обрабатываем ОБА формата
         } else if (item.type === "table") {
-          console.log("🔍 Processing table:", item);
 
           if (item.answer && typeof item.answer === "object") {
             Object.keys(item.answer).forEach((key) => {
@@ -2710,9 +2860,6 @@ async function handleFinishTest() {
               if (isCorrect) listeningCorrect++;
               listeningTotal++;
 
-              console.log(
-                `✅ Table ${qId} (from key "${key}" -> qNum=${qNum}): user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`
-              );
             });
           }
 
@@ -2754,14 +2901,9 @@ async function handleFinishTest() {
                         if (isCorrect) listeningCorrect++;
                         listeningTotal++;
 
-                        console.log(
-                          `✅ Table row ${qId}: user="${userAns}", correct="${expected}", isCorrect=${isCorrect}`
-                        );
                       } else {
                         listeningTotal++;
-                        console.log(
-                          `⚠️ Table row ${qId}: user="${userAns}", correct=MISSING`
-                        );
+
                       }
                     });
                   }
@@ -2786,9 +2928,6 @@ async function handleFinishTest() {
             if (isCorrect) listeningCorrect++;
             listeningTotal++;
 
-            console.log(
-              `✅ Standalone Matching ${qId}: user="${userAns}", correct="${q.correctAnswer}", isCorrect=${isCorrect}`
-            );
           });
         }
       });
@@ -2829,7 +2968,6 @@ async function handleFinishTest() {
     if (isCorrect) readingCorrect++;
   }
 
-  console.log(`📊 Reading Results: ${readingCorrect}/${readingTotal}`);
 
   try {
     const docRef = await addDoc(collection(db, "resultFullmock"), {
@@ -2950,7 +3088,6 @@ function countWords(text) {
 // Send writing to Telegram bot
 async function sendWritingToTelegram(data) {
   try {
-    console.log("📱 Sending full mock result to Telegram...");
 
     const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
     const CHAT_ID = "53064348";
@@ -3013,7 +3150,6 @@ ${task2Preview}
     );
 
     if (response.ok) {
-      console.log("✅ Telegram notification sent successfully");
       return true;
     } else {
       const error = await response.json();
@@ -3035,7 +3171,6 @@ ${task2Preview}
         );
 
         if (fallbackResponse.ok) {
-          console.log("✅ Telegram notification sent (plain text)");
           return true;
         }
       }
@@ -3240,5 +3375,4 @@ window.openReview = function () {
 };
 // Initialize everything when page loads
 window.onload = () => {
-  console.log("🌐 Full mock test page loaded");
 };

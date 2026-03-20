@@ -74,19 +74,14 @@ export async function collectWritingData() {
         id: "writing",
         title: "Writing Test",
         duration: 60,
-        tasks: [
-            {
-                taskNumber: 1,
-                instructions: t1Inst,
-                prompt: t1Prompt,
+        tasks: [{
+            task1: {
+                question: `${t1Inst}\n\n${t1Prompt}`,
                 imageUrl: t1ImageRef
             },
-            {
-                taskNumber: 2,
-                instructions: t2Inst,
-                topic: t2Topic,
-                prompt: t2Prompt
+            task2: {
+                question: `${t2Inst}\n\n${t2Topic}\n\n${t2Prompt}`
             }
-        ]
+        }]
     };
 }

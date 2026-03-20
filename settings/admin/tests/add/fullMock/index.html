@@ -75,6 +75,12 @@
                     <input type="text" id="testTitle" class="form-input" placeholder="e.g., IELTS Full Mock Test 1" autocomplete="off">
                 </div>
 
+                <div class="form-group">
+                    <label for="testAccessPin">Test Access PIN <span style="color: #94a3b8; font-weight: 400;">(optional)</span></label>
+                    <input type="text" id="testAccessPin" class="form-input" placeholder="e.g., 123456" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" style="max-width: 220px; letter-spacing: 0.3em; font-size: 1.1rem;">
+                    <small style="color: #94a3b8; margin-top: 4px; display: block;">6-digit numeric PIN. Students must enter this PIN to access the test.</small>
+                </div>
+
                 <div class="info-card warning">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     <div>
@@ -187,6 +193,7 @@
                     <div class="review-card">
                         <h3>Test Info</h3>
                         <p><strong>Title:</strong> <span id="reviewTitle">-</span></p>
+                        <p><strong>Access PIN:</strong> <span id="reviewAccessPin">None</span></p>
                         <p><strong>Total Time:</strong> 150 minutes</p>
                     </div>
                     

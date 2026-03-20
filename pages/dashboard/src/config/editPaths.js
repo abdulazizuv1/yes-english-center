@@ -4,9 +4,9 @@
  * This is the single source of truth for all edit page redirects.
  */
 const EDIT_PATHS = {
-    listening: '/settings/admin/tests/edit/listening/editListening/index.html',
-    reading:   '/settings/admin/tests/edit/reading/editReading/index.html',
-    writing:   '/settings/admin/tests/edit/writing/editWriting/index.html',
+    listening: '/settings/admin/tests/edit/listening/editListening/index',
+    reading:   '/settings/admin/tests/edit/reading/editReading/index',
+    writing:   '/settings/admin/tests/edit/writing/editWriting/index',
 };
 
 /**
