@@ -86,3 +86,4 @@ mock-tests/serviceAccountKey.json
 # macOS
 .DS_Store
 EOFserviceAccountKey.json
+.htaccess
