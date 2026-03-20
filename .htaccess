@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Если запрашиваемый ресурс не является файлом...
+RewriteCond %{REQUEST_FILENAME} !-f
+# ... и не является директорией...
+RewriteCond %{REQUEST_FILENAME} !-d
+# ... но существует такой же путь с добавленным .html ...
+RewriteCond %{REQUEST_FILENAME}.html -f
+# ... то подставляем расширение .html скрытно от пользователя.
+RewriteRule ^(.*)$ $1.html [L,QSA]
