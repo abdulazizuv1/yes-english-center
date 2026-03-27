@@ -201,10 +201,6 @@ async function loadResultsData(category = 'all') {
       results.push(...writingResults);
     }
     
-    if (category === 'all' || category === 'fullmock') {
-      const fullMockResults = await fetchResults('resultFullmock', 'fullmock');
-      results.push(...fullMockResults);
-    }
 
     // Sort by date (newest first)
     results.sort((a, b) => {
@@ -404,7 +400,7 @@ window.openResult = function(type, resultId) {
     listening: `/pages/mock/listening/resultListening.html?id=${resultId}`,
     reading: `/pages/mock/result.html?id=${resultId}`,
     writing: `/pages/mock/writing/resultWriting.html?id=${resultId}`,
-    fullmock: `/pages/mock/full/resultFullMock.html?id=${resultId}`
+    fullmock: null
   };
   
   const url = urls[type];

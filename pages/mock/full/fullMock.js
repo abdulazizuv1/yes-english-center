@@ -3035,7 +3035,7 @@ async function handleFinishTest() {
     });
 
     clearInterval(window.fullMockTimerInterval);
-    window.location.href = `/pages/mock/full/result/?id=${docRef.id}`;
+    window.location.href = '/';
   } catch (e) {
     console.error("❌ Error saving result:", e);
     alert("Error submitting your result. Please try again.");

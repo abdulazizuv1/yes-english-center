@@ -2,17 +2,36 @@ import {
   getFirestore,
   doc,
   getDoc,
+  addDoc,
+  collection,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  limit,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  get,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 import { firebaseConfig } from "/config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const rtdb = getDatabase(app);
+
+const EVALUATE_URL = "https://us-central1-yes-english-center.cloudfunctions.net/evaluateWriting";
+
+let currentUser = null;
+let currentData = null;
+let currentResultId = null;
 
 const auth = getAuth();
 onAuthStateChanged(auth, async (user) => {
@@ -22,8 +41,11 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  currentUser = user;
+
   const params = new URLSearchParams(window.location.search);
   let resultId = params.get("id");
+  currentResultId = resultId;
 
   if (!resultId) {
     alert("No result ID found. Redirecting to your dashboard.");
@@ -37,7 +59,8 @@ onAuthStateChanged(auth, async (user) => {
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      console.log("Writing result data:", data); // Для отладки
+      currentData = data;
+      console.log("Writing result data:", data);
       showCelebration();
       setTimeout(() => renderResult(data), 1000);
     } else {
@@ -115,9 +138,12 @@ function renderResult(data) {
   
   // Настраиваем переключатели вида
   setupViewToggles();
-  
+
   // Анимируем числа
   animateNumbers();
+
+  // Инициализируем AI Check
+  initAiCheck();
 }
 
 function countWords(text) {
@@ -266,6 +292,116 @@ function animateNumbers() {
       }
     }, 50);
   });
+}
+
+function showFeedbackButton(docId) {
+  const feedbackBtn = document.getElementById("aiFeedbackBtn");
+  if (feedbackBtn) {
+    feedbackBtn.href = `/pages/ai-feedback/?id=${docId}`;
+    feedbackBtn.style.display = "";
+  }
+}
+
+async function checkExistingFeedback() {
+  if (!currentUser || !currentResultId) return;
+  try {
+    const q = query(
+      collection(db, "aiFeedback"),
+      where("uid", "==", currentUser.uid),
+      where("sessionId", "==", currentResultId),
+      limit(1)
+    );
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      showFeedbackButton(snapshot.docs[0].id);
+    }
+  } catch (err) {
+    console.error("Error checking existing feedback:", err);
+  }
+}
+
+async function initAiCheck() {
+  const btn = document.getElementById("aiCheckBtn");
+  const statusEl = document.getElementById("aiUsageStatus");
+  if (!btn || !statusEl || !currentUser) return;
+
+  const today = new Date().toISOString().split("T")[0];
+  const usageRef = ref(rtdb, `aiUsage/${currentUser.uid}/${today}/count`);
+
+  try {
+    const snapshot = await get(usageRef);
+    const count = snapshot.exists() ? snapshot.val() : 0;
+    const remaining = Math.max(0, 3 - count);
+    if (remaining === 0) {
+      statusEl.textContent = "Daily limit reached (3/3). Try again tomorrow.";
+      statusEl.className = "ai-usage-status limit-reached";
+      btn.disabled = true;
+    } else {
+      statusEl.textContent = `AI checks remaining today: ${remaining}/3`;
+    }
+  } catch (err) {
+    console.error("Error reading AI usage:", err);
+    statusEl.textContent = "AI checks remaining today: 3/3";
+  }
+
+  btn.addEventListener("click", handleAiCheck);
+  checkExistingFeedback();
+}
+
+async function handleAiCheck() {
+  const btn = document.getElementById("aiCheckBtn");
+  const statusEl = document.getElementById("aiUsageStatus");
+
+  btn.disabled = true;
+  btn.textContent = "⏳ Analyzing…";
+  statusEl.textContent = "Sending to AI examiner...";
+
+  try {
+    const idToken = await currentUser.getIdToken();
+
+    const response = await fetch(EVALUATE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        task1Text: currentData?.task1Content || null,
+        task2Text: currentData?.task2Content || null,
+        task1ImageUrl: currentData?.task1ImageUrl || null,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.error === "limit_reached") {
+      statusEl.textContent = "Daily limit reached (3/day). Try again tomorrow.";
+      statusEl.className = "ai-usage-status limit-reached";
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`[${result.error}] ${result.message || response.status}`);
+    }
+
+    // Save feedback to Firestore
+    const docRef = await addDoc(collection(db, "aiFeedback"), {
+      uid: currentUser.uid,
+      feedbackText: result.feedbackText,
+      task1Text: currentData?.task1Content || null,
+      task2Text: currentData?.task2Content || null,
+      sessionId: currentResultId,
+      createdAt: serverTimestamp(),
+    });
+
+    showFeedbackButton(docRef.id);
+    window.location.href = `/pages/ai-feedback/?id=${docRef.id}`;
+  } catch (err) {
+    console.error("AI check error:", err);
+    statusEl.textContent = "Error occurred. Please try again.";
+    btn.disabled = false;
+    btn.textContent = "✨ AI Check (IELTS Feedback)";
+  }
 }
 
 // Добавляем интерактивные эффекты

@@ -1,10 +1,11 @@
 import functions from "firebase-functions";
 import admin from "firebase-admin";
 import cors from "cors";
+import OpenAI from "openai";
+import { Buffer } from "node:buffer";
+import process from "node:process";
 
 admin.initializeApp();
-const functions = require('firebase-functions');
-const cors = require('cors');
 const db = admin.firestore();
 const auth = admin.auth();
 const corsHandler = cors({ origin: true });
@@ -120,10 +121,112 @@ export const deleteUser = functions.https.onRequest((req, res) => {
   });
 });
 
-const corsOptions = {
-    origin: 'https://yescenter.uz',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, // Allow cookies if needed
-};
+export const evaluateWriting = functions.https.onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "POST");
+      res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      return res.status(204).send("");
+    }
 
-const corsMiddleware = cors(corsOptions);
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Only POST requests are allowed" });
+    }
+
+    // Verify auth token
+    const bearerToken = req.headers.authorization;
+    if (!bearerToken?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing or invalid Authorization header." });
+    }
+
+    let uid;
+    try {
+      const idToken = bearerToken.split("Bearer ")[1];
+      const decoded = await auth.verifyIdToken(idToken);
+      uid = decoded.uid;
+    } catch (err) {
+      return res.status(401).json({ error: "Invalid ID token." });
+    }
+
+    // Rate limit: read-only check first — do NOT increment yet
+    const today = new Date().toISOString().split("T")[0];
+    const usageRef = admin.database().ref(`aiUsage/${uid}/${today}/count`);
+
+    let currentCount;
+    try {
+      const snapshot = await usageRef.get();
+      currentCount = snapshot.exists() ? snapshot.val() : 0;
+      if (currentCount >= 3) {
+        return res.status(429).json({ error: "limit_reached", used: 3, max: 3 });
+      }
+    } catch (err) {
+      console.error("RTDB read error:", err);
+      return res.status(500).json({ error: "rtdb_failed", message: err.message });
+    }
+
+    const { task1Text, task2Text, task1ImageUrl } = req.body;
+
+    // Build OpenAI user message content
+    const userContent = [];
+
+    // Attach Task 1 image if available
+    if (task1ImageUrl) {
+      try {
+        const imgRes = await fetch(task1ImageUrl);
+        const buf = await imgRes.arrayBuffer();
+        const base64 = Buffer.from(buf).toString("base64");
+        const mime = imgRes.headers.get("content-type") || "image/jpeg";
+        userContent.push({ type: "text", text: "Task 1 image (the chart/graph the student described):" });
+        userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } });
+      } catch (imgErr) {
+        console.warn("Could not fetch Task 1 image:", imgErr.message);
+      }
+    }
+
+    let promptText = "";
+    if (task1Text) promptText += `### Task 1 Response:\n${task1Text}\n\n`;
+    if (task2Text) promptText += `### Task 2 Response:\n${task2Text}\n\n`;
+    promptText += "Evaluate the writing above according to official IELTS band descriptors. For each task present, give:\n- Band scores for Task Achievement/Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy\n- Estimated band score for the task\n- Key strengths (bullet list)\n- Areas for improvement (bullet list with specific suggestions)\n- 2-3 corrected example sentences from the student's actual writing\n\nFinish with an Overall Estimated Band Score.";
+    userContent.push({ type: "text", text: promptText });
+
+    // Call OpenAI — only increment the counter after a successful response
+    let feedbackText;
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        max_tokens: 2000,
+        temperature: 0.3,
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert IELTS examiner. Evaluate the student's writing strictly according to official IELTS Writing band descriptors. Always respond in English.",
+          },
+          { role: "user", content: userContent },
+        ],
+      });
+      feedbackText = completion.choices[0].message.content;
+    } catch (err) {
+      console.error("OpenAI error:", err);
+      return res.status(500).json({ error: "openai_failed", message: err.message });
+    }
+
+    // OpenAI succeeded — now increment the counter
+    let newCount;
+    try {
+      const txResult = await usageRef.transaction((current) => {
+        if (current === null) return 1;
+        if (current >= 3) return; // abort
+        return current + 1;
+      });
+      newCount = txResult.committed ? txResult.snapshot.val() : 3;
+    } catch (err) {
+      console.error("RTDB increment error:", err);
+      // Counter failed to increment but feedback is ready — still return it
+      newCount = currentCount + 1;
+    }
+
+    return res.status(200).json({ feedbackText, used: newCount, max: 3 });
+  });
+});

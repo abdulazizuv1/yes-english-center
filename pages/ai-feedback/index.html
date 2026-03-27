@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI IELTS Feedback</title>
+    <link rel="stylesheet" href="/pages/ai-feedback/aiFeedback.css">
+    <link rel="icon" href="/image/logo_copy.png" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🤖 AI IELTS Feedback</h1>
+            </div>
+            <div class="badge">AI Evaluation</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button class="btn-back" onclick="history.back()">← Back to Results</button>
+            <button class="btn-history" id="historyBtn">📋 View History</button>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="feedback-card" id="feedbackCard">
+            <div class="feedback-meta" id="feedbackMeta"></div>
+            <div class="feedback-body" id="feedbackBody">
+                <div class="loading-state">⏳ Loading feedback...</div>
+            </div>
+        </div>
+
+        <!-- History Panel -->
+        <div class="history-panel" id="historyPanel" style="display: none;">
+            <h3>📋 Your Feedback History</h3>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/pages/ai-feedback/aiFeedback.js"></script>
+</body>
+</html>
