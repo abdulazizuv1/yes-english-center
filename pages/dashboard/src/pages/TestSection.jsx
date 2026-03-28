@@ -46,33 +46,7 @@ function TestCard({ test, type, userId }) {
                 <ArrowRight size={18} className="test-card-arrow" />
             </div>
             {testDesc && <p className="test-card-desc">{testDesc}</p>}
-            <div className="test-card-result">
-                {result === undefined ? (
-                    <div className="result-loading"><div className="spinner-sm" /> Loading result...</div>
-                ) : result === null ? (
-                    <div className="result-empty">Take this test to see your score</div>
-                ) : (
-                    <div className="result-badge" onClick={handleResultClick}>
-                        <span className="result-score-text">
-                            {type === 'fullmock'
-                                ? `Band ${result.overallBand || 'N/A'}`
-                                : type === 'writing'
-                                    ? `${result.totalWordCount || 0} words`
-                                    : `${result.score || 0}/${result.total || 40} correct`}
-                        </span>
-                        {type !== 'writing' && type !== 'fullmock' && (
-                            <span className={`band-pill ${getBandClass(convertToIELTS(result.score || 0, result.total || 40, type))}`}>
-                                Band {convertToIELTS(result.score || 0, result.total || 40, type)}
-                            </span>
-                        )}
-                        {type === 'fullmock' && result.overallBand && (
-                            <span className={`band-pill ${getBandClass(result.overallBand)}`}>
-                                Overall
-                            </span>
-                        )}
-                    </div>
-                )}
-            </div>
+            
         </div>
     );
 }

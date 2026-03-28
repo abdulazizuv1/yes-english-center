@@ -70,18 +70,26 @@ export async function collectWritingData() {
          t1ImageRef = { file: t1ImageInput.files[0], task: "task1" };
     }
 
+    const task1 = {
+        question: `${t1Inst}\n\n${t1Prompt}`,
+        ...(t1ImageRef ? { imageUrl: t1ImageRef } : {})
+    };
+    const task2 = {
+        question: `${t2Inst}\n\n${t2Topic}\n\n${t2Prompt}`
+    };
+
+    const writingTasksEntry = {
+        // testId/title set later by main when full mock testId/title are known
+        task1,
+        task2
+    };
+
     return {
         id: "writing",
         title: "Writing Test",
         duration: 60,
-        tasks: [
-            {
-                question: `${t1Inst}\n\n${t1Prompt}`,
-                imageUrl: t1ImageRef
-            },
-            {
-                question: `${t2Inst}\n\n${t2Topic}\n\n${t2Prompt}`
-            }
-        ]
+        task1,
+        task2,
+        tasks: [writingTasksEntry]
     };
 }

@@ -133,6 +133,19 @@ async function generateReviewData() {
         const readingData = await collectReadingData();
         const writingData = await collectWritingData();
 
+        // Ensure writing stage is compatible with the shared mock format
+        if (writingData.tasks && writingData.tasks[0]) {
+            writingData.tasks[0].testId = testId;
+            writingData.tasks[0].title = title;
+        } else {
+            writingData.tasks = [{
+                testId,
+                title,
+                task1: writingData.task1,
+                task2: writingData.task2
+            }];
+        }
+
         const payload = {
             testId: testId,
             title: title,
@@ -152,8 +165,11 @@ async function generateReviewData() {
         document.getElementById('reviewReadingPassages').textContent = readingData.passages.length;
         document.getElementById('reviewReadingQuestions').textContent = readingData.totalQuestions || 0;
         
-        document.getElementById('reviewWritingTask1').textContent = writingData.tasks[0] ? 'Yes' : 'No';
-        document.getElementById('reviewWritingTask2').textContent = writingData.tasks[1] ? 'Yes' : 'No';
+        const writingTask1 = writingData.task1 || writingData.tasks?.[0]?.task1;
+        const writingTask2 = writingData.task2 || writingData.tasks?.[0]?.task2;
+
+        document.getElementById('reviewWritingTask1').textContent = writingTask1 ? 'Yes' : 'No';
+        document.getElementById('reviewWritingTask2').textContent = writingTask2 ? 'Yes' : 'No';
 
         document.getElementById('saveTestBtn').disabled = false;
     } catch(err) {
@@ -198,16 +214,37 @@ async function handleSave() {
 
         // 3. Process Writing Images Uploads
         const wData = fullMockDataCache.stages[2];
-        for(let i=0; i < wData.tasks.length; i++) {
-             const t = wData.tasks[i];
-             if(t.imageUrl && typeof t.imageUrl === 'object') {
-                  loadingText.textContent = `Uploading writing task ${i+1} image...`;
-                  const ext = t.imageUrl.file.name.split('.').pop();
-                  const filePath = `fullmock-images/${testId}/writing-task${i+1}.${ext}`;
-                  t.imageUrl = await uploadFile(t.imageUrl.file, filePath);
-             } else {
-                  delete t.imageUrl;
-             }
+        const writingEntries = [];
+
+        // Top-level tasks (legacy) path
+        if (Array.isArray(wData.tasks)) {
+            wData.tasks.forEach((entry) => {
+                if (entry.task1) writingEntries.push({ parent: entry, key: 'task1', data: entry.task1 });
+                if (entry.task2) writingEntries.push({ parent: entry, key: 'task2', data: entry.task2 });
+                // support flat task-structure for backwards compatibility
+                if (entry.imageUrl && typeof entry.imageUrl === 'object') {
+                    writingEntries.push({ parent: entry, key: 'imageUrl', data: entry });
+                }
+            });
+        }
+        // Top-level task1/task2 path
+        if (wData.task1) writingEntries.push({ parent: wData, key: 'task1', data: wData.task1 });
+        if (wData.task2) writingEntries.push({ parent: wData, key: 'task2', data: wData.task2 });
+
+        for (let i = 0; i < writingEntries.length; i++) {
+            const { parent, data } = writingEntries[i];
+            if (data.imageUrl && typeof data.imageUrl === 'object') {
+                loadingText.textContent = `Uploading writing task ${i + 1} image...`;
+                const ext = data.imageUrl.file.name.split('.').pop();
+                const filePath = `fullmock-images/${testId}/writing-task${i + 1}.${ext}`;
+                const downloadUrl = await uploadFile(data.imageUrl.file, filePath);
+                data.imageUrl = downloadUrl;
+            } else if (data.imageUrl) {
+                // if imageUrl is already a URL string, leave it
+                if (typeof data.imageUrl !== 'string') {
+                    delete data.imageUrl;
+                }
+            }
         }
 
         // 4. Save to Firestore
