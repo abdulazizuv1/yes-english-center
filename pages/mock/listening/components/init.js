@@ -130,11 +130,17 @@ export function initListeningTest(deps) {
     setupOpenReview();
     setupTogglePause(handleFinish);
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         alert("Please log in to take the test.");
         window.location.href = "/";
       } else {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          listeningState.isAdmin = userDoc.exists() && userDoc.data().role === "admin";
+        } catch (e) {
+          listeningState.isAdmin = false;
+        }
         loadTest();
       }
     });

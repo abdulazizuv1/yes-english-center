@@ -2,6 +2,7 @@ export const listeningState = {
   app: null,
   db: null,
   auth: null,
+  isAdmin: false,
 
   sections: [],
   currentSectionIndex: 0,
