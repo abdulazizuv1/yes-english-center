@@ -198,10 +198,13 @@ async function handleFormSubmit(e) {
     // Upload image
     const imageUrl = await uploadImage(task1ImageFile, nextTestNumber);
 
+    const accessPin = document.getElementById("accessPin").value.trim();
+
     // Prepare test data
     const testData = {
       testId: `test-${nextTestNumber}`,
       title: testTitle,
+      ...(accessPin ? { accessPin } : {}),
       task1: {
         question: task1Question,
         imageUrl: imageUrl,

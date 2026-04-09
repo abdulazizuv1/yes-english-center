@@ -16,6 +16,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 
+
 function extractNumber(str) {
   // Ищем первое число в строке
   const match = str.match(/\d+/);

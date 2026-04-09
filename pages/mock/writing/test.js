@@ -97,6 +97,35 @@ window.togglePause = function() {
 };
 
 // Initialize test
+function waitForPin(correctPin) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("pinModal");
+    const input = document.getElementById("pinInput");
+    const error = document.getElementById("pinError");
+    const confirmBtn = document.getElementById("pinConfirmBtn");
+
+    modal.style.display = "flex";
+    input.focus();
+
+    function attempt() {
+      const entered = input.value.trim();
+      if (entered === correctPin) {
+        modal.style.display = "none";
+        resolve();
+      } else {
+        error.style.display = "block";
+        input.value = "";
+        input.focus();
+      }
+    }
+
+    confirmBtn.addEventListener("click", attempt);
+    input.addEventListener("keydown", function onKey(e) {
+      if (e.key === "Enter") attempt();
+    });
+  });
+}
+
 async function initializeTest() {
   try {
     // Get test ID from URL
@@ -112,6 +141,10 @@ async function initializeTest() {
     if (docSnap.exists()) {
       const rawData = docSnap.data();
       console.log("✅ Raw test data loaded:", rawData);
+
+      if (rawData.accessPin) {
+        await waitForPin(rawData.accessPin);
+      }
 
       // Fix structure - get nested object test-1
       if (rawData[currentTestId]) {

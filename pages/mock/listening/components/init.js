@@ -11,6 +11,35 @@ import { renderSection } from "./render.js";
 import { createHandleFinish } from "./results.js";
 import { setupTogglePause, startTimer } from "./pause.js";
 
+function waitForPin(correctPin) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("pinModal");
+    const input = document.getElementById("pinInput");
+    const error = document.getElementById("pinError");
+    const confirmBtn = document.getElementById("pinConfirmBtn");
+
+    modal.style.display = "flex";
+    input.focus();
+
+    function attempt() {
+      const entered = input.value.trim();
+      if (entered === correctPin) {
+        modal.style.display = "none";
+        resolve();
+      } else {
+        error.style.display = "block";
+        input.value = "";
+        input.focus();
+      }
+    }
+
+    confirmBtn.addEventListener("click", attempt);
+    input.addEventListener("keydown", function onKey(e) {
+      if (e.key === "Enter") attempt();
+    });
+  });
+}
+
 export function initListeningTest(deps) {
   const {
     app,
@@ -46,6 +75,11 @@ export function initListeningTest(deps) {
         if (!docSnap.exists()) throw new Error(`Test ${testId} not found`);
 
         const data = docSnap.data();
+
+        if (data.accessPin) {
+          await waitForPin(data.accessPin);
+        }
+
         listeningState.sections =
           data.sections || data.parts?.sections || data.parts || [];
 

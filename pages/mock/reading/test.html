@@ -82,6 +82,23 @@
       </div>
     </div>
     
+    <!-- PIN Modal -->
+    <div id="pinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:16px; padding:36px 32px; max-width:360px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+        <h3 style="margin:0 0 8px; color:#1e293b; font-size:20px;">Access PIN Required</h3>
+        <p style="margin:0 0 20px; color:#64748b; font-size:14px;">This test is protected. Enter the 6-digit PIN to continue.</p>
+        <input type="text" id="pinInput" maxlength="6" inputmode="numeric" placeholder="• • • • • •"
+          style="width:100%; box-sizing:border-box; padding:14px; border:2px solid #e2e8f0; border-radius:10px; font-size:22px; letter-spacing:8px; text-align:center; outline:none; transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+        <p id="pinError" style="display:none; color:#ef4444; font-size:13px; margin:8px 0 0;">Incorrect PIN. Please try again.</p>
+        <div style="display:flex; gap:12px; margin-top:20px;">
+          <button onclick="history.back()" style="flex:1; padding:12px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#374151; font-size:15px; cursor:pointer;">Back</button>
+          <button id="pinConfirmBtn" style="flex:1; padding:12px; border:none; border-radius:10px; background:#3b82f6; color:#fff; font-size:15px; font-weight:600; cursor:pointer;">Confirm</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading Modal -->
     <div class="loading-modal" id="loadingModal">
       <div class="loading-modal-content">

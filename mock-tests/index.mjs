@@ -15,11 +15,11 @@ admin.initializeApp({
 const db = admin.firestore();
 
 async function downloadDocument() {
-  const snap = await db.collection("fullmockTests").doc("test-12").get();
+  const snap = await db.collection("readingTests").doc("test-1").get();
 
   if (snap.exists) {
     const data = snap.data();
-    const outPath = path.join(__dirname, "data", "full", "test-12.json");
+    const outPath = path.join(__dirname, "data", "readingTests", "test-1.json");
     fs.writeFileSync(outPath, JSON.stringify(data, null, 2));
     console.log(`Документ сохранён: ${outPath}`);
   } else {

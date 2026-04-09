@@ -6,6 +6,35 @@ import { renderPassage } from "./render.js";
 import { createHandleFinish } from "./finish.js";
 import { createPauseModal, setupTogglePause } from "./pause.js";
 
+function waitForPin(correctPin) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("pinModal");
+    const input = document.getElementById("pinInput");
+    const error = document.getElementById("pinError");
+    const confirmBtn = document.getElementById("pinConfirmBtn");
+
+    modal.style.display = "flex";
+    input.focus();
+
+    function attempt() {
+      const entered = input.value.trim();
+      if (entered === correctPin) {
+        modal.style.display = "none";
+        resolve();
+      } else {
+        error.style.display = "block";
+        input.value = "";
+        input.focus();
+      }
+    }
+
+    confirmBtn.addEventListener("click", attempt);
+    input.addEventListener("keydown", function onKey(e) {
+      if (e.key === "Enter") attempt();
+    });
+  });
+}
+
 export function initReadingTest(deps) {
   const { db, auth, doc, getDoc, collection, addDoc, serverTimestamp, onAuthStateChanged } = deps;
 
@@ -71,6 +100,11 @@ export function initReadingTest(deps) {
 
       if (docSnap.exists()) {
         const data = docSnap.data();
+
+        if (data.accessPin) {
+          await waitForPin(data.accessPin);
+        }
+
         readingState.passages = data.passages;
         // Соединяем навигацию с функцией рендера
         setRenderPassageFn(renderPassage);

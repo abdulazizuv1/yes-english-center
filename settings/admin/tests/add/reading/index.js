@@ -1216,9 +1216,12 @@ function collectTestData() {
     passages.push(passageData);
   });
 
+  const accessPin = document.getElementById("accessPin").value.trim();
+
   return {
     testId: `test-${nextTestNumber}`,
     passages: passages,
+    ...(accessPin ? { accessPin } : {}),
     createdAt: new Date().toISOString(),
     createdBy: currentUser?.email || "unknown",
   };

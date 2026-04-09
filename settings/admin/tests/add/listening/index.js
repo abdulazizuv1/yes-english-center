@@ -2079,8 +2079,11 @@ function collectTestData() {
     sections.push(sectionData);
   });
 
+  const accessPin = document.getElementById("accessPin").value.trim();
+
   return {
     title: testTitle,
+    ...(accessPin ? { accessPin } : {}),
     parts: {
       testId: `ielts-listening-${nextTestNumber}`,
       title: testTitle,
