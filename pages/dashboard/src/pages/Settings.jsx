@@ -18,7 +18,7 @@ export default function Settings() {
     const { results, loading: resultsLoading } = useAllResults(user?.uid);
     const [filter, setFilter] = useState('all');
 
-    const filteredResults = (filter === 'all' ? results : results.filter(r => r.type === filter)).filter(r => r.type !== 'fullmock');
+    const filteredResults = filter === 'all' ? results : results.filter(r => r.type === filter);
 
     return (
         <div className="settings-page page-enter">
@@ -57,7 +57,7 @@ export default function Settings() {
             {tab === 'results' && (
                 <div className="tab-content">
                     <div className="filter-row">
-                        {['all', 'listening', 'reading', 'writing'].map(f => (
+                        {['all', 'listening', 'reading', 'writing', 'fullmock'].map(f => (
                             <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
                                 {f === 'all' ? 'All' : formatType(f)}
                             </button>
@@ -189,6 +189,7 @@ function StatsTab({ userId }) {
                     <option value="listening">Listening</option>
                     <option value="reading">Reading</option>
                     <option value="writing">Writing</option>
+                    <option value="fullmock">Full Mock</option>
                 </select>
             </div>
             {loading ? (
