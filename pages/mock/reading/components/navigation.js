@@ -43,7 +43,9 @@ export function updateQuestionNav() {
     num.classList.remove("current", "answered");
 
     const qId = `q${index + 1}`;
-    if (readingState.answersSoFar[qId] && readingState.answersSoFar[qId].trim() !== "") {
+    const ans = readingState.answersSoFar[qId];
+    const isAnswered = ans && (typeof ans === 'string' ? ans.trim() !== '' : Object.keys(ans).length > 0);
+    if (isAnswered) {
       num.classList.add("answered");
     }
 

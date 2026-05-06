@@ -32,6 +32,12 @@ export function assignQuestionIds() {
           counter++;
         });
         question.qIds = question.questions.map((q) => q.qId);
+      } else if (question.type === "drag_drop" && question.slots) {
+        question.slots.forEach((slot) => {
+          slot.qId = `q${counter}`;
+          readingState.orderedQIds.push(slot.qId);
+          counter++;
+        });
       } else if (question.question) {
         question.qId = `q${counter}`;
         readingState.orderedQIds.push(question.qId);

@@ -2,6 +2,7 @@ import { readingState } from "./state.js";
 import { restoreHighlights } from "./highlights.js";
 import { saveState } from "./storage.js";
 import { updateQuestionNav } from "./navigation.js";
+import { QUESTION_TYPE_DRAG_DROP } from "./dragDropValidator.js";
 
 export function forceRenderPassageContent(index) {
   const passage = readingState.passages[index];
@@ -224,15 +225,19 @@ export function renderPassage(index) {
       case "question-group":
         renderQuestionGroup(q, qDiv);
         break;
+      case QUESTION_TYPE_DRAG_DROP:
+        renderDragDrop(q, qDiv);
+        break;
     }
 
     if (
       q.type !== "gap-fill" &&
       q.type !== "question-group" &&
+      q.type !== QUESTION_TYPE_DRAG_DROP &&
       (q.qId || q.type === "text-question" || q.type === "table")
     ) {
       questionsList.appendChild(qDiv);
-    } else if (q.type === "question-group") {
+    } else if (q.type === "question-group" || q.type === QUESTION_TYPE_DRAG_DROP) {
       questionsList.appendChild(qDiv);
     }
   });
@@ -779,4 +784,262 @@ function handleMultiSelectChange(group, container) {
   updateQuestionNav();
 }
 
+function renderDragDrop(q, qDiv) {
+  if (!q.items || !q.slots) return;
+  if (q.inlineText) {
+    renderDragDropInline(q, qDiv);
+  } else {
+    renderDragDropCards(q, qDiv);
+  }
+}
+
+function renderDragDropCards(q, qDiv) {
+  const savedAnswer = readingState.answersSoFar[q.qId] || {};
+
+  const itemsHtml = q.items.map(item => `
+    <div class="dd-item" draggable="true" data-item-id="${item.id}" data-qid="${q.qId}">
+      <span class="dd-item-label">${item.id}</span>
+      <span class="dd-item-text">${item.text}</span>
+    </div>
+  `).join('');
+
+  const slotsHtml = q.slots.map(slot => {
+    const placedId = savedAnswer[slot.slotId] || '';
+    const placedItem = placedId ? q.items.find(i => i.id === placedId) : null;
+    const placedHtml = placedItem
+      ? `<div class="dd-placed-item" data-item-id="${placedItem.id}">
+           <span class="dd-item-label">${placedItem.id}</span>
+           <span class="dd-item-text">${placedItem.text}</span>
+         </div>`
+      : '';
+    return `
+      <div class="dd-slot" data-slot-id="${slot.slotId}" data-qid="${q.qId}">
+        <div class="dd-slot-label">${slot.label || ''}</div>
+        <div class="dd-slot-drop-zone">${placedHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  qDiv.innerHTML = `
+    <div class="dd-question-text">${q.question || q.title || ''}</div>
+    <div class="dd-layout">
+      <div class="dd-items-bank" data-qid="${q.qId}">${itemsHtml}</div>
+      <div class="dd-slots-container">${slotsHtml}</div>
+    </div>
+  `;
+
+  setTimeout(() => attachDragDropListeners(qDiv, q), 0);
+}
+
+function renderDragDropInline(q, qDiv) {
+  qDiv.innerHTML = `
+    <div class="dd-inline-wrapper">
+      ${q.title ? `<div class="dd-question-title">${q.title}</div>` : ''}
+      <div class="dd-items-bank" data-dd-bank="true">${buildBankHtml(q)}</div>
+      <div class="dd-inline-paragraph">${buildInlineParagraphHtml(q)}</div>
+    </div>
+  `;
+  setTimeout(() => attachInlineListeners(qDiv, q), 0);
+}
+
+function buildBankHtml(q) {
+  const placed = new Set(q.slots.map(s => readingState.answersSoFar[s.qId]).filter(Boolean));
+  return q.items
+    .filter(item => !placed.has(item.id))
+    .map(item => `
+      <div class="dd-item" draggable="true" data-item-id="${item.id}">
+        <span class="dd-item-label">${item.id}.</span>
+        <span class="dd-item-text">${item.text}</span>
+      </div>
+    `).join('');
+}
+
+function buildInlineParagraphHtml(q) {
+  return q.inlineText.replace(/\{(\d+)\}/g, (match, idx) => {
+    const slot = q.slots[parseInt(idx)];
+    if (!slot || !slot.qId) return match;
+    const placedId = readingState.answersSoFar[slot.qId] || '';
+    const placedItem = placedId ? q.items.find(i => i.id === placedId) : null;
+    const numLabel = slot.qId.replace('q', '');
+    if (placedItem) {
+      return `<span class="dd-inline-slot dd-inline-slot-filled" data-slot-idx="${idx}" data-qid="${slot.qId}">` +
+        `<span class="dd-inline-badge" draggable="true" data-item-id="${placedItem.id}" data-from-slot-idx="${idx}">` +
+          `<span class="dd-item-label">${placedItem.id}.</span>` +
+          `<span class="dd-item-text">${placedItem.text}</span>` +
+        `</span>` +
+      `</span>`;
+    }
+    return `<span class="dd-inline-slot dd-inline-slot-empty" data-slot-idx="${idx}" data-qid="${slot.qId}">` +
+      `<span class="dd-slot-num">${numLabel}</span>` +
+    `</span>`;
+  });
+}
+
+function attachInlineListeners(qDiv, q) {
+  let dragItemId = null;
+  let dragFromIdx = null;
+
+  qDiv.querySelectorAll('[data-dd-bank="true"] .dd-item').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragItemId = el.dataset.itemId;
+      dragFromIdx = null;
+      e.dataTransfer.effectAllowed = 'move';
+    });
+  });
+
+  qDiv.querySelectorAll('.dd-inline-badge').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragItemId = el.dataset.itemId;
+      dragFromIdx = parseInt(el.dataset.fromSlotIdx);
+      e.dataTransfer.effectAllowed = 'move';
+      e.stopPropagation();
+    });
+  });
+
+  qDiv.querySelectorAll('.dd-inline-slot').forEach(slotEl => {
+    slotEl.addEventListener('dragover', e => e.preventDefault());
+    slotEl.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragItemId) return;
+      const targetIdx = parseInt(slotEl.dataset.slotIdx);
+      const targetSlot = q.slots[targetIdx];
+      if (!targetSlot) return;
+      const existingId = readingState.answersSoFar[targetSlot.qId];
+      if (dragFromIdx !== null) {
+        const fromSlot = q.slots[dragFromIdx];
+        delete readingState.answersSoFar[fromSlot.qId];
+        if (existingId) readingState.answersSoFar[fromSlot.qId] = existingId;
+      }
+      readingState.answersSoFar[targetSlot.qId] = dragItemId;
+      saveState();
+      updateQuestionNav();
+      refreshInlineUI(qDiv, q);
+      dragItemId = null;
+      dragFromIdx = null;
+    });
+  });
+
+  const bank = qDiv.querySelector('[data-dd-bank="true"]');
+  if (bank) {
+    bank.addEventListener('dragover', e => e.preventDefault());
+    bank.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragItemId || dragFromIdx === null) return;
+      const fromSlot = q.slots[dragFromIdx];
+      if (fromSlot) delete readingState.answersSoFar[fromSlot.qId];
+      saveState();
+      updateQuestionNav();
+      refreshInlineUI(qDiv, q);
+      dragItemId = null;
+      dragFromIdx = null;
+    });
+  }
+}
+
+function refreshInlineUI(qDiv, q) {
+  const bank = qDiv.querySelector('[data-dd-bank="true"]');
+  if (bank) bank.innerHTML = buildBankHtml(q);
+  const para = qDiv.querySelector('.dd-inline-paragraph');
+  if (para) para.innerHTML = buildInlineParagraphHtml(q);
+  attachInlineListeners(qDiv, q);
+}
+
+function attachDragDropListeners(qDiv, q) {
+  let draggedItemId = null;
+  let draggedFromSlotId = null;
+
+  function handleDragStart(e, itemId, fromSlotId) {
+    draggedItemId = itemId;
+    draggedFromSlotId = fromSlotId || null;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleDrop(e, targetSlotId) {
+    e.preventDefault();
+    if (!draggedItemId) return;
+
+    const answer = readingState.answersSoFar[q.qId] || {};
+
+    const existingId = answer[targetSlotId];
+
+    if (draggedFromSlotId) {
+      delete answer[draggedFromSlotId];
+    }
+
+    if (existingId && draggedFromSlotId) {
+      answer[draggedFromSlotId] = existingId;
+    }
+
+    answer[targetSlotId] = draggedItemId;
+    readingState.answersSoFar[q.qId] = answer;
+
+    saveState();
+    updateQuestionNav();
+    refreshDragDropUI(qDiv, q);
+    draggedItemId = null;
+    draggedFromSlotId = null;
+  }
+
+  qDiv.querySelectorAll('.dd-items-bank .dd-item').forEach(item => {
+    item.addEventListener('dragstart', e => handleDragStart(e, item.dataset.itemId, null));
+  });
+
+  qDiv.querySelectorAll('.dd-slot .dd-placed-item').forEach(item => {
+    item.setAttribute('draggable', 'true');
+    item.addEventListener('dragstart', e => {
+      handleDragStart(e, item.dataset.itemId, item.closest('.dd-slot').dataset.slotId);
+    });
+  });
+
+  qDiv.querySelectorAll('.dd-slot').forEach(slot => {
+    slot.addEventListener('dragover', e => e.preventDefault());
+    slot.addEventListener('drop', e => handleDrop(e, slot.dataset.slotId));
+  });
+
+  const bank = qDiv.querySelector('.dd-items-bank');
+  bank.addEventListener('dragover', e => e.preventDefault());
+  bank.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!draggedItemId || !draggedFromSlotId) return;
+    const answer = readingState.answersSoFar[q.qId] || {};
+    delete answer[draggedFromSlotId];
+    readingState.answersSoFar[q.qId] = answer;
+    saveState();
+    updateQuestionNav();
+    refreshDragDropUI(qDiv, q);
+    draggedItemId = null;
+    draggedFromSlotId = null;
+  });
+}
+
+function refreshDragDropUI(qDiv, q) {
+  const answer = readingState.answersSoFar[q.qId] || {};
+  const placedIds = new Set(Object.values(answer));
+
+  const bank = qDiv.querySelector('.dd-items-bank');
+  bank.innerHTML = q.items
+    .filter(item => !placedIds.has(item.id))
+    .map(item => `
+      <div class="dd-item" draggable="true" data-item-id="${item.id}" data-qid="${q.qId}">
+        <span class="dd-item-label">${item.id}</span>
+        <span class="dd-item-text">${item.text}</span>
+      </div>
+    `).join('');
+
+  qDiv.querySelectorAll('.dd-slot').forEach(slotEl => {
+    const slotId = slotEl.dataset.slotId;
+    const zone = slotEl.querySelector('.dd-slot-drop-zone');
+    const placedId = answer[slotId];
+    const placedItem = placedId ? q.items.find(i => i.id === placedId) : null;
+    zone.innerHTML = placedItem
+      ? `<div class="dd-placed-item" draggable="true" data-item-id="${placedItem.id}">
+           <span class="dd-item-label">${placedItem.id}</span>
+           <span class="dd-item-text">${placedItem.text}</span>
+         </div>`
+      : '';
+  });
+
+  const container = bank.closest('.question-item') || qDiv;
+  attachDragDropListeners(container, q);
+}
 

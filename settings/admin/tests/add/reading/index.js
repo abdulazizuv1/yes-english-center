@@ -165,6 +165,7 @@ function addPassage() {
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multi-select')">Multi-Select</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'drag_drop')">Drag & Drop Matching</div>
           </div>
         </div>
       </div>
@@ -181,6 +182,43 @@ function addPassage() {
 function getQuestionRange(passageNumber) {
   return `corresponding to this passage`;
 }
+
+window.addDDItem = function(questionId) {
+  const list = document.getElementById(`dd-items-${questionId}`);
+  const rows = list.querySelectorAll('.dd-item-row');
+  const nextLetter = String.fromCharCode(65 + rows.length);
+  const row = document.createElement('div');
+  row.className = 'dd-item-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;';
+  row.innerHTML = `
+    <input type="text" value="${nextLetter}" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+    <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
+    <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+  `;
+  list.appendChild(row);
+};
+
+window.removeDDItem = function(btn) {
+  btn.closest('.dd-item-row').remove();
+};
+
+window.addDDSlot = function(questionId) {
+  const list = document.getElementById(`dd-slots-${questionId}`);
+  const idx = list.querySelectorAll('.dd-slot-row').length;
+  const row = document.createElement('div');
+  row.className = 'dd-slot-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {${idx}}:</span>
+    <input type="text" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+    <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+  `;
+  list.appendChild(row);
+};
+
+window.removeDDSlot = function(btn) {
+  btn.closest('.dd-slot-row').remove();
+};
 
 // Toggle question type menu
 window.toggleQuestionMenu = function (passageNumber) {
@@ -481,6 +519,59 @@ window.addQuestion = function (passageNumber, type) {
       setTimeout(() => {
         updateMultiSelectOptionDropdowns(questionId);
       }, 0);
+      break;
+
+    case "drag_drop":
+      questionHTML = `
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
+      <div class="question-header">
+        <span class="question-type-badge" style="background: #9C27B0; color: white;">Drag & Drop (Inline)</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
+      </div>
+      <textarea placeholder="Group instruction (optional, e.g. 'Questions 33–37\\nDrag the correct phrase...')" class="group-instruction" rows="2"></textarea>
+      <input type="text" placeholder="Title / heading (e.g., Calls by the umpire)" class="dd-title" style="margin-bottom:10px;width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;">
+      <div style="font-weight:600;margin-bottom:4px;">Items (things to drag):</div>
+      <div class="dd-items-list" id="dd-items-${questionId}">
+        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" value="A" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
+          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" value="B" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
+          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" value="C" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
+          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+      </div>
+      <button type="button" onclick="addDDItem(${questionId})" style="margin-bottom:14px;padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Item</button>
+      <div style="font-weight:600;margin-bottom:4px;">Paragraph text <small style="font-weight:400;color:#888;">(use {0}, {1}, {2}… where gaps should appear)</small></div>
+      <textarea class="dd-inline-text" rows="4" placeholder="Write the full paragraph here. Example: The umpire had to make a {0} call every time a ball crossed the {1}." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;margin-bottom:10px;font-size:13px;"></textarea>
+      <div style="font-weight:600;margin-bottom:4px;">Correct answers <small style="font-weight:400;color:#888;">(one per gap, in order)</small></div>
+      <div class="dd-slots-list" id="dd-slots-${questionId}">
+        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {0}:</span>
+          <input type="text" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {1}:</span>
+          <input type="text" placeholder="Correct item ID (e.g., B)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {2}:</span>
+          <input type="text" placeholder="Correct item ID (e.g., C)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+        </div>
+      </div>
+      <button type="button" onclick="addDDSlot(${questionId})" style="padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Gap</button>
+    </div>
+  `;
       break;
   }
 
@@ -973,6 +1064,7 @@ function getQuestionTypeFromText(text) {
     "Multiple Choice": "multiple-choice",
     "Paragraph Matching": "paragraph-matching",
     "Match Person/Feature": "match-person",
+    "Drag & Drop Matching": "drag_drop",
   };
   return types[text] || "gap-fill";
 }
@@ -1145,7 +1237,7 @@ function collectTestData() {
         questionData.type = "question-group";
         questionData.groupType = "multi-select";
         questionData.text = questionEl.querySelector(".multi-select-text")?.value.trim() || "";
-        
+
         const subQuestions = [];
         const subQuestionElements = questionEl.querySelectorAll(".multi-select-subquestion");
         subQuestionElements.forEach((subQEl) => {
@@ -1156,7 +1248,7 @@ function collectTestData() {
           });
         });
         questionData.questions = subQuestions;
-        
+
         const options = {};
         questionEl.querySelectorAll(".multi-select-options-list .option-row").forEach((row) => {
           const label = row.querySelector(".option-label")?.value.trim();
@@ -1166,6 +1258,22 @@ function collectTestData() {
           }
         });
         questionData.options = options;
+      } else if (type === "drag_drop") {
+        questionData.title = questionEl.querySelector(".dd-title")?.value.trim() || "";
+        questionData.inlineText = questionEl.querySelector(".dd-inline-text")?.value.trim() || "";
+        const ddItems = [];
+        questionEl.querySelectorAll(".dd-items-list .dd-item-row").forEach(row => {
+          const id = row.querySelector(".dd-item-id")?.value.trim();
+          const text = row.querySelector(".dd-item-text")?.value.trim();
+          if (id && text) ddItems.push({ id, text });
+        });
+        questionData.items = ddItems;
+        const ddSlots = [];
+        questionEl.querySelectorAll(".dd-slots-list .dd-slot-row").forEach(row => {
+          const correctId = row.querySelector(".dd-slot-correct")?.value.trim().toUpperCase();
+          ddSlots.push({ correctId: correctId || "" });
+        });
+        questionData.slots = ddSlots;
       } else {
         const questionText = questionEl.querySelector(".question-text")?.value.trim() || "";
         questionData.question = questionText;

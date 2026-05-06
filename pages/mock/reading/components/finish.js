@@ -16,6 +16,11 @@ function findQuestionByQId(qId) {
         }
       }
 
+      if (q.type === "drag_drop" && q.slots) {
+        const slot = q.slots.find((s) => s.qId === qId);
+        if (slot) return { answer: slot.correctId };
+      }
+
       if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
         return { ...q, qId };
       }

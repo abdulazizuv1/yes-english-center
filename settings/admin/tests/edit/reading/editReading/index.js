@@ -205,6 +205,24 @@ function syncDOMToData() {
         if (textEl)
           currentTest.passages[passageIndex].questions[questionIndex].text =
             textEl.value;
+      } else if (type === "drag_drop") {
+        const titleEl = questionEl.querySelector(".dd-title");
+        if (titleEl) currentTest.passages[passageIndex].questions[questionIndex].title = titleEl.value;
+        const inlineTextEl = questionEl.querySelector(".dd-inline-text");
+        if (inlineTextEl) currentTest.passages[passageIndex].questions[questionIndex].inlineText = inlineTextEl.value;
+        const ddItems = [];
+        questionEl.querySelectorAll(".dd-items-list .dd-item-row").forEach(row => {
+          const id = row.querySelector(".dd-item-id")?.value.trim();
+          const text = row.querySelector(".dd-item-text")?.value.trim();
+          if (id && text) ddItems.push({ id, text });
+        });
+        currentTest.passages[passageIndex].questions[questionIndex].items = ddItems;
+        const ddSlots = [];
+        questionEl.querySelectorAll(".dd-slots-list .dd-slot-row").forEach(row => {
+          const correctId = row.querySelector(".dd-slot-correct")?.value.trim().toUpperCase();
+          ddSlots.push({ correctId: correctId || "" });
+        });
+        currentTest.passages[passageIndex].questions[questionIndex].slots = ddSlots;
       } else if (type === "multi-select") {
         // Update multi-select question
         const textEl = questionEl.querySelector(".multi-select-text");
@@ -502,6 +520,7 @@ function createPassageCard(passage, passageNumber) {
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
             <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multi-select')">Multi-Select</div>
+            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'drag_drop')">Drag & Drop Matching</div>
           </div>
           </div>
         </div>
@@ -895,6 +914,43 @@ function createQuestionItem(
         // Handle other question-group types if needed
         questionHTML = "";
       }
+      break;
+
+    case "drag_drop":
+      questionHTML = `
+    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage-index="${passageIndex}" data-question-index="${questionIndex}">
+      <div class="question-header">
+        <span class="question-type-badge" style="background: #9C27B0; color: white;">Drag & Drop (Inline)</span>
+        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId}, ${passageIndex}, ${questionIndex})">Remove</button>
+      </div>
+      <textarea placeholder="Group instruction (optional)" class="group-instruction" rows="2" onchange="updateQuestion(${passageIndex}, ${questionIndex}, 'groupInstruction', this.value)">${(question.groupInstruction || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+      <input type="text" placeholder="Title / heading" class="dd-title" value="${(question.title || '').replace(/"/g, '&quot;')}" style="margin-bottom:10px;width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;">
+      <div style="font-weight:600;margin-bottom:4px;">Items (things to drag):</div>
+      <div class="dd-items-list" id="dd-items-${questionId}">
+        ${(question.items || []).map(item => `
+          <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
+            <input type="text" value="${item.id}" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+            <input type="text" value="${(item.text || '').replace(/"/g, '&quot;')}" placeholder="Item text" class="dd-item-text" style="flex:1;">
+            <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button type="button" onclick="addDDItem(${questionId})" style="margin-bottom:14px;padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Item</button>
+      <div style="font-weight:600;margin-bottom:4px;">Paragraph text <small style="font-weight:400;color:#888;">(use {0}, {1}, {2}… where gaps should appear)</small></div>
+      <textarea class="dd-inline-text" rows="4" placeholder="Write the full paragraph here. Use {0}, {1}, {2}... for gap positions." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;margin-bottom:10px;font-size:13px;">${(question.inlineText || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+      <div style="font-weight:600;margin-bottom:4px;">Correct answers <small style="font-weight:400;color:#888;">(one per gap, in order)</small></div>
+      <div class="dd-slots-list" id="dd-slots-${questionId}">
+        ${(question.slots || []).map((slot, idx) => `
+          <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+            <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {${idx}}:</span>
+            <input type="text" value="${slot.correctId || ''}" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+            <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button type="button" onclick="addDDSlot(${questionId})" style="padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Gap</button>
+    </div>
+  `;
       break;
   }
 
@@ -1466,6 +1522,43 @@ function removeTableAnswer(passageIndex, questionIndex, key) {
   displayPassages(); // Refresh to remove answer
 }
 
+window.addDDItem = function(questionId) {
+  const list = document.getElementById(`dd-items-${questionId}`);
+  const rows = list.querySelectorAll('.dd-item-row');
+  const nextLetter = String.fromCharCode(65 + rows.length);
+  const row = document.createElement('div');
+  row.className = 'dd-item-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;';
+  row.innerHTML = `
+    <input type="text" value="${nextLetter}" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
+    <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
+    <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+  `;
+  list.appendChild(row);
+};
+
+window.removeDDItem = function(btn) {
+  btn.closest('.dd-item-row').remove();
+};
+
+window.addDDSlot = function(questionId) {
+  const list = document.getElementById(`dd-slots-${questionId}`);
+  const idx = list.querySelectorAll('.dd-slot-row').length;
+  const row = document.createElement('div');
+  row.className = 'dd-slot-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {${idx}}:</span>
+    <input type="text" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
+    <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
+  `;
+  list.appendChild(row);
+};
+
+window.removeDDSlot = function(btn) {
+  btn.closest('.dd-slot-row').remove();
+};
+
 // Toggle question type menu
 window.toggleQuestionMenu = function (passageNumber) {
   const menu = document.getElementById(`questionMenu${passageNumber}`);
@@ -1526,6 +1619,21 @@ window.addQuestion = function (passageNumber, type) {
         { question: "", answer: "" },
       ],
       options: options,
+    };
+  } else if (type === "drag_drop") {
+    newQuestion = {
+      type: "drag_drop",
+      question: "",
+      items: [
+        { id: "A", text: "" },
+        { id: "B", text: "" },
+        { id: "C", text: "" },
+      ],
+      slots: [
+        { slotId: "s1", label: "", correctId: "" },
+        { slotId: "s2", label: "", correctId: "" },
+        { slotId: "s3", label: "", correctId: "" },
+      ],
     };
   } else {
     newQuestion = {
@@ -2237,6 +2345,22 @@ function collectTestData() {
             }
           });
         questionData.options = options;
+      } else if (type === "drag_drop") {
+        questionData.title = questionEl.querySelector(".dd-title")?.value.trim() || "";
+        questionData.inlineText = questionEl.querySelector(".dd-inline-text")?.value.trim() || "";
+        const ddItems = [];
+        questionEl.querySelectorAll(".dd-items-list .dd-item-row").forEach(row => {
+          const id = row.querySelector(".dd-item-id")?.value.trim();
+          const text = row.querySelector(".dd-item-text")?.value.trim();
+          if (id && text) ddItems.push({ id, text });
+        });
+        questionData.items = ddItems;
+        const ddSlots = [];
+        questionEl.querySelectorAll(".dd-slots-list .dd-slot-row").forEach(row => {
+          const correctId = row.querySelector(".dd-slot-correct")?.value.trim().toUpperCase();
+          ddSlots.push({ correctId: correctId || "" });
+        });
+        questionData.slots = ddSlots;
       } else {
         questionData.question = questionText || "";
 

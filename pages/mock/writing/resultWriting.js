@@ -338,17 +338,17 @@ async function initAiCheck() {
   try {
     const snapshot = await get(usageRef);
     const count = snapshot.exists() ? snapshot.val() : 0;
-    const remaining = Math.max(0, 4 - count);
+    const remaining = Math.max(0, 3 - count);
     if (remaining === 0) {
-      statusEl.textContent = "Weekly limit reached (4/4). Try again next week.";
+      statusEl.textContent = "Weekly limit reached (3/3). Try again next week.";
       statusEl.className = "ai-usage-status limit-reached";
       btn.disabled = true;
     } else {
-      statusEl.textContent = `AI feedback remaining this week: ${remaining}/4`;
+      statusEl.textContent = `AI feedback remaining this week: ${remaining}/3`;
     }
   } catch (err) {
     console.error("Error reading AI usage:", err);
-    statusEl.textContent = "AI feedback remaining this week: 4/4";
+    statusEl.textContent = "AI feedback remaining this week: 3/3";
   }
 
   btn.addEventListener("click", handleAiCheck);
@@ -378,7 +378,7 @@ async function handleAiCheck() {
     const result = await response.json();
 
     if (result.error === "limit_reached") {
-      statusEl.textContent = "Weekly limit reached (4/week). Try again next week.";
+      statusEl.textContent = "Weekly limit reached (3/week). Try again next week.";
       statusEl.className = "ai-usage-status limit-reached";
       btn.disabled = true;
       return;
