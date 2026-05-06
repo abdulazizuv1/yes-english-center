@@ -407,6 +407,85 @@ export function useDashboardStats(userId) {
   return { stats, loading };
 }
 
+/* ─── Hook: AI Writing Feedback results for current user ─── */
+export function useAIFeedbackResults(userId) {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const q = query(
+          collection(db, 'aiWritingFeedback'),
+          where('userId', '==', userId)
+        );
+        const snap = await getDocs(q);
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, type: 'aifeedback', ...d.data() }));
+        arr.sort((a, b) => {
+          const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+          return db2 - da;
+        });
+        if (!cancelled) { setResults(arr); setLoading(false); }
+      } catch {
+        if (!cancelled) { setResults([]); setLoading(false); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  return { results, loading };
+}
+
+/* ─── Hook: ALL users' AI Writing Feedback (admin) ─── */
+export function useAllUsersAIFeedback() {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(collection(db, 'aiWritingFeedback'));
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, type: 'aifeedback', ...d.data() }));
+
+        await Promise.all(arr.map(async (r) => {
+          try {
+            const userSnap = await getDoc(doc(db, 'users', r.userId));
+            if (userSnap.exists()) {
+              const u = userSnap.data();
+              r.name = u.name || u.email || r.userId;
+              r.email = u.email || '';
+            } else {
+              r.name = r.userId;
+              r.email = '';
+            }
+          } catch {
+            r.name = r.userId;
+            r.email = '';
+          }
+        }));
+
+        arr.sort((a, b) => {
+          const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+          return db2 - da;
+        });
+        if (!cancelled) { setResults(arr); setLoading(false); }
+      } catch {
+        if (!cancelled) { setResults([]); setLoading(false); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { results, loading };
+}
+
 /* ─── Hook: Target Score ─── */
 export function useTargetScore(userId, userEmail) {
   const [target, setTarget] = useState(null);

@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v2';
-const STATIC_CACHE = 'yes-static-v2';
-const DYNAMIC_CACHE = 'yes-dynamic-v2';
+const CACHE_NAME = 'yes-english-center-v3';
+const STATIC_CACHE = 'yes-static-v3';
+const DYNAMIC_CACHE = 'yes-dynamic-v3';
 
 // Assets to cache on install
 const STATIC_ASSETS = [

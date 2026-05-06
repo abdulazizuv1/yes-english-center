@@ -1,96 +1,80 @@
-# YES English Center — CLAUDE.md
+# CLAUDE.md
 
-## Инструкция при старте каждого чата
-1. Если существует `plans/handoff.md` — прочитай его молча и используй как контекст
-2. Не сообщай пользователю что ты читал — просто учитывай содержимое
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Stack & Versions
-- **Frontend**: Vanilla JS (ES modules), HTML, CSS — основной сайт и admin панель
-- **Dashboard**: React 19 + Vite 7 + React Router 7 + Chart.js (в `pages/dashboard/`)
-- **Backend**: Firebase Cloud Functions v2 (Node.js, `functions/`)
-- **DB**: Firestore (`yes-english-center` project)
-- **Auth**: Firebase Auth
-- **Build**: Vite (`npm run build` → `dist/`)
-- **Deploy**: cPanel (`.cpanel.yml`) + Firebase Functions
-- **Service Worker**: `sw.js` (кэширование)
-- **i18n**: `lang.js` (мультиязычность)
+## Project Overview
 
-## Структура папок
-```
-/
-├── index.html          # Главная страница (Vanilla JS)
-├── style.css           # Глобальные стили
-├── lang.js             # Переводы / i18n
-├── glass-effects.js    # UI эффекты
-├── sw.js               # Service Worker
-├── config.js           # Firebase config (публичный)
-├── src/
-│   ├── main.js         # Точка входа
-│   └── modules/        # auth, cache, callback, data, language, swiper, ui, utils
-├── pages/
-│   ├── dashboard/      # React + Vite приложение (admin dashboard)
-│   ├── mock/           # Страница полного мока
-│   └── mock.html/js    # Mock test entry
-├── settings/
-│   ├── admin/
-│   │   └── tests/
-│   │       ├── add/    # Добавление тестов (reading/writing/listening)
-│   │       └── edit/   # Редактирование тестов
-│   └── user/           # Настройки пользователя
-├── mock-tests/
-│   ├── app/            # Mock test logic
-│   └── data/           # Test data
-├── functions/          # Firebase Cloud Functions v2
-├── image/              # Статика
-├── dist/               # Vite build output (не коммитить)
-└── plans/              # Планы задач (см. plans/README.md)
-```
+**YES English Center** — an IELTS exam preparation platform. Three distinct apps coexist in the same repo:
+1. **Landing page + Mock tests** — vanilla JS, no build step, served from root
+2. **Admin panel** — vanilla JS at `settings/admin/`, served as-is
+3. **React Dashboard** — React 19 + Vite at `pages/dashboard/`, requires a separate build
 
-## Команды
+All three share Firebase Auth, Firestore, and Storage via `config.js` (gitignored).
+
+## Commands
+
+### Root (main site / landing page)
 ```bash
-
-# Build in pages/dashboard
-npm run build
-
-# Lint
-npm run lint
-
-# Preview билда
-npm run preview
-
-# Firebase Functions deploy
-cd functions && npm run deploy
-
-# Локальный статик-сервер для Vanilla JS части
-npx serve . --config serve.json
+npm run dev      # Vite dev server for main site
+npm run build    # Vite build
+npm run lint     # ESLint
 ```
 
-## Что я часто делаю неправильно в таких проектах
+### React Dashboard
+```bash
+cd pages/dashboard
+npm install
+npm run dev      # Vite dev server (base path: /pages/dashboard/)
+npm run build    # Outputs to pages/dashboard/dist/
+```
 
-1. **Путаю два стека** — в `pages/dashboard/` React с Vite, везде остальном чистый Vanilla JS. Не добавляю React-компоненты туда, где Vanilla JS и наоборот.
+### Cloud Functions
+```bash
+cd functions
+npm install
+npm run serve    # Firebase local emulator
+npm run deploy   # Deploy to Firebase
+npm run lint
+```
 
-2. **Firebase импорты** — проект использует Firebase v12 (modular API). Нельзя писать `firebase.firestore()` — только `import { getFirestore } from 'firebase/firestore'`.
+## Architecture
 
-3. **ES modules в Vanilla JS** — все `.js` файлы используют `type="module"`. Нет глобальных переменных через `var`, только `import/export`.
+### Vanilla JS Modules (`src/modules/`)
+The main app uses a module orchestrator pattern. Each module has a single responsibility and is initialized in order by `src/main.js`. All modules are exposed on `window.App.*` for cross-module access and debugging.
 
-4. **Service Worker кэш** — после изменений в `sw.js` или добавления новых файлов нужно обновить версию кэша, иначе браузер будет показывать старое.
+| Module | Responsibility |
+|--------|---------------|
+| `auth/` | Firebase Auth — email/password login, username lookup, role resolution |
+| `data/` | Firestore reads with multi-level caching (memory → IndexedDB → Firebase) |
+| `cache/` | IndexedDB wrapper with 30-minute TTL |
+| `ui/` | Skeleton loaders, DOM rendering, scroll animations |
+| `language/` | i18n for English / Russian / Uzbek |
+| `swiper/` | Swiper carousel configuration |
+| `callback/` | Contact form submission |
+| `utils/` | Shared helpers, performance tracking |
 
-5. **Config.js с ключами в репо** — Firebase config публичный и в git, это нормально для клиентских ключей Firebase. Не пытаться спрятать в `.env`.
+### Cloud Functions (`functions/index.js`)
+Three HTTP-callable functions, all requiring Firebase ID token verification:
+- `createUser` — admin-only; creates Auth user + Firestore doc
+- `deleteUser` — admin-only; deletes Auth user + Firestore doc
+- `generateAIFeedback` — calls Anthropic Claude API (IELTS writing grading); 4 requests/week per user, results cached in Firestore
 
-6. **Структура тестов** — каждый тип теста (reading/writing/listening) имеет свою папку с `index.js`. Не ломать эту структуру.
+### Firestore Collections
+`users`, `groups`, `results`, `feedbacks`, `readingTests`, `listeningTests`, `writingTests`, `fullMockTests`, `resultsWriting`, `aiWritingFeedback`
 
-7. **cPanel deploy** — `.cpanel.yml` деплоит на хостинг. Проверять что `dist/` актуален перед деплоем.
+### Role-Based Access
+Three roles stored in Firestore `users` collection: `admin`, `teacher`, `student`. Cloud Functions verify admin role via Firestore before privileged operations. Frontend routes check role after auth.
 
-## Когда использовать каких агентов
+### Mock Tests (`pages/mock/`)
+Four test types: `reading/`, `listening/`, `writing/`, `full/`. Each is a self-contained HTML/JS/CSS bundle — no build step. Test data loaded from Firestore; results written back.
 
-| Задача | Агент |
-|--------|-------|
-| Найти где реализована фича / паттерн | `researcher` |
-| Разобраться в структуре модуля | `researcher` |
-| Спланировать новую фичу | `researcher` → `architect` |
-| Проверить готовый код | `code-reviewer` |
-| Написать код | Основной Claude (без агента) |
+### React Dashboard (`pages/dashboard/`)
+Separate Vite app with React Router, Chart.js analytics, and Lucide icons. Shares Firebase config via a relative import to root `config.js`. Build outputs to `pages/dashboard/dist/`.
 
-## Команды Claude Code
-- `/plan-feature` — исследование + план реализации с подтверждением
-- `/handoff` — сохранить прогресс сессии перед `/clear`
+## Key Files
+
+- `config.js` — Firebase credentials (gitignored; must exist locally)
+- `src/main.js` — App initialization sequence; start here to trace data flow
+- `functions/index.js` — All backend logic including Claude AI integration
+- `sw.js` — Service Worker for offline caching of static assets
+- `firebase.json` / `.firebaserc` — Firebase hosting + emulator config

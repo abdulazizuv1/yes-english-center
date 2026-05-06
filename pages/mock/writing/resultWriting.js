@@ -2,9 +2,7 @@ import {
   getFirestore,
   doc,
   getDoc,
-  addDoc,
   collection,
-  serverTimestamp,
   query,
   where,
   getDocs,
@@ -27,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
 
-const EVALUATE_URL = "https://us-central1-yes-english-center.cloudfunctions.net/evaluateWriting";
+const FEEDBACK_URL = "https://us-central1-yes-english-center.cloudfunctions.net/generateAIFeedback";
 
 let currentUser = null;
 let currentData = null;
@@ -294,10 +292,19 @@ function animateNumbers() {
   });
 }
 
-function showFeedbackButton(docId) {
+function getWeekKey(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const week1 = new Date(d.getFullYear(), 0, 4);
+  const weekNum = 1 + Math.round(((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  return `${d.getFullYear()}-W${String(weekNum).padStart(2, "0")}`;
+}
+
+function showFeedbackButton() {
   const feedbackBtn = document.getElementById("aiFeedbackBtn");
   if (feedbackBtn) {
-    feedbackBtn.href = `/pages/ai-feedback/?id=${docId}`;
+    feedbackBtn.href = `/pages/ai-feedback/?id=${currentResultId}`;
     feedbackBtn.style.display = "";
   }
 }
@@ -306,14 +313,14 @@ async function checkExistingFeedback() {
   if (!currentUser || !currentResultId) return;
   try {
     const q = query(
-      collection(db, "aiFeedback"),
-      where("uid", "==", currentUser.uid),
-      where("sessionId", "==", currentResultId),
+      collection(db, "aiWritingFeedback"),
+      where("userId", "==", currentUser.uid),
+      where("submissionId", "==", currentResultId),
       limit(1)
     );
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
-      showFeedbackButton(snapshot.docs[0].id);
+      showFeedbackButton();
     }
   } catch (err) {
     console.error("Error checking existing feedback:", err);
@@ -325,23 +332,23 @@ async function initAiCheck() {
   const statusEl = document.getElementById("aiUsageStatus");
   if (!btn || !statusEl || !currentUser) return;
 
-  const today = new Date().toISOString().split("T")[0];
-  const usageRef = ref(rtdb, `aiUsage/${currentUser.uid}/${today}/count`);
+  const weekKey = getWeekKey(new Date());
+  const usageRef = ref(rtdb, `aiUsage/${currentUser.uid}/${weekKey}/count`);
 
   try {
     const snapshot = await get(usageRef);
     const count = snapshot.exists() ? snapshot.val() : 0;
-    const remaining = Math.max(0, 3 - count);
+    const remaining = Math.max(0, 4 - count);
     if (remaining === 0) {
-      statusEl.textContent = "Daily limit reached (3/3). Try again tomorrow.";
+      statusEl.textContent = "Weekly limit reached (4/4). Try again next week.";
       statusEl.className = "ai-usage-status limit-reached";
       btn.disabled = true;
     } else {
-      statusEl.textContent = `AI checks remaining today: ${remaining}/3`;
+      statusEl.textContent = `AI feedback remaining this week: ${remaining}/4`;
     }
   } catch (err) {
     console.error("Error reading AI usage:", err);
-    statusEl.textContent = "AI checks remaining today: 3/3";
+    statusEl.textContent = "AI feedback remaining this week: 4/4";
   }
 
   btn.addEventListener("click", handleAiCheck);
@@ -359,24 +366,21 @@ async function handleAiCheck() {
   try {
     const idToken = await currentUser.getIdToken();
 
-    const response = await fetch(EVALUATE_URL, {
+    const response = await fetch(FEEDBACK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${idToken}`,
       },
-      body: JSON.stringify({
-        task1Text: currentData?.task1Content || null,
-        task2Text: currentData?.task2Content || null,
-        task1ImageUrl: currentData?.task1ImageUrl || null,
-      }),
+      body: JSON.stringify({ submissionId: currentResultId }),
     });
 
     const result = await response.json();
 
     if (result.error === "limit_reached") {
-      statusEl.textContent = "Daily limit reached (3/day). Try again tomorrow.";
+      statusEl.textContent = "Weekly limit reached (4/week). Try again next week.";
       statusEl.className = "ai-usage-status limit-reached";
+      btn.disabled = true;
       return;
     }
 
@@ -384,23 +388,13 @@ async function handleAiCheck() {
       throw new Error(`[${result.error}] ${result.message || response.status}`);
     }
 
-    // Save feedback to Firestore
-    const docRef = await addDoc(collection(db, "aiFeedback"), {
-      uid: currentUser.uid,
-      feedbackText: result.feedbackText,
-      task1Text: currentData?.task1Content || null,
-      task2Text: currentData?.task2Content || null,
-      sessionId: currentResultId,
-      createdAt: serverTimestamp(),
-    });
-
-    showFeedbackButton(docRef.id);
-    window.location.href = `/pages/ai-feedback/?id=${docRef.id}`;
+    showFeedbackButton();
+    window.location.href = `/pages/ai-feedback/?id=${currentResultId}`;
   } catch (err) {
     console.error("AI check error:", err);
     statusEl.textContent = "Error occurred. Please try again.";
     btn.disabled = false;
-    btn.textContent = "✨ AI Check (IELTS Feedback)";
+    btn.textContent = "✨ AI Feedback (IELTS)";
   }
 }
 

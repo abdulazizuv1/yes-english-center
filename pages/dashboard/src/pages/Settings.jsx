@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useAllResults, useSkillResults, convertToIELTS, getTypeIcon, formatType, getScoreDisplay, getResultUrl } from '../hooks/useResults';
+import { useAllResults, useSkillResults, useAIFeedbackResults, convertToIELTS, getTypeIcon, formatType, getScoreDisplay, getResultUrl, getBandClass } from '../hooks/useResults';
 import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -16,9 +16,18 @@ export default function Settings() {
     const { user, userData } = useAuth();
     const [tab, setTab] = useState('results');
     const { results, loading: resultsLoading } = useAllResults(user?.uid);
+    const { results: aiResults, loading: aiLoading } = useAIFeedbackResults(user?.uid);
     const [filter, setFilter] = useState('all');
 
-    const filteredResults = filter === 'all' ? results : results.filter(r => r.type === filter);
+    const filteredResults = filter === 'all'
+        ? [...results, ...aiResults].sort((a, b) => {
+            const da = a.createdAt?.toDate ? a.createdAt.toDate() : (a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0));
+            const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : (b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0));
+            return db2 - da;
+          })
+        : filter === 'aifeedback'
+        ? aiResults
+        : results.filter(r => r.type === filter);
 
     return (
         <div className="settings-page page-enter">
@@ -57,19 +66,37 @@ export default function Settings() {
             {tab === 'results' && (
                 <div className="tab-content">
                     <div className="filter-row">
-                        {['all', 'listening', 'reading', 'writing', 'fullmock'].map(f => (
+                        {['all', 'listening', 'reading', 'writing', 'fullmock', 'aifeedback'].map(f => (
                             <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
-                                {f === 'all' ? 'All' : formatType(f)}
+                                {f === 'all' ? 'All' : f === 'aifeedback' ? '🤖 AI Feedback' : formatType(f)}
                             </button>
                         ))}
                     </div>
                     <div className="results-list">
-                        {resultsLoading ? (
+                        {(resultsLoading || (filter === 'aifeedback' && aiLoading)) ? (
                             <div className="loading-container"><div className="spinner" /><span>Loading...</span></div>
                         ) : filteredResults.length === 0 ? (
                             <div className="empty-state glass-card"><span className="empty-icon">📝</span><p>No results found.</p></div>
                         ) : (
                             filteredResults.map((r, i) => {
+                                if (r.type === 'aifeedback') {
+                                    const date = r.createdAt?.toDate
+                                        ? r.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                        : '—';
+                                    const overall = r.feedback?.overall ?? '—';
+                                    const bandCls = overall !== '—' ? getBandClass(overall) : '';
+                                    return (
+                                        <a key={r.id || i} href={`/pages/ai-feedback/?id=${r.submissionId}`} className="result-row glass-card">
+                                            <span className="result-row-icon">🤖</span>
+                                            <div className="result-row-info">
+                                                <span className="result-row-type" style={{ fontWeight: 500 }}>AI Writing Feedback</span>
+                                                <span className="result-row-date">{date}</span>
+                                            </div>
+                                            <span className={`result-row-score ${bandCls}`}>Band {overall}</span>
+                                        </a>
+                                    );
+                                }
+
                                 let date = '—';
                                 if (r.type === 'writing' && r.submittedAt) {
                                     if (r.submittedAt.toDate) {

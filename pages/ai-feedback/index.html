@@ -8,33 +8,130 @@
     <link rel="icon" href="/image/logo_copy.png" />
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="logo">
-                <h1>🤖 AI IELTS Feedback</h1>
-            </div>
+            <div class="logo"><h1>🤖 AI IELTS Feedback</h1></div>
             <div class="badge">AI Evaluation</div>
         </div>
     </header>
 
     <div class="container">
-        <!-- Action Bar -->
         <div class="action-bar">
             <button class="btn-back" onclick="history.back()">← Back to Results</button>
             <button class="btn-history" id="historyBtn">📋 View History</button>
         </div>
 
-        <!-- Feedback Card -->
-        <div class="feedback-card" id="feedbackCard">
-            <div class="feedback-meta" id="feedbackMeta"></div>
-            <div class="feedback-body" id="feedbackBody">
-                <div class="loading-state">⏳ Loading feedback...</div>
+        <!-- Loading / Error -->
+        <div id="feedbackLoading" class="feedback-card" style="display:none;">
+            <div class="loading-state">⏳ Loading feedback...</div>
+        </div>
+        <div id="feedbackError" class="feedback-card" style="display:none;">
+            <div class="error-state"></div>
+        </div>
+
+        <!-- Overall Band -->
+        <div id="overallSection" style="display:none;" class="overall-card">
+            <div class="overall-band" id="overallBand"></div>
+            <div class="overall-label">Overall Band Score</div>
+            <div class="feedback-date-row" id="feedbackDateRow"></div>
+        </div>
+
+        <!-- Task 1 -->
+        <div id="task1Section" style="display:none;" class="task-feedback-card">
+            <div class="task-feedback-header">
+                <span class="task-label task-label-1">Task 1</span>
+                <span class="task-score" id="task1Score"></span>
+            </div>
+
+            <div class="criteria-grid" id="task1Criteria"></div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--annotated">📝 Annotated Response</div>
+                <div class="annotation-legend">
+                    <span class="legend-err">strikethrough (correction)</span> = grammar/word error &nbsp;|&nbsp;
+                    <span class="legend-cmt">highlighted comment</span> = examiner note
+                </div>
+                <div class="annotated-text" id="task1AnnotatedText"></div>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--good">✅ Good Sides</div>
+                <ul class="good-sides-list" id="task1GoodSides"></ul>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--issues">⚠️ Key Issues</div>
+                <ul class="key-issues-list" id="task1KeyIssues"></ul>
+            </div>
+
+            <div class="task-subsection" id="task1GrammarSection">
+                <div class="subsection-title subsection-title--grammar">🔤 Grammar Issues</div>
+                <div class="grammar-table-wrap">
+                    <table class="grammar-table" id="task1GrammarTable">
+                        <thead><tr><th>Wrong</th><th>Correct</th><th>Rule</th></tr></thead>
+                        <tbody id="task1GrammarBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--advice">💡 Advice</div>
+                <p class="advice-text" id="task1Advice"></p>
             </div>
         </div>
 
-        <!-- History Panel -->
-        <div class="history-panel" id="historyPanel" style="display: none;">
+        <!-- Task 2 -->
+        <div id="task2Section" style="display:none;" class="task-feedback-card">
+            <div class="task-feedback-header">
+                <span class="task-label task-label-2">Task 2</span>
+                <span class="task-score" id="task2Score"></span>
+            </div>
+
+            <div class="criteria-grid" id="task2Criteria"></div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--annotated">📝 Annotated Response</div>
+                <div class="annotation-legend">
+                    <span class="legend-err">strikethrough (correction)</span> = grammar/word error &nbsp;|&nbsp;
+                    <span class="legend-cmt">highlighted comment</span> = examiner note
+                </div>
+                <div class="annotated-text" id="task2AnnotatedText"></div>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--good">✅ Good Sides</div>
+                <ul class="good-sides-list" id="task2GoodSides"></ul>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--issues">⚠️ Key Issues</div>
+                <ul class="key-issues-list" id="task2KeyIssues"></ul>
+            </div>
+
+            <div class="task-subsection" id="task2GrammarSection">
+                <div class="subsection-title subsection-title--grammar">🔤 Grammar Issues</div>
+                <div class="grammar-table-wrap">
+                    <table class="grammar-table" id="task2GrammarTable">
+                        <thead><tr><th>Wrong</th><th>Correct</th><th>Rule</th></tr></thead>
+                        <tbody id="task2GrammarBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="task-subsection">
+                <div class="subsection-title subsection-title--advice">💡 Advice</div>
+                <p class="advice-text" id="task2Advice"></p>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div id="summarySection" style="display:none;" class="summary-card">
+            <div class="summary-title">📊 Overall Summary</div>
+            <p class="summary-text" id="summaryText"></p>
+        </div>
+
+        <!-- History -->
+        <div class="history-panel" id="historyPanel" style="display:none;">
             <h3>📋 Your Feedback History</h3>
             <div class="history-list" id="historyList"></div>
         </div>
