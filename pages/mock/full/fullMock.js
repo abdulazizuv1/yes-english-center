@@ -1466,11 +1466,11 @@ function renderListeningMatchingGroup(group) {
 
   groupDiv.innerHTML = `
     <div class="group-instruction">
-      <h4>${group.instructions}</h4>
+      <h4>${group.groupInstruction || group.instructions || ""}</h4>
     </div>
-    
+
     <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      <p style="font-weight: 600; margin-bottom: 10px;">${group.text}</p>
+      ${group.text ? `<p style="font-weight: 600; margin-bottom: 10px;">${group.text}</p>` : ""}
       ${Object.keys(group.options)
         .sort()
         .map(
@@ -1589,6 +1589,14 @@ function assignReadingQuestionIds() {
         question.qId = `reading_q${counter}`; // Add reading prefix
         orderedQIds.push(question.qId);
         counter++;
+      }
+
+      if (question.type === "question-group" && question.questions) {
+        question.questions.forEach((subQ) => {
+          subQ.qId = `reading_q${counter}`;
+          orderedQIds.push(subQ.qId);
+          counter++;
+        });
       }
 
       if (question.type === "table") {
@@ -2212,7 +2220,13 @@ function renderQuestionGroup(group, qDiv) {
   groupContainer.className = "multi-select-group";
   
 
-  // Заголовок группы
+  if (group.instructions) {
+    const instrDiv = document.createElement("p");
+    instrDiv.textContent = group.instructions;
+    instrDiv.style.cssText = "margin: 0 0 10px 0; font-style: italic; color: #374151;";
+    groupContainer.appendChild(instrDiv);
+  }
+
   if (group.text) {
     const textDiv = document.createElement("h4");
     textDiv.textContent = group.text;
@@ -3120,6 +3134,10 @@ function findReadingQuestionByQId(qId) {
       if (q.qId === qId) return q;
       if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
         return { ...q, qId };
+      }
+      if (q.type === "question-group" && q.questions) {
+        const subQ = q.questions.find((sq) => sq.qId === qId);
+        if (subQ) return { ...subQ, answer: [subQ.correctAnswer] };
       }
     }
   }
