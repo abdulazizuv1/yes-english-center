@@ -682,8 +682,7 @@ function renderQuestionGroup(group, qDiv) {
     .sort()
     .forEach((key) => {
       const optionDiv = document.createElement("label");
-      optionDiv.style.cssText =
-        "display: block; margin: 10px 0; padding: 12px; border: 2px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s;";
+      optionDiv.className = "multi-select-option";
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -693,8 +692,7 @@ function renderQuestionGroup(group, qDiv) {
 
       if (selectedAnswers.includes(key)) {
         checkbox.checked = true;
-        optionDiv.style.background = "#dbeafe";
-        optionDiv.style.borderColor = "#3b82f6";
+        optionDiv.classList.add("selected");
       }
 
       const textSpan = document.createElement("span");
@@ -761,13 +759,7 @@ function handleMultiSelectChange(group, container) {
 
   checkboxes.forEach((cb) => {
     const label = cb.parentElement;
-    if (cb.checked) {
-      label.style.background = "#dbeafe";
-      label.style.borderColor = "#3b82f6";
-    } else {
-      label.style.background = "";
-      label.style.borderColor = "#d1d5db";
-    }
+    label.classList.toggle("selected", cb.checked);
   });
 
   const indicator = container.parentElement.querySelector(".selection-indicator");

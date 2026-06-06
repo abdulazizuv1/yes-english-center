@@ -177,8 +177,19 @@ export function restoreHighlights(restoreInputEventListeners) {
     try {
       const savedHTML = readingState.questionHighlights[index];
 
+      // Hold references to freshly-rendered multi-select groups before innerHTML is
+      // replaced. DOM nodes survive innerHTML replacement in memory, and — unlike
+      // cloneNode — they keep their event listeners attached during render.
+      const freshGroups = Array.from(questionsList.querySelectorAll(".multi-select-options"));
+
       setTimeout(() => {
         questionsList.innerHTML = savedHTML;
+
+        // Re-inject fresh multi-select groups to replace any corrupted saved HTML.
+        const restoredGroups = Array.from(questionsList.querySelectorAll(".multi-select-options"));
+        freshGroups.forEach((freshEl, i) => {
+          if (restoredGroups[i]) restoredGroups[i].replaceWith(freshEl);
+        });
 
         setTimeout(() => {
           restoreInputEventListeners();
@@ -212,62 +223,59 @@ export function setupWindowHighlightActions(saveState) {
     }
 
     try {
-      if (readingState.selectedRange.collapsed || !readingState.selectedRange.toString().trim()) {
+      const range = readingState.selectedRange;
+      if (range.collapsed || !range.toString().trim()) {
         clearSelection();
         return;
       }
 
-      const fragment = document.createDocumentFragment();
-      const range = readingState.selectedRange.cloneRange();
-      const contents = range.extractContents();
+      // Safe in-place highlight: walk only text nodes, never extract or clone elements.
+      // extractContents() would clone label/input elements at range boundaries and
+      // re-insert duplicates — this avoids that entirely.
+      const ancestor = range.commonAncestorContainer;
+      const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
 
-      function wrapTextNodes(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          if (node.textContent.trim()) {
-            const span = document.createElement("span");
-            span.className = "highlighted";
-            span.setAttribute("data-highlight", "true");
-            span.textContent = node.textContent;
-            return span;
-          }
-          return node;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const clone = node.cloneNode(false);
-          Array.from(node.childNodes).forEach((child) => {
-            clone.appendChild(wrapTextNodes(child));
-          });
-          return clone;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+      let n;
+      while ((n = walker.nextNode())) {
+        if (range.intersectsNode(n)) textNodes.push(n);
+      }
+
+      textNodes.forEach((textNode) => {
+        if (!textNode.textContent) return;
+
+        let start = 0;
+        let end = textNode.textContent.length;
+
+        if (textNode === range.startContainer) start = range.startOffset;
+        if (textNode === range.endContainer) end = range.endOffset;
+
+        // Split off leading text we don't want highlighted
+        if (start > 0) {
+          textNode.splitText(start);
+          textNode = textNode.nextSibling;
+          end -= start; // end is now relative to the new node
         }
-        return node;
-      }
 
-      Array.from(contents.childNodes).forEach((node) => {
-        fragment.appendChild(wrapTextNodes(node));
+        // Split off trailing text we don't want highlighted
+        if (end < textNode.textContent.length) {
+          textNode.splitText(end);
+        }
+
+        if (!textNode.textContent.trim()) return;
+
+        const span = document.createElement("span");
+        span.className = "highlighted";
+        span.setAttribute("data-highlight", "true");
+        textNode.parentNode.insertBefore(span, textNode);
+        span.appendChild(textNode);
       });
-
-      range.insertNode(fragment);
-
-      const commonAncestor = range.commonAncestorContainer;
-      if (commonAncestor.nodeType === Node.ELEMENT_NODE) {
-        commonAncestor.normalize();
-      } else if (commonAncestor.parentElement) {
-        commonAncestor.parentElement.normalize();
-      }
 
       clearSelection();
       saveCurrentHighlights(saveState);
     } catch (error) {
       console.warn("Failed to create highlight:", error);
-      try {
-        const span = document.createElement("span");
-        span.className = "highlighted";
-        span.setAttribute("data-highlight", "true");
-        readingState.selectedRange.surroundContents(span);
-        clearSelection();
-        saveCurrentHighlights(saveState);
-      } catch (e) {
-        console.error("Fallback highlighting also failed:", e);
-      }
     }
 
     const menu = document.getElementById("contextMenu");

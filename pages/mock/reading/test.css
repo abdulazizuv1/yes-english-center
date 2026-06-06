@@ -237,6 +237,44 @@ body {
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
+/* ===== MULTI-SELECT (which two) STYLES ===== */
+.multi-select-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.multi-select-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    background: white;
+}
+
+.multi-select-option:hover {
+    border-color: #93c5fd;
+    background: #f8fafc;
+}
+
+.multi-select-option.selected {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+.multi-select-option input[type="checkbox"] {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
 /* ===== GAP-FILL SPECIFIC STYLES ===== */
 .gap-fill-section {
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
