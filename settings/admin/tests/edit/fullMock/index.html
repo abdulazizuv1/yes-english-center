@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Full Mock Tests - YES English Center</title>
+  <link rel="stylesheet" href="/settings/admin/tests/edit/fullMock/index.css">
+  <link rel="icon" href="/image/logo_copy.png" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>📋 Manage Full Mock Tests</h1>
+      <p class="subtitle">Select a test to manage or delete</p>
+    </header>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-label">Total Tests:</span>
+        <span class="stat-value" id="totalTests">0</span>
+      </div>
+      <div class="stat-item">
+        <button class="btn-back" onclick="window.location.href='../index.html'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Test Selection
+        </button>
+      </div>
+    </div>
+
+    <div id="loadingContainer" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading tests...</p>
+    </div>
+
+    <div id="testsContainer" class="tests-container" style="display: none;">
+      <!-- Tests will be loaded here -->
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"></path>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      </svg>
+      <h2>No Tests Found</h2>
+      <p>There are no full mock tests available yet.</p>
+    </div>
+  </div>
+
+  <!-- PIN Management Modal -->
+  <div id="pinModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🔒 Manage Access PIN</h2>
+      </div>
+      <div class="modal-body">
+        <p>Set a 6-digit PIN to restrict access to <strong id="pinTestName"></strong>.</p>
+        <p style="color: #9ca3af; font-size: 0.88rem; margin-bottom: 20px;">Leave blank and save to remove the PIN (unrestricted access).</p>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="pinModalInput" maxlength="6" placeholder="Enter 6-digit PIN" inputmode="numeric"
+            style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1.1rem; font-family: 'Courier New', monospace; letter-spacing: 0.2em; width: 180px;">
+        </div>
+        <p class="pin-status" id="pinModalStatus" style="margin-top: 12px; font-size: 0.88rem; font-weight: 500;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closePinModal()">Cancel</button>
+        <button class="btn-save-confirm" id="confirmPinBtn" onclick="confirmSavePin()">
+          <span id="pinSaveText">Save PIN</span>
+          <span class="loader" id="pinLoader" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚠️ Confirm Deletion</h2>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteTestName"></strong>?</p>
+        <p class="warning-text">This action cannot be undone. The full mock test will be permanently deleted.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-delete-confirm" id="confirmDeleteBtn">
+          <span id="deleteText">Delete Test</span>
+          <span class="loader" id="deleteLoader" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/settings/admin/tests/edit/fullMock/index.js"></script>
+</body>
+</html>

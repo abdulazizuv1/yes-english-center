@@ -10,6 +10,8 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
+  updateDoc,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { firebaseConfig } from "/config.js";
 
@@ -128,7 +130,8 @@ function displayTests() {
       month: 'short',
       day: 'numeric'
     }) : 'Unknown date';
-    
+    const hasPIN = !!test.accessPin;
+
     return `
       <div class="test-card" data-test-id="${test.id}">
         <div class="test-card-header">
@@ -150,6 +153,7 @@ function displayTests() {
                 </svg>
                 ${totalQuestions} Questions
               </div>
+              ${hasPIN ? `<div class="stat-badge pin-badge">🔒 PIN Protected</div>` : ''}
             </div>
             <p class="test-date">Created: ${createdDate}</p>
           </div>
@@ -161,6 +165,15 @@ function displayTests() {
               </svg>
               Edit
             </button>
+            ${hasPIN ? `
+            <button class="btn-remove-pin" onclick="removePin('${test.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                <line x1="8" y1="8" x2="16" y2="16"></line>
+              </svg>
+              Remove PIN
+            </button>` : ''}
             <button class="btn-delete" onclick="confirmDelete('${test.id}', '${testNumber}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -243,6 +256,22 @@ window.deleteTest = async function() {
     confirmBtn.disabled = false;
     deleteText.textContent = "Delete Test";
     loader.style.display = "none";
+  }
+};
+
+// Remove PIN from test
+window.removePin = async function(testId) {
+  if (!confirm("Remove the access PIN from this test? Students will be able to access it without a PIN.")) return;
+
+  try {
+    await updateDoc(doc(db, "listeningTests", testId), { accessPin: deleteField() });
+    const idx = allTests.findIndex(t => t.id === testId);
+    if (idx !== -1) delete allTests[idx].accessPin;
+    displayTests();
+    showNotification("✅ PIN removed successfully!", "success");
+  } catch (error) {
+    console.error("❌ Error removing PIN:", error);
+    showNotification("❌ Error removing PIN: " + error.message, "error");
   }
 };
 

@@ -916,3 +916,105 @@ body {
 .visible {
   display: block !important;
 }
+
+/* ─── PIN MANAGEMENT ───────────────────────────────────────────────────────── */
+.pin-management-section .section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pin-current-badge {
+  display: none;
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pin-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.pin-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pin-input {
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.2em;
+  width: 180px;
+  transition: border-color 0.2s;
+}
+
+.pin-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.btn-pin-save,
+.btn-pin-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-pin-save {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-pin-save:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+.btn-pin-save:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-pin-remove {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-pin-remove:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+.pin-status {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.pin-status.pin-active {
+  color: #d97706;
+}
+
+.pin-status.pin-none {
+  color: #9ca3af;
+}

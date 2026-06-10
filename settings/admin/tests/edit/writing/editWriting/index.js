@@ -8,6 +8,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteField,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getStorage,
@@ -112,6 +113,9 @@ async function loadTest() {
     // Hide loading, show content
     document.getElementById("loadingContainer").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
+
+    // Load PIN section
+    loadPinSection();
 
     console.log("✅ Writing test loaded:", testId);
   } catch (error) {
@@ -279,6 +283,69 @@ async function confirmSave() {
     saveLoader.style.display = "none";
   }
 }
+
+// ═══════════════════════════════════════════
+//  PIN MANAGEMENT
+// ═══════════════════════════════════════════
+
+function loadPinSection() {
+  const pin = currentTest?.accessPin || '';
+  const input = document.getElementById('accessPinInput');
+  if (input) input.value = pin;
+  updatePinUI(pin);
+}
+
+function updatePinUI(pin) {
+  const statusEl = document.getElementById('pinStatus');
+  const badgeEl = document.getElementById('pinBadge');
+  const removeBtn = document.getElementById('removePinBtn');
+  if (!statusEl) return;
+  if (pin) {
+    statusEl.textContent = `Current PIN: ${pin}`;
+    statusEl.className = 'pin-status pin-active';
+    if (badgeEl) { badgeEl.textContent = `PIN: ${pin}`; badgeEl.style.display = 'inline-block'; }
+    if (removeBtn) removeBtn.style.display = 'inline-flex';
+  } else {
+    statusEl.textContent = 'No PIN set — test is publicly accessible';
+    statusEl.className = 'pin-status pin-none';
+    if (badgeEl) badgeEl.style.display = 'none';
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+window.savePin = async function() {
+  const pin = document.getElementById('accessPinInput').value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    alert('PIN must be exactly 6 digits (numbers only)');
+    return;
+  }
+  const btn = document.getElementById('savePinBtn');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const testDocRef = doc(db, "writingTests", testId);
+    if (pin) {
+      await updateDoc(testDocRef, { accessPin: pin });
+      if (currentTest) currentTest.accessPin = pin;
+    } else {
+      await updateDoc(testDocRef, { accessPin: deleteField() });
+      if (currentTest) delete currentTest.accessPin;
+    }
+    updatePinUI(pin);
+    showNotification(pin ? '✅ PIN saved successfully!' : '✅ PIN removed successfully!');
+  } catch (error) {
+    alert('❌ Error saving PIN: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+};
+
+window.removePin = function() {
+  document.getElementById('accessPinInput').value = '';
+  window.savePin();
+};
 
 // ═══════════════════════════════════════════
 //  GO BACK

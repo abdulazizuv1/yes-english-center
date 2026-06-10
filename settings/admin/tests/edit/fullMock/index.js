@@ -23,7 +23,6 @@ let currentUser = null;
 let allTests = [];
 let testToDelete = null;
 
-// Check if user is admin
 async function checkAdminAccess() {
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -46,9 +45,7 @@ async function checkAdminAccess() {
         }
 
         const userData = userDoc.data();
-        const userRole = userData.role;
-
-        if (userRole !== "admin") {
+        if (userData.role !== "admin") {
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
@@ -65,44 +62,34 @@ async function checkAdminAccess() {
   });
 }
 
-// Load all tests from Firebase
 async function loadTests() {
   try {
-    
-    const testsRef = collection(db, "readingTests");
+    const testsRef = collection(db, "fullmockTests");
     const testsSnapshot = await getDocs(testsRef);
-    
+
     allTests = [];
     testsSnapshot.forEach((docSnapshot) => {
-      allTests.push({
-        id: docSnapshot.id,
-        ...docSnapshot.data()
-      });
+      allTests.push({ id: docSnapshot.id, ...docSnapshot.data() });
     });
 
-    // Sort by test number
     allTests.sort((a, b) => {
       const numA = parseInt(a.id.replace("test-", ""));
       const numB = parseInt(b.id.replace("test-", ""));
       return numA - numB;
     });
 
-    
-    // Hide loading, show content
     document.getElementById("loadingContainer").style.display = "none";
-    
+
     if (allTests.length === 0) {
       document.getElementById("emptyState").style.display = "block";
     } else {
       document.getElementById("testsContainer").style.display = "block";
       displayTests();
     }
-    
-    // Update stats
+
     document.getElementById("totalTests").textContent = allTests.length;
-    
   } catch (error) {
-    console.error("❌ Error loading tests:", error);
+    console.error("❌ Error loading full mock tests:", error);
     document.getElementById("loadingContainer").innerHTML = `
       <div style="color: #f44336;">
         <h3>❌ Error loading tests</h3>
@@ -115,18 +102,13 @@ async function loadTests() {
   }
 }
 
-// Display tests in the list
 function displayTests() {
   const container = document.getElementById("testsContainer");
-  
+
   container.innerHTML = allTests.map(test => {
     const testNumber = test.id.replace("test-", "");
-    const passageCount = test.passages?.length || 0;
-    const totalQuestions = test.passages?.reduce((sum, p) => sum + (p.questions?.length || 0), 0) || 0;
     const createdDate = test.createdAt ? new Date(test.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      year: 'numeric', month: 'short', day: 'numeric'
     }) : 'Unknown date';
     const hasPIN = !!test.accessPin;
 
@@ -134,36 +116,27 @@ function displayTests() {
       <div class="test-card" data-test-id="${test.id}">
         <div class="test-card-header">
           <div class="test-info">
-            <h3>📖 Reading Test ${testNumber}</h3>
+            <h3>📋 Full Mock Test ${testNumber}</h3>
             <div class="test-stats">
               <div class="stat-badge">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
-                ${passageCount} Passage${passageCount !== 1 ? 's' : ''}
+                150 min
               </div>
-              ${hasPIN ? `<div class="stat-badge pin-badge">🔒 PIN Protected</div>` : ''}
+              ${hasPIN ? `<div class="stat-badge pin-badge">🔒 PIN: ${test.accessPin}</div>` : '<div class="stat-badge" style="background:#f0fdf4;color:#16a34a;">🔓 No PIN</div>'}
             </div>
             <p class="test-date">Created: ${createdDate}</p>
           </div>
           <div class="test-actions">
-            <button class="btn-edit" onclick="editTest('${test.id}')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              Edit
-            </button>
-            ${hasPIN ? `
-            <button class="btn-remove-pin" onclick="removePin('${test.id}')">
+            <button class="btn-edit-pin" onclick="openPinModal('${test.id}', '${testNumber}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
-                <line x1="8" y1="8" x2="16" y2="16"></line>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
-              Remove PIN
-            </button>` : ''}
+              ${hasPIN ? 'Edit PIN' : 'Set PIN'}
+            </button>
             <button class="btn-delete" onclick="confirmDelete('${test.id}', '${testNumber}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -180,26 +153,75 @@ function displayTests() {
   }).join('');
 }
 
-// Edit test - redirect to edit page
-window.editTest = function(testId) {
-  // Redirect to edit page with test ID as parameter
-  window.location.href = `editReading/index.html?testId=${testId}`;
+let pinEditTestId = null;
+
+window.openPinModal = function(testId, testNumber) {
+  pinEditTestId = testId;
+  const test = allTests.find(t => t.id === testId);
+  document.getElementById('pinTestName').textContent = `Full Mock Test ${testNumber}`;
+  document.getElementById('pinModalInput').value = test?.accessPin || '';
+  const statusEl = document.getElementById('pinModalStatus');
+  if (test?.accessPin) {
+    statusEl.textContent = `Current PIN: ${test.accessPin}`;
+    statusEl.style.color = '#d97706';
+  } else {
+    statusEl.textContent = 'No PIN set — test is publicly accessible';
+    statusEl.style.color = '#9ca3af';
+  }
+  document.getElementById('pinModal').style.display = 'flex';
 };
 
-// Confirm delete - show modal
+window.closePinModal = function() {
+  document.getElementById('pinModal').style.display = 'none';
+  pinEditTestId = null;
+};
+
+window.confirmSavePin = async function() {
+  if (!pinEditTestId) return;
+  const pin = document.getElementById('pinModalInput').value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    alert('PIN must be exactly 6 digits (numbers only)');
+    return;
+  }
+  const confirmBtn = document.getElementById('confirmPinBtn');
+  const pinSaveText = document.getElementById('pinSaveText');
+  const pinLoader = document.getElementById('pinLoader');
+  confirmBtn.disabled = true;
+  pinSaveText.textContent = 'Saving...';
+  pinLoader.style.display = 'inline-block';
+  try {
+    if (pin) {
+      await updateDoc(doc(db, "fullmockTests", pinEditTestId), { accessPin: pin });
+      const idx = allTests.findIndex(t => t.id === pinEditTestId);
+      if (idx !== -1) allTests[idx].accessPin = pin;
+    } else {
+      await updateDoc(doc(db, "fullmockTests", pinEditTestId), { accessPin: deleteField() });
+      const idx = allTests.findIndex(t => t.id === pinEditTestId);
+      if (idx !== -1) delete allTests[idx].accessPin;
+    }
+    closePinModal();
+    displayTests();
+    showNotification(pin ? '✅ PIN saved successfully!' : '✅ PIN removed successfully!', 'success');
+  } catch (error) {
+    alert('❌ Error saving PIN: ' + error.message);
+  } finally {
+    confirmBtn.disabled = false;
+    pinSaveText.textContent = 'Save PIN';
+    pinLoader.style.display = 'none';
+  }
+};
+
 window.confirmDelete = function(testId, testNumber) {
   testToDelete = testId;
-  document.getElementById("deleteTestName").textContent = `Reading Test ${testNumber}`;
+  document.getElementById("deleteTestName").textContent = `Full Mock Test ${testNumber}`;
   document.getElementById("deleteModal").style.display = "flex";
 };
 
-// Close delete modal
 window.closeDeleteModal = function() {
   document.getElementById("deleteModal").style.display = "none";
   testToDelete = null;
 };
 
-// Delete test
 window.deleteTest = async function() {
   if (!testToDelete) return;
 
@@ -207,65 +229,35 @@ window.deleteTest = async function() {
   const deleteText = document.getElementById("deleteText");
   const loader = document.getElementById("deleteLoader");
 
-  // Disable button and show loader
   confirmBtn.disabled = true;
   deleteText.textContent = "Deleting...";
   loader.style.display = "inline-block";
 
   try {
-    
-    // Delete from Firebase
-    await deleteDoc(doc(db, "readingTests", testToDelete));
-    
-    
-    // Remove from local array
+    await deleteDoc(doc(db, "fullmockTests", testToDelete));
     allTests = allTests.filter(test => test.id !== testToDelete);
-    
-    // Close modal
     closeDeleteModal();
-    
-    // Update display
+
     if (allTests.length === 0) {
       document.getElementById("testsContainer").style.display = "none";
       document.getElementById("emptyState").style.display = "block";
     } else {
       displayTests();
     }
-    
-    // Update stats
+
     document.getElementById("totalTests").textContent = allTests.length;
-    
-    // Show success message
-    showNotification("✅ Test deleted successfully!", "success");
-    
+    showNotification("✅ Full mock test deleted successfully!", "success");
   } catch (error) {
     console.error("❌ Error deleting test:", error);
     alert(`❌ Error deleting test: ${error.message}`);
   } finally {
-    // Reset button
     confirmBtn.disabled = false;
     deleteText.textContent = "Delete Test";
     loader.style.display = "none";
   }
 };
 
-// Remove PIN from test
-window.removePin = async function(testId) {
-  if (!confirm("Remove the access PIN from this test? Students will be able to access it without a PIN.")) return;
 
-  try {
-    await updateDoc(doc(db, "readingTests", testId), { accessPin: deleteField() });
-    const idx = allTests.findIndex(t => t.id === testId);
-    if (idx !== -1) delete allTests[idx].accessPin;
-    displayTests();
-    showNotification("✅ PIN removed successfully!", "success");
-  } catch (error) {
-    console.error("❌ Error removing PIN:", error);
-    showNotification("❌ Error removing PIN: " + error.message, "error");
-  }
-};
-
-// Show notification
 function showNotification(message, type = "success") {
   const notification = document.createElement("div");
   notification.style.cssText = `
@@ -290,50 +282,30 @@ function showNotification(message, type = "success") {
   }, 3000);
 }
 
-// Add CSS animations
 const style = document.createElement("style");
 style.textContent = `
   @keyframes slideInRight {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
-  
   @keyframes slideOutRight {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(400px);
-      opacity: 0;
-    }
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
   }
 `;
 document.head.appendChild(style);
 
-// Connect delete button in modal
 document.addEventListener("DOMContentLoaded", async () => {
-
-  // Check admin access
   await checkAdminAccess();
-
-  // Load tests
   await loadTests();
 
-  // Connect modal delete button
   document.getElementById("confirmDeleteBtn").addEventListener("click", deleteTest);
 
-  // Close modal on outside click
   document.getElementById("deleteModal").addEventListener("click", (e) => {
-    if (e.target.id === "deleteModal") {
-      closeDeleteModal();
-    }
+    if (e.target.id === "deleteModal") closeDeleteModal();
   });
 
+  document.getElementById("pinModal").addEventListener("click", (e) => {
+    if (e.target.id === "pinModal") closePinModal();
+  });
 });

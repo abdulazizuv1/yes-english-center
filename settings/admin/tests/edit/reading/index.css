@@ -233,9 +233,36 @@ body {
 }
 
 .btn-edit svg,
-.btn-delete svg {
+.btn-delete svg,
+.btn-remove-pin svg {
   width: 18px;
   height: 18px;
+}
+
+.btn-remove-pin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: #ff9800;
+  color: white;
+}
+
+.btn-remove-pin:hover {
+  background: #e65100;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.pin-badge {
+  background: #fff3e0;
+  color: #e65100;
 }
 
 /* Empty State */

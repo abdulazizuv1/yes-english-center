@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { firebaseConfig } from "/config.js";
 
@@ -65,6 +65,9 @@ async function loadTest() {
     // Hide loading, show content
     document.getElementById("loadingContainer").style.display = "none";
     document.getElementById("listeningTestForm").style.display = "block";
+
+    // Load PIN section
+    loadPinSection();
 
     // Populate fundamental test info based on parts structure
     const parts = currentTest.parts || {};
@@ -2632,6 +2635,75 @@ window.executeSaveTest = async function() {
     submitText.textContent = "Save Changes";
     loader.style.display = "none";
   }
+}
+
+// ─── PIN MANAGEMENT ──────────────────────────────────────────────────────────
+
+function loadPinSection() {
+  const pin = currentTest?.accessPin || '';
+  const input = document.getElementById('accessPinInput');
+  if (input) input.value = pin;
+  updatePinUI(pin);
+}
+
+function updatePinUI(pin) {
+  const statusEl = document.getElementById('pinStatus');
+  const badgeEl = document.getElementById('pinBadge');
+  const removeBtn = document.getElementById('removePinBtn');
+  if (!statusEl) return;
+  if (pin) {
+    statusEl.textContent = `Current PIN: ${pin}`;
+    statusEl.className = 'pin-status pin-active';
+    if (badgeEl) { badgeEl.textContent = `PIN: ${pin}`; badgeEl.style.display = 'inline-block'; }
+    if (removeBtn) removeBtn.style.display = 'inline-flex';
+  } else {
+    statusEl.textContent = 'No PIN set — test is publicly accessible';
+    statusEl.className = 'pin-status pin-none';
+    if (badgeEl) badgeEl.style.display = 'none';
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+window.savePin = async function() {
+  const pin = document.getElementById('accessPinInput').value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    alert('PIN must be exactly 6 digits (numbers only)');
+    return;
+  }
+  const btn = document.getElementById('savePinBtn');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const testDocRef = doc(db, "listeningTests", testId);
+    if (pin) {
+      await updateDoc(testDocRef, { accessPin: pin });
+      if (currentTest) currentTest.accessPin = pin;
+    } else {
+      await updateDoc(testDocRef, { accessPin: deleteField() });
+      if (currentTest) delete currentTest.accessPin;
+    }
+    updatePinUI(pin);
+    showPinNotification(pin ? '✅ PIN saved successfully!' : '✅ PIN removed successfully!');
+  } catch (error) {
+    alert('❌ Error saving PIN: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+};
+
+window.removePin = function() {
+  document.getElementById('accessPinInput').value = '';
+  window.savePin();
+};
+
+function showPinNotification(message) {
+  const n = document.createElement('div');
+  n.style.cssText = 'position:fixed;top:20px;right:20px;padding:15px 25px;background:#4CAF50;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10000;font-weight:500;font-family:inherit;';
+  n.textContent = message;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 3000);
 }
 
 // Global functions for inline HTML event handlers
