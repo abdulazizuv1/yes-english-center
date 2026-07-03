@@ -4,96 +4,34 @@
  * @module callback/callback
  */
 
-const TELEGRAM_BOT_TOKEN = "8058733911:AAG69r1bXN8tFZVBG489FeQqnUxneAmknck";
-const TELEGRAM_CHAT_ID = "53064348"; // <-- Replace with your actual chat_id
-
-const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-/**
- * Group display names mapping
- */
-const GROUP_NAMES = {
-  general_english: "General English",
-  ielts: "IELTS",
-  sat: "SAT",
-};
+// Submissions go through a Cloud Function that formats the message and
+// holds the Telegram credentials server-side.
+const CONTACT_FORM_URL =
+  "https://us-central1-yes-english-center.cloudfunctions.net/submitContactForm";
 
 /**
- * Format the form data into a readable Telegram message
+ * Send form data to the contact-form Cloud Function
  * @param {Object} data - Form data
- * @returns {string} Formatted message text
- */
-function formatMessage(data) {
-  const now = new Date();
-  const dateStr = now.toLocaleString("ru-RU", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  let message = `📩 <b>Новая заявка с сайта YES</b>\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `👤 <b>ФИО:</b> ${escapeHtml(data.name)}\n`;
-  message += `📞 <b>Телефон:</b> ${escapeHtml(data.phone)}\n`;
-  message += `📚 <b>Группа:</b> ${GROUP_NAMES[data.group] || data.group}\n`;
-
-  if (data.comment && data.comment.trim()) {
-    message += `💬 <b>Комментарий:</b> ${escapeHtml(data.comment)}\n`;
-  }
-
-  message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `🕐 <i>${dateStr}</i>`;
-
-  return message;
-}
-
-/**
- * Escape HTML special characters to prevent injection
- * @param {string} text
- * @returns {string}
- */
-function escapeHtml(text) {
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  };
-  return text.replace(/[&<>"']/g, (char) => map[char]);
-}
-
-/**
- * Send message to Telegram bot
- * @param {string} message - Formatted message text
  * @returns {Promise<boolean>} Success status
  */
-async function sendToTelegram(message) {
+async function sendToTelegram(data) {
   try {
-    const response = await fetch(TELEGRAM_API_URL, {
+    const response = await fetch(CONTACT_FORM_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: "HTML",
-      }),
+      body: JSON.stringify(data),
     });
 
-    const result = await response.json();
-
-    if (!result.ok) {
-      console.error("Telegram API error:", result.description);
+    if (!response.ok) {
+      console.error("Contact form error:", response.status);
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("Failed to send message to Telegram:", error);
+    console.error("Failed to submit contact form:", error);
     return false;
   }
 }
@@ -224,8 +162,7 @@ async function handleSubmit() {
   setSubmitLoading(submitBtn, true);
 
   try {
-    const message = formatMessage(data);
-    const success = await sendToTelegram(message);
+    const success = await sendToTelegram(data);
 
     if (success) {
       showNotification("✅ Заявка успешно отправлена!");

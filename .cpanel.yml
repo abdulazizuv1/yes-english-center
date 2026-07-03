@@ -2,4 +2,6 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/goodw790/public_html
-    - /bin/cp -R * \$DEPLOYPATH" > .cpanel.yml
+    - /bin/cp -R * $DEPLOYPATH
+    # Never expose backend source, test data (contains answers), or tooling
+    - /bin/rm -rf $DEPLOYPATH/mock-tests $DEPLOYPATH/functions $DEPLOYPATH/docs $DEPLOYPATH/dist $DEPLOYPATH/node_modules $DEPLOYPATH/pages/dashboard/node_modules $DEPLOYPATH/pages/dashboard/src

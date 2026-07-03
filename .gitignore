@@ -44,9 +44,7 @@ dist/
 .env.*
 functions/.env
 functions/.env.*
-
-# Firebase Functions source (contains secrets)
-functions/index.js
+!functions/.env.example
 
 # Frontend Firebase config
 config.js
