@@ -93,7 +93,6 @@ export function initReadingTest(deps) {
       readingState.testStorageKey = `readingTest_${readingState.currentTestId}`;
       loadSavedState();
 
-      console.log("🎯 Loading reading test with ID:", testId);
 
       const docRef = doc(db, "readingTests", testId);
       const docSnap = await getDoc(docRef);
@@ -112,7 +111,6 @@ export function initReadingTest(deps) {
         generateQuestionNav();
         renderPassage(readingState.currentPassageIndex);
         updateQuestionNav();
-        console.log("✅ Reading test loaded successfully");
       } else {
         document.getElementById("passageText").innerHTML = "Test not found.";
         console.error("❌ Reading test not found:", testId);
@@ -136,7 +134,6 @@ export function initReadingTest(deps) {
         readingState.hasUnlimitedTime = true;
         display.textContent = "∞";
         display.style.fontSize = "24px";
-        console.log("✨ Unlimited time mode activated for", user.email);
       } else {
         readingState.hasUnlimitedTime = false;
         startTimer(60 * 60, display, handleFinish);

@@ -21,12 +21,10 @@ let testStructureCache = {};
 async function loadTestStructure(testId) {
   // Return cached version if available
   if (testStructureCache[testId]) {
-    console.log(`📋 Using cached test structure for ${testId}`);
     return testStructureCache[testId];
   }
   
   try {
-    console.log(`🔄 Loading test structure for testId: ${testId}`);
     const docRef = doc(db, "listeningTests", testId);
     const docSnap = await getDoc(docRef);
     
@@ -45,7 +43,6 @@ async function loadTestStructure(testId) {
       
       // Cache the loaded structure
       testStructureCache[testId] = testStructure;
-      console.log(`✅ Test structure loaded and cached for ${testId}:`, testStructure);
       return testStructure;
     } else {
       console.error(`❌ Test document not found for testId: ${testId}`);
@@ -69,7 +66,6 @@ function getAllQuestions(testStructure) {
     if (!section.content) {
       // Check for legacy format
       if (section.questions || section.multiSelect || section.matching) {
-        console.log(`Processing legacy section ${sectionIndex + 1}`);
       }
       return;
     }
@@ -109,7 +105,6 @@ function getAllQuestions(testStructure) {
         
       } else if (item.type === "matching" && item.questions) {
         // ДОБАВЛЕНО: Обработка прямого типа "matching"
-        console.log(`Processing direct matching type with ${item.questions.length} questions`);
         item.questions.forEach(q => {
           allQuestions.push({
             qId: q.questionId,
@@ -190,7 +185,6 @@ function getAllQuestions(testStructure) {
     });
   });
   
-  console.log(`Extracted ${allQuestions.length} questions from test structure:`, allQuestions);
   return allQuestions;
 }
 
@@ -212,13 +206,11 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   try {
-    console.log(`🔍 Fetching result with ID: ${resultId}`);
     const docRef = doc(db, "resultsListening", resultId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      console.log("📊 Result data loaded:", data);
       
       // Validate that testId exists in result data
       if (!data.testId) {
@@ -250,7 +242,6 @@ function showCelebration() {
 }
 
 async function renderResult(data) {
-  console.log(`🎯 Rendering result for testId: ${data.testId}`);
   
   const emailEl = document.getElementById("email");
   const scoreEl = document.getElementById("score");
@@ -281,7 +272,6 @@ async function renderResult(data) {
     const accuracy = Math.round((score / total) * 100);
     const ieltsScore = convertToIELTS(score, total);
 
-    console.log(`📈 Test Results: ${score}/${total} (${accuracy}%) - IELTS: ${ieltsScore}`);
 
     // Update basic info
     if (emailEl) emailEl.textContent = data.name || "Unknown Student";
@@ -559,9 +549,7 @@ function highlightBand(selector) {
   }
 }
 window.debugMatchingProcessing = function() {
-    console.log("=== DEBUGGING MATCHING PROCESSING ===");
     
-    console.log("Test structure cache:", testStructureCache);
     
     const urlParams = new URLSearchParams(window.location.search);
     const resultId = urlParams.get("id");
@@ -571,26 +559,18 @@ window.debugMatchingProcessing = function() {
         getDoc(docRef).then(docSnap => {
             if (docSnap.exists()) {
                 const resultData = docSnap.data();
-                console.log("Result data:", resultData);
-                console.log("TestId from result:", resultData.testId);
                 
                 loadTestStructure(resultData.testId).then(testStructure => {
-                    console.log("Loaded test structure:", testStructure);
                     
                     if (testStructure && testStructure.sections) {
                         testStructure.sections.forEach((section, index) => {
-                            console.log(`Section ${index}:`, section);
                             
                             if (section.content) {
                                 section.content.forEach((item, itemIndex) => {
                                     if (item.type === "matching") {
-                                        console.log(`Found matching item in section ${index}, item ${itemIndex}:`, item);
-                                        console.log(`  Questions:`, item.questions);
-                                        console.log(`  Options:`, item.options);
                                         
                                         if (item.questions) {
                                             item.questions.forEach(q => {
-                                                console.log(`    Question ${q.questionId}: correct=${q.correctAnswer}, user=${resultData.answers[q.questionId] || 'NO ANSWER'}`);
                                             });
                                         }
                                     }
@@ -600,10 +580,8 @@ window.debugMatchingProcessing = function() {
                     }
                     
                     const allQuestions = getAllQuestions(testStructure);
-                    console.log("All questions extracted:", allQuestions);
                     
                     const matchingQuestions = allQuestions.filter(q => q.type === "matching");
-                    console.log("Matching questions found:", matchingQuestions);
                     
                 }).catch(err => {
                     console.error("Error loading test structure:", err);
@@ -616,8 +594,6 @@ window.debugMatchingProcessing = function() {
 };
 
 function processAnswers(data, allQuestions) {
-  console.log("Processing answers with data:", data);
-  console.log("All questions to process:", allQuestions);
   
   const userAnswers = {};
   const correctAnswers = {};
@@ -625,7 +601,6 @@ function processAnswers(data, allQuestions) {
   
   Object.entries(data.answers || {}).forEach(([qId, answer]) => {
     userAnswers[qId] = answer;
-    console.log(`User answer loaded: ${qId} = ${answer}`);
   });
   
   allQuestions.forEach(question => {
@@ -637,12 +612,10 @@ function processAnswers(data, allQuestions) {
     
     const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, question.type);
     
-    console.log(`Question ${qId} (${question.type}): user="${userAnswer}" vs correct="${correctAnswer}" = ${isCorrect ? 'CORRECT' : 'INCORRECT'}`);
     
     if (isCorrect) score++;
   });
   
-  console.log(`Final score calculation: ${score}/${allQuestions.length}`);
   
   return {
     userAnswers,
@@ -670,7 +643,6 @@ function checkAnswerCorrectness(userAnswer, correctAnswer, questionType) {
     const userClean = String(userAnswer).toUpperCase().trim();
     const correctClean = String(correctAnswer).toUpperCase().trim();
     
-    console.log(`Matching comparison: "${userClean}" vs "${correctClean}"`);
     return userClean === correctClean;
   }
   
@@ -715,7 +687,6 @@ function processAnswer(userAnswer, correctAnswer, questionData) {
     const userDisplay = userAnswer ? `${userAnswer}. ${optionText}` : "<i>Not answered</i>";
     const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, questionType);
     
-    console.log(`Processing matching answer: ${userAnswer} -> ${isCorrect ? 'CORRECT' : 'INCORRECT'} (expected: ${correctAnswer})`);
     return { userDisplay, isCorrect };
   }
 
