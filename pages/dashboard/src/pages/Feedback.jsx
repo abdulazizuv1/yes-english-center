@@ -28,36 +28,19 @@ export default function Feedback() {
 
         setStatus('sending');
 
-        const botToken = '8614804182:AAEL5prKYyCY3D02FWqtlWVASaFjev-qeRg';
-        const chatId = '1351499476';
-
         const name = userData?.name || 'User';
-        const email = userData?.email || user?.email || 'N/A';
-
-        const text = `
-📩 *New Feedback Received*
-        
-👤 *User:* ${name}
-📧 *Email:* ${email}
-        
-📌 *Category:* ${category}
-⚠️ *Priority:* ${priority}
-📝 *Subject:* ${subject}
-        
-💬 *Message:*
-${message}
-        `;
 
         try {
-            const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            const idToken = await user.getIdToken();
+            const response = await fetch('https://us-central1-yes-english-center.cloudfunctions.net/sendTestNotification', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${idToken}`,
                 },
                 body: JSON.stringify({
-                    chat_id: chatId,
-                    text: text,
-                    parse_mode: 'Markdown'
+                    type: 'feedback',
+                    data: { name, category, priority, subject, message },
                 })
             });
 

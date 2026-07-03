@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isStaff() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'teacher'];
+    }
+
+    // Results are owned via userId (new docs) or email/name (legacy docs
+    // written before userId was recorded).
+    function isOwnResult() {
+      return request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.email == request.auth.token.email ||
+        resource.data.name == request.auth.token.email
+      );
+    }
+
+    // ─── Users ───
+    // Any signed-in user may read (username-uniqueness checks query this
+    // collection). Self-updates may never touch the role field — role
+    // changes and account create/delete go through admin Cloud Functions.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow update: if isAdmin() || (
+        request.auth != null && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
+      );
+      allow create, delete: if isAdmin();
+    }
+
+    match /adminOnly/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── Landing page content (public read, admin-managed) ───
+    match /groups/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /results/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /feedbacks/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Tests: signed-in students read, admins manage ───
+    match /readingTests/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    match /listeningTests/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    match /writingTests/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    match /fullmockTests/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    match /mockTests/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // ─── Test results: students create their own, read their own; staff read all ───
+    match /resultsReading/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwnResult() || isStaff();
+      allow update, delete: if isAdmin();
+    }
+    match /resultsListening/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwnResult() || isStaff();
+      allow update, delete: if isAdmin();
+    }
+    match /resultsWriting/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwnResult() || isStaff();
+      allow update, delete: if isAdmin();
+    }
+    match /resultFullmock/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwnResult() || isStaff();
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── Target scores: keyed by email ───
+    match /userTargets/{docId} {
+      allow read: if isStaff() ||
+        (request.auth != null && resource.data.email == request.auth.token.email);
+      allow create, update: if request.auth != null &&
+        request.resource.data.email == request.auth.token.email;
+      allow delete: if isAdmin();
+    }
+
+    // ─── AI feedback: written server-side by Cloud Functions (admin SDK) ───
+    match /aiFeedback/{docId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+    match /aiWritingFeedback/{docId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+    match /aiReadingAnalysis/{docId} {
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isStaff());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

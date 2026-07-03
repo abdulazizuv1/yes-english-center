@@ -132,7 +132,6 @@ async function initializeTest() {
     const urlParams = new URLSearchParams(window.location.search);
     currentTestId = urlParams.get("testId") || "test-1";
 
-    console.log("🎯 Loading writing test:", currentTestId);
 
     // Load test data
     const docRef = doc(db, "writingTests", currentTestId);
@@ -140,7 +139,6 @@ async function initializeTest() {
 
     if (docSnap.exists()) {
       const rawData = docSnap.data();
-      console.log("✅ Raw test data loaded:", rawData);
 
       if (rawData.accessPin) {
         await waitForPin(rawData.accessPin);
@@ -149,10 +147,8 @@ async function initializeTest() {
       // Fix structure - get nested object test-1
       if (rawData[currentTestId]) {
         testData = rawData[currentTestId];
-        console.log("✅ Extracted nested test data:", testData);
       } else {
         testData = rawData;
-        console.log("✅ Using direct test data:", testData);
       }
 
       // Check data structure
@@ -172,7 +168,6 @@ async function initializeTest() {
         throw new Error("Task2 is missing question field");
       }
 
-      console.log("✅ Test structure validated");
       console.log(
         "📝 Task1 question:",
         testData.task1.question.substring(0, 100)
@@ -197,7 +192,6 @@ async function initializeTest() {
           hasUnlimitedTime = true;
           elements.timer.textContent = "∞";
           elements.timer.style.fontSize = "24px";
-          console.log("✨ Unlimited time mode activated for", user.email);
         } else {
           // Normal timer for other users
           hasUnlimitedTime = false;
@@ -236,8 +230,6 @@ function loadTask(taskNum) {
     try {
         currentTask = taskNum;
         
-        console.log(`🔄 Loading task ${taskNum}`);
-        console.log(`📋 Available test data:`, testData);
         
         if (taskNum === 1) {
             // Task 1
@@ -254,17 +246,14 @@ function loadTask(taskNum) {
             elements.wordMinimum.textContent = "/ 150 minimum";
             elements.writingLabel.textContent = "Your Answer (Task 1):";
             
-            console.log("📝 Task1 question loaded:", task1Question.substring(0, 50));
             
             // Show image if exists
             if (testData?.task1?.imageUrl) {
-                console.log("🖼️ Loading image:", testData.task1.imageUrl);
                 elements.taskImage.src = testData.task1.imageUrl;
                 elements.taskImage.onload = () => console.log("✅ Image loaded successfully");
                 elements.taskImage.onerror = () => console.error("❌ Image failed to load");
                 elements.questionImage.style.display = "block";
             } else {
-                console.log("⚠️ No image URL for Task 1");
                 elements.questionImage.style.display = "none";
             }
             
@@ -274,7 +263,6 @@ function loadTask(taskNum) {
             elements.answerText.value = task1Answer;
             updateWordCount();
             
-            console.log("📥 Task 1 answer restored:", task1Answer.length, "characters");
             
             // Update navigation - Task 1 keeps "Back to Tests"
             document.getElementById('backBtn').innerHTML = '🏠 Back to Tests';
@@ -300,7 +288,6 @@ function loadTask(taskNum) {
             elements.wordMinimum.textContent = "/ 250 minimum";
             elements.writingLabel.textContent = "Your Answer (Task 2):";
             
-            console.log("📝 Task2 question loaded:", task2Question.substring(0, 50));
             
             // Hide image
             elements.questionImage.style.display = "none";
@@ -311,7 +298,6 @@ function loadTask(taskNum) {
             elements.answerText.value = task2Answer;
             updateWordCount();
             
-            console.log("📥 Task 2 answer restored:", task2Answer.length, "characters");
             
             // Update navigation - Task 2 has "Back to Task 1"
             document.getElementById('backBtn').innerHTML = '⬅️ Back to Task 1';
@@ -322,7 +308,6 @@ function loadTask(taskNum) {
             elements.finishBtn.style.display = 'block';
         }
         
-        console.log(`✅ Task ${taskNum} loaded successfully`);
         
     } catch (error) {
         console.error(`❌ Error loading task ${taskNum}:`, error);
@@ -422,7 +407,6 @@ function setupAutoSave() {
       localStorage.setItem("writing_test_task2", currentAnswer);
     }
 
-    console.log("📝 Auto-saved");
   }, 30000); // Every 30 seconds
 }
 
@@ -466,7 +450,6 @@ function clearAllData() {
     elements.wordStatus.querySelector('.status-icon').textContent = '⚠️';
     elements.wordStatus.querySelector('.status-text').textContent = 'Below minimum word count';
     
-    console.log("🧹 All data cleared successfully");
 }
 
 // Submit test
@@ -540,10 +523,8 @@ async function submitTest() {
       submittedAt: serverTimestamp(),
     };
 
-    console.log("💾 Saving to Firestore:", resultData);
 
     const docRef = await addDoc(collection(db, "resultsWriting"), resultData);
-    console.log("✅ Data saved to Firestore successfully, ID:", docRef.id);
 
     // Send email
     await sendEmailNotification(resultData);
@@ -566,91 +547,44 @@ async function submitTest() {
   }
 }
 
-// Send Telegram notification
+// Send Telegram notification via Cloud Function (token stays server-side)
 async function sendEmailNotification(data) {
   try {
-    console.log("📱 Sending Telegram notification...");
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return false;
 
-    const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
-    const CHAT_ID = "53064348";
-
-    const task1Preview = data.task1Content
-
-    const task2Preview = data.task2Content
-
-    const message = `🎓 *IELTS Writing Test Submission*
-
-👤 *Student:* ${data.name}
-📧 *Email:* ${data.email}
-📝 *Test:* ${data.testTitle}
-🆔 *Test ID:* ${data.testId}
-⏰ *Submitted:* ${new Date().toLocaleString()}
-
-📋 *TASK 1 (${data.task1WordCount} words)*
-❓ *Question:* ${data.task1Question}
-${data.task1ImageUrl ? `🖼️ [View Image](${data.task1ImageUrl})` : ""}
-
-📝 *Answer:* ${task1Preview}
-
-📋 *TASK 2 (${data.task2WordCount} words)*  
-❓ *Question:* ${data.task2Question}
-
-📝 *Answer:* ${task2Preview}
-
-📊 *Total Words:* ${data.totalWordCount}
-🏫 *Platform:* YES English Center`;
-
+    const idToken = await user.getIdToken();
     const response = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      "https://us-central1-yes-english-center.cloudfunctions.net/sendTestNotification",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: message,
-          parse_mode: "Markdown",
-          disable_web_page_preview: false,
+          type: "writing",
+          data: {
+            testTitle: data.testTitle,
+            testId: data.testId,
+            task1Question: data.task1Question,
+            task1ImageUrl: data.task1ImageUrl,
+            task1Content: data.task1Content,
+            task1WordCount: data.task1WordCount,
+            task2Question: data.task2Question,
+            task2Content: data.task2Content,
+            task2WordCount: data.task2WordCount,
+            totalWordCount: data.totalWordCount,
+          },
         }),
       }
     );
-
-    if (response.ok) {
-      console.log("✅ Telegram notification sent successfully");
-      return true;
-    } else {
-      const error = await response.json();
-      console.error("❌ Telegram API error:", error);
-
-      // Fallback: send without Markdown if parsing error
-      if (error.error_code === 400) {
-        const plainMessage = message
-          .replace(/\*/g, "")
-          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-        const fallbackResponse = await fetch(
-          `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: CHAT_ID,
-              text: plainMessage,
-            }),
-          }
-        );
-
-        if (fallbackResponse.ok) {
-          console.log("✅ Telegram notification sent (plain text)");
-          return true;
-        }
-      }
-
-      return false;
-    }
+    return response.ok;
   } catch (error) {
-    console.error("❌ Telegram notification error:", error)
-      
+    console.error("Notification error:", error);
     return false;
- }
+  }
 }
 
 // Show success modal
@@ -693,7 +627,6 @@ function setupEventListeners() {
    // Ctrl+S for save
    if (e.ctrlKey && e.key === "s") {
      e.preventDefault();
-     console.log("💾 Manual save triggered");
    }
 
    // Ctrl+Enter for next/submit
@@ -710,7 +643,6 @@ function setupEventListeners() {
 
 // Initialize everything
 window.addEventListener("load", async () => {
- console.log("🌐 Writing test page loaded");
 
  // Check authentication
  const auth = getAuth();
@@ -727,7 +659,6 @@ window.addEventListener("load", async () => {
    return;
  }
 
- console.log("👤 User authenticated:", user.email);
 
  // Load saved data
  loadSavedData();

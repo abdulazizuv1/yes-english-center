@@ -3170,99 +3170,43 @@ function countWords(text) {
   return text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
 }
 
-// Send writing to Telegram bot
+// Send writing to Telegram via Cloud Function (token stays server-side)
 async function sendWritingToTelegram(data) {
   try {
+    const user = auth.currentUser;
+    if (!user) return false;
 
-    const BOT_TOKEN = "8312079942:AAHsxrigaSHGEsdf3EQTB9IVYadU1mVVbwI";
-    const CHAT_ID = "53064348";
-
-    const task1Preview =
-      data.task1.length > 300
-        ? data.task1.substring(0, 300) + "..."
-        : data.task1;
-    const task2Preview =
-      data.task2.length > 300
-        ? data.task2.substring(0, 300) + "..."
-        : data.task2;
-
-    const message = `🎓 *IELTS FULL MOCK TEST SUBMISSION*
-
-👤 *Student:* ${data.name}
-📧 *Email:* ${data.email}
-📝 *Test:* ${data.testTitle}
-🆔 *Test ID:* ${data.testId}
-⏰ *Submitted:* ${new Date().toLocaleString()}
-
-📊 *TEST SCORES:*
-👂 *Listening:* ${data.listeningScore}/${data.listeningTotal} (${Math.round(
-      (data.listeningScore / data.listeningTotal) * 100
-    )}%)
-📖 *Reading:* ${data.readingScore}/${data.readingTotal} (${Math.round(
-      (data.readingScore / data.readingTotal) * 100
-    )}%)
-🏆 *Overall:* ${data.overallScore}/${data.overallTotal} (${Math.round(
-      (data.overallScore / data.overallTotal) * 100
-    )}%)
-
-📝 *WRITING SECTION:*
-
-📋 *TASK 1 (${data.task1WordCount} words)*
-${task1Preview}
-
-📋 *TASK 2 (${data.task2WordCount} words)*  
-${task2Preview}
-
-📊 *Writing Stats:*
-• Task 1: ${data.task1WordCount} words
-• Task 2: ${data.task2WordCount} words
-• Total: ${data.task1WordCount + data.task2WordCount} words
-
-🏫 *Platform:* YES English Center - Full Mock Test`;
-
+    const idToken = await user.getIdToken();
     const response = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      "https://us-central1-yes-english-center.cloudfunctions.net/sendTestNotification",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: message,
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,
+          type: "fullmock",
+          data: {
+            testTitle: data.testTitle,
+            testId: data.testId,
+            task1: data.task1,
+            task2: data.task2,
+            task1WordCount: data.task1WordCount,
+            task2WordCount: data.task2WordCount,
+            listeningScore: data.listeningScore,
+            listeningTotal: data.listeningTotal,
+            readingScore: data.readingScore,
+            readingTotal: data.readingTotal,
+            overallScore: data.overallScore,
+            overallTotal: data.overallTotal,
+          },
         }),
       }
     );
-
-    if (response.ok) {
-      return true;
-    } else {
-      const error = await response.json();
-      console.error("❌ Telegram API error:", error);
-
-      // Fallback: отправляем без Markdown если ошибка парсинга
-      if (error.error_code === 400) {
-        const plainMessage = message.replace(/\*/g, "");
-        const fallbackResponse = await fetch(
-          `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: CHAT_ID,
-              text: plainMessage,
-            }),
-          }
-        );
-
-        if (fallbackResponse.ok) {
-          return true;
-        }
-      }
-      return false;
-    }
+    return response.ok;
   } catch (error) {
-    console.error("❌ Telegram notification error:", error);
+    console.error("Notification error:", error);
     return false;
   }
 }
