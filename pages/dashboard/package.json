@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "[ -f index.dev.html ] && cp index.dev.html index.html; vite",
-    "build": "[ -f index.dev.html ] && cp index.dev.html index.html || cp index.html index.dev.html; vite build",
+    "build": "rm -rf assets && { [ -f index.dev.html ] && cp index.dev.html index.html || cp index.html index.dev.html; } && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

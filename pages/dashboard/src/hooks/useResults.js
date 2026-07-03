@@ -53,6 +53,65 @@ const TEST_COLLECTIONS = {
   fullmock: 'fullmockTests',
 };
 
+/* ─── Shared timestamp helpers ─── */
+function tsOf(r) {
+  if (r.createdAt?.toDate) return r.createdAt.toDate();
+  if (r.submittedAt?.toDate) return r.submittedAt.toDate();
+  return new Date(0);
+}
+
+function byNewest(a, b) {
+  return tsOf(b) - tsOf(a);
+}
+
+/* ─── Test title resolution with module-level cache ───
+   Titles come from a handful of test docs, so fetch each test doc at most
+   once per session instead of once per result row. */
+const titleCache = new Map(); // "type:testId" -> title string
+
+function fallbackTitle(type, testId) {
+  const num = testId?.match(/\d+/)?.[0] || '';
+  return `${formatType(type)} Test ${num}`.trim();
+}
+
+async function resolveDisplayTitles(results) {
+  // reading/fullmock always use the numeric fallback — no fetch needed
+  results.forEach(r => {
+    if (r.type === 'reading' || r.type === 'fullmock') {
+      r.displayTitle = fallbackTitle(r.type, r.testId);
+    } else if (!r.testId) {
+      r.displayTitle = `${formatType(r.type)} Test`;
+    }
+  });
+
+  // listening/writing use the test doc title — batch-fetch unique uncached ids
+  const pending = new Map(); // cacheKey -> {type, testId}
+  results.forEach(r => {
+    if ((r.type === 'listening' || r.type === 'writing') && r.testId) {
+      const key = `${r.type}:${r.testId}`;
+      if (!titleCache.has(key)) pending.set(key, { type: r.type, testId: r.testId });
+    }
+  });
+
+  await Promise.all([...pending.values()].map(async ({ type, testId }) => {
+    const key = `${type}:${testId}`;
+    try {
+      const snap = await getDoc(doc(db, TEST_COLLECTIONS[type], testId));
+      const data = snap.exists() ? snap.data() : null;
+      titleCache.set(key, data?.title || data?.name || fallbackTitle(type, testId));
+    } catch (err) {
+      console.error(`Failed to fetch ${type} test title for ${testId}:`, err);
+      titleCache.set(key, fallbackTitle(type, testId));
+    }
+  }));
+
+  results.forEach(r => {
+    if ((r.type === 'listening' || r.type === 'writing') && r.testId) {
+      r.displayTitle = titleCache.get(`${r.type}:${r.testId}`);
+    }
+  });
+}
+
 /* ─── Fetch results for a skill ─── */
 async function fetchResults(userId, type) {
   const col = COLLECTIONS[type];
@@ -67,39 +126,13 @@ async function fetchResults(userId, type) {
     const snap = await getDocs(q);
     const results = [];
     snap.forEach(d => results.push({ id: d.id, type, ...d.data() }));
-    
-    // Fetch titles
-    await Promise.all(results.map(async (r) => {
-      if (r.type === 'reading' || r.type === 'fullmock') {
-        const num = r.testId ? (r.testId.match(/\d+/) ? r.testId.match(/\d+/)[0] : '') : '';
-        r.displayTitle = `${formatType(r.type)} Test ${num}`.trim();
-      } else if (r.type === 'listening' || r.type === 'writing') {
-        if (r.testId) {
-          try {
-            const testDocRef = doc(db, TEST_COLLECTIONS[r.type], r.testId);
-            const testDocSnap = await getDoc(testDocRef);
-            if (testDocSnap.exists()) {
-              const data = testDocSnap.data();
-              r.displayTitle = data.title || data.name || `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-            } else {
-              r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-            }
-          } catch (e) {
-            r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-          }
-        } else {
-          r.displayTitle = `${formatType(r.type)} Test`;
-        }
-      }
-    }));
 
-    results.sort((a, b) => {
-      const da = a.createdAt?.toDate ? a.createdAt.toDate() : (a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0));
-      const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : (b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0));
-      return db2 - da;
-    });
+    await resolveDisplayTitles(results);
+
+    results.sort(byNewest);
     return results;
-  } catch {
+  } catch (err) {
+    console.error(`Failed to fetch ${type} results:`, err);
     return [];
   }
 }
@@ -113,16 +146,10 @@ export function useAllResults(userId) {
     if (!userId) return;
     let cancelled = false;
     (async () => {
-      const all = [];
-      for (const type of Object.keys(COLLECTIONS)) {
-        const r = await fetchResults(userId, type);
-        all.push(...r);
-      }
-      all.sort((a, b) => {
-        const da = a.createdAt?.toDate ? a.createdAt.toDate() : (a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0));
-        const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : (b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0));
-        return db2 - da;
-      });
+      const perType = await Promise.all(
+        Object.keys(COLLECTIONS).map(type => fetchResults(userId, type))
+      );
+      const all = perType.flat().sort(byNewest);
       if (!cancelled) {
         setResults(all);
         setLoading(false);
@@ -160,11 +187,12 @@ export function useLatestResults(userId) {
     if (!userId) return;
     let cancelled = false;
     (async () => {
+      const types = Object.keys(COLLECTIONS);
+      const perType = await Promise.all(types.map(type => fetchResults(userId, type)));
       const out = {};
-      for (const type of Object.keys(COLLECTIONS)) {
-        const r = await fetchResults(userId, type);
-        out[type] = r.length > 0 ? r[0] : null;
-      }
+      types.forEach((type, i) => {
+        out[type] = perType[i].length > 0 ? perType[i][0] : null;
+      });
       if (!cancelled) { setLatest(out); setLoading(false); }
     })();
     return () => { cancelled = true; };
@@ -182,10 +210,10 @@ export function useTests(type) {
     if (!type) return;
     const col = TEST_COLLECTIONS[type];
     if (!col) return;
-    setTests([]);
-    setLoading(true);
     let cancelled = false;
     (async () => {
+      setTests([]);
+      setLoading(true);
       try {
         const snap = await getDocs(collection(db, col));
         const arr = [];
@@ -196,7 +224,8 @@ export function useTests(type) {
           return an - bn;
         });
         if (!cancelled) { setTests(arr); setLoading(false); }
-      } catch {
+      } catch (err) {
+        console.error(`Failed to fetch ${type} tests:`, err);
         if (!cancelled) { setTests([]); setLoading(false); }
       }
     })();
@@ -224,7 +253,8 @@ export async function getUserTestResult(userId, type, testId) {
       return { id: d.id, type, ...d.data() };
     }
     return null;
-  } catch {
+  } catch (err) {
+    console.error(`Failed to fetch ${type} result for test ${testId}:`, err);
     return null;
   }
 }
@@ -237,46 +267,23 @@ export function useAllUsersResults(type) {
   useEffect(() => {
     if (!type) return;
     const col = COLLECTIONS[type];
-    if (!col) { setLoading(false); return; }
     let cancelled = false;
     (async () => {
+      if (!col) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
       try {
         const snap = await getDocs(collection(db, col));
         const arr = [];
         snap.forEach(d => arr.push({ id: d.id, type, ...d.data() }));
 
-        // Fetch display titles
-        await Promise.all(arr.map(async (r) => {
-          if (r.type === 'reading' || r.type === 'fullmock') {
-            const num = r.testId ? (r.testId.match(/\d+/) ? r.testId.match(/\d+/)[0] : '') : '';
-            r.displayTitle = `${formatType(r.type)} Test ${num}`.trim();
-          } else if (r.type === 'listening' || r.type === 'writing') {
-            if (r.testId) {
-              try {
-                const testDocRef = doc(db, TEST_COLLECTIONS[r.type], r.testId);
-                const testDocSnap = await getDoc(testDocRef);
-                if (testDocSnap.exists()) {
-                  const data = testDocSnap.data();
-                  r.displayTitle = data.title || data.name || `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-                } else {
-                  r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-                }
-              } catch {
-                r.displayTitle = `${formatType(r.type)} Test ${r.testId.match(/\d+/)?.[0] || ''}`.trim();
-              }
-            } else {
-              r.displayTitle = `${formatType(r.type)} Test`;
-            }
-          }
-        }));
+        await resolveDisplayTitles(arr);
 
-        arr.sort((a, b) => {
-          const da = a.createdAt?.toDate ? a.createdAt.toDate() : (a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0));
-          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : (b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0));
-          return db2 - da;
-        });
+        arr.sort(byNewest);
         if (!cancelled) { setResults(arr); setLoading(false); }
-      } catch {
+      } catch (err) {
+        console.error(`Failed to fetch all ${type} results:`, err);
         if (!cancelled) { setResults([]); setLoading(false); }
       }
     })();
@@ -338,7 +345,7 @@ export function useDashboardStats(userId) {
 
   useEffect(() => {
     if (loading) return;
-    
+
     let bestScoreObj = null;
     let maxBand = -1;
     let listeningTotal = 0, listeningCount = 0;
@@ -347,9 +354,8 @@ export function useDashboardStats(userId) {
 
     results.forEach(r => {
       // Activity Calendar Date
-      let dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : (r.submittedAt?.toDate ? r.submittedAt.toDate() : null);
+      const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : (r.submittedAt?.toDate ? r.submittedAt.toDate() : null);
       if (dateObj) {
-        // Adjust for timezone explicitly or just use local date string
         const dateStr = dateObj.toLocaleDateString('en-CA'); // format: YYYY-MM-DD
         activityMap[dateStr] = (activityMap[dateStr] || 0) + 1;
       }
@@ -380,7 +386,7 @@ export function useDashboardStats(userId) {
 
     const avgL = listeningCount > 0 ? listeningTotal / listeningCount : 0;
     const avgR = readingCount > 0 ? readingTotal / readingCount : 0;
-    
+
     let strongSkill = { name: 'Reading', score: '0.0' };
     let weakArea = { name: 'Listening', score: '0.0' };
 
@@ -424,13 +430,10 @@ export function useAIFeedbackResults(userId) {
         const snap = await getDocs(q);
         const arr = [];
         snap.forEach(d => arr.push({ id: d.id, type: 'aifeedback', ...d.data() }));
-        arr.sort((a, b) => {
-          const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
-          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
-          return db2 - da;
-        });
+        arr.sort(byNewest);
         if (!cancelled) { setResults(arr); setLoading(false); }
-      } catch {
+      } catch (err) {
+        console.error('Failed to fetch AI feedback results:', err);
         if (!cancelled) { setResults([]); setLoading(false); }
       }
     })();
@@ -453,30 +456,34 @@ export function useAllUsersAIFeedback() {
         const arr = [];
         snap.forEach(d => arr.push({ id: d.id, type: 'aifeedback', ...d.data() }));
 
-        await Promise.all(arr.map(async (r) => {
+        // Resolve user names — one fetch per unique user, not per feedback doc
+        const uniqueUserIds = [...new Set(arr.map(r => r.userId))];
+        const userMap = new Map();
+        await Promise.all(uniqueUserIds.map(async (uid) => {
           try {
-            const userSnap = await getDoc(doc(db, 'users', r.userId));
+            const userSnap = await getDoc(doc(db, 'users', uid));
             if (userSnap.exists()) {
               const u = userSnap.data();
-              r.name = u.name || u.email || r.userId;
-              r.email = u.email || '';
+              userMap.set(uid, { name: u.name || u.email || uid, email: u.email || '' });
             } else {
-              r.name = r.userId;
-              r.email = '';
+              userMap.set(uid, { name: uid, email: '' });
             }
-          } catch {
-            r.name = r.userId;
-            r.email = '';
+          } catch (err) {
+            console.error(`Failed to fetch user ${uid}:`, err);
+            userMap.set(uid, { name: uid, email: '' });
           }
         }));
 
-        arr.sort((a, b) => {
-          const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
-          const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
-          return db2 - da;
+        arr.forEach(r => {
+          const u = userMap.get(r.userId) || { name: r.userId, email: '' };
+          r.name = u.name;
+          r.email = u.email;
         });
+
+        arr.sort(byNewest);
         if (!cancelled) { setResults(arr); setLoading(false); }
-      } catch {
+      } catch (err) {
+        console.error('Failed to fetch all AI feedback:', err);
         if (!cancelled) { setResults([]); setLoading(false); }
       }
     })();
@@ -511,6 +518,7 @@ export function useTargetScore(userId, userEmail) {
           }
         }
       } catch (err) {
+        console.error('Failed to fetch target score:', err);
         if (!cancelled) {
           setTarget(null);
           setLoading(false);
