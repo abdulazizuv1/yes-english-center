@@ -108,7 +108,6 @@ export function initListeningTest(deps) {
               display.textContent = "∞";
               display.style.fontSize = "24px";
             }
-            console.log("✨ Unlimited time mode activated for", user.email);
           } else {
             listeningState.hasUnlimitedTime = false;
             startTimer(40 * 60, display, handleFinish);

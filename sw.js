@@ -3,9 +3,10 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v3';
-const STATIC_CACHE = 'yes-static-v3';
-const DYNAMIC_CACHE = 'yes-dynamic-v3';
+const CACHE_NAME = 'yes-english-center-v4';
+const STATIC_CACHE = 'yes-static-v4';
+const DYNAMIC_CACHE = 'yes-dynamic-v4';
+const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -15,11 +16,25 @@ const STATIC_ASSETS = [
   '/lang.js',
   '/glass-effects.js',
   '/src/main.js',
-  '/image/logo.png',
+  '/image/logo.webp',
   '/image/logo_copy.png',
   '/image/placeholder.svg',
   '/image/no_user.webp'
 ];
+
+// Keep the dynamic cache from growing without bound (drop oldest first)
+async function trimCache(cacheName, maxEntries) {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxEntries) {
+      await cache.delete(keys[0]);
+      await trimCache(cacheName, maxEntries);
+    }
+  } catch (error) {
+    // Ignore trim failures
+  }
+}
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -109,6 +124,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(DYNAMIC_CACHE).then((cache) => {
             try {
               cache.put(request, responseToCache);
+              trimCache(DYNAMIC_CACHE, DYNAMIC_CACHE_MAX_ENTRIES);
             } catch (error) {
               // Silently fail if caching is not possible
             }

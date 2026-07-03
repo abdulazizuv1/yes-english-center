@@ -58,7 +58,6 @@ onAuthStateChanged(auth, async (user) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
       currentData = data;
-      console.log("Writing result data:", data);
       showCelebration();
       setTimeout(() => renderResult(data), 1000);
     } else {

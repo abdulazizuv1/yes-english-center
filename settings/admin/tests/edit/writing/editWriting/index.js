@@ -117,7 +117,6 @@ async function loadTest() {
     // Load PIN section
     loadPinSection();
 
-    console.log("✅ Writing test loaded:", testId);
   } catch (error) {
     console.error("❌ Error loading test:", error);
     document.getElementById("loadingContainer").innerHTML = `
@@ -273,7 +272,6 @@ async function confirmSave() {
 
     closeSaveModal();
     showNotification("✅ Writing test saved successfully!");
-    console.log("✅ Writing test saved:", testId);
   } catch (error) {
     console.error("❌ Save error:", error);
     alert("❌ Error saving test: " + error.message);

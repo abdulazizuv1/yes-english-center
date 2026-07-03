@@ -61,7 +61,6 @@ async function initializeResult() {
       return;
     }
 
-    console.log("🔍 Loading result:", resultId);
 
     // Load result data
     const docRef = doc(db, "resultFullmock", resultId);
@@ -72,13 +71,6 @@ async function initializeResult() {
     }
 
     resultData = docSnap.data();
-  console.log("📊 Result data loaded:", resultData);
-  console.log("🔍 Listening answers:", resultData.listeningAnswers);
-  console.log("🔍 Reading answers:", resultData.readingAnswers);
-  console.log("🔍 Listening correct answers:", resultData.listeningCorrectAnswers);
-  console.log("🔍 Reading correct answers:", resultData.readingCorrectAnswers);
-  console.log("🔍 Listening answers keys:", Object.keys(resultData.listeningAnswers || {}));
-  console.log("🔍 Reading answers keys:", Object.keys(resultData.readingAnswers || {}));
 
     // Update UI
     updateResultDisplay();
@@ -556,7 +548,6 @@ window.retakeTest = function () {
 
 // Initialize when page loads
 window.addEventListener("load", async () => {
-  console.log("🌐 Full mock result page loaded");
 
   // Check authentication
   const auth = getAuth();
@@ -573,7 +564,6 @@ window.addEventListener("load", async () => {
     return;
   }
 
-  console.log("👤 User authenticated:", user.email);
   await initializeResult();
 });
 
