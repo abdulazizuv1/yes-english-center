@@ -456,6 +456,57 @@ body {
     font-weight: 600;
 }
 
+/* Analysis Promo Card */
+.analysis-promo-card {
+    background: linear-gradient(135deg, #1763e1, #4a8af4);
+    border-radius: 20px;
+    padding: 28px 30px;
+    box-shadow: 0 20px 40px rgba(23, 99, 225, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.analysis-promo-inner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.analysis-promo-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.analysis-promo-text h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.analysis-promo-text p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.5;
+}
+
+.analysis-promo-card .btn-primary {
+    background: white;
+    color: #1763e1;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    flex-shrink: 0;
+}
+
+.analysis-promo-card .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Analysis Check</title>
+    <link rel="icon" href="/image/logo_copy.png">
+    <link rel="stylesheet" href="./analyzeCheck.css">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>📊 Reading Analysis Check</h1>
+            </div>
+            <span class="badge">AI Feedback</span>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Auth loading -->
+        <div id="section-init" class="section-block">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <div class="loading-sub">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div id="section-form" class="section-block hidden">
+            <div class="form-card">
+                <h2>Upload Your Reading Analysis</h2>
+                <p class="form-desc">Upload your Reading Analysis Excel file and get AI-powered feedback on your keywords and answers.</p>
+
+                <div class="form-group">
+                    <label class="form-label">Analysis Mode</label>
+                    <div class="mode-toggle">
+                        <label class="mode-option" id="modeOptionWithout">
+                            <input type="radio" name="mode" value="without_passage" checked onchange="onModeChange()">
+                            <div class="mode-option-content">
+                                <span class="mode-option-title">📝 Without Passage</span>
+                                <span class="mode-option-sub">Quick keyword logic check</span>
+                            </div>
+                        </label>
+                        <label class="mode-option" id="modeOptionWith">
+                            <input type="radio" name="mode" value="with_passage" onchange="onModeChange()">
+                            <div class="mode-option-content">
+                                <span class="mode-option-title">📄 With Passage</span>
+                                <span class="mode-option-sub">Accurate — verifies keywords against text</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="testGroup" style="display:none">
+                    <label class="form-label" for="testDropdown">Reading Test</label>
+                    <select id="testDropdown" class="test-dropdown" onchange="onTestChange()">
+                        <option value="">-- Select a test --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Excel File (.xlsx or .xls)</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-zone-icon">📂</div>
+                        <div class="upload-zone-title">Drag & drop or click to browse</div>
+                        <label class="browse-btn">
+                            Choose File
+                            <input type="file" id="fileInput" accept=".xlsx,.xls" hidden onchange="handleFileSelect(this)">
+                        </label>
+                    </div>
+                    <div id="fileInfo" class="file-info hidden">
+                        <span class="file-icon">📄</span>
+                        <span id="fileName" class="file-name"></span>
+                        <span id="fileStatus" class="file-status"></span>
+                        <button class="remove-file-btn" onclick="removeFile()">✕</button>
+                    </div>
+                    <div id="parseError" class="parse-error hidden"></div>
+                </div>
+
+                <button class="btn-primary btn-submit" id="btnSubmit" onclick="submitAnalysis()" disabled>
+                    Submit for AI Check
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="section-loading" class="section-block hidden">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <div class="loading-title">Claude AI is analyzing...</div>
+                <div class="loading-sub">This may take 15–30 seconds</div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="section-results" class="section-block hidden">
+            <div id="resultsContent"></div>
+            <div class="results-actions">
+                <button class="btn-secondary" onclick="startNewAnalysis()">📊 New Analysis</button>
+                <a href="/pages/dashboard/" class="btn-primary">My Submissions</a>
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div id="section-error" class="section-block hidden">
+            <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title" id="errorTitle">Something went wrong</div>
+                <div class="error-message" id="errorMessage"></div>
+                <button class="btn-primary" onclick="retrySubmit()">Try Again</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="./analyzeCheck.js"></script>
+</body>
+</html>

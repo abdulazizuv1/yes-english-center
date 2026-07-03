@@ -225,8 +225,67 @@
 .flash-msg.success { background: #dcfce7; color: #166534; }
 .flash-msg.error { background: #fee2e2; color: #991b1b; }
 
+/* Reading Analysis Tab */
+.ra-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ra-desc { font-size: 13px; color: var(--text-muted); }
+.ra-new-btn {
+  background: var(--gradient);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.ra-new-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.ra-row { cursor: default; }
+.ra-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ra-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.ra-completed { background: #dcfce7; color: #166534; }
+.ra-error { background: #fee2e2; color: #991b1b; }
+.ra-pending { background: #fef3c7; color: #92400e; }
+.ra-mode-with { background: #e0e7ff; color: #3730a3; }
+.ra-mode-without { background: #f3f4f6; color: #4b5563; }
+
+.ra-view-btn {
+  background: var(--gradient);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+.ra-view-btn:hover { opacity: 0.85; }
+
 @media (max-width: 768px) {
   .profile-card { flex-direction: column; text-align: center; }
   .settings-tabs { overflow-x: auto; }
   .input-row { flex-direction: column; }
+  .ra-row-right { justify-content: flex-start; }
 }

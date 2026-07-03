@@ -39,6 +39,7 @@ onAuthStateChanged(auth, async (user) => {
       const data = docSnap.data();
       showCelebration();
       setTimeout(() => renderResult(data), 1000);
+      setupAnalysisPromoButton(data.testId);
     } else {
       alert("Result document not found.");
     }
@@ -298,6 +299,19 @@ function convertToIELTS(score, total) {
   if (score >= 13) return "4.5";
   if (score >= 10) return "4.0";
   return "Below 4.0";
+}
+
+function setupAnalysisPromoButton(testId) {
+  const card = document.getElementById('analysisPromoCard');
+  const btn = document.getElementById('btnGoToAnalysis');
+  if (!card || !btn) return;
+  card.style.display = 'block';
+  btn.addEventListener('click', () => {
+    const url = testId
+      ? `/pages/mock/reading/analysis-check/?testId=${encodeURIComponent(testId)}&mode=with_passage`
+      : `/pages/mock/reading/analysis-check/`;
+    window.location.href = url;
+  });
 }
 
 // Add some interactive effects

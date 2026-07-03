@@ -486,6 +486,68 @@ export function useAllUsersAIFeedback() {
   return { results, loading };
 }
 
+/* ─── Hook: Reading Analysis results for current user ─── */
+export function useReadingAnalyses(userId) {
+  const [analyses, setAnalyses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const q = query(
+          collection(db, 'aiReadingAnalysis'),
+          where('userId', '==', userId)
+        );
+        const snap = await getDocs(q);
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+        arr.sort((a, b) => {
+          const da = a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0);
+          const db2 = b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0);
+          return db2 - da;
+        });
+        if (!cancelled) { setAnalyses(arr); setLoading(false); }
+      } catch {
+        if (!cancelled) { setAnalyses([]); setLoading(false); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  return { analyses, loading };
+}
+
+/* ─── Hook: ALL users' Reading Analyses (admin) ─── */
+export function useAllReadingAnalyses() {
+  const [analyses, setAnalyses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const q = query(collection(db, 'aiReadingAnalysis'), limit(100));
+        const snap = await getDocs(q);
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+        arr.sort((a, b) => {
+          const da = a.submittedAt?.toDate ? a.submittedAt.toDate() : new Date(0);
+          const db2 = b.submittedAt?.toDate ? b.submittedAt.toDate() : new Date(0);
+          return db2 - da;
+        });
+        if (!cancelled) { setAnalyses(arr); setLoading(false); }
+      } catch {
+        if (!cancelled) { setAnalyses([]); setLoading(false); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { analyses, loading };
+}
+
 /* ─── Hook: Target Score ─── */
 export function useTargetScore(userId, userEmail) {
   const [target, setTarget] = useState(null);

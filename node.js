@@ -1,38 +1,29 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import admin from "firebase-admin";
+import { createRequire } from "module";
 import fs from "fs";
-import 'dotenv/config';
 
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
-};
+const require = createRequire(import.meta.url);
 
-for (const [key, value] of Object.entries(firebaseConfig)) {
-  if (!value) {
-    throw new Error(`Missing environment variable for Firebase config: ${key}`);
-  }
-}
+const serviceAccount = require("./mock-tests/serviceAccountKey.json");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
-async function downloadDocument() {
-  const ref = doc(db, "listeningTests", "test-12");
-  const snap = await getDoc(ref);
+const db = admin.firestore();
 
-  if (snap.exists()) {
+async function downloadDocument(collection, docId) {
+  const ref = db.collection(collection).doc(docId);
+  const snap = await ref.get();
+
+  if (snap.exists) {
     const data = snap.data();
-    fs.writeFileSync("test-12.json", JSON.stringify(data, null, 2));
-    console.log("Документ сохранён как document.json");
+    const filename = `${docId}.json`;
+    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+    console.log(`Документ сохранён как ${filename}`);
   } else {
     console.log("Документ не найден");
   }
 }
 
-downloadDocument()
+downloadDocument("fullmockTests", "test-14");

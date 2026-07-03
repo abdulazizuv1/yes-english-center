@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useAllResults, useSkillResults, useAIFeedbackResults, convertToIELTS, getTypeIcon, formatType, getScoreDisplay, getResultUrl, getBandClass } from '../hooks/useResults';
+import { useAllResults, useSkillResults, useAIFeedbackResults, useReadingAnalyses, convertToIELTS, getTypeIcon, formatType, getScoreDisplay, getResultUrl, getBandClass } from '../hooks/useResults';
 import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { User, BarChart3, FileText, Camera } from 'lucide-react';
+import { User, BarChart3, FileText, Camera, BookOpen } from 'lucide-react';
 import './Settings.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -56,6 +56,9 @@ export default function Settings() {
                 </button>
                 <button className={`tab-btn ${tab === 'statistics' ? 'active' : ''}`} onClick={() => setTab('statistics')}>
                     <BarChart3 size={16} /> Statistics
+                </button>
+                <button className={`tab-btn ${tab === 'analysis' ? 'active' : ''}`} onClick={() => setTab('analysis')}>
+                    <BookOpen size={16} /> Reading Analysis
                 </button>
                 <button className={`tab-btn ${tab === 'personal' ? 'active' : ''}`} onClick={() => setTab('personal')}>
                     <User size={16} /> Personal
@@ -126,6 +129,9 @@ export default function Settings() {
                 </div>
             )}
 
+            {/* Reading Analysis Tab */}
+            {tab === 'analysis' && <ReadingAnalysisTab userId={user?.uid} />}
+
             {/* Statistics Tab */}
             {tab === 'statistics' && <StatsTab userId={user?.uid} />}
 
@@ -134,6 +140,86 @@ export default function Settings() {
         </div>
     );
 }
+
+/* ─── Reading Analysis Tab ─── */
+// function ReadingAnalysisTab({ userId }) {
+//     const { analyses, loading } = useReadingAnalyses(userId);
+
+//     const formatDate = (ts) => {
+//         if (!ts) return '—';
+//         const d = ts.toDate ? ts.toDate() : new Date(ts);
+//         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+//     };
+
+//     const getStatusBadge = (status) => {
+//         if (status === 'completed') return <span className="ra-badge ra-completed">Completed</span>;
+//         if (status === 'error') return <span className="ra-badge ra-error">Error</span>;
+//         return <span className="ra-badge ra-pending">Pending</span>;
+//     };
+
+//     const getModeBadge = (mode) => {
+//         if (mode === 'with_passage') return <span className="ra-badge ra-mode-with">With Passage</span>;
+//         return <span className="ra-badge ra-mode-without">Without Passage</span>;
+//     };
+
+//     return (
+//         <div className="tab-content">
+//             <div className="ra-header-row">
+//                 <p className="ra-desc">Your reading analysis submissions and AI feedback history.</p>
+//                 <a
+//                     href="/pages/mock/reading/analysis-check/"
+//                     className="ra-new-btn"
+//                 >
+//                     + New Analysis
+//                 </a>
+//             </div>
+//             {loading ? (
+//                 <div className="loading-container"><div className="spinner" /><span>Loading...</span></div>
+//             ) : analyses.length === 0 ? (
+//                 <div className="empty-state glass-card">
+//                     <span className="empty-icon">📊</span>
+//                     <p>No reading analyses yet.</p>
+//                     <a href="/pages/mock/reading/analysis-check/" style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 14 }}>
+//                         Try the Reading Analysis Check →
+//                     </a>
+//                 </div>
+//             ) : (
+//                 <div className="results-list">
+//                     {analyses.map((a) => {
+//                         const date = formatDate(a.submittedAt);
+//                         const testLabel = a.testTitle || 'No test selected';
+//                         const score = a.aiResult ? `${a.aiResult.overallScore}/${a.aiResult.totalQuestions}` : '—';
+//                         const band = a.aiResult?.estimatedBand || '—';
+//                         const bandCls = a.aiResult?.estimatedBand ? getBandClass(a.aiResult.estimatedBand) : '';
+//                         return (
+//                             <div key={a.id} className="result-row glass-card ra-row">
+//                                 <span className="result-row-icon">📊</span>
+//                                 <div className="result-row-info">
+//                                     <span className="result-row-type">{testLabel}</span>
+//                                     <span className="result-row-date">{date} · {getModeBadge(a.mode)}</span>
+//                                 </div>
+//                                 <div className="ra-row-right">
+//                                     {a.status === 'completed' && (
+//                                         <span className={`result-row-score ${bandCls}`}>Band {band}</span>
+//                                     )}
+//                                     {getStatusBadge(a.status)}
+//                                     {a.status === 'completed' && (
+//                                         <a
+//                                             href={`/pages/mock/reading/analysis-check/?view=${a.id}`}
+//                                             className="ra-view-btn"
+//                                         >
+//                                             View
+//                                         </a>
+//                                     )}
+//                                 </div>
+//                             </div>
+//                         );
+//                     })}
+//                 </div>
+//             )}
+//         </div>
+//     );
+// }
 
 /* ─── Statistics Tab ─── */
 function StatsTab({ userId }) {

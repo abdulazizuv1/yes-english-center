@@ -81,6 +81,24 @@ export default function TestSection() {
                     ))}
                 </div>
             )}
+
+            {type === 'reading' && (
+                <div className="analysis-check-promo glass-card">
+                    <div className="analysis-check-content">
+                        <span className="analysis-check-icon">📊</span>
+                        <div className="analysis-check-text">
+                            <h4>Reading Analysis Check</h4>
+                            <p>Upload your reading analysis worksheet for AI-powered keyword feedback</p>
+                        </div>
+                    </div>
+                    <button
+                        className="btn-analysis-check"
+                        onClick={() => window.location.href = '/pages/mock/reading/analysis-check/'}
+                    >
+                        Check My Reading Analysis
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
