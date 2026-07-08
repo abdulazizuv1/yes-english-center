@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { doc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 
 const GENERATE_URL = 'https://us-central1-yes-english-center.cloudfunctions.net/generateStudyPlan';
@@ -141,7 +141,18 @@ export function useStudyPlan(userId) {
     }
   }, []);
 
-  return { plan, loading, generating, error, generatePlan, toggleTask };
+  // Remove the plan entirely (owner delete is allowed by rules)
+  const deletePlan = useCallback(async () => {
+    try {
+      await deleteDoc(doc(db, 'studyPlans', userId));
+      return true;
+    } catch (err) {
+      console.error('Failed to delete plan:', err);
+      return false;
+    }
+  }, [userId]);
+
+  return { plan, loading, generating, error, generatePlan, toggleTask, deletePlan };
 }
 
 /* ─── Derived helpers ─── */

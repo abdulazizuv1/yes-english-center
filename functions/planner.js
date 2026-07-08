@@ -38,10 +38,21 @@ export function clampBand(value) {
   return Math.min(9, Math.max(3.5, n));
 }
 
-export function validatePlanInput({ currentBand, targetBand, examDate, hoursPerDay, startDate }) {
-  const cur = clampBand(currentBand);
+const SECTIONS = ["listening", "reading", "writing", "speaking"];
+
+export function validatePlanInput({ currentBands, targetBand, examDate, hoursPerDay, startDate }) {
+  const bands = {};
+  for (const s of SECTIONS) {
+    const b = clampBand(currentBands?.[s]);
+    if (b === null) return { error: "invalid_band" };
+    bands[s] = b;
+  }
   const target = clampBand(targetBand);
-  if (cur === null || target === null) return { error: "invalid_band" };
+  if (target === null) return { error: "invalid_band" };
+
+  // Overall current level = section average rounded to the nearest 0.5
+  const avg = SECTIONS.reduce((sum, s) => sum + bands[s], 0) / SECTIONS.length;
+  const currentBand = Math.round(avg * 2) / 2;
 
   const hours = Math.min(6, Math.max(0.5, parseFloat(hoursPerDay)));
   if (Number.isNaN(hours)) return { error: "invalid_hours" };
@@ -55,24 +66,43 @@ export function validatePlanInput({ currentBand, targetBand, examDate, hoursPerD
   if (days < 3) return { error: "exam_too_soon" };
   if (days > 200) return { error: "exam_too_far" };
 
-  return { currentBand: cur, targetBand: target, examDate, startDate, hoursPerDay: hours, totalDays: days };
+  return {
+    currentBands: bands, currentBand, targetBand: target,
+    examDate, startDate, hoursPerDay: hours, totalDays: days,
+  };
 }
 
+/* ─── Estimated minutes per task type (shown in the UI and reminders) ─── */
+export const TASK_MINUTES = {
+  reading: 60,
+  listening: 35,
+  writing: 60,
+  fullmock: 165,
+  vocabulary: 20,
+  grammar: 20,
+  review: 25,
+  mock_review: 30,
+  reading_analysis: 30,
+  listening_review: 20,
+  speaking: 20,
+  rest: 0,
+};
+
 /* ─── Fallback personalization when Claude is unavailable ───
-   Weight = how far each skill is from target (weaker → more sessions). */
-export function fallbackWeights(skillStats, currentBand, targetBand) {
-  const weights = { reading: 1, listening: 1, writing: 1 };
-  for (const skill of ["reading", "listening"]) {
-    const avg = skillStats?.[skill]?.avgBand;
-    if (typeof avg === "number") {
-      const gap = targetBand - avg;
-      weights[skill] = Math.min(2, Math.max(0.5, 1 + gap * 0.25));
-    }
-  }
-  // Writing is the hardest section to self-improve — bias it up for high targets
-  if (targetBand >= 6.5) weights.writing = 1.25;
-  if (targetBand - currentBand >= 1.5) weights.writing = 1.5;
-  return weights;
+   Weight = how far each section is from target (weaker → more sessions).
+   Prefers real recent test scores; falls back to self-assessed bands. */
+export function fallbackWeights(skillStats, currentBands, targetBand) {
+  const weightFor = (assessed, tested) => {
+    const level = typeof tested === "number" ? tested : assessed;
+    const gap = targetBand - level;
+    return Math.min(2, Math.max(0.5, 1 + gap * 0.25));
+  };
+  return {
+    reading: weightFor(currentBands.reading, skillStats?.reading?.avgBand),
+    listening: weightFor(currentBands.listening, skillStats?.listening?.avgBand),
+    writing: weightFor(currentBands.writing, null),
+    speaking: weightFor(currentBands.speaking, null),
+  };
 }
 
 const DEFAULT_FOCUSES = [
@@ -84,6 +114,14 @@ const DEFAULT_FOCUSES = [
   { theme: "Coherence & linking", vocabTopic: "Culture & society", grammarTopic: "Linking devices" },
   { theme: "Accuracy under pressure", vocabTopic: "Travel & globalisation", grammarTopic: "Articles" },
   { theme: "Full-test stamina", vocabTopic: "Science & research", grammarTopic: "Modal verbs" },
+];
+
+const SPEAKING_PROMPTS = [
+  "Speaking Part 1: record yourself — hometown, work, hobbies",
+  "Speaking Part 2: 2-minute cue card, record and listen back",
+  "Speaking Part 3: discuss opinions out loud for 10 minutes",
+  "Speaking: describe a chart or photo aloud for 2 minutes",
+  "Speaking: shadow a native speaker for 15 minutes",
 ];
 
 /**
@@ -121,6 +159,7 @@ export function buildPlan(input, ai, tests, taken) {
   }
 
   let taskSeq = 0;
+  let speakingSeq = 0;
   const takeTest = (type, label) => {
     const q = queues[type];
     if (!q.items.length) return null;
@@ -134,6 +173,7 @@ export function buildPlan(input, ai, tests, taken) {
       type,
       testId,
       title: `${label} Test ${num}${isRepeat ? " (repeat)" : ""}`.trim(),
+      minutes: TASK_MINUTES[type] || 30,
       status: "pending",
     };
   };
@@ -143,8 +183,11 @@ export function buildPlan(input, ai, tests, taken) {
     kind: "external",
     type,
     title,
+    minutes: TASK_MINUTES[type] ?? 20,
     status: "pending",
   });
+
+  const speakingTask = () => external("speaking", SPEAKING_PROMPTS[speakingSeq++ % SPEAKING_PROMPTS.length]);
 
   // Deficit round-robin over the two "input" skills: the weaker skill gets
   // proportionally more days, but the other one never disappears entirely.
@@ -160,8 +203,12 @@ export function buildPlan(input, ai, tests, taken) {
     return t;
   };
 
+  const speakingBias = (weights.speaking ?? 1) >= 1.25;
+  const writingBias = (weights.writing ?? 1) >= 1.25;
+
   const days = [];
   let totalTasks = 0;
+  let mockYesterday = false;
 
   for (let i = 0; i < totalDays; i++) {
     const date = new Date(start.getTime() + i * DAY_MS);
@@ -170,6 +217,7 @@ export function buildPlan(input, ai, tests, taken) {
     const focus = focuses[weekIndex % focuses.length];
     const daysLeft = totalDays - i;
     const tasks = [];
+    let mockToday = false;
 
     if (daysLeft === 1) {
       // Day before the exam: rest, no cramming
@@ -179,10 +227,12 @@ export function buildPlan(input, ai, tests, taken) {
       const mockWeek = mockEveryWeek || weekIndex % 2 === 1;
       if (mockWeek && daysLeft > 3) {
         const mock = takeTest("fullmock", "Full Mock");
-        if (mock) tasks.push(mock);
-        else {
-          const r = takeTest("reading", "Reading");
-          const l = takeTest("listening", "Listening");
+        if (mock) {
+          tasks.push(mock);
+          mockToday = true;
+        } else {
+          const r = takeInputTest("reading");
+          const l = takeInputTest("listening");
           if (r) tasks.push(r);
           if (l) tasks.push(l);
         }
@@ -190,23 +240,29 @@ export function buildPlan(input, ai, tests, taken) {
         const t = takeInputTest(pickInputSkill());
         if (t) tasks.push(t);
         tasks.push(external("vocabulary", `Vocabulary: ${focus.vocabTopic || "topic review"}`));
+        if (slotsPerDay >= 3) tasks.push(speakingTask());
       }
     } else if (dow === 0) {
       // Sunday: review + light work
-      tasks.push(external("review", "Review this week's mistakes and notes"));
+      if (mockYesterday) {
+        tasks.push(external("mock_review", "Review yesterday's mock: analyse every mistake"));
+      } else {
+        tasks.push(external("review", "Review this week's mistakes and notes"));
+      }
       if (slotsPerDay >= 3) {
         tasks.push(external("vocabulary", `Vocabulary: ${focus.vocabTopic || "topic review"}`));
       }
     } else {
       // Weekdays
-      const writingBias = (weights.writing ?? 1) >= 1.25;
-
       if (dow === 2 || dow === 4 || (writingBias && dow === 5)) {
         // Tue/Thu (+Fri when writing is weak): writing day
         const w = takeTest("writing", "Writing");
         if (w) tasks.push(w);
         if (slotsPerDay >= 3) {
           tasks.push(external("grammar", `Grammar: ${focus.grammarTopic || "review"}`));
+        }
+        if (speakingBias && dow === 2 && slotsPerDay >= 3) {
+          tasks.push(speakingTask());
         }
       } else {
         // Mon/Wed/Fri: input skills, weaker one scheduled more often
@@ -218,7 +274,10 @@ export function buildPlan(input, ai, tests, taken) {
         } else {
           tasks.push(external("listening_review", "Listening review: replay and transcribe hard sections"));
         }
-        if (slotsPerDay >= 4) {
+        if (dow === 3) {
+          // Wednesday: speaking practice for everyone
+          tasks.push(speakingTask());
+        } else if (slotsPerDay >= 4) {
           const t2 = takeInputTest(pickInputSkill());
           if (t2) tasks.push(t2);
         }
@@ -235,6 +294,7 @@ export function buildPlan(input, ai, tests, taken) {
       focus: focus.theme || "",
       tasks,
     });
+    mockYesterday = mockToday;
   }
 
   return { days, totalTasks, weeks };

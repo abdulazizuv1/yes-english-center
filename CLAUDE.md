@@ -69,11 +69,13 @@ HTTP functions; all except `submitContactForm` require a Firebase ID token:
 - `sendTestNotification` — Telegram notifications for test/feedback submissions (types: `writing`, `fullmock`, `feedback`)
 - `submitContactForm` — public endpoint for the landing-page contact form
 - `generateStudyPlan` — builds the student's daily study plan (`studyPlans/{uid}`); Claude (Haiku) supplies only skill weights/weekly focuses/advice, all scheduling is deterministic in `functions/planner.js`; 3 generations/week per user, full non-AI fallback
+- `dailyPlanBotWebhook` — Telegram webhook for @dailyplan_yes_bot: students link by sending their login email; mapping stored in `telegramLinks/{chatId}` (server-only collection)
+- `sendDailyPlanReminders` — scheduled daily 08:00 Asia/Tashkent; sends each linked student their pending tasks
 
 Secrets (`CLAUDE_API_KEY`, `TELEGRAM_*`) live in `functions/.env` (gitignored; see `functions/.env.example`).
 
 ### Firestore
-Collections: `users`, `groups`, `results`, `feedbacks`, `readingTests`, `listeningTests`, `writingTests`, `fullmockTests`, `resultsReading`, `resultsListening`, `resultsWriting`, `resultFullmock`, `aiWritingFeedback`, `aiReadingAnalysis`, `userTargets`, `studyPlans`.
+Collections: `users`, `groups`, `results`, `feedbacks`, `readingTests`, `listeningTests`, `writingTests`, `fullmockTests`, `resultsReading`, `resultsListening`, `resultsWriting`, `resultFullmock`, `aiWritingFeedback`, `aiReadingAnalysis`, `userTargets`, `studyPlans`, `telegramLinks` (server-only).
 
 Security rules are versioned in `firestore.rules` (deployed via `firebase deploy --only firestore`). Key invariants: tests require auth to read; students may only create their own results and can never change their own `role`; landing-page collections (`groups`, `results`, `feedbacks`) are public-read/admin-write. See `docs/SECURITY.md` for the threat model and remaining known gaps.
 

@@ -3,6 +3,7 @@ import admin from "firebase-admin";
 import cors from "cors";
 import Anthropic from "@anthropic-ai/sdk";
 import { Buffer } from "node:buffer";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { validatePlanInput, fallbackWeights, buildPlan, bandFromScore } from "./planner.js";
 
 admin.initializeApp();
@@ -828,13 +829,15 @@ const PLANNER_SYSTEM_PROMPT = `You are an IELTS study-plan advisor for an exam-p
 Given a student profile you return personalization parameters for a deterministic scheduler.
 Return ONLY valid JSON, no other text:
 {
-  "skillWeights": { "reading": <0.5-2>, "listening": <0.5-2>, "writing": <0.5-2> },
+  "skillWeights": { "reading": <0.5-2>, "listening": <0.5-2>, "writing": <0.5-2>, "speaking": <0.5-2> },
   "weeklyFocuses": [ { "theme": "<short weekly strategy focus>", "vocabTopic": "<IELTS vocabulary topic>", "grammarTopic": "<grammar point>" } ],
   "advice": "<2-3 sentences of specific, honest advice for this student>"
 }
 Rules:
 - Higher weight = the student needs MORE practice in that skill.
-- Base weights on the gap between recent scores and the target; with no scores, use the gap between current and target band.
+- The profile includes the student's self-assessed band per section (currentBands) and
+  recent test averages (recentPerformance). Trust recent test data over self-assessment
+  for reading/listening; for writing/speaking only self-assessment is available.
 - weeklyFocuses: exactly the number of weeks requested, ordered from fundamentals to exam-week polish, no repeated topics.
 - Be realistic: if the target is not achievable in the time left, say so in advice and state what is achievable.`;
 
@@ -947,6 +950,7 @@ export const generateStudyPlan = functions.https.onRequest((req, res) => {
     try {
       const profile = {
         currentBand: input.currentBand,
+        currentBands: input.currentBands,
         targetBand: input.targetBand,
         daysUntilExam: input.totalDays,
         hoursPerDay: input.hoursPerDay,
@@ -969,6 +973,7 @@ export const generateStudyPlan = functions.https.onRequest((req, res) => {
             reading: Math.min(2, Math.max(0.5, parseFloat(w.reading) || 1)),
             listening: Math.min(2, Math.max(0.5, parseFloat(w.listening) || 1)),
             writing: Math.min(2, Math.max(0.5, parseFloat(w.writing) || 1)),
+            speaking: Math.min(2, Math.max(0.5, parseFloat(w.speaking) || 1)),
           },
           weeklyFocuses: Array.isArray(parsed.weeklyFocuses) ? parsed.weeklyFocuses : null,
           advice: typeof parsed.advice === "string" ? parsed.advice.slice(0, 600) : "",
@@ -980,7 +985,7 @@ export const generateStudyPlan = functions.https.onRequest((req, res) => {
     }
     if (!ai) {
       ai = {
-        skillWeights: fallbackWeights(skillStats, input.currentBand, input.targetBand),
+        skillWeights: fallbackWeights(skillStats, input.currentBands, input.targetBand),
         weeklyFocuses: null,
         advice: "",
       };
@@ -993,6 +998,7 @@ export const generateStudyPlan = functions.https.onRequest((req, res) => {
         userId: uid,
         email,
         currentBand: input.currentBand,
+        currentBands: input.currentBands,
         targetBand: input.targetBand,
         examDate: input.examDate,
         startDate: input.startDate,
@@ -1028,3 +1034,134 @@ export const generateStudyPlan = functions.https.onRequest((req, res) => {
     return res.status(200).json({ success: true, generatedWith, totalTasks: plan.totalTasks });
   });
 });
+
+/* ═══════════════ Daily Plan Telegram bot ═══════════════
+   Separate bot (@dailyplan_yes_bot). Students link themselves by sending
+   their login email to the bot; a scheduled function then sends them their
+   pending tasks every morning. Token lives in functions/.env. */
+
+async function sendDailyPlanBotMessage(chatId, text) {
+  const token = process.env.DAILYPLAN_BOT_TOKEN;
+  if (!token) {
+    console.error("DAILYPLAN_BOT_TOKEN not configured");
+    return false;
+  }
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML", disable_web_page_preview: true }),
+    });
+    if (!res.ok) console.error("Daily plan bot API error:", await res.text());
+    return res.ok;
+  } catch (err) {
+    console.error("Daily plan bot send failed:", err);
+    return false;
+  }
+}
+
+function tashkentToday() {
+  // YYYY-MM-DD in Asia/Tashkent regardless of server timezone
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Tashkent" });
+}
+
+function formatTasksMessage(name, day) {
+  const pending = day.tasks.filter((t) => t.status === "pending");
+  if (!pending.length) return null;
+  const totalMin = pending.reduce((sum, t) => sum + (t.minutes || 0), 0);
+  let msg = `📋 <b>Your study plan for today</b>\n`;
+  if (day.focus) msg += `<i>Week focus: ${day.focus}</i>\n`;
+  msg += `\n`;
+  pending.forEach((t, i) => {
+    msg += `${i + 1}. ${t.title}${t.minutes ? ` — ~${t.minutes} min` : ""}\n`;
+  });
+  msg += `\n⏱ Total: ~${totalMin} min`;
+  msg += `\n\nOpen your plan: https://yescenteruz.com/pages/dashboard/#/plan`;
+  return msg;
+}
+
+// Telegram webhook: /start → ask for email; email → link chat to student
+export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).send("Only POST");
+  }
+  // Optional shared-secret check (set the same value in setWebhook)
+  const secret = process.env.DAILYPLAN_WEBHOOK_SECRET;
+  if (secret && req.headers["x-telegram-bot-api-secret-token"] !== secret) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const message = req.body?.message;
+  // Always 200 so Telegram doesn't retry forever
+  if (!message?.chat?.id || typeof message.text !== "string") {
+    return res.status(200).json({ ok: true });
+  }
+
+  const chatId = String(message.chat.id);
+  const text = message.text.trim();
+
+  try {
+    if (text.startsWith("/start")) {
+      await sendDailyPlanBotMessage(chatId,
+        "👋 Welcome to <b>YES Daily Plan</b>!\n\n" +
+        "Send me the <b>email you use to log in</b> on yescenteruz.com and I will " +
+        "message you your study tasks every morning.");
+    } else if (text.includes("@")) {
+      const email = text.toLowerCase();
+      const userSnap = await db.collection("users").where("email", "==", email).limit(1).get();
+      if (userSnap.empty) {
+        await sendDailyPlanBotMessage(chatId,
+          "❌ I couldn't find a student with that email. " +
+          "Make sure you send exactly the email you log in with.");
+      } else {
+        const userDoc = userSnap.docs[0];
+        await db.collection("telegramLinks").doc(chatId).set({
+          chatId,
+          email,
+          userId: userDoc.id,
+          name: userDoc.data().name || null,
+          linkedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        await sendDailyPlanBotMessage(chatId,
+          `✅ Done, ${userDoc.data().name || "student"}! ` +
+          "I will send you your daily tasks every morning at 8:00.\n\n" +
+          "Send /stop to turn reminders off.");
+      }
+    } else if (text.startsWith("/stop")) {
+      await db.collection("telegramLinks").doc(chatId).delete();
+      await sendDailyPlanBotMessage(chatId, "🔕 Reminders are off. Send your email again to re-enable them.");
+    } else {
+      await sendDailyPlanBotMessage(chatId,
+        "Please send the email you use to log in on the site (it contains @).");
+    }
+  } catch (err) {
+    console.error("Webhook handling error:", err);
+  }
+
+  return res.status(200).json({ ok: true });
+});
+
+// Every morning: send each linked student their pending tasks for today
+export const sendDailyPlanReminders = onSchedule(
+  { schedule: "every day 08:00", timeZone: "Asia/Tashkent" },
+  async () => {
+    const today = tashkentToday();
+    const links = await db.collection("telegramLinks").get();
+    if (links.empty) return;
+
+    for (const link of links.docs) {
+      const { chatId, userId, name } = link.data();
+      try {
+        const planSnap = await db.collection("studyPlans").doc(userId).get();
+        if (!planSnap.exists) continue;
+        const plan = planSnap.data();
+        const day = plan.days?.find((d) => d.date === today);
+        if (!day) continue;
+        const msg = formatTasksMessage(name, day);
+        if (msg) await sendDailyPlanBotMessage(chatId, msg);
+      } catch (err) {
+        console.error(`Reminder failed for chat ${chatId}:`, err);
+      }
+    }
+  }
+);

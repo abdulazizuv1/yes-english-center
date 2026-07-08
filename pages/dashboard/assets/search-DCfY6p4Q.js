@@ -1,1 +1,0 @@
-import{d as e}from"./index-Ck89dD_o.js";const c=[["path",{d:"m12 19-7-7 7-7",key:"1l729n"}],["path",{d:"M19 12H5",key:"x3x0zl"}]],t=e("arrow-left",c);const o=[["path",{d:"m21 21-4.34-4.34",key:"14j7rj"}],["circle",{cx:"11",cy:"11",r:"8",key:"4ej97u"}]],a=e("search",o);export{t as A,a as S};
