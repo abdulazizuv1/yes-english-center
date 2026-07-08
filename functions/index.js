@@ -1069,7 +1069,7 @@ function formatTasksMessage(name, day) {
   const pending = day.tasks.filter((t) => t.status === "pending");
   if (!pending.length) return null;
   const totalMin = pending.reduce((sum, t) => sum + (t.minutes || 0), 0);
-  let msg = `📋 <b>Your study plan for today</b>\n`;
+  let msg = `☀️ Good morning${name ? `, ${name}` : ""}!\n📋 <b>Your study plan for today</b>\n`;
   if (day.focus) msg += `<i>Week focus: ${day.focus}</i>\n`;
   msg += `\n`;
   pending.forEach((t, i) => {
@@ -1104,8 +1104,9 @@ export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) =>
     if (text.startsWith("/start")) {
       await sendDailyPlanBotMessage(chatId,
         "👋 Welcome to <b>YES Daily Plan</b>!\n\n" +
-        "Send me the <b>email you use to log in</b> on yescenteruz.com and I will " +
-        "message you your study tasks every morning.");
+        "I send you your IELTS study tasks every morning at <b>7:00</b> and check " +
+        "your progress in the evening at <b>20:00</b>.\n\n" +
+        "To connect, send me the <b>email you use to log in</b> on yescenteruz.com.");
     } else if (text.includes("@")) {
       const email = text.toLowerCase();
       const userSnap = await db.collection("users").where("email", "==", email).limit(1).get();
@@ -1123,8 +1124,10 @@ export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) =>
           linkedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         await sendDailyPlanBotMessage(chatId,
-          `✅ Done, ${userDoc.data().name || "student"}! ` +
-          "I will send you your daily tasks every morning at 8:00.\n\n" +
+          `✅ Connected, ${userDoc.data().name || "student"}! Your Daily Plan is now linked.\n\n` +
+          "☀️ Every morning at <b>7:00</b> I'll send your tasks for the day.\n" +
+          "🌙 At <b>20:00</b> I'll remind you if something isn't finished.\n\n" +
+          "Create or view your plan here: https://yescenteruz.com/pages/dashboard/#/plan\n\n" +
           "Send /stop to turn reminders off.");
       }
     } else if (text.startsWith("/stop")) {
@@ -1141,9 +1144,45 @@ export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) =>
   return res.status(200).json({ ok: true });
 });
 
+// Server-side auto-complete: mark site tasks done when a matching test
+// result exists (same rule as the dashboard, but works even if the student
+// never opens the plan page). Returns the up-to-date plan data.
+async function autoMarkPlanTasks(uid, planSnap) {
+  const plan = planSnap.data();
+  const createdMs = plan.createdAt?.toMillis ? plan.createdAt.toMillis() : 0;
+  const doneTests = {};
+  await Promise.all(Object.entries(RESULT_COLLECTIONS).map(async ([type, col]) => {
+    const snap = await db.collection(col).where("userId", "==", uid).limit(50).get();
+    doneTests[type] = new Set();
+    snap.forEach((d) => {
+      const r = d.data();
+      const ms = r.createdAt?.toMillis?.() || r.submittedAt?.toMillis?.() ||
+        (typeof r.submittedAt === "string" ? (Date.parse(r.submittedAt) || 0) : 0);
+      if (r.testId && ms >= createdMs) doneTests[type].add(r.testId);
+    });
+  }));
+
+  let changed = false;
+  const days = plan.days.map((day) => ({
+    ...day,
+    tasks: day.tasks.map((t) => {
+      if (t.kind === "site" && t.status === "pending" && doneTests[t.type]?.has(t.testId)) {
+        changed = true;
+        return { ...t, status: "auto" };
+      }
+      return t;
+    }),
+  }));
+  if (changed) {
+    await planSnap.ref.update({ days });
+    return { ...plan, days };
+  }
+  return plan;
+}
+
 // Every morning: send each linked student their pending tasks for today
 export const sendDailyPlanReminders = onSchedule(
-  { schedule: "every day 08:00", timeZone: "Asia/Tashkent" },
+  { schedule: "every day 07:00", timeZone: "Asia/Tashkent" },
   async () => {
     const today = tashkentToday();
     const links = await db.collection("telegramLinks").get();
@@ -1154,13 +1193,54 @@ export const sendDailyPlanReminders = onSchedule(
       try {
         const planSnap = await db.collection("studyPlans").doc(userId).get();
         if (!planSnap.exists) continue;
-        const plan = planSnap.data();
+        const plan = await autoMarkPlanTasks(userId, planSnap);
         const day = plan.days?.find((d) => d.date === today);
         if (!day) continue;
         const msg = formatTasksMessage(name, day);
         if (msg) await sendDailyPlanBotMessage(chatId, msg);
       } catch (err) {
         console.error(`Reminder failed for chat ${chatId}:`, err);
+      }
+    }
+  }
+);
+
+// Every evening: nudge students who haven't finished today's tasks
+export const sendEveningNudges = onSchedule(
+  { schedule: "every day 20:00", timeZone: "Asia/Tashkent" },
+  async () => {
+    const today = tashkentToday();
+    const links = await db.collection("telegramLinks").get();
+    if (links.empty) return;
+
+    for (const link of links.docs) {
+      const { chatId, userId, name } = link.data();
+      try {
+        const planSnap = await db.collection("studyPlans").doc(userId).get();
+        if (!planSnap.exists) continue;
+        const plan = await autoMarkPlanTasks(userId, planSnap);
+        const day = plan.days?.find((d) => d.date === today);
+        if (!day) continue;
+
+        const real = day.tasks.filter((t) => t.type !== "rest");
+        const pending = real.filter((t) => t.status === "pending");
+        if (!real.length || !pending.length) continue; // rest day or all done
+
+        const totalMin = pending.reduce((sum, t) => sum + (t.minutes || 0), 0);
+        let msg;
+        if (pending.length === real.length) {
+          msg = `🌙 ${name ? `${name}, y` : "Y"}ou haven't started today's plan yet!\n\n`;
+        } else {
+          msg = `🌙 Almost there${name ? `, ${name}` : ""} — <b>${pending.length} task${pending.length > 1 ? "s" : ""} left</b> today:\n\n`;
+        }
+        pending.forEach((t, i) => {
+          msg += `${i + 1}. ${t.title}${t.minutes ? ` — ~${t.minutes} min` : ""}\n`;
+        });
+        msg += `\n⏱ About ${totalMin} min to finish. Every completed day brings you closer to Band ${plan.targetBand} 💪`;
+        msg += `\n\nhttps://yescenteruz.com/pages/dashboard/#/plan`;
+        await sendDailyPlanBotMessage(chatId, msg);
+      } catch (err) {
+        console.error(`Evening nudge failed for chat ${chatId}:`, err);
       }
     }
   }

@@ -70,7 +70,7 @@ HTTP functions; all except `submitContactForm` require a Firebase ID token:
 - `submitContactForm` — public endpoint for the landing-page contact form
 - `generateStudyPlan` — builds the student's daily study plan (`studyPlans/{uid}`); Claude (Haiku) supplies only skill weights/weekly focuses/advice, all scheduling is deterministic in `functions/planner.js`; 3 generations/week per user, full non-AI fallback
 - `dailyPlanBotWebhook` — Telegram webhook for @dailyplan_yes_bot: students link by sending their login email; mapping stored in `telegramLinks/{chatId}` (server-only collection)
-- `sendDailyPlanReminders` — scheduled daily 08:00 Asia/Tashkent; sends each linked student their pending tasks
+- `sendDailyPlanReminders` / `sendEveningNudges` — scheduled 07:00 / 20:00 Asia/Tashkent; morning task list and evening unfinished-tasks nudge; both auto-mark completed site tests server-side before checking
 
 Secrets (`CLAUDE_API_KEY`, `TELEGRAM_*`) live in `functions/.env` (gitignored; see `functions/.env.example`).
 

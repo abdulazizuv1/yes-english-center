@@ -320,12 +320,12 @@ function TelegramModal({ onClose }) {
                 <button className="modal-close" onClick={onClose}><X size={18} /></button>
                 <div className="modal-icon"><Send size={26} /></div>
                 <h3>Daily reminders in Telegram</h3>
-                <p className="modal-sub">Get your study tasks every morning at 8:00</p>
+                <p className="modal-sub">Tasks every morning at 7:00 — and a reminder at 20:00 if something is unfinished</p>
                 <ol className="tg-steps">
                     <li>Open <a href={`https://t.me/${TG_BOT_USERNAME}`} target="_blank" rel="noreferrer">@{TG_BOT_USERNAME} <ExternalLink size={12} /></a> in Telegram</li>
                     <li>Press <strong>Start</strong></li>
                     <li>Send the bot the <strong>email you log in with</strong> on this site</li>
-                    <li>Done — every morning the bot sends what you need to do today</li>
+                    <li>Done — at 7:00 the bot sends today\u2019s tasks, at 20:00 it checks your progress</li>
                 </ol>
                 <p className="tg-note">To turn reminders off, send <code>/stop</code> to the bot.</p>
                 <a className="btn-primary tg-open" href={`https://t.me/${TG_BOT_USERNAME}`} target="_blank" rel="noreferrer">
