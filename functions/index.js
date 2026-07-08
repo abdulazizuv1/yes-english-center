@@ -1076,7 +1076,7 @@ function formatTasksMessage(name, day) {
     msg += `${i + 1}. ${t.title}${t.minutes ? ` — ~${t.minutes} min` : ""}\n`;
   });
   msg += `\n⏱ Total: ~${totalMin} min`;
-  msg += `\n\nOpen your plan: https://yescenteruz.com/pages/dashboard/#/plan`;
+  msg += `\n\nOpen your plan: https://yescenter.uz/pages/dashboard/#/plan`;
   return msg;
 }
 
@@ -1106,7 +1106,7 @@ export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) =>
         "👋 Welcome to <b>YES Daily Plan</b>!\n\n" +
         "I send you your IELTS study tasks every morning at <b>7:00</b> and check " +
         "your progress in the evening at <b>20:00</b>.\n\n" +
-        "To connect, send me the <b>email you use to log in</b> on yescenteruz.com.");
+        "To connect, send me the <b>email you use to log in</b> on yescenter.uz.");
     } else if (text.includes("@")) {
       const email = text.toLowerCase();
       const userSnap = await db.collection("users").where("email", "==", email).limit(1).get();
@@ -1127,7 +1127,7 @@ export const dailyPlanBotWebhook = functions.https.onRequest(async (req, res) =>
           `✅ Connected, ${userDoc.data().name || "student"}! Your Daily Plan is now linked.\n\n` +
           "☀️ Every morning at <b>7:00</b> I'll send your tasks for the day.\n" +
           "🌙 At <b>20:00</b> I'll remind you if something isn't finished.\n\n" +
-          "Create or view your plan here: https://yescenteruz.com/pages/dashboard/#/plan\n\n" +
+          "Create or view your plan here: https://yescenter.uz/pages/dashboard/#/plan\n\n" +
           "Send /stop to turn reminders off.");
       }
     } else if (text.startsWith("/stop")) {
@@ -1237,7 +1237,7 @@ export const sendEveningNudges = onSchedule(
           msg += `${i + 1}. ${t.title}${t.minutes ? ` — ~${t.minutes} min` : ""}\n`;
         });
         msg += `\n⏱ About ${totalMin} min to finish. Every completed day brings you closer to Band ${plan.targetBand} 💪`;
-        msg += `\n\nhttps://yescenteruz.com/pages/dashboard/#/plan`;
+        msg += `\n\nhttps://yescenter.uz/pages/dashboard/#/plan`;
         await sendDailyPlanBotMessage(chatId, msg);
       } catch (err) {
         console.error(`Evening nudge failed for chat ${chatId}:`, err);

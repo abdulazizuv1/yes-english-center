@@ -281,7 +281,7 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle }) {
 }
 
 /* ═══════════════ Options dropdown ═══════════════ */
-function OptionsMenu({ onAdjust, onTelegram, onDelete }) {
+function OptionsMenu({ onAdjust, onDelete }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -299,9 +299,6 @@ function OptionsMenu({ onAdjust, onTelegram, onDelete }) {
                 <div className="options-menu">
                     <button onClick={() => { setOpen(false); onAdjust(); }}>
                         <SlidersHorizontal size={15} /> Adjust plan
-                    </button>
-                    <button onClick={() => { setOpen(false); onTelegram(); }}>
-                        <Send size={15} /> Telegram reminders
                     </button>
                     <button className="danger" onClick={() => { setOpen(false); onDelete(); }}>
                         <Trash2 size={15} /> Delete plan
@@ -373,11 +370,12 @@ function PlanView({ plan, onToggle, onAdjust, onDelete }) {
             {/* Title row */}
             <div className="plan-titlebar">
                 <h1><CalendarDays size={24} /> My Study Plan</h1>
-                <OptionsMenu
-                    onAdjust={onAdjust}
-                    onTelegram={() => setShowTelegram(true)}
-                    onDelete={onDelete}
-                />
+                <div className="titlebar-actions">
+                    <button className="btn-ghost btn-telegram" onClick={() => setShowTelegram(true)}>
+                        <Send size={15} /> Telegram
+                    </button>
+                    <OptionsMenu onAdjust={onAdjust} onDelete={onDelete} />
+                </div>
             </div>
 
             {/* Stats */}
@@ -408,14 +406,6 @@ function PlanView({ plan, onToggle, onAdjust, onDelete }) {
                     <div className="progress-fill" style={{ width: `${progress.pct}%` }} />
                 </div>
             </div>
-
-            {/* Advice */}
-            {plan.advice && (
-                <div className="plan-advice card">
-                    <Sparkles size={17} />
-                    <p>{plan.advice}</p>
-                </div>
-            )}
 
             {/* Week navigation */}
             <div className="week-nav">
