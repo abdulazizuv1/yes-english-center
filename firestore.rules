@@ -97,6 +97,15 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ─── Study plans: created server-side by generateStudyPlan CF;
+    //     students may only update task statuses on their own plan ───
+    match /studyPlans/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isStaff());
+      allow update: if request.auth != null && request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['days']);
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+    }
+
     // ─── Target scores: keyed by email ───
     match /userTargets/{docId} {
       allow read: if isStaff() ||

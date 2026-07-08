@@ -1,13 +1,14 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     Home, Headphones, BookOpen, PenTool, FileText,
-    Settings, Shield, LogOut, X, MessageSquare
+    Settings, Shield, LogOut, X, MessageSquare, CalendarCheck
 } from 'lucide-react';
 import './Sidebar.css';
 
 const NAV_ITEMS = [
     { to: '/', icon: Home, label: 'Home' },
+    { to: '/plan', icon: CalendarCheck, label: 'Daily Plan' },
     { to: '/listening', icon: Headphones, label: 'Listening' },
     { to: '/reading', icon: BookOpen, label: 'Reading' },
     { to: '/writing', icon: PenTool, label: 'Writing' },
@@ -16,7 +17,6 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ isOpen, onClose }) {
     const { userData, isAdmin, logout } = useAuth();
-    const location = useLocation();
 
     return (
         <>
@@ -37,16 +37,16 @@ export default function Sidebar({ isOpen, onClose }) {
                 {/* Navigation */}
                 <nav className="sidebar-nav">
                     <div className="nav-label">Main</div>
-                    {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+                    {NAV_ITEMS.map((item) => (
                         <NavLink
-                            key={to}
-                            to={to}
-                            end={to === '/'}
+                            key={item.to}
+                            to={item.to}
+                            end={item.to === '/'}
                             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                             onClick={onClose}
                         >
-                            <Icon size={20} />
-                            <span>{label}</span>
+                            <item.icon size={20} />
+                            <span>{item.label}</span>
                         </NavLink>
                     ))}
 

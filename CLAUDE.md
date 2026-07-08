@@ -68,11 +68,12 @@ HTTP functions; all except `submitContactForm` require a Firebase ID token:
 - `analyzeReadingAnalysis` — Claude API check of reading-analysis worksheets; 5/week per user
 - `sendTestNotification` — Telegram notifications for test/feedback submissions (types: `writing`, `fullmock`, `feedback`)
 - `submitContactForm` — public endpoint for the landing-page contact form
+- `generateStudyPlan` — builds the student's daily study plan (`studyPlans/{uid}`); Claude (Haiku) supplies only skill weights/weekly focuses/advice, all scheduling is deterministic in `functions/planner.js`; 3 generations/week per user, full non-AI fallback
 
 Secrets (`CLAUDE_API_KEY`, `TELEGRAM_*`) live in `functions/.env` (gitignored; see `functions/.env.example`).
 
 ### Firestore
-Collections: `users`, `groups`, `results`, `feedbacks`, `readingTests`, `listeningTests`, `writingTests`, `fullmockTests`, `resultsReading`, `resultsListening`, `resultsWriting`, `resultFullmock`, `aiWritingFeedback`, `aiReadingAnalysis`, `userTargets`.
+Collections: `users`, `groups`, `results`, `feedbacks`, `readingTests`, `listeningTests`, `writingTests`, `fullmockTests`, `resultsReading`, `resultsListening`, `resultsWriting`, `resultFullmock`, `aiWritingFeedback`, `aiReadingAnalysis`, `userTargets`, `studyPlans`.
 
 Security rules are versioned in `firestore.rules` (deployed via `firebase deploy --only firestore`). Key invariants: tests require auth to read; students may only create their own results and can never change their own `role`; landing-page collections (`groups`, `results`, `feedbacks`) are public-read/admin-write. See `docs/SECURITY.md` for the threat model and remaining known gaps.
 

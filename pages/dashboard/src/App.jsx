@@ -14,6 +14,7 @@ const ManageUsers = lazy(() => import('./pages/ManageUsers'));
 const ManageTests = lazy(() => import('./pages/ManageTests'));
 const Feedback = lazy(() => import('./pages/Feedback'));
 const UsersTestResults = lazy(() => import('./pages/UsersTestResults'));
+const DailyPlan = lazy(() => import('./pages/DailyPlan'));
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                     <Routes>
                         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                             <Route index element={<Home />} />
+                            <Route path="plan" element={<DailyPlan />} />
                             <Route path="settings" element={<Settings />} />
                             <Route path="feedback" element={<Feedback />} />
                             <Route path="admin" element={<AdminSettings />} />

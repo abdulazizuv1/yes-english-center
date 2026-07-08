@@ -3,6 +3,7 @@ import admin from "firebase-admin";
 import cors from "cors";
 import Anthropic from "@anthropic-ai/sdk";
 import { Buffer } from "node:buffer";
+import { validatePlanInput, fallbackWeights, buildPlan, bandFromScore } from "./planner.js";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -812,5 +813,218 @@ export const analyzeReadingAnalysis = functions.https.onRequest({ timeoutSeconds
     }
 
     return res.status(200).json({ success: true, submissionId, aiResult });
+  });
+});
+
+/* ═══════════════ Daily Study Plan ═══════════════
+   Claude (Haiku — cheap) supplies ONLY personalization: skill weights,
+   weekly focus topics and advice. All dates, tasks and test links are
+   assembled deterministically in planner.js. One API call per generation,
+   rate-limited, with a full non-AI fallback. */
+
+const PLANNER_MODEL = "claude-haiku-4-5";
+
+const PLANNER_SYSTEM_PROMPT = `You are an IELTS study-plan advisor for an exam-prep center.
+Given a student profile you return personalization parameters for a deterministic scheduler.
+Return ONLY valid JSON, no other text:
+{
+  "skillWeights": { "reading": <0.5-2>, "listening": <0.5-2>, "writing": <0.5-2> },
+  "weeklyFocuses": [ { "theme": "<short weekly strategy focus>", "vocabTopic": "<IELTS vocabulary topic>", "grammarTopic": "<grammar point>" } ],
+  "advice": "<2-3 sentences of specific, honest advice for this student>"
+}
+Rules:
+- Higher weight = the student needs MORE practice in that skill.
+- Base weights on the gap between recent scores and the target; with no scores, use the gap between current and target band.
+- weeklyFocuses: exactly the number of weeks requested, ordered from fundamentals to exam-week polish, no repeated topics.
+- Be realistic: if the target is not achievable in the time left, say so in advice and state what is achievable.`;
+
+const RESULT_COLLECTIONS = {
+  reading: "resultsReading",
+  listening: "resultsListening",
+  writing: "resultsWriting",
+  fullmock: "resultFullmock",
+};
+
+const TEST_COLLECTIONS = {
+  reading: "readingTests",
+  listening: "listeningTests",
+  writing: "writingTests",
+  fullmock: "fullmockTests",
+};
+
+export const generateStudyPlan = functions.https.onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Only POST requests are allowed" });
+    }
+
+    const bearerToken = req.headers.authorization;
+    if (!bearerToken?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing or invalid Authorization header." });
+    }
+
+    let uid, email;
+    try {
+      const decoded = await auth.verifyIdToken(bearerToken.split("Bearer ")[1]);
+      uid = decoded.uid;
+      email = decoded.email || null;
+    } catch {
+      return res.status(401).json({ error: "Invalid ID token." });
+    }
+
+    const input = validatePlanInput(req.body || {});
+    if (input.error) {
+      return res.status(400).json({ error: input.error });
+    }
+
+    // Rate limit: 3 plan generations per week per user
+    const weekKey = getWeekKey(new Date());
+    const usageRef = admin.database().ref(`planUsage/${uid}/${weekKey}/count`);
+    let limitReached = false;
+    try {
+      await usageRef.transaction((current) => {
+        const count = current || 0;
+        if (count >= 3) {
+          limitReached = true;
+          return;
+        }
+        return count + 1;
+      });
+    } catch (err) {
+      console.error("RTDB transaction error:", err);
+      return res.status(500).json({ error: "rate_limit_check_failed" });
+    }
+    if (limitReached) {
+      return res.status(429).json({ error: "limit_reached", used: 3, max: 3 });
+    }
+
+    // ── Student stats + already-taken tests (server-side, trusted data) ──
+    const skillStats = {};
+    const taken = {};
+    try {
+      await Promise.all(Object.entries(RESULT_COLLECTIONS).map(async ([skill, col]) => {
+        const snap = await db.collection(col).where("userId", "==", uid).limit(25).get();
+        taken[skill] = new Set();
+        const bands = [];
+        snap.forEach((d) => {
+          const r = d.data();
+          if (r.testId) taken[skill].add(r.testId);
+          if ((skill === "reading" || skill === "listening") &&
+              typeof r.score === "number" && r.total) {
+            bands.push(bandFromScore(r.score, r.total));
+          }
+        });
+        skillStats[skill] = {
+          testsTaken: snap.size,
+          avgBand: bands.length
+            ? Math.round((bands.reduce((a, b) => a + b, 0) / bands.length) * 10) / 10
+            : null,
+        };
+      }));
+    } catch (err) {
+      console.error("Failed to read results:", err);
+      return res.status(500).json({ error: "firestore_failed" });
+    }
+
+    // ── Available tests (ids only — listDocuments avoids reading content) ──
+    const tests = {};
+    try {
+      await Promise.all(Object.entries(TEST_COLLECTIONS).map(async ([skill, col]) => {
+        const refs = await db.collection(col).listDocuments();
+        tests[skill] = refs
+          .map((r) => r.id)
+          .sort((a, b) => (parseInt(a.match(/\d+/)?.[0] || "0") - parseInt(b.match(/\d+/)?.[0] || "0")));
+      }));
+    } catch (err) {
+      console.error("Failed to list tests:", err);
+      return res.status(500).json({ error: "firestore_failed" });
+    }
+
+    // ── Personalization: single cheap Claude call, deterministic fallback ──
+    const weeks = Math.ceil(input.totalDays / 7);
+    let ai = null;
+    let generatedWith = "fallback";
+    try {
+      const profile = {
+        currentBand: input.currentBand,
+        targetBand: input.targetBand,
+        daysUntilExam: input.totalDays,
+        hoursPerDay: input.hoursPerDay,
+        weeklyFocusesRequested: Math.min(weeks, 16),
+        recentPerformance: skillStats,
+      };
+      const client = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
+      const message = await client.messages.create({
+        model: PLANNER_MODEL,
+        max_tokens: 1500,
+        system: [{ type: "text", text: PLANNER_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+        messages: [{ role: "user", content: JSON.stringify(profile) }],
+      });
+      const jsonMatch = message.content[0].text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        const w = parsed.skillWeights || {};
+        ai = {
+          skillWeights: {
+            reading: Math.min(2, Math.max(0.5, parseFloat(w.reading) || 1)),
+            listening: Math.min(2, Math.max(0.5, parseFloat(w.listening) || 1)),
+            writing: Math.min(2, Math.max(0.5, parseFloat(w.writing) || 1)),
+          },
+          weeklyFocuses: Array.isArray(parsed.weeklyFocuses) ? parsed.weeklyFocuses : null,
+          advice: typeof parsed.advice === "string" ? parsed.advice.slice(0, 600) : "",
+        };
+        generatedWith = "ai";
+      }
+    } catch (err) {
+      console.warn("Planner AI call failed, using fallback:", err.message);
+    }
+    if (!ai) {
+      ai = {
+        skillWeights: fallbackWeights(skillStats, input.currentBand, input.targetBand),
+        weeklyFocuses: null,
+        advice: "",
+      };
+    }
+
+    // ── Deterministic assembly + save ──
+    const plan = buildPlan(input, ai, tests, taken);
+    try {
+      await db.collection("studyPlans").doc(uid).set({
+        userId: uid,
+        email,
+        currentBand: input.currentBand,
+        targetBand: input.targetBand,
+        examDate: input.examDate,
+        startDate: input.startDate,
+        hoursPerDay: input.hoursPerDay,
+        weeks: plan.weeks,
+        totalTasks: plan.totalTasks,
+        days: plan.days,
+        advice: ai.advice || "",
+        skillWeights: ai.skillWeights,
+        generatedWith,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Failed to save plan:", err);
+      return res.status(500).json({ error: "firestore_save_failed" });
+    }
+
+    // Keep the dashboard target card in sync with the plan target
+    if (email) {
+      try {
+        const targetSnap = await db.collection("userTargets")
+          .where("email", "==", email).limit(1).get();
+        if (!targetSnap.empty) {
+          await targetSnap.docs[0].ref.set({ target: input.targetBand }, { merge: true });
+        } else {
+          await db.collection("userTargets").add({ email, target: input.targetBand });
+        }
+      } catch (err) {
+        console.warn("userTargets sync failed (non-fatal):", err.message);
+      }
+    }
+
+    return res.status(200).json({ success: true, generatedWith, totalTasks: plan.totalTasks });
   });
 });
