@@ -49,6 +49,37 @@ export function initWritingUI() {
     document.getElementById('writingTasksContainer').innerHTML = html;
 }
 
+// Admins often paste the whole prompt (starting with "You should spend about
+// 40 minutes...") into the topic field while also filling the instructions
+// field — the saved question then contains the instruction twice. Join the
+// blocks while dropping exact repeats and duplicated leading text.
+function joinWritingBlocks(blocks) {
+    const norm = (s) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+    const out = [];
+    for (const raw of blocks) {
+        let text = (raw || '').trim();
+        if (!text) continue;
+        // Strip a leading repeat of any block we already included
+        for (const prev of out) {
+            const nPrev = norm(prev);
+            const nText = norm(text);
+            if (nText === nPrev) { text = ''; break; }
+            if (nText.startsWith(nPrev)) {
+                // Cut the duplicated part off the raw string (whitespace-insensitive)
+                const targetChars = prev.replace(/\s+/g, '').length;
+                let seen = 0, i = 0;
+                while (i < text.length && seen < targetChars) {
+                    if (!/\s/.test(text[i])) seen++;
+                    i++;
+                }
+                text = text.slice(i).trim();
+            }
+        }
+        if (text) out.push(text);
+    }
+    return out.join('\n\n');
+}
+
 export async function collectWritingData() {
     const t1Inst = document.querySelector('.t1-instructions').value.trim();
     const t1Prompt = document.querySelector('.t1-prompt').value.trim();
@@ -71,11 +102,11 @@ export async function collectWritingData() {
     }
 
     const task1 = {
-        question: `${t1Inst}\n\n${t1Prompt}`,
+        question: joinWritingBlocks([t1Inst, t1Prompt]),
         ...(t1ImageRef ? { imageUrl: t1ImageRef } : {})
     };
     const task2 = {
-        question: `${t2Inst}\n\n${t2Topic}\n\n${t2Prompt}`
+        question: joinWritingBlocks([t2Inst, t2Topic, t2Prompt])
     };
 
     const writingTasksEntry = {

@@ -70,7 +70,7 @@ export async function collectReadingData() {
 
         if (!title || !text) throw new Error(`Reading Passage ${i+1}: Title and Content are required.`);
 
-        const { questions, nextQNum } = extractReadingQuestions(block.querySelector('.questions-container'), globalQNum);
+        const { questions, nextQNum } = extractReadingQuestions(block.querySelector('.questions-container'), globalQNum, i + 1);
         globalQNum = nextQNum;
 
         if (questions.length === 0) throw new Error(`Reading Passage ${i+1}: Must contain at least one question.`);
@@ -81,10 +81,33 @@ export async function collectReadingData() {
     return { id: "reading", title: "Reading Test", duration: 60, passages, totalQuestions: globalQNum - 1 };
 }
 
-function extractReadingQuestions(container, startQNum) {
+function extractReadingQuestions(container, startQNum, passageNum) {
     const items = container.querySelectorAll('.question-item');
     const result = [];
     let qNum = startQNum;
+
+    // The test page numbers questions by their ORDER and skips entries with an
+    // empty `question` field. A question saved without text or answer therefore
+    // silently shifts every following number — so we validate instead of saving.
+    const fail = (msg) => { throw new Error(`Reading Passage ${passageNum}, Question ${qNum}: ${msg}`); };
+    const requireText = (value, what = 'question text') => {
+        if (!value || !value.trim()) fail(`${what} is empty.`);
+        return value;
+    };
+    const requireAnswer = (value) => {
+        if (!value || !value.trim()) fail('answer is missing.');
+        return value;
+    };
+    // The test page renders matching options with options.map(...) — must be an array
+    const collectOptionRows = (rows) => {
+        const options = [];
+        rows.forEach(row => {
+            const label = row.querySelector('.option-label')?.value?.trim();
+            const text = row.querySelector('.option-text')?.value?.trim();
+            if (label) options.push({ label, text: text || "" });
+        });
+        return options;
+    };
 
     items.forEach(el => {
         const type = el.dataset.type;
@@ -102,9 +125,9 @@ function extractReadingQuestions(container, startQNum) {
             result.push({
                 type: 'gap-fill', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
+                question: requireText(el.querySelector('.question-text')?.value || ""),
                 postfix: el.querySelector('.question-postfix')?.value || "",
-                answer: [el.querySelector('.question-answer')?.value || ""],
+                answer: [requireAnswer(el.querySelector('.question-answer')?.value || "")],
                 wordLimit: parseInt(el.querySelector('.question-word-limit')?.value) || null
             });
             qNum++;
@@ -112,16 +135,16 @@ function extractReadingQuestions(container, startQNum) {
             result.push({
                 type: 'true-false-notgiven', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
-                answer: el.querySelector('.question-answer')?.value || ""
+                question: requireText(el.querySelector('.question-text')?.value || ""),
+                answer: requireAnswer(el.querySelector('.question-answer')?.value || "")
             });
             qNum++;
         } else if (type === 'yes-no-notgiven') {
             result.push({
                 type: 'yes-no-notgiven', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
-                answer: el.querySelector('.question-answer')?.value || ""
+                question: requireText(el.querySelector('.question-text')?.value || ""),
+                answer: requireAnswer(el.querySelector('.question-answer')?.value || "")
             });
             qNum++;
         } else if (type === 'multiple-choice') {
@@ -131,64 +154,72 @@ function extractReadingQuestions(container, startQNum) {
                 const text = opt.querySelector('.option-text')?.value?.trim() || "";
                 if (text) options[letter] = text;
             });
+            if (Object.keys(options).length === 0) fail('multiple-choice has no options.');
             result.push({
                 type: 'multiple-choice', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
+                question: requireText(el.querySelector('.question-text')?.value || ""),
                 options,
-                answer: el.querySelector('input[type="radio"]:checked')?.value || ""
+                answer: requireAnswer(el.querySelector('input[type="radio"]:checked')?.value || "")
             });
             qNum++;
         } else if (type === 'paragraph-matching') {
-            const options = {};
-            el.querySelectorAll('#pm-options-' + el.dataset.questionId + ' .option-row, .pm-options .option-row').forEach(row => {
-                const label = row.querySelector('.option-label')?.value?.trim();
-                const text = row.querySelector('.option-text')?.value?.trim();
-                if (label) options[label] = text || "";
-            });
+            const options = collectOptionRows(
+                el.querySelectorAll('#pm-options-' + el.dataset.questionId + ' .option-row, .pm-options .option-row'));
+            if (options.length === 0) fail('paragraph-matching has no options.');
             result.push({
                 type: 'paragraph-matching', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
-                answer: el.querySelector('.question-answer')?.value || "",
+                question: requireText(el.querySelector('.question-text')?.value || ""),
+                answer: requireAnswer(el.querySelector('.question-answer')?.value || ""),
                 options
             });
             qNum++;
         } else if (type === 'match-person') {
-            const options = {};
-            el.querySelectorAll('.match-options .option-row').forEach(row => {
-                const label = row.querySelector('.option-label')?.value?.trim();
-                const text = row.querySelector('.option-text')?.value?.trim();
-                if (label) options[label] = text || "";
-            });
+            const options = collectOptionRows(el.querySelectorAll('.match-options .option-row'));
+            if (options.length === 0) fail('match-person has no options.');
             result.push({
                 type: 'match-person', questionId: `q${qNum}`,
                 groupInstruction: gi || null,
-                question: el.querySelector('.question-text')?.value || "",
-                answer: el.querySelector('.question-answer')?.value || "",
+                question: requireText(el.querySelector('.question-text')?.value || ""),
+                answer: requireAnswer(el.querySelector('.question-answer')?.value || ""),
                 options
             });
             qNum++;
         } else if (type === 'multi-select') {
+            // Saved in the site-compatible "question-group" format: the test page
+            // renders type question-group / groupType multi-select and grades each
+            // sub-question by its correctAnswer field. The old flat "multi-select"
+            // format was invisible to the test page and shifted all numbering.
             const options = {};
             el.querySelectorAll('.multi-select-options-list .option-row').forEach(row => {
                 const label = row.querySelector('.option-label')?.value?.trim();
                 const text = row.querySelector('.option-text')?.value?.trim();
-                if (label) options[label] = text || "";
+                if (label && text) options[label] = text;
             });
             const subAnswers = [];
             el.querySelectorAll('.subquestion-answer-input').forEach(inp => {
-                subAnswers.push(inp.value.trim().toUpperCase());
+                const v = inp.value.trim().toUpperCase();
+                if (v) subAnswers.push(v);
+            });
+            if (Object.keys(options).length === 0) fail('multi-select has no options.');
+            if (subAnswers.length === 0) fail('multi-select has no answer letters.');
+            subAnswers.forEach(a => {
+                if (!options[a]) fail(`multi-select answer "${a}" does not match any option letter.`);
             });
             result.push({
-                type: 'multi-select',
-                questionIds: subAnswers.map((_, idx) => `q${qNum + idx}`),
+                type: 'question-group',
+                groupType: 'multi-select',
+                questionId: subAnswers.length > 1 ? `q${qNum}_${qNum + subAnswers.length - 1}` : `q${qNum}`,
                 groupInstruction: gi || null,
-                text: el.querySelector('.multi-select-text')?.value || "",
+                text: requireText(el.querySelector('.multi-select-text')?.value || ""),
                 options,
-                answers: subAnswers
+                questions: subAnswers.map((ans, idx) => ({
+                    questionId: `q${qNum + idx}`,
+                    correctAnswer: ans
+                }))
             });
-            qNum += Math.max(subAnswers.length, 1);
+            qNum += subAnswers.length;
         }
     });
 
