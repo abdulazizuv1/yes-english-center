@@ -455,6 +455,62 @@
 }
 .btn-start.primary:hover { background: var(--primary-dark); }
 
+.task-remove {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.task-remove:hover { color: var(--danger); background: rgba(239, 68, 68, 0.08); }
+
+/* ═══ Add-your-own-task ═══ */
+.add-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1.5px dashed var(--card-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.add-link-btn:hover { color: var(--primary); border-color: var(--primary-light); }
+
+.add-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--content-bg);
+}
+.add-link-input {
+  padding: 9px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  outline: none;
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+.add-link-input:focus { border-color: var(--primary); }
+.add-link-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-primary.sm, .btn-ghost.sm { padding: 7px 14px; font-size: 13px; }
+
 /* ═══ Telegram modal ═══ */
 .modal-overlay {
   position: fixed;

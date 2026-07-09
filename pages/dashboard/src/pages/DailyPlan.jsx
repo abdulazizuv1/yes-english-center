@@ -6,7 +6,7 @@ import {
     CalendarDays, Target, Gauge, Clock, ChevronLeft, ChevronRight,
     Sparkles, Check, Lock, SlidersHorizontal, Trash2, Send,
     BookOpen, Headphones, PenTool, FileText, BookMarked, SpellCheck,
-    RotateCcw, ClipboardCheck, Search, Music, Mic, Moon, X, ExternalLink,
+    RotateCcw, ClipboardCheck, Search, Music, Mic, Moon, X, ExternalLink, Plus, Link2,
 } from 'lucide-react';
 import './DailyPlan.css';
 
@@ -23,10 +23,10 @@ const MIN_EXAM_DATE = new Date(Date.now() + 3 * 86400000).toISOString().slice(0,
 const MAX_EXAM_DATE = new Date(Date.now() + 200 * 86400000).toISOString().slice(0, 10);
 
 const HOURS_OPTIONS = [
-    { value: 1, label: '1 hour', desc: 'Light — busy schedule' },
-    { value: 1.5, label: '1.5 hours', desc: 'Steady progress' },
-    { value: 2, label: '2 hours', desc: 'Balanced (recommended)' },
-    { value: 3, label: '3+ hours', desc: 'Intensive preparation' },
+    { value: 3, label: '3 hours', desc: 'Essential — all 4 skills daily' },
+    { value: 4, label: '4 hours', desc: 'Solid — extra vocabulary & grammar' },
+    { value: 5, label: '5 hours', desc: 'Serious — double practice on weak skills' },
+    { value: 6, label: '6 hours', desc: 'Maximum — full-time preparation' },
 ];
 
 const TASK_META = {
@@ -39,8 +39,12 @@ const TASK_META = {
     review: { label: 'Review', icon: RotateCcw },
     mock_review: { label: 'Mock Review', icon: ClipboardCheck },
     reading_analysis: { label: 'Analysis', icon: Search },
+    reading_practice: { label: 'Reading', icon: BookOpen },
     listening_review: { label: 'Listening', icon: Music },
+    listening_practice: { label: 'Listening', icon: Music },
+    writing_practice: { label: 'Writing', icon: PenTool },
     speaking: { label: 'Speaking', icon: Mic },
+    custom: { label: 'My task', icon: Link2 },
     rest: { label: 'Rest', icon: Moon },
 };
 
@@ -81,7 +85,7 @@ function PlanWizard({ defaults, onSubmit, generating, error, onCancel }) {
     });
     const [examDate, setExamDate] = useState(defaults.examDate ?? '');
     const [targetBand, setTargetBand] = useState(defaults.targetBand ?? null);
-    const [hoursPerDay, setHoursPerDay] = useState(defaults.hoursPerDay ?? 2);
+    const [hoursPerDay, setHoursPerDay] = useState(Math.max(3, defaults.hoursPerDay ?? 3));
 
     const setSection = (key, value) =>
         setBands((prev) => ({ ...prev, [key]: value === '' ? null : parseFloat(value) }));
@@ -168,7 +172,7 @@ function PlanWizard({ defaults, onSubmit, generating, error, onCancel }) {
         {
             icon: Clock,
             title: 'Daily study time',
-            subtitle: 'How much time can you realistically spend per day?',
+            subtitle: 'Every skill is trained daily, so plan for at least 3 focused hours',
             valid: !!hoursPerDay,
             body: (
                 <div className="hours-grid">
@@ -235,7 +239,7 @@ function PlanWizard({ defaults, onSubmit, generating, error, onCancel }) {
 }
 
 /* ═══════════════ Task row (OnePrep style) ═══════════════ */
-function TaskRow({ task, isOverdue, isPrimary, onToggle }) {
+function TaskRow({ task, isOverdue, isPrimary, onToggle, onRemove }) {
     const auto = task.status === 'auto';
     const done = task.status === 'done' || auto;
     const meta = TASK_META[task.type] || { label: task.type, icon: FileText };
@@ -261,7 +265,7 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle }) {
                 </div>
                 <div className="task-meta">
                     <MetaIcon size={13} />
-                    <span>IELTS</span>
+                    <span>{task.kind === 'custom' ? 'Personal' : 'IELTS'}</span>
                     {task.minutes > 0 && (<><span className="meta-sep">/</span><span>~{task.minutes} min</span></>)}
                 </div>
             </div>
@@ -276,6 +280,62 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle }) {
                     Start <ChevronRight size={15} />
                 </a>
             )}
+            {task.kind === 'custom' && task.url && !done && (
+                <a className="btn-start" href={task.url} target="_blank" rel="noreferrer">
+                    Open <ExternalLink size={13} />
+                </a>
+            )}
+            {task.kind === 'custom' && (
+                <button className="task-remove" onClick={onRemove} title="Remove this task">
+                    <X size={15} />
+                </button>
+            )}
+        </div>
+    );
+}
+
+/* ═══════════════ Add-your-own-task row ═══════════════ */
+function AddLinkRow({ onAdd }) {
+    const [open, setOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [url, setUrl] = useState('');
+
+    const submit = () => {
+        if (!title.trim()) return;
+        onAdd(title, url);
+        setTitle(''); setUrl(''); setOpen(false);
+    };
+
+    if (!open) {
+        return (
+            <button className="add-link-btn" onClick={() => setOpen(true)}>
+                <Plus size={15} /> Add your own task
+            </button>
+        );
+    }
+    return (
+        <div className="add-link-form">
+            <input
+                className="add-link-input"
+                placeholder="Task name (e.g. Watch IELTS grammar video)"
+                value={title}
+                maxLength={80}
+                autoFocus
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+            />
+            <input
+                className="add-link-input"
+                placeholder="Link — https://youtube.com/… (optional)"
+                value={url}
+                maxLength={300}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+            />
+            <div className="add-link-actions">
+                <button className="btn-ghost sm" onClick={() => { setOpen(false); setTitle(''); setUrl(''); }}>Cancel</button>
+                <button className="btn-primary sm" onClick={submit} disabled={!title.trim()}>Add</button>
+            </div>
         </div>
     );
 }
@@ -322,7 +382,7 @@ function TelegramModal({ onClose }) {
                     <li>Open <a href={`https://t.me/${TG_BOT_USERNAME}`} target="_blank" rel="noreferrer">@{TG_BOT_USERNAME} <ExternalLink size={12} /></a> in Telegram</li>
                     <li>Press <strong>Start</strong></li>
                     <li>Send the bot the <strong>email you log in with</strong> on this site</li>
-                    <li>Done — at 7:00 the bot sends today\u2019s tasks, at 20:00 it checks your progress</li>
+                    <li>Done — at 7:00 the bot sends today's tasks, at 20:00 it checks your progress</li>
                 </ol>
                 <p className="tg-note">To turn reminders off, send <code>/stop</code> to the bot.</p>
                 <a className="btn-primary tg-open" href={`https://t.me/${TG_BOT_USERNAME}`} target="_blank" rel="noreferrer">
@@ -334,7 +394,7 @@ function TelegramModal({ onClose }) {
 }
 
 /* ═══════════════ Plan view ═══════════════ */
-function PlanView({ plan, onToggle, onAdjust, onDelete }) {
+function PlanView({ plan, onToggle, onAddLink, onRemoveTask, onAdjust, onDelete }) {
     const today = todayString();
     const progress = planProgress(plan);
     const daysLeft = daysUntil(plan.examDate);
@@ -447,8 +507,12 @@ function PlanView({ plan, onToggle, onAdjust, onDelete }) {
                                         isOverdue={day.date < today && t.status === 'pending' && t.type !== 'rest'}
                                         isPrimary={t.id === primaryTaskId}
                                         onToggle={() => onToggle(day.dayIndex, t.id)}
+                                        onRemove={() => onRemoveTask(day.dayIndex, t.id)}
                                     />
                                 ))}
+                                {day.date >= today && (
+                                    <AddLinkRow onAdd={(title, url) => onAddLink(day.dayIndex, title, url)} />
+                                )}
                             </div>
                         </div>
                     );
@@ -463,7 +527,7 @@ function PlanView({ plan, onToggle, onAdjust, onDelete }) {
 /* ═══════════════ Page ═══════════════ */
 export default function DailyPlan() {
     const { user, userData } = useAuth();
-    const { plan, loading, generating, error, generatePlan, toggleTask, deletePlan } = useStudyPlan(user?.uid);
+    const { plan, loading, generating, error, generatePlan, toggleTask, addCustomTask, removeCustomTask, deletePlan } = useStudyPlan(user?.uid);
     const { target } = useTargetScore(user?.uid, userData?.email || user?.email);
     const [editing, setEditing] = useState(false);
 
@@ -508,6 +572,8 @@ export default function DailyPlan() {
                 <PlanView
                     plan={plan}
                     onToggle={toggleTask}
+                    onAddLink={addCustomTask}
+                    onRemoveTask={removeCustomTask}
                     onAdjust={() => setEditing(true)}
                     onDelete={handleDelete}
                 />

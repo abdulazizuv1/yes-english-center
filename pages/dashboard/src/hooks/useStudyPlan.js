@@ -141,6 +141,43 @@ export function useStudyPlan(userId) {
     }
   }, []);
 
+  // Student's own task, optionally with an external link (YouTube etc.)
+  const addCustomTask = useCallback(async (dayIndex, title, url) => {
+    if (!plan?.days || !title?.trim()) return;
+    let link = (url || '').trim();
+    if (link && !/^https?:\/\//i.test(link)) link = `https://${link}`;
+    const task = {
+      id: `c${Date.now()}`,
+      kind: 'custom',
+      type: 'custom',
+      title: title.trim(),
+      ...(link ? { url: link } : {}),
+      minutes: 0,
+      status: 'pending',
+    };
+    const days = plan.days.map((day, i) =>
+      i !== dayIndex ? day : { ...day, tasks: [...day.tasks, task] });
+    try {
+      await updateDoc(doc(db, 'studyPlans', userId), { days });
+    } catch (err) {
+      console.error('Failed to add custom task:', err);
+    }
+  }, [plan, userId]);
+
+  const removeCustomTask = useCallback(async (dayIndex, taskId) => {
+    if (!plan?.days) return;
+    const days = plan.days.map((day, i) =>
+      i !== dayIndex ? day : {
+        ...day,
+        tasks: day.tasks.filter((t) => !(t.id === taskId && t.kind === 'custom')),
+      });
+    try {
+      await updateDoc(doc(db, 'studyPlans', userId), { days });
+    } catch (err) {
+      console.error('Failed to remove custom task:', err);
+    }
+  }, [plan, userId]);
+
   // Remove the plan entirely (owner delete is allowed by rules)
   const deletePlan = useCallback(async () => {
     try {
@@ -152,7 +189,7 @@ export function useStudyPlan(userId) {
     }
   }, [userId]);
 
-  return { plan, loading, generating, error, generatePlan, toggleTask, deletePlan };
+  return { plan, loading, generating, error, generatePlan, toggleTask, addCustomTask, removeCustomTask, deletePlan };
 }
 
 /* ─── Derived helpers ─── */
