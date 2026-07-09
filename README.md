@@ -1,137 +1,127 @@
-# YES English Center — фронтенд, мок-тесты и админка
+# YES English Center
 
-Статический сайт школы YES с модульной архитектурой ES-модулей, Firebase-авторизацией и панелями для управления тестами/пользователями. Ключевые блоки: публичный лендинг, личные мок-тесты после авторизации, кабинеты администратора и студента, облачные функции для создания/удаления пользователей.
+Платформа подготовки к IELTS учебного центра YES: публичный лендинг, мок-тесты (Listening / Reading / Writing / Full Mock), личный кабинет студента с ежедневным планом подготовки и AI-проверкой письма, админ-панель для управления тестами и пользователями.
 
-## 🚀 Оптимизации производительности
+Прод: **[yescenter.uz](https://yescenter.uz)**
 
-Проект оптимизирован для максимальной производительности и SEO:
+## Три приложения в одном репозитории
 
-- **Оптимизация загрузки:** Service Worker для офлайн-режима и кэширования, оптимизированная загрузка шрифтов (только необходимые веса: 400, 500, 600, 700)
-- **SEO:** Мета-теги (Open Graph, Twitter Cards), структурированные данные (JSON-LD), канонические URL
-- **Доступность:** ARIA-метки, улучшенные индикаторы фокуса, правильная иерархия заголовков
-- **Производительность:** CSS containment, content-visibility, оптимизированная ленивая загрузка изображений с Intersection Observer
-- **Мониторинг:** Отслеживание Web Vitals (LCP, FID, CLS, FCP, TTI) через модуль `performance.js`
-- **Оптимизация ресурсов:** Defer для некритичных скриптов, fetchpriority для важных изображений, оптимизированные CDN-ресурсы
+| Приложение | Стек | Где живёт |
+|---|---|---|
+| Лендинг + мок-тесты | Vanilla JS (ES-модули), без сборки | корень, `pages/mock/` |
+| Админ-панель | Vanilla JS, без сборки | `settings/admin/` |
+| Дашборд студента | React 19 + Vite (сборка коммитится) | `pages/dashboard/` |
+
+Все три используют общий Firebase (Auth, Firestore, Storage) через `config.js` (в git не хранится).
 
 ## Возможности
-- Лендинг с секциями Groups/Results/Feedbacks и динамической подгрузкой данных из Firestore.
-- Авторизация через Firebase Auth, проверка роли и отображение нужных ссылок (Mock Tests, Admin Panel, My Settings).
-- Три языка интерфейса (en/ru/uz) через `lang.js` + модуль `language.js`.
-- Кэширование данных в памяти и IndexedDB (30 мин) для групп/результатов/отзывов.
-- Мок-тесты (reading, listening, writing, full) доступны только авторизованным пользователям.
-- Админ-панель: создание/удаление пользователей через Cloud Functions, загрузка материалов в Storage, CRUD по тестам и группам.
 
-## Технологии
-- **Фронтенд:** HTML5/CSS3/ES-модули, Swiper 11, AOS (Animate On Scroll), glassmorphism-эффекты
-- **Backend:** Firebase (Auth, Firestore, Storage, Cloud Functions v2)
-- **Оптимизация:** Service Worker, IndexedDB кэширование, CSS containment, Performance API
-- **Инструменты:** Node 20+ для вспомогательных скриптов и функций
+- **Мок-тесты IELTS** — reading, listening, writing и полный мок; результаты сохраняются в Firestore, доступ к тестам только после входа.
+- **Daily Plan** — персональный план подготовки до даты экзамена: студент задаёт уровень по каждой секции, target band и часы в день; план строится детерминированным алгоритмом (`functions/planner.js`), Claude (Haiku) добавляет только персонализацию (веса навыков, недельные темы). Каждый день тренируются все 4 навыка; тесты сайта отмечаются выполненными автоматически.
+- **Telegram-бот** `@dailyplan_yes_bot` — утром (7:00) присылает задачи дня, вечером (20:00) напоминает о невыполненных.
+- **AI-проверка письма** — Claude оценивает IELTS Writing по официальным дескрипторам с аннотацией ошибок (лимит 2/нед на студента).
+- **Проверка Reading Analysis** — Claude проверяет таблицы анализа текста (5/нед).
+- **Админка** — CRUD по тестам всех типов, управление пользователями/группами через Cloud Functions, результаты всех студентов.
+- Лендинг: 3 языка (en/ru/uz), Swiper, кэширование Firestore-данных (память → IndexedDB, TTL 30 мин), Service Worker.
 
 ## Структура
-- `index.html`, `style.css`, `glass-effects.js`, `lang.js` — публичный лендинг
-- `sw.js` — Service Worker для офлайн-режима и кэширования
-- `src/` — модульный фронтенд:
-  - `modules/auth/` — авторизация через Firebase Auth
-  - `modules/data/` — загрузка данных с multi-level кэшированием (память + IndexedDB)
-  - `modules/ui/` — рендеринг UI с оптимизированной ленивой загрузкой изображений
-  - `modules/utils/` — утилиты и мониторинг производительности (`performance.js`)
-  - `modules/cache/` — IndexedDB кэширование
-  - `modules/language/` — переключение языков
-  - `modules/swiper/` — конфигурация Swiper слайдеров
-  - См. подробности в `src/README.md`
-- `pages/mock/` — страницы выбора и прохождения мок-тестов (reading/listening/writing/full + результаты)
-- `settings/admin/` — админка (управление пользователями, группами, тестами, загрузками в Storage) на Firebase SDK
-- `settings/user/` — страница настроек студента
-- `functions/` — Cloud Functions (`createUser`, `deleteUser`) с проверкой токена админа
-- `mock-tests/` — примерные данные/скрипты для импорта мок-тестов
-- `image/` — статические изображения
 
-## Подготовка Firebase-конфига (обязательно)
-Создайте файл `config.js` в корне проекта и экспортируйте конфиг вашего Firebase-проекта (используется на лендинге, в мок-страницах и админке):
+```
+index.html, style.css, lang.js     лендинг
+src/modules/                       модули лендинга (auth, data, cache, ui, language, callback…)
+sw.js                              Service Worker (при изменении статики — поднять версию кэша)
+pages/mock/                        мок-тесты: reading/ listening/ writing/ full/ + страницы результатов
+pages/dashboard/                   React-дашборд (src/ — исходники, index.html + assets/ — коммитящаяся сборка)
+settings/admin/                    админ-панель (добавление/редактирование тестов, пользователи)
+functions/                         Cloud Functions (index.js — все функции, planner.js — генератор Daily Plan)
+firestore.rules                    правила безопасности — источник правды, деплой через CLI
+mock-tests/                        админ-скрипты (admin SDK) и экспорт тестовых данных
+docs/SECURITY.md                   что исправлено, известные ограничения, ручные шаги
+```
+
+## Настройка
+
+1. **`config.js` в корне** (обязательно, gitignored):
 
 ```js
 export const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "...",
-  measurementId: "..." // опционально
+  apiKey: "...", authDomain: "...", projectId: "...",
+  storageBucket: "...", messagingSenderId: "...", appId: "...",
 };
 ```
 
-Для вспомогательных Node-скриптов (`node.js`, `index.mjs`) можно создать `.env` с теми же ключами (`FIREBASE_API_KEY` и т.д.).
+2. **`functions/.env`** — секреты бэкенда (см. `functions/.env.example`): `CLAUDE_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DAILYPLAN_BOT_TOKEN` и др.
 
-## Запуск локально (статический фронт)
-1) Убедитесь, что `config.js` заполнен.
-2) Запустите local сервер
+3. Для админ-скриптов (`mock-tests/`) нужен `mock-tests/serviceAccountKey.json` (gitignored).
 
-## Работа с Cloud Functions
-- Установить зависимости: `npm install --prefix functions`.
-- Линт: `npm run lint --prefix functions`.
-- Локально (эмулятор): `npm run serve --prefix functions`.
-- Деплой только функций: `npm run deploy --prefix functions`.
+## Локальный запуск
 
-## Данные и коллекции Firestore
-Основные коллекции, которые ожидает фронтенд:
-- `groups` — карточки преподавателей/групп (`name`, `position`, `photoURL`, `createdAt`).
-- `results` — достижения студентов (`score`, `name`, `photoURL`, `createdAt`).
-- `feedbacks` — отзывы (`text`, `author`, `photoURL`, `createdAt`).
-- `users` — пользователи с `role` (`admin`/`teacher`/`student`), `name`, `username` (уникален).
-- Тестовые коллекции для моков: `readingTests`, `listeningTests`, `writingTests`, `fullMockTests` (структура см. в `pages/mock/**`).
+```bash
+# Лендинг + мок-тесты (http://localhost:5173, страницы открывать с .html)
+npm install && npm run dev
 
-## Потоки использования
-- **Публичный лендинг:** данные тянутся из Firestore, прогресс отображается через скелетоны, Swiper обновляется после рендера.
-- **Авторизация:** логин по email/username + пароль, проверка роли; после входа показываются ссылки на мок-тесты и кабинеты, при отсутствии `name` предлагается задать имя.
-- **Мок-тесты:** доступны только после входа; перенаправление защищено `onAuthStateChanged`.
-- **Админка:** защищена проверкой роли в Firestore; создание/удаление пользователей идет через `https://...cloudfunctions.net/createUser|deleteUser` с ID-токеном текущего админа; загрузки в Storage и сохранение ссылок в коллекциях.
-
-## Советы по разработке
-- **Кэширование:** Данные кэшируются в памяти и IndexedDB на 30 минут; при обновлениях используйте функции из `data-loader.js` (`reloadData`) или очищайте IndexedDB вручную
-- **Отладка:** Все модули доступны глобально в консоли как `window.App.*` для отладки
-- **Тесты:** При добавлении новых тестов придерживайтесь существующих коллекций и схем, чтобы рендер страниц не ломался
-- **Производительность:** 
-  - Service Worker автоматически кэширует статические ресурсы
-  - Изображения загружаются лениво с помощью Intersection Observer
-  - Производительность отслеживается через `window.App.Performance.getPerformanceMetrics()`
-- **SEO:** Мета-теги и структурированные данные обновляются в `index.html`
-- **Доступность:** Используйте ARIA-метки для интерактивных элементов, проверяйте контрастность цветов
-
-## Производительность
-
-### Ожидаемые улучшения после оптимизаций:
-- ⚡ **Время загрузки:** сокращение на 30-40%
-- 📊 **Lighthouse Score:** улучшение до 90+ по всем метрикам
-- 🎯 **First Contentful Paint:** улучшение на 200-300ms
-- ⏱️ **Time to Interactive:** улучшение на 500-800ms
-- 🔍 **SEO:** улучшенная видимость в поисковых системах
-- ♿ **Доступность:** поддержка screen readers и навигации с клавиатуры
-
-### Мониторинг производительности:
-```javascript
-// Получить метрики производительности
-const metrics = window.App.Performance.getPerformanceMetrics();
-console.log(metrics);
-
-// Метрики отслеживаются автоматически:
-// - LCP (Largest Contentful Paint)
-// - FID (First Input Delay)
-// - CLS (Cumulative Layout Shift)
-// - FCP (First Contentful Paint)
-// - TTI (Time to Interactive)
+# Дашборд (http://localhost:517x/pages/dashboard/)
+cd pages/dashboard && npm install && npm run dev
 ```
 
-## Лицензия
-Проект образовательного центра YES; используйте внутри команды согласно договорённостям.
+Локальный dev работает с **боевым** Firebase — осторожно с записями.
 
----
+## Сборка дашборда
 
-**Версия:** 2.0 (2026)  
-**Последнее обновление:** Оптимизация производительности, SEO, доступности и добавление Service Worker
+```bash
+cd pages/dashboard && npm run build
+```
 
+Сборка идёт «на место»: чистит `assets/`, восстанавливает entry из `index.dev.html`, кладёт готовые `index.html` + `assets/` — **их нужно коммитить** (cPanel раздаёт файлы из git как есть).
 
+## Cloud Functions
 
+| Функция | Назначение |
+|---|---|
+| `createUser` / `deleteUser` | управление пользователями (только админ) |
+| `generateAIFeedback` | AI-оценка письма (2/нед на студента) |
+| `analyzeReadingAnalysis` | AI-проверка reading analysis (5/нед) |
+| `generateStudyPlan` | генерация Daily Plan (3/нед) |
+| `sendTestNotification` | Telegram-уведомления о сдачах (writing / fullmock / feedback) |
+| `submitContactForm` | публичная форма обратной связи лендинга |
+| `dailyPlanBotWebhook` | вебхук бота: привязка студента по email, /stop |
+| `sendDailyPlanReminders` / `sendEveningNudges` | рассылки 07:00 / 20:00 (Asia/Tashkent) |
 
+```bash
+cd functions && npm install
+npm run serve   # эмулятор
+npm run lint
+```
 
+## Деплой
 
+Порядок при изменениях бэкенда: **сначала functions и rules, потом сайт.**
+
+```bash
+firebase deploy --only functions --project yes-english-center
+firebase deploy --only firestore --project yes-english-center   # rules + indexes
+```
+
+Сайт деплоится синхронизацией cPanel: `.cpanel.yml` копирует checkout в `public_html` и удаляет служебные папки (`functions/`, `mock-tests/`, `docs/` не попадают в публичный доступ).
+
+⚠️ Правила Firestore редактируются **только** в `firestore.rules` в репозитории — правки в консоли Firebase будут перезаписаны следующим деплоем.
+
+## Коллекции Firestore
+
+`users`, `groups`, `results`, `feedbacks` (лендинг) · `readingTests`, `listeningTests`, `writingTests`, `fullmockTests` (тесты) · `resultsReading`, `resultsListening`, `resultsWriting`, `resultFullmock` (результаты) · `aiWritingFeedback`, `aiReadingAnalysis` (AI) · `userTargets`, `studyPlans` (Daily Plan) · `telegramLinks` (только сервер).
+
+Ключевые инварианты правил: тесты читаются только после входа; студент создаёт и читает только свои результаты; менять свою `role` нельзя; staff (admin/teacher) видит всё. Подробности и известные ограничения — в `docs/SECURITY.md`.
+
+## Админ-скрипты
+
+```bash
+cd mock-tests
+node scripts/download-doc.js <collection> <docId>   # выгрузить документ в JSON
+```
+
+## Советы по разработке
+
+- Модули лендинга доступны в консоли как `window.App.*`.
+- Данные лендинга кэшируются на 30 минут — для сброса `window.App.DataLoader.reloadData()`.
+- Меняешь статику, которую кэширует SW, — подними версию кэша в `sw.js`.
+- Новые тесты создавай через админку: сборщики валидируют форматы, которые ожидает страница теста (пустой текст вопроса или отсутствующий ответ не дадут сохранить битый тест).
