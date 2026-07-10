@@ -1603,23 +1603,6 @@ function collectTestData() {
     return numbers;
   };
 
-  const registerExistingQuestionNumbers = (numbers) => {
-    if (!Array.isArray(numbers) || numbers.length === 0) return;
-    const uniqueNumbers = Array.from(
-      new Set(
-        numbers
-          .map((num) => parseInt(num, 10))
-          .filter((num) => Number.isFinite(num))
-      )
-    ).sort((a, b) => a - b);
-    if (!uniqueNumbers.length) return;
-    totalQuestionCount += uniqueNumbers.length;
-    const highest = uniqueNumbers[uniqueNumbers.length - 1];
-    if (highest >= nextQuestionNumber) {
-      nextQuestionNumber = highest + 1;
-    }
-  };
-
   const toQuestionId = (number) => `q${number}`;
   const formatMultiSelectGroupId = (numbers) => {
     if (!numbers.length) return "";
@@ -1712,16 +1695,16 @@ function collectTestData() {
           break;
 
 
-        case "table":
+        case "table": {
           const tableTitle = questionEl.querySelector(".table-title")?.value.trim();
           const tableGroupInstruction = questionEl.querySelector(".group-instruction")?.value.trim();
           const tableAnswersElement = questionEl.querySelector(".table-answers-text");
           const tableAnswersText = tableAnswersElement ? tableAnswersElement.value.trim() : "";
-          
+
           questionData.type = "table";
           if (tableTitle) questionData.title = tableTitle;
           if (tableGroupInstruction) questionData.groupInstruction = tableGroupInstruction;
-          
+
           // Get columns from header
           questionData.columns = [];
           const headerRow = questionEl.querySelector(`#header-row-${questionId}`);
@@ -1731,199 +1714,121 @@ function collectTestData() {
               if (colName) questionData.columns.push(colName);
             });
           }
-          
-          // Get rows from table body and organize questions by number
+
           questionData.rows = [];
-          questionData.questions = {}; // Store questions by their numbers
-          
+          questionData.questions = {};
+
+          // Question numbers are assigned HERE, at save time, in document order —
+          // never trusted from the UI counter (data-question-number), which keeps
+          // growing as the admin adds/removes items and used to leak numbers like
+          // q41+ into the saved test. The UI number is only kept as a key so the
+          // admin's answer list (typed against visible numbers) can be remapped.
+          const uiToFinal = {};
+          const allocateTableQuestion = (uiNumber) => {
+            const [finalNumber] = allocateQuestionNumbers(1);
+            if (uiNumber !== null && uiNumber !== undefined && uiNumber !== "") {
+              uiToFinal[String(parseInt(uiNumber, 10))] = finalNumber;
+            }
+            return finalNumber;
+          };
+          // Rewrite gap placeholders in cell text to the final number.
+          // The test page turns both "___qN___" and "N___" (3+ underscores)
+          // into inputs with qId = qN, so the number inside the text MUST be
+          // the final sequential one.
+          const renumberPlaceholders = (content, finalNumber) =>
+            content
+              .replace(/___q\d+___/g, `___q${finalNumber}___`)
+              .replace(/(?<!q)(\d+)\s*_{3,}/g, `${finalNumber}_____`);
+
           const tbody = questionEl.querySelector(`#table-body-${questionId}`);
           if (tbody) {
             tbody.querySelectorAll(".data-row").forEach((rowEl, rowIndex) => {
               const rowData = {};
               const cells = rowEl.querySelectorAll(".data-cell");
-              
+
               cells.forEach((cellEl, cellIndex) => {
                 const cellType = cellEl.querySelector(".cell-type").value;
                 const cellContent = cellEl.querySelector(".cell-content");
                 // ВАЖНО: Убираем пробелы из имени колонки, чтобы совпадало с рендерингом
                 const columnName = questionData.columns[cellIndex]?.toLowerCase().replace(/\s+/g, "") || `column${cellIndex + 1}`;
-                
+
                 if (cellType === "question") {
-                  // Process all questions in this cell (including additional questions)
                   let cellValue = '';
-                  
-                  // Get main question input
+
+                  const registerGapQuestion = (input) => {
+                    const content = input.value.trim();
+                    if (!content) return;
+                    const uiNumber = input.getAttribute('data-question-number');
+                    const finalNumber = allocateTableQuestion(uiNumber);
+                    const formattedContent = renumberPlaceholders(content, finalNumber);
+                    if (cellValue) cellValue += '<br>';
+                    cellValue += formattedContent;
+                    questionData.questions[finalNumber] = {
+                      questionId: `q${finalNumber}`,
+                      text: formattedContent,
+                      row: rowIndex,
+                      column: cellIndex,
+                      columnName: columnName
+                    };
+                  };
+
                   const mainInput = cellContent.querySelector('.cell-input[data-question-number]');
-                  if (mainInput) {
-                    const questionNumber = mainInput.getAttribute('data-question-number');
-                    const content = mainInput.value.trim();
-                    if (content) {
-                      // Keep the content as-is - user controls the format
-                      // If they want "1_____", they type it
-                      // If they want "Good for people who are 1_____ interested", they type it
-                      // Just ensure the question number pattern uses the correct number if present
-                      let formattedContent = content;
-                      if (content.match(/\d+_____/)) {
-                        // Replace any question number pattern with the correct one
-                        formattedContent = content.replace(/(\d+)_____/g, `${questionNumber}_____`);
-                      }
-                      // Otherwise keep content as-is (e.g., plain text or text with _____ but no number)
-                      cellValue += formattedContent;
-                      
-                      // Store question by its number
-                      if (!questionData.questions[questionNumber]) {
-                        questionData.questions[questionNumber] = {
-                          questionId: `q${questionNumber}`,
-                          text: formattedContent,
-                          row: rowIndex,
-                          column: cellIndex,
-                          columnName: columnName
-                        };
-                      }
-                    }
-                  }
-                  
-                  // Get additional questions in the same cell
-                  const additionalQuestions = cellContent.querySelectorAll('.additional-question');
-                  additionalQuestions.forEach((addQDiv, addQIndex) => {
-                    const addInput = addQDiv.querySelector('.cell-input[data-question-number]');
-                    if (addInput) {
-                      const questionNumber = addInput.getAttribute('data-question-number');
-                      const content = addInput.value.trim();
-                      if (content) {
-                        if (cellValue) cellValue += '<br>';
-                        
-                        // Keep the content as-is - user controls the format
-                        let formattedContent = content;
-                        if (content.match(/\d+_____/)) {
-                          // Replace any question number pattern with the correct one
-                          formattedContent = content.replace(/(\d+)_____/g, `${questionNumber}_____`);
-                        }
-                        // Otherwise keep content as-is
-                        cellValue += formattedContent;
-                        
-                        // Store question by its number
-                        if (!questionData.questions[questionNumber]) {
-                          questionData.questions[questionNumber] = {
-                            questionId: `q${questionNumber}`,
-                            text: formattedContent,
-                            row: rowIndex,
-                            column: cellIndex,
-                            columnName: columnName
-                          };
-                        }
-                      }
-                    }
-                  });
-                  
+                  if (mainInput) registerGapQuestion(mainInput);
+                  cellContent.querySelectorAll('.additional-question .cell-input[data-question-number]')
+                    .forEach(registerGapQuestion);
+
                   rowData[columnName] = cellValue;
                 } else if (cellType === "multiple-choice") {
-                  // Process multiple choice questions (main + additional)
                   let cellValue = '';
-                  
-                  // Process main MC question
+
+                  const registerMcQuestion = (mcContent) => {
+                    const input = mcContent.querySelector('.cell-input');
+                    if (!input) return;
+                    const questionText = input.value.trim();
+                    if (!questionText) return;
+                    const uiNumber = input.getAttribute('data-question-number');
+                    const finalNumber = allocateTableQuestion(uiNumber);
+                    const options = mcContent.querySelectorAll('.mc-option');
+                    const correctAnswer = mcContent.querySelector('input[type="radio"]:checked')?.value || '';
+
+                    if (cellValue) cellValue += '<br>';
+                    cellValue += `Q${finalNumber}: ${questionText}<br>`;
+
+                    const optionsMap = {};
+                    options.forEach(option => {
+                      const letter = option.querySelector('.mc-radio').value;
+                      const text = option.querySelector('.mc-option-text').value.trim();
+                      if (text) {
+                        // Never mark the correct option in the visible cell text —
+                        // students see this content during the test
+                        cellValue += `${letter}. ${text}<br>`;
+                        optionsMap[letter] = text;
+                      }
+                    });
+
+                    questionData.questions[finalNumber] = {
+                      questionId: `q${finalNumber}`,
+                      text: questionText,
+                      format: 'multiple-choice',
+                      options: optionsMap,
+                      correctAnswer: correctAnswer,
+                      row: rowIndex,
+                      column: cellIndex,
+                      columnName: columnName
+                    };
+                  };
+
                   const mainMcContent = cellContent.querySelector('.mc-cell-content');
-                  if (mainMcContent) {
-                    const mainInput = mainMcContent.querySelector('.cell-input');
-                    if (mainInput) {
-                      const questionNumber = mainInput.getAttribute('data-question-number');
-                      const questionText = mainInput.value.trim();
-                      const options = mainMcContent.querySelectorAll('.mc-option');
-                      const correctAnswer = mainMcContent.querySelector('input[type="radio"]:checked')?.value || '';
-                      
-                      if (questionText) {
-                        cellValue += `Q${questionNumber}: ${questionText}<br>`;
-                        
-                        options.forEach(option => {
-                          const letter = option.querySelector('.mc-radio').value;
-                          const text = option.querySelector('.mc-option-text').value.trim();
-                          if (text) {
-                            cellValue += `${letter}. ${text}`;
-                            if (letter === correctAnswer) cellValue += ' ✓';
-                            cellValue += '<br>';
-                          }
-                        });
-                        
-                        // Store multiple choice question by its number
-                        if (!questionData.questions[questionNumber]) {
-                          questionData.questions[questionNumber] = {
-                            questionId: `q${questionNumber}`,
-                            text: questionText,
-                            format: 'multiple-choice',
-                            options: {},
-                            correctAnswer: correctAnswer,
-                            row: rowIndex,
-                            column: cellIndex,
-                            columnName: columnName
-                          };
-                          
-                          options.forEach(option => {
-                            const letter = option.querySelector('.mc-radio').value;
-                            const text = option.querySelector('.mc-option-text').value.trim();
-                            if (text) {
-                              questionData.questions[questionNumber].options[letter] = text;
-                            }
-                          });
-                        }
-                      }
-                    }
-                  }
-                  
-                  // Process additional MC questions in the same cell
-                  const additionalMcQuestions = cellContent.querySelectorAll('.additional-question .mc-cell-content');
-                  additionalMcQuestions.forEach((mcEl, qIndex) => {
-                    const addInput = mcEl.querySelector('.cell-input');
-                    if (addInput) {
-                      const questionNumber = addInput.getAttribute('data-question-number');
-                      const questionText = addInput.value.trim();
-                      const options = mcEl.querySelectorAll('.mc-option');
-                      const correctAnswer = mcEl.querySelector('input[type="radio"]:checked')?.value || '';
-                      
-                      if (questionText) {
-                        if (cellValue) cellValue += '<br>';
-                        cellValue += `Q${questionNumber}: ${questionText}<br>`;
-                        
-                        options.forEach(option => {
-                          const letter = option.querySelector('.mc-radio').value;
-                          const text = option.querySelector('.mc-option-text').value.trim();
-                          if (text) {
-                            cellValue += `${letter}. ${text}`;
-                            if (letter === correctAnswer) cellValue += ' ✓';
-                            cellValue += '<br>';
-                          }
-                        });
-                        
-                        // Store multiple choice question by its number
-                        if (!questionData.questions[questionNumber]) {
-                          questionData.questions[questionNumber] = {
-                            questionId: `q${questionNumber}`,
-                            text: questionText,
-                            format: 'multiple-choice',
-                            options: {},
-                            correctAnswer: correctAnswer,
-                            row: rowIndex,
-                            column: cellIndex,
-                            columnName: columnName
-                          };
-                          
-                          options.forEach(option => {
-                            const letter = option.querySelector('.mc-radio').value;
-                            const text = option.querySelector('.mc-option-text').value.trim();
-                            if (text) {
-                              questionData.questions[questionNumber].options[letter] = text;
-                            }
-                          });
-                        }
-                      }
-                    }
-                  });
-                  
+                  if (mainMcContent) registerMcQuestion(mainMcContent);
+                  cellContent.querySelectorAll('.additional-question .mc-cell-content')
+                    .forEach(registerMcQuestion);
+
                   rowData[columnName] = cellValue;
                 } else if (cellType === "example") {
                   // This is an example cell
                   const questions = cellContent.querySelectorAll('.cell-input[data-question-number]');
                   let cellValue = '';
-                  
+
                   questions.forEach((input, qIndex) => {
                     const content = input.value.trim();
                     if (content) {
@@ -1931,70 +1836,62 @@ function collectTestData() {
                       cellValue += `Example<br>${content}`;
                     }
                   });
-                  
+
                   rowData[columnName] = cellValue;
                 } else {
                   // Regular text cell (no question numbers)
                   let cellValue = '';
-                  
-                  // Check if there are inputs with question numbers (shouldn't be for text cells)
-                  const questionsWithNumbers = cellContent.querySelectorAll('.cell-input[data-question-number]');
-                  if (questionsWithNumbers.length > 0) {
-                    // If there are question-numbered inputs, process them
-                    questionsWithNumbers.forEach((input, qIndex) => {
-                      const content = input.value.trim();
-                      if (content) {
-                        if (qIndex > 0) cellValue += '<br>';
-                        cellValue += content;
-                      }
-                    });
-                  } else {
-                    // Pure text cell without question numbers
-                    const textInputs = cellContent.querySelectorAll('.cell-input');
-                    textInputs.forEach((input, qIndex) => {
-                      const content = input.value.trim();
-                      if (content) {
-                        if (qIndex > 0) cellValue += '<br>';
-                        cellValue += content;
-                      }
-                    });
-                  }
-                  
+                  const textInputs = cellContent.querySelectorAll('.cell-input');
+                  textInputs.forEach((input, qIndex) => {
+                    const content = input.value.trim();
+                    if (content) {
+                      if (qIndex > 0) cellValue += '<br>';
+                      cellValue += content;
+                    }
+                  });
                   rowData[columnName] = cellValue;
                 }
               });
-              
+
               questionData.rows.push(rowData);
             });
           }
-          
-          // Parse answers
+
+          // Parse answers typed against the numbers the admin SAW in the UI
+          // and remap them to the final sequential numbers. Unknown keys are a
+          // hard error — silently saving them produced ungradable tests before.
           questionData.answer = {};
           if (tableAnswersText) {
-            const answerPairs = tableAnswersText.split(',');
-            answerPairs.forEach(pair => {
-              const [key, value] = pair.split('=');
-              if (key && value) {
-                questionData.answer[key.trim()] = value.trim();
+            tableAnswersText.split(',').forEach(pair => {
+              const [rawKey, value] = pair.split('=');
+              if (!rawKey || !value || !value.trim()) return;
+              const uiKey = String(parseInt(rawKey.trim().replace(/^q/i, ''), 10));
+              const finalNumber = uiToFinal[uiKey];
+              if (finalNumber === undefined) {
+                const valid = Object.keys(uiToFinal).map(n => 'q' + n).join(', ') || 'none';
+                throw new Error(`Listening table: answer key "${rawKey.trim()}" does not match any question in the table. Question numbers in this table: ${valid}.`);
               }
+              questionData.answer[`q${finalNumber}`] = value.trim();
             });
           }
-          
-          // Debug logging
-          console.log({
-            title: questionData.title,
-            columns: questionData.columns,
-            rowCount: questionData.rows.length,
-            rows: questionData.rows,
-            questions: questionData.questions,
-            answers: questionData.answer
+
+          // Every gap question in the table must have an answer, otherwise the
+          // test cannot be graded
+          const finalToUi = Object.fromEntries(Object.entries(uiToFinal).map(([ui, fin]) => [fin, ui]));
+          Object.entries(questionData.questions).forEach(([num, q]) => {
+            if (q.format === 'multiple-choice') {
+              if (!q.correctAnswer) {
+                throw new Error(`Listening table: multiple-choice question q${finalToUi[num] || num} has no correct answer selected.`);
+              }
+              return;
+            }
+            if (!questionData.answer[`q${num}`]) {
+              throw new Error(`Listening table: question q${finalToUi[num] || num} has no answer. Add it to the answers field as "q${finalToUi[num] || num}=your answer".`);
+            }
           });
 
-          const tableQuestionNumbers = Object.keys(questionData.questions || {})
-            .map(num => parseInt(num, 10))
-            .filter(num => Number.isFinite(num));
-          registerExistingQuestionNumbers(tableQuestionNumbers);
           break;
+        }
 
         case "question-group":
           const groupTypeElement = questionEl.querySelector(".group-type");
