@@ -28,6 +28,10 @@ let currentSectionIndex = 0;
 let currentPassageIndex = 0;
 let currentQuestionIndex = 0;
 let orderedQIds = [];
+// How many gradeable questions each reading passage holds, in order.
+// Built by assignReadingQuestionIds so nav counts match the real IDs
+// (a question-group counts as its inner questions, not as 1).
+let readingPassageCounts = [];
 let currentTestId = null;
 let currentAudio = null;
 let isPaused = false;
@@ -622,11 +626,9 @@ function generateQuestionNav() {
       const navNumbers = document.createElement("div");
       navNumbers.className = "nav-numbers";
 
-      let qsInPassage = 0;
-      passage.questions.forEach(q => {
-         if (q.questionId) qsInPassage += 1;
-         else if (q.questionIds) qsInPassage += q.questionIds.length;
-      });
+      // Use the real per-passage count computed in assignReadingQuestionIds
+      // (a question-group counts as its inner questions, not as one).
+      const qsInPassage = readingPassageCounts[index] || 0;
 
       const endQ = currentStartQ + qsInPassage - 1;
 
@@ -732,24 +734,9 @@ function jumpToQuestion(questionNum) {
     }
     currentQuestionIndex = questionNum - 1;
   } else if (currentStage === "reading") {
-    // Determine which passage contains this question dynamically
-    let targetPassage = 0;
-    for (let pIdx = 0; pIdx < stageData.reading.passages.length; pIdx++) {
-       const passage = stageData.reading.passages[pIdx];
-       let found = false;
-       for (const q of passage.questions) {
-          if (q.questionId === `q${questionNum}` || (q.questionIds && q.questionIds.includes(`q${questionNum}`))) {
-             found = true;
-             break;
-          }
-       }
-       if (found) {
-          targetPassage = pIdx;
-          break;
-       }
-    }
-
-    currentPassageIndex = targetPassage;
+    // Map the global question number to its passage using the real counts
+    // (handles question-groups, which span several numbers under one entry).
+    currentPassageIndex = readingPassageOfQuestion(questionNum);
     currentQuestionIndex = questionNum - 1;
     renderReadingPassage(currentPassageIndex);
   }
@@ -1074,13 +1061,65 @@ function showStageContent(stageName) {
   }
 }
 
+// Tracks the last group instruction shown while rendering a section so the
+// same instruction isn't repeated before every question in the group.
+let lastListeningInstruction = null;
+
 // Initialize Listening
 function initializeListening() {
-  const sections = stageData.listening.sections;
+  normalizeListeningQuestionIds(stageData.listening.sections);
   currentSectionIndex = 0;
   audioInitialized = false; // Сбрасываем флаг аудио
   currentAudioSection = 0;   // Сбрасываем текущую секцию аудио
   renderListeningSection(0);
+}
+
+// Ensures every gradeable listening item has a questionId, and repairs
+// multi-select groups saved with only `correctAnswers` (no `questions[]`),
+// which older add-tool exports produced (e.g. full mock test 15). A single
+// running counter walks all sections so synthesized IDs slot into the real
+// 1–40 sequence.
+function normalizeListeningQuestionIds(sections) {
+  if (!Array.isArray(sections)) return;
+  let n = 1;
+  const sync = (id) => {
+    const num = parseInt(String(id).replace(/\D/g, ""), 10);
+    if (Number.isFinite(num)) n = num + 1;
+  };
+  for (const section of sections) {
+    for (const item of section.content || []) {
+      if (item.type === "question") {
+        if (!item.questionId) item.questionId = `q${n}`;
+        sync(item.questionId);
+      } else if (item.type === "question-group") {
+        if (Array.isArray(item.questions) && item.questions.length) {
+          item.questions.forEach((q) => {
+            if (!q.questionId) q.questionId = `q${n}`;
+            sync(q.questionId);
+          });
+        } else if (Array.isArray(item.correctAnswers) && item.correctAnswers.length) {
+          const start = n;
+          item.questions = item.correctAnswers.map((ans, i) => ({
+            questionId: `q${start + i}`,
+            correctAnswer: ans,
+          }));
+          n = start + item.correctAnswers.length;
+        }
+        const ids = (item.questions || []).map((q) => q.questionId);
+        if (ids.length && !item.questionId) {
+          const first = parseInt(ids[0].slice(1), 10);
+          const last = parseInt(ids[ids.length - 1].slice(1), 10);
+          item.questionId = last > first ? `q${first}_${last}` : `q${first}`;
+        }
+      } else if (item.type === "table") {
+        // Advance the counter past any ___qN___ placeholders in the cells
+        const nums = (JSON.stringify(item).match(/q(\d+)/g) || [])
+          .map((s) => parseInt(s.slice(1), 10))
+          .filter(Number.isFinite);
+        if (nums.length) n = Math.max(n, Math.max(...nums) + 1);
+      }
+    }
+  }
 }
 
 function renderListeningSection(index) {
@@ -1108,27 +1147,26 @@ function renderListeningSection(index) {
       </div>
   `;
 
-  if (section.instructions) {
+  // Instructions are driven by per-question groupInstruction (see
+  // renderListeningInstructionFor). Only fall back to the section-level
+  // instructions block for older tests whose questions carry no
+  // groupInstruction at all.
+  lastListeningInstruction = null;
+  const content = Array.isArray(section.content) ? section.content : [];
+  const hasGroupInstruction = content.some((item) => item.groupInstruction);
+
+  if (!hasGroupInstruction && section.instructions) {
+    const { heading, details, note } = section.instructions;
     questionList.innerHTML += `
-      <div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px;">
-        ${
-          section.instructions.heading
-            ? `<h4>${section.instructions.heading}</h4>`
-            : ""
-        }
-        ${
-          section.instructions.details
-            ? `<p>${section.instructions.details}</p>`
-            : ""
-        }
+      <div class="group-instruction">
+        ${heading ? `<strong>${heading}</strong><br>` : ""}
+        ${details || ""}${note ? `<br><em>${note}</em>` : ""}
       </div>
     `;
   }
 
-  if (section.content && Array.isArray(section.content)) {
-    section.content.forEach((item) => renderListeningContentItem(item));
-  }
-  
+  content.forEach((item) => renderListeningContentItem(item));
+
   questionList.innerHTML += `</div>`;
 
   updateNavigationButtons();
@@ -1168,15 +1206,13 @@ function initializeSequentialAudio() {
       `;
     } else {
       container.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-          <div style="font-size:13px; color:#6b7280; margin-bottom:12px; text-align:center;">Master Audio</div>
-          <audio id="sectionAudio" autoplay>
+        <div style="display:flex; align-items:center; justify-content:center; gap:18px; width:100%;">
+          <span class="audio-bar-label">🎧 Audio</span>
+          <audio id="sectionAudio" autoplay style="display:none;">
             <source src="${stageData.listening.audioUrl}" type="audio/mpeg" />
           </audio>
-          <div style="display:flex; align-items:center; justify-content:center; gap:16px;">
-            <button id="studentPlayPauseBtn" style="padding:8px 22px; border:none; border-radius:8px; background:#3b82f6; color:#fff; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
-            <span id="studentAudioTime" style="font-size:13px; color:#374151; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
-          </div>
+          <button id="studentPlayPauseBtn" style="padding:6px 20px; border:none; border-radius:8px; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
+          <span id="studentAudioTime" style="font-size:13px; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
         </div>
       `;
       setupStudentAudioControls();
@@ -1212,15 +1248,13 @@ function initializeSequentialAudio() {
       `;
     } else {
       container.innerHTML = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-          <div style="font-size:13px; color:#6b7280; margin-bottom:12px; text-align:center;">${label}</div>
-          <audio id="sectionAudio" autoplay>
+        <div style="display:flex; align-items:center; justify-content:center; gap:18px; width:100%;">
+          <span class="audio-bar-label">🎧 ${label}</span>
+          <audio id="sectionAudio" autoplay style="display:none;">
             <source src="${section.audioUrl}" type="audio/mpeg" />
           </audio>
-          <div style="display:flex; align-items:center; justify-content:center; gap:16px;">
-            <button id="studentPlayPauseBtn" style="padding:8px 22px; border:none; border-radius:8px; background:#3b82f6; color:#fff; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
-            <span id="studentAudioTime" style="font-size:13px; color:#374151; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
-          </div>
+          <button id="studentPlayPauseBtn" style="padding:6px 20px; border:none; border-radius:8px; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
+          <span id="studentAudioTime" style="font-size:13px; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
         </div>
       `;
       setupStudentAudioControls();
@@ -1271,8 +1305,27 @@ function setupStudentAudioControls() {
   });
 }
 
+// Renders a question's groupInstruction as an instruction block, but only
+// when it changes — so a group of questions sharing one instruction shows it
+// once (real IELTS layout).
+function renderListeningInstructionFor(item) {
+  const gi = item && item.groupInstruction;
+  if (!gi || gi === lastListeningInstruction) return;
+  lastListeningInstruction = gi;
+  const questionList = document.getElementById("listening-questions");
+  const div = document.createElement("div");
+  div.className = "group-instruction";
+  div.innerHTML = String(gi).replace(/\n/g, "<br>");
+  questionList.appendChild(div);
+}
+
 function renderListeningContentItem(item, itemIndex) {
   const questionList = document.getElementById("listening-questions");
+
+  // Show the shared instruction ahead of any gradeable item that carries one
+  if (item.type === "question" || item.type === "question-group" || item.type === "table") {
+    renderListeningInstructionFor(item);
+  }
 
   if (item.type) {
     switch (item.type) {
@@ -1317,19 +1370,12 @@ function renderListeningQuestion(question) {
     // Replace underscores with input field
     const inputHtml = questionText.replace(
       /(\d+)_+|_+(\d+)|_+/g,
-      `<input type="text" 
-              data-qid="${qId}" 
-              class="gap-fill-input" 
-              placeholder="${number}"
-              value="${answersSoFar[qId] || ""}" 
-              style="border: none; border-bottom: 2px solid #333; background: transparent; padding: 2px 4px; min-width: 80px; font-size: 14px; text-align: center;" />`
+      `<input type="text" data-qid="${qId}" class="gap-fill-input" placeholder="${number}" value="${answersSoFar[qId] || ""}" />`
     );
 
     questionDiv.innerHTML = `
       <div class="question-number">${number}</div>
-      <div class="question-text">
-        ${inputHtml}
-      </div>
+      <div class="question-text">${inputHtml}</div>
     `;
   } else if (question.format === "multiple-choice") {
     let optionsHtml = '<div class="radio-group">';
@@ -1370,9 +1416,9 @@ function renderListeningQuestionGroup(group) {
 }
 
 function renderListeningMultiSelectGroup(group) {
-  const maxSelections = extractMaxSelections(
-    group.instructions || group.text || ""
-  );
+  const maxSelections =
+    (group.questions && group.questions.length) ||
+    extractMaxSelections(group.groupInstruction || group.text || "");
   const groupQId = group.questionId;
   const questionList = document.getElementById("listening-questions");
 
@@ -1394,13 +1440,10 @@ function renderListeningMultiSelectGroup(group) {
     }
   }
   groupDiv.innerHTML = `
-    <div data-group-id="${groupQId}" style="margin: 25px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 10px; background: #f8fafc;">
-      <div class="group-instruction">
-        <h4>${group.instructions}</h4>
-        <p style="font-weight: 600;">${group.text}</p>
-        <div class="selection-counter" style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 6px; font-weight: 600; color: #0369a1;">
-          Selected: <span id="counter-${groupQId}">0</span> / ${maxSelections}
-        </div>
+    <div data-group-id="${groupQId}" class="multi-select-box">
+      ${group.text ? `<p class="group-stem">${group.text}</p>` : ""}
+      <div class="selection-counter">
+        Selected: <span id="counter-${groupQId}">0</span> / ${maxSelections}
       </div>
       <div class="radio-group">
         ${Object.keys(group.options)
@@ -1465,12 +1508,8 @@ function renderListeningMatchingGroup(group) {
   groupDiv.className = "matching-group";
 
   groupDiv.innerHTML = `
-    <div class="group-instruction">
-      <h4>${group.groupInstruction || group.instructions || ""}</h4>
-    </div>
-
-    <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      ${group.text ? `<p style="font-weight: 600; margin-bottom: 10px;">${group.text}</p>` : ""}
+    <div class="matching-options-box">
+      ${group.text ? `<p class="group-stem">${group.text}</p>` : ""}
       ${Object.keys(group.options)
         .sort()
         .map(
@@ -1582,8 +1621,10 @@ function initializeReading() {
 function assignReadingQuestionIds() {
   let counter = 1;
   orderedQIds = [];
+  readingPassageCounts = [];
 
   for (const passage of stageData.reading.passages) {
+    const before = counter;
     for (const question of passage.questions) {
       if (question.question) {
         question.qId = `reading_q${counter}`; // Add reading prefix
@@ -1619,7 +1660,21 @@ function assignReadingQuestionIds() {
         }
       }
     }
+    // Number of gradeable questions this passage contributed
+    readingPassageCounts.push(counter - before);
   }
+}
+
+// Which passage (0-based) holds global reading question number `n` (1-based),
+// derived from the real per-passage counts so question-groups are counted right.
+function readingPassageOfQuestion(n) {
+  let start = 1;
+  for (let p = 0; p < readingPassageCounts.length; p++) {
+    const end = start + readingPassageCounts[p] - 1;
+    if (n >= start && n <= end) return p;
+    start = end + 1;
+  }
+  return 0;
 }
 
 function renderReadingPassage(index) {

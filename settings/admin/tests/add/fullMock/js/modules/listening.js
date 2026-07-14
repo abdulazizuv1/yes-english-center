@@ -150,7 +150,9 @@ export async function collectListeningData(testId) {
         const details = block.querySelector('.instructions-details').value.trim();
         const note = block.querySelector('.instructions-note').value.trim();
 
-        if (!title || !heading || !details) throw new Error(`Listening Part ${i+1}: Title, Heading, and Details are required.`);
+        // Only the title is required now — per-question groupInstruction drives
+        // the on-screen instructions, so section heading/details are optional.
+        if (!title) throw new Error(`Listening Part ${i+1}: Title is required.`);
 
         let sectionAudioUrl = "";
         if (!isSingleAudio) {
@@ -329,6 +331,7 @@ function extractQuestionGroupData(el, startQNum) {
         groupType: gt
     };
 
+    const start = qNum;
     if (gt === 'matching') {
         data.options = {};
         el.querySelectorAll('.options-list .option-item').forEach(item => {
@@ -352,10 +355,20 @@ function extractQuestionGroupData(el, startQNum) {
             if (label && text) data.options[label] = text;
         });
         const answers = el.querySelector('.group-correct-answers')?.value?.trim() || "";
-        data.correctAnswers = answers.split(',').map(a => a.trim()).filter(Boolean);
-        data.correctAnswers.forEach(a => { qNum++; });
-        if (data.correctAnswers.length === 0) qNum++; // At least 1
+        const correctAnswers = answers.split(',').map(a => a.trim()).filter(Boolean);
+        data.correctAnswers = correctAnswers;
+        // Emit one gradeable sub-question per answer letter, with sequential
+        // ids — the test page needs `questions[]` to render and grade the group.
+        data.questions = correctAnswers.map((ans, i) => ({
+            questionId: `q${start + i}`,
+            correctAnswer: ans,
+        }));
+        qNum += correctAnswers.length || 1;
     }
+
+    // Group id spans its sub-questions (e.g. q28_30), matching the test page.
+    const end = qNum - 1;
+    data.questionId = end > start ? `q${start}_${end}` : `q${start}`;
 
     return { data, nextQNum: qNum };
 }
