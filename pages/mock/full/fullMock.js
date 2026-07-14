@@ -1147,22 +1147,28 @@ function renderListeningSection(index) {
       </div>
   `;
 
-  // Instructions are driven by per-question groupInstruction (see
-  // renderListeningInstructionFor). Only fall back to the section-level
-  // instructions block for older tests whose questions carry no
-  // groupInstruction at all.
+  // Two instruction sources, both supported: the section-level block
+  // (section.instructions — lives OUTSIDE content[]) always renders at the
+  // top when present, and per-item groupInstruction blocks render inline as
+  // the content flows (see renderListeningInstructionFor).
   lastListeningInstruction = null;
   const content = Array.isArray(section.content) ? section.content : [];
-  const hasGroupInstruction = content.some((item) => item.groupInstruction);
 
-  if (!hasGroupInstruction && section.instructions) {
+  if (section.instructions) {
     const { heading, details, note } = section.instructions;
-    questionList.innerHTML += `
-      <div class="group-instruction">
-        ${heading ? `<strong>${heading}</strong><br>` : ""}
-        ${details || ""}${note ? `<br><em>${note}</em>` : ""}
-      </div>
-    `;
+    if (heading || details || note) {
+      questionList.innerHTML += `
+        <div class="group-instruction">
+          ${heading ? `<strong>${heading}</strong><br>` : ""}
+          ${details || ""}${note ? `<br><em>${note}</em>` : ""}
+        </div>
+      `;
+      // If the first item's groupInstruction repeats the section block
+      // verbatim, don't show it twice.
+      lastListeningInstruction = normalizeInstruction(
+        [heading, details, note].filter(Boolean).join(" ")
+      );
+    }
   }
 
   content.forEach((item) => renderListeningContentItem(item));
@@ -1188,9 +1194,30 @@ function handleSectionAudio(section, index) {
   audioInitialized = true;
 }
 
+const AUDIO_ICON_PLAY = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
+const AUDIO_ICON_PAUSE = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
+
+// One clean student player: round play/pause button, label, live progress
+// bar (display only — seeking stays blocked) and time counter.
+function studentAudioBarHTML(label, src) {
+  return `
+    <div class="student-audio">
+      <button id="studentPlayPauseBtn" class="audio-play-btn" aria-label="Pause audio">${AUDIO_ICON_PAUSE}</button>
+      <div class="audio-meta">
+        <span class="audio-bar-label">${label}</span>
+        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgressFill"></div></div>
+      </div>
+      <span id="studentAudioTime">0:00 / 0:00</span>
+      <audio id="sectionAudio" autoplay style="display:none;">
+        <source src="${src}" type="audio/mpeg" />
+      </audio>
+    </div>
+  `;
+}
+
 function initializeSequentialAudio() {
   const container = document.getElementById("audio-container");
-  
+
   // If we have a single master audio mode
   if (stageData.listening.audioUrl && stageData.listening.audioMode === 'single') {
     if (currentAudio) {
@@ -1205,16 +1232,7 @@ function initializeSequentialAudio() {
         <div style="text-align:center; margin-top:10px; color:#6b7280;">Playing: Master Audio</div>
       `;
     } else {
-      container.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:18px; width:100%;">
-          <span class="audio-bar-label">🎧 Audio</span>
-          <audio id="sectionAudio" autoplay style="display:none;">
-            <source src="${stageData.listening.audioUrl}" type="audio/mpeg" />
-          </audio>
-          <button id="studentPlayPauseBtn" style="padding:6px 20px; border:none; border-radius:8px; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
-          <span id="studentAudioTime" style="font-size:13px; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
-        </div>
-      `;
+      container.innerHTML = studentAudioBarHTML("Listening Audio", stageData.listening.audioUrl);
       setupStudentAudioControls();
     }
     currentAudio = document.getElementById('sectionAudio');
@@ -1247,16 +1265,7 @@ function initializeSequentialAudio() {
         <div style="text-align:center; margin-top:10px; color:#6b7280;">${label}</div>
       `;
     } else {
-      container.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:18px; width:100%;">
-          <span class="audio-bar-label">🎧 ${label}</span>
-          <audio id="sectionAudio" autoplay style="display:none;">
-            <source src="${section.audioUrl}" type="audio/mpeg" />
-          </audio>
-          <button id="studentPlayPauseBtn" style="padding:6px 20px; border:none; border-radius:8px; font-size:14px; cursor:pointer; min-width:90px;">⏸ Pause</button>
-          <span id="studentAudioTime" style="font-size:13px; font-variant-numeric:tabular-nums; min-width:90px;">0:00 / 0:00</span>
-        </div>
-      `;
+      container.innerHTML = studentAudioBarHTML(label, section.audioUrl);
       setupStudentAudioControls();
     }
 
@@ -1275,6 +1284,7 @@ function setupStudentAudioControls() {
   const audio = document.getElementById("sectionAudio");
   const playPauseBtn = document.getElementById("studentPlayPauseBtn");
   const timeDisplay = document.getElementById("studentAudioTime");
+  const progressFill = document.getElementById("audioProgressFill");
   if (!audio) return;
 
   let lastValidTime = 0;
@@ -1289,6 +1299,9 @@ function setupStudentAudioControls() {
   audio.addEventListener("timeupdate", () => {
     if (!audio.seeking) lastValidTime = audio.currentTime;
     timeDisplay.textContent = `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+    if (progressFill && audio.duration) {
+      progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+    }
   });
 
   // Block seeking
@@ -1296,8 +1309,14 @@ function setupStudentAudioControls() {
     audio.currentTime = lastValidTime;
   });
 
-  audio.addEventListener("play", () => { playPauseBtn.textContent = "⏸ Pause"; });
-  audio.addEventListener("pause", () => { playPauseBtn.textContent = "▶ Play"; });
+  audio.addEventListener("play", () => {
+    playPauseBtn.innerHTML = AUDIO_ICON_PAUSE;
+    playPauseBtn.setAttribute("aria-label", "Pause audio");
+  });
+  audio.addEventListener("pause", () => {
+    playPauseBtn.innerHTML = AUDIO_ICON_PLAY;
+    playPauseBtn.setAttribute("aria-label", "Play audio");
+  });
 
   playPauseBtn.addEventListener("click", () => {
     if (audio.paused) audio.play();
@@ -1305,13 +1324,21 @@ function setupStudentAudioControls() {
   });
 }
 
-// Renders a question's groupInstruction as an instruction block, but only
-// when it changes — so a group of questions sharing one instruction shows it
+// Whitespace/case-insensitive comparison so the same instruction typed with
+// different spacing (or split across section fields) never shows twice.
+function normalizeInstruction(s) {
+  return String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+// Renders an item's groupInstruction as an instruction block, but only
+// when it changes — so a run of items sharing one instruction shows it
 // once (real IELTS layout).
 function renderListeningInstructionFor(item) {
   const gi = item && item.groupInstruction;
-  if (!gi || gi === lastListeningInstruction) return;
-  lastListeningInstruction = gi;
+  if (!gi) return;
+  const norm = normalizeInstruction(gi);
+  if (!norm || norm === lastListeningInstruction) return;
+  lastListeningInstruction = norm;
   const questionList = document.getElementById("listening-questions");
   const div = document.createElement("div");
   div.className = "group-instruction";
@@ -1322,10 +1349,9 @@ function renderListeningInstructionFor(item) {
 function renderListeningContentItem(item, itemIndex) {
   const questionList = document.getElementById("listening-questions");
 
-  // Show the shared instruction ahead of any gradeable item that carries one
-  if (item.type === "question" || item.type === "question-group" || item.type === "table") {
-    renderListeningInstructionFor(item);
-  }
+  // Show the shared instruction ahead of ANY item that carries one — text
+  // blocks and subheadings included, not just gradeable questions.
+  renderListeningInstructionFor(item);
 
   if (item.type) {
     switch (item.type) {
@@ -1365,17 +1391,48 @@ function renderListeningQuestion(question) {
 
   if (question.format === "gap-fill") {
     const number = qId.toUpperCase().replace("Q", "");
-    let questionText = question.text || "";
-    
-    // Replace underscores with input field
-    const inputHtml = questionText.replace(
-      /(\d+)_+|_+(\d+)|_+/g,
-      `<input type="text" data-qid="${qId}" class="gap-fill-input" placeholder="${number}" value="${answersSoFar[qId] || ""}" />`
-    );
+    const questionText = question.text || "";
+    const safeVal = String(answersSoFar[qId] ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;");
 
+    // Real exam look: the question number is a small box glued to the input,
+    // sitting inline exactly where the blank is in the sentence.
+    const gapHtml = `<span class="gap-inline"><span class="gap-num">${number}</span><input type="text" data-qid="${qId}" class="gap-fill-input" placeholder=" " value="${safeVal}" /></span>`;
+
+    const blankRe = /(\d+)\s*_+|_+\s*(\d+)|_+/; // first blank marker only
+    let inputHtml = blankRe.test(questionText)
+      ? questionText.replace(blankRe, gapHtml)
+      : `${questionText} ${gapHtml}`;
+    if (question.postfix) {
+      inputHtml += ` <span class="gap-postfix">${question.postfix}</span>`;
+    }
+
+    questionDiv.classList.add("gap-fill-item");
+    questionDiv.innerHTML = `<div class="question-text">${inputHtml}</div>`;
+  } else if (question.format === "true-false-notgiven") {
+    const number = qId.toUpperCase().replace("Q", "");
+    const tfOptions = ["TRUE", "FALSE", "NOT GIVEN"];
     questionDiv.innerHTML = `
       <div class="question-number">${number}</div>
-      <div class="question-text">${inputHtml}</div>
+      <div class="question-text">
+        ${question.text || ""}
+        <div class="radio-group">
+          ${tfOptions
+            .map(
+              (opt) => `
+            <label class="radio-option">
+              <input type="radio" name="${qId}" value="${opt}" ${
+                answersSoFar[qId] === opt ? "checked" : ""
+              }/>
+              ${opt}
+            </label>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
     `;
   } else if (question.format === "multiple-choice") {
     let optionsHtml = '<div class="radio-group">';
@@ -1574,13 +1631,15 @@ function renderListeningTable(table) {
       const key = col.toLowerCase().replace(/\s+/g, "");
       let content = row[key] || "";
 
-      // ✅ ИСПРАВЛЕНО: Обрабатываем паттерн ___qX___
+      // ___qX___ marker → numbered box glued to the input (same look as
+      // the inline gap-fill questions)
       content = content.replace(/___q(\d+)___/g, (match, num) => {
         const qId = `q${num}`;
-
-        return `<span style="font-weight: bold; color: #1976d2;">${num}:</span> <input type="text" data-qid="${qId}" class="gap-fill table-input" style="border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; margin-left: 5px; min-width: 120px;" value="${
-          answersSoFar[qId] || ""
-        }" placeholder="Your answer..." />`;
+        const safeVal = String(answersSoFar[qId] ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+        return `<span class="gap-inline"><span class="gap-num">${num}</span><input type="text" data-qid="${qId}" class="gap-fill-input table-input" placeholder=" " value="${safeVal}" /></span>`;
       });
 
       tableHtml += `<td style="border: 1px solid #ddd; padding: 12px 8px; vertical-align: top;">${content}</td>`;

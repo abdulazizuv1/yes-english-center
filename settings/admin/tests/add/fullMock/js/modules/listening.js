@@ -187,9 +187,17 @@ function extractListeningQuestions(container, startQNum) {
         const gi = el.querySelector('.group-instruction')?.value?.trim() || "";
 
         if (type === 'text') {
-            result.push({ type: 'text', value: el.querySelector('.question-value')?.value || "" });
+            result.push({
+                type: 'text',
+                groupInstruction: gi || null,
+                value: el.querySelector('.question-value')?.value || ""
+            });
         } else if (type === 'subheading') {
-            result.push({ type: 'subheading', value: el.querySelector('.question-value')?.value || "" });
+            result.push({
+                type: 'subheading',
+                groupInstruction: gi || null,
+                value: el.querySelector('.question-value')?.value || ""
+            });
         } else if (type === 'gap-fill') {
             result.push({
                 type: 'question', questionId: `q${qNum}`, format: 'gap-fill',
@@ -254,6 +262,34 @@ function extractTableData(el, questionId, startQNum) {
         const v = h.value.trim(); if (v) data.columns.push(v);
     });
 
+    // The admin sees UI counter numbers next to table inputs and types the
+    // answer list against them — remember which UI number became which final
+    // question number so the answers can be remapped on save.
+    const uiToFinal = {};
+
+    // The test page turns ONLY the ___qN___ marker into an input, so every
+    // question cell's text must contain exactly that marker with the FINAL
+    // number. Normalise whatever the admin typed (___q7___, 1____, ____) —
+    // or append the marker if the text has no blank at all.
+    const normalizeCellMarker = (content, finalNum) => {
+        const marker = `___q${finalNum}___`;
+        if (/___q\d+___/.test(content)) return content.replace(/___q\d+___/, marker);
+        if (/(?<!_)\d+\s*_{2,}/.test(content)) return content.replace(/(?<!_)\d+\s*_{2,}/, marker);
+        if (/_{2,}/.test(content)) return content.replace(/_{2,}/, marker);
+        return `${content} ${marker}`;
+    };
+
+    const registerGapCell = (inp, ri, ci, colName, appendVal) => {
+        const content = inp.value.trim();
+        if (!content) return appendVal;
+        const ui = parseInt(inp.getAttribute('data-question-number'), 10);
+        if (Number.isFinite(ui)) uiToFinal[String(ui)] = qNum;
+        const normalized = normalizeCellMarker(content, qNum);
+        data.questions[qNum] = { questionId: `q${qNum}`, text: normalized, row: ri, column: ci, columnName: colName };
+        qNum++;
+        return appendVal ? `${appendVal}<br>${normalized}` : normalized;
+    };
+
     // Rows
     const tbody = el.querySelector(`#table-body-${questionId}`);
     if (tbody) {
@@ -267,22 +303,10 @@ function extractTableData(el, questionId, startQNum) {
                 if (cellType === 'question') {
                     let val = '';
                     cc.querySelectorAll('.cell-input[data-question-number]').forEach(inp => {
-                        const content = inp.value.trim();
-                        if (content) {
-                            if (val) val += '<br>';
-                            val += content;
-                            data.questions[qNum] = { questionId: `q${qNum}`, text: content, row: ri, column: ci, columnName: colName };
-                            qNum++;
-                        }
+                        val = registerGapCell(inp, ri, ci, colName, val);
                     });
                     cc.querySelectorAll('.additional-question .cell-input[data-question-number]').forEach(inp => {
-                        const content = inp.value.trim();
-                        if (content) {
-                            if (val) val += '<br>';
-                            val += content;
-                            data.questions[qNum] = { questionId: `q${qNum}`, text: content, row: ri, column: ci, columnName: colName };
-                            qNum++;
-                        }
+                        val = registerGapCell(inp, ri, ci, colName, val);
                     });
                     rowData[colName] = val;
                 } else if (cellType === 'multiple-choice') {
@@ -296,7 +320,14 @@ function extractTableData(el, questionId, startQNum) {
                                 if (l && t) opts[l] = t;
                             });
                             const correct = mc.querySelector('input[type="radio"]:checked')?.value || '';
-                            if (txt) { val += `Q${qNum}: ${txt}<br>`; data.questions[qNum] = { questionId: `q${qNum}`, text: txt, format: 'multiple-choice', options: opts, correctAnswer: correct, row: ri, column: ci, columnName: colName }; qNum++; }
+                            if (txt) {
+                                if (!correct) throw new Error(`Listening table: multiple-choice question "${txt.slice(0, 40)}" has no correct answer selected.`);
+                                const ui = parseInt(inp.getAttribute('data-question-number'), 10);
+                                if (Number.isFinite(ui)) uiToFinal[String(ui)] = qNum;
+                                val += `Q${qNum}: ${txt}<br>`;
+                                data.questions[qNum] = { questionId: `q${qNum}`, text: txt, format: 'multiple-choice', options: opts, correctAnswer: correct, row: ri, column: ci, columnName: colName };
+                                qNum++;
+                            }
                         }
                     });
                     rowData[colName] = val;
@@ -310,14 +341,34 @@ function extractTableData(el, questionId, startQNum) {
         });
     }
 
-    // Answers
+    // Answers — typed against the UI numbers, saved against the final ones.
+    // Unknown keys are a hard error: silently saving them used to produce
+    // ungradable tables.
     const answersText = el.querySelector('.table-answers-text')?.value?.trim() || "";
     if (answersText) {
         answersText.split(',').forEach(pair => {
             const [k, v] = pair.split('=');
-            if (k && v) data.answer[k.trim()] = v.trim();
+            if (!k || !v || !v.trim()) return;
+            const uiKey = String(parseInt(k.trim().replace(/^q+/i, ''), 10));
+            const finalNum = uiToFinal[uiKey];
+            if (finalNum === undefined) {
+                const valid = Object.keys(uiToFinal).map(n => 'q' + n).join(', ') || 'none';
+                throw new Error(`Listening table: answer key "${k.trim()}" does not match any question in this table. Question numbers here: ${valid}.`);
+            }
+            data.answer[`q${finalNum}`] = v.trim();
         });
     }
+
+    // Every gap question needs an answer, otherwise the test can't be graded
+    const finalToUi = {};
+    Object.entries(uiToFinal).forEach(([ui, fin]) => { finalToUi[fin] = ui; });
+    Object.entries(data.questions).forEach(([num, q]) => {
+        if (q.format === 'multiple-choice') return;
+        if (!data.answer[`q${num}`]) {
+            const label = finalToUi[num] ? `q${finalToUi[num]}` : `q${num}`;
+            throw new Error(`Listening table: question ${label} has no answer. Add it to the answers field as "${label}=your answer".`);
+        }
+    });
 
     return { data, nextQNum: qNum };
 }

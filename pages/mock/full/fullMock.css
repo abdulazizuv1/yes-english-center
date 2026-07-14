@@ -308,7 +308,7 @@ body {
     padding: 16px;
     margin-bottom: 20px;
     border-radius: 0 6px 6px 0;
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.6;
     color: #92400e;
 }
@@ -407,7 +407,7 @@ body {
 
 /* Enhanced subheading styles */
 .listening-subheading {
-    font-size: 18px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
     margin: 25px 0 15px 0 !important;
@@ -536,22 +536,82 @@ body {
     top: 0;
     z-index: 20;
     width: 100%;
-    background: #0f2340;
+    background: linear-gradient(135deg, #0f2340 0%, #1c3a63 100%);
     color: #fff;
-    padding: 12px 24px;
+    padding: 12px 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 60px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-height: 64px;
+    box-shadow: 0 3px 12px rgba(15, 35, 64, 0.35);
 }
 .audio-bar .audio-placeholder { color: #cbd5e1; font-size: 14px; font-weight: 500; }
 .audio-bar audio { width: 100%; max-width: 640px; height: 40px; }
 /* Student inline player rows sit centred in the bar */
 .audio-bar > div { background: transparent !important; border: none !important; padding: 0 !important; }
-.audio-bar .audio-bar-label { color: #cbd5e1; font-size: 13px; }
-.audio-bar button { background: #2563eb; color: #fff; }
-.audio-bar #studentAudioTime { color: #e2e8f0 !important; }
+
+/* Student audio player: round button + label + progress + time */
+.student-audio {
+    display: flex !important;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    max-width: 920px;
+}
+.audio-play-btn {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.audio-play-btn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6);
+}
+.audio-play-btn:active { transform: scale(0.97); }
+.audio-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.audio-bar .audio-bar-label {
+    color: #dbeafe;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.audio-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+}
+.audio-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    transition: width 0.25s linear;
+}
+.audio-bar #studentAudioTime {
+    color: #e2e8f0 !important;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    min-width: 92px;
+    text-align: right;
+}
 
 /* Questions span the page, centred with a readable max width */
 .listening-questions-panel {
@@ -593,7 +653,7 @@ body {
     display: flex;
     align-items: baseline;
     gap: 12px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.7;
 }
 .listening-stage .question-item:hover { border: none; background: transparent; box-shadow: none; }
@@ -618,7 +678,7 @@ body {
     width: auto;
     font-weight: 400;
     color: #1f2937;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 /* Gap-fill: a clean bordered box inline in the sentence (real exam look) */
@@ -630,7 +690,7 @@ body {
     padding: 4px 10px;
     min-width: 150px;
     margin: 0 4px;
-    font-size: 15px;
+    font-size: 17px;
     text-align: left;
 }
 .listening-stage .gap-fill-input:focus,
@@ -645,12 +705,45 @@ body {
     background: #fff;
 }
 
+/* Numbered gap: dark question-number box fused to the input */
+.gap-inline {
+    display: inline-flex;
+    align-items: stretch;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+.gap-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    padding: 0 9px;
+    background: #0f2340;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 6px 0 0 6px;
+    user-select: none;
+}
+.listening-stage .gap-inline .gap-fill-input,
+.gap-inline .gap-fill-input {
+    margin: 0;
+    border-radius: 0 6px 6px 0;
+    border-left: none;
+    min-width: 170px;
+}
+/* Gap-fill rows read as normal sentences — no left badge column */
+.listening-stage .question-item.gap-fill-item {
+    display: block;
+    line-height: 2.1;
+}
+
 /* Radio / MC options: light, no heavy borders */
 .listening-stage .radio-group { margin: 8px 0 4px; gap: 4px; }
 .listening-stage .radio-option {
     border: none;
-    padding: 5px 4px;
-    font-size: 16px;
+    padding: 6px 4px;
+    font-size: 18px;
 }
 .listening-stage .radio-option:hover { background: #f1f5f9; border: none; }
 
@@ -668,7 +761,7 @@ body {
     font-weight: 700 !important;
 }
 .listening-stage .listening-text {
-    font-size: 16px;
+    font-size: 18px;
     color: #1f2937;
     margin: 8px 0;
     padding: 0;
@@ -683,14 +776,14 @@ body {
     border-radius: 0 !important;
     margin-bottom: 8px;
 }
-.listening-stage .section-title h2 { font-size: 22px; }
+.listening-stage .section-title h2 { font-size: 24px; }
 
 /* Multi-select & matching boxes */
 .listening-stage .multi-select-box,
 .listening-stage .matching-options-box {
     margin: 12px 0 20px;
 }
-.listening-stage .group-stem { font-weight: 600; margin: 0 0 12px; font-size: 16px; color: #1f2937; }
+.listening-stage .group-stem { font-weight: 600; margin: 0 0 12px; font-size: 18px; color: #1f2937; }
 .listening-stage .selection-counter {
     display: inline-block;
     margin-bottom: 12px;
@@ -708,7 +801,7 @@ body {
     margin: 10px 0;
 }
 .listening-stage .matching-question .question-number { align-self: center; }
-.listening-stage .matching-question-text { flex: 1; font-size: 16px; }
+.listening-stage .matching-question-text { flex: 1; font-size: 18px; }
 .listening-stage .matching-select { width: auto; min-width: 160px; margin: 0; }
 
 .select-input, .matching-select {

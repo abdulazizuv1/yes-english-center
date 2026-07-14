@@ -148,13 +148,16 @@ function extractReadingQuestions(container, startQNum, passageNum) {
             });
             qNum++;
         } else if (type === 'multiple-choice') {
-            const options = {};
+            // The test page renders MC options with options.forEach(...) —
+            // they must be saved as an array of {label, text}, matching every
+            // working production test.
+            const options = [];
             el.querySelectorAll('.mc-option-item').forEach(opt => {
                 const letter = opt.querySelector('input[type="radio"]').value;
                 const text = opt.querySelector('.option-text')?.value?.trim() || "";
-                if (text) options[letter] = text;
+                if (text) options.push({ label: letter, text });
             });
-            if (Object.keys(options).length === 0) fail('multiple-choice has no options.');
+            if (options.length === 0) fail('multiple-choice has no options.');
             result.push({
                 type: 'multiple-choice', questionId: `q${qNum}`,
                 groupInstruction: gi || null,

@@ -72,10 +72,12 @@ export function generateQuestionHTML(type, questionId) {
     case 'text':
       return `<div class="question-item" data-question-id="${questionId}" data-type="text">
         <div class="question-header"><span class="question-type-badge text">Text</span>${rmBtn}</div>
+        <textarea placeholder="Group instruction (optional — instruction band shown above this text)" class="group-instruction form-input" rows="2" style="margin-bottom:.5rem"></textarea>
         <textarea placeholder="Text content" class="question-value form-input" rows="3"></textarea></div>`;
     case 'subheading':
       return `<div class="question-item" data-question-id="${questionId}" data-type="subheading">
         <div class="question-header"><span class="question-type-badge subheading">Subheading</span>${rmBtn}</div>
+        <textarea placeholder="Group instruction (optional — instruction band shown above this subheading)" class="group-instruction form-input" rows="2" style="margin-bottom:.5rem"></textarea>
         <input type="text" placeholder="Subheading text" class="question-value form-input"></div>`;
     case 'gap-fill':
       return `<div class="question-item" data-question-id="${questionId}" data-type="gap-fill">

@@ -133,17 +133,10 @@ async function generateReviewData() {
         const readingData = await collectReadingData();
         const writingData = await collectWritingData();
 
-        // Ensure writing stage is compatible with the shared mock format
+        // Stamp the shared mock identifiers onto the writing entry
         if (writingData.tasks && writingData.tasks[0]) {
             writingData.tasks[0].testId = testId;
             writingData.tasks[0].title = title;
-        } else {
-            writingData.tasks = [{
-                testId,
-                title,
-                task1: writingData.task1,
-                task2: writingData.task2
-            }];
         }
 
         const payload = {
@@ -165,8 +158,8 @@ async function generateReviewData() {
         document.getElementById('reviewReadingPassages').textContent = readingData.passages.length;
         document.getElementById('reviewReadingQuestions').textContent = readingData.totalQuestions || 0;
         
-        const writingTask1 = writingData.task1 || writingData.tasks?.[0]?.task1;
-        const writingTask2 = writingData.task2 || writingData.tasks?.[0]?.task2;
+        const writingTask1 = writingData.tasks?.[0]?.task1;
+        const writingTask2 = writingData.tasks?.[0]?.task2;
 
         document.getElementById('reviewWritingTask1').textContent = writingTask1 ? 'Yes' : 'No';
         document.getElementById('reviewWritingTask2').textContent = writingTask2 ? 'Yes' : 'No';
@@ -227,10 +220,6 @@ async function handleSave() {
                 }
             });
         }
-        // Top-level task1/task2 path
-        if (wData.task1) writingEntries.push({ parent: wData, key: 'task1', data: wData.task1 });
-        if (wData.task2) writingEntries.push({ parent: wData, key: 'task2', data: wData.task2 });
-
         for (let i = 0; i < writingEntries.length; i++) {
             const { parent, data } = writingEntries[i];
             if (data.imageUrl && typeof data.imageUrl === 'object') {

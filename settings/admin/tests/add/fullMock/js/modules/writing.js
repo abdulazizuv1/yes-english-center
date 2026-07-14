@@ -119,8 +119,6 @@ export async function collectWritingData() {
         id: "writing",
         title: "Writing Test",
         duration: 60,
-        task1,
-        task2,
         tasks: [writingTasksEntry]
     };
 }
