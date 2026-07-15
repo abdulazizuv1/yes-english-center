@@ -552,17 +552,22 @@ body {
     box-shadow: 0 3px 12px rgba(15, 35, 64, 0.35);
 }
 .audio-bar .audio-placeholder { color: #cbd5e1; font-size: 14px; font-weight: 500; }
-.audio-bar audio { width: 100%; max-width: 640px; height: 40px; }
-/* Student inline player rows sit centred in the bar */
-.audio-bar > div { background: transparent !important; border: none !important; padding: 0 !important; }
 
-/* Student audio player: round button + label + progress + time */
-.student-audio {
-    display: flex !important;
+/* One centred player pill: play button, current time, progress line, total
+   time. No label text. `.seekable` (admins) makes the line clickable. */
+.audio-player {
+    display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
     width: 100%;
-    max-width: 920px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 8px 20px 8px 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 .audio-play-btn {
     width: 44px;
@@ -570,54 +575,46 @@ body {
     flex-shrink: 0;
     border: none;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #fff;
+    background: #fff;
+    color: #0f2340;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .audio-play-btn:hover {
-    transform: scale(1.07);
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6);
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
-.audio-play-btn:active { transform: scale(0.97); }
-.audio-meta {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-.audio-bar .audio-bar-label {
-    color: #dbeafe;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
+.audio-play-btn:active { transform: scale(0.96); }
 .audio-progress {
+    flex: 1;
     height: 6px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
     overflow: hidden;
 }
+.audio-progress.seekable { cursor: pointer; }
+.audio-progress.seekable:hover { background: rgba(255, 255, 255, 0.3); }
 .audio-progress-fill {
     height: 100%;
     width: 0%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    border-radius: 999px;
+    background: linear-gradient(90deg, #93c5fd, #3b82f6);
     transition: width 0.25s linear;
 }
-.audio-bar #studentAudioTime {
-    color: #e2e8f0 !important;
+.audio-player .audio-time {
+    color: #fff;
     font-size: 13px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
-    min-width: 92px;
-    text-align: right;
+    min-width: 44px;
+    text-align: center;
 }
+.audio-player .audio-time.total { color: rgba(255, 255, 255, 0.65); }
 
 /* Questions span the page, centred with a readable max width */
 .listening-questions-panel {

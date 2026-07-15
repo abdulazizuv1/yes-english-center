@@ -1217,17 +1217,16 @@ function handleSectionAudio(section, index) {
 const AUDIO_ICON_PLAY = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
 const AUDIO_ICON_PAUSE = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
 
-// One clean student player: round play/pause button, label, live progress
-// bar (display only — seeking stays blocked) and time counter.
-function studentAudioBarHTML(label, src) {
+// One player for everyone, centred in the top bar: round play/pause,
+// current time, progress line, total time — no label text. Students can't
+// seek; admins seek by clicking the progress line.
+function audioBarHTML(src) {
   return `
-    <div class="student-audio">
-      <button id="studentPlayPauseBtn" class="audio-play-btn" aria-label="Pause audio">${AUDIO_ICON_PAUSE}</button>
-      <div class="audio-meta">
-        <span class="audio-bar-label">${label}</span>
-        <div class="audio-progress"><div class="audio-progress-fill" id="audioProgressFill"></div></div>
-      </div>
-      <span id="studentAudioTime">0:00 / 0:00</span>
+    <div class="audio-player">
+      <button id="audioPlayPauseBtn" class="audio-play-btn" aria-label="Pause audio">${AUDIO_ICON_PAUSE}</button>
+      <span class="audio-time" id="audioTimeCurrent">0:00</span>
+      <div class="audio-progress" id="audioProgressTrack"><div class="audio-progress-fill" id="audioProgressFill"></div></div>
+      <span class="audio-time total" id="audioTimeTotal">0:00</span>
       <audio id="sectionAudio" autoplay style="display:none;">
         <source src="${src}" type="audio/mpeg" />
       </audio>
@@ -1244,17 +1243,8 @@ function initializeSequentialAudio() {
       currentAudio.pause();
       currentAudio = null;
     }
-    if (isAdmin) {
-      container.innerHTML = `
-        <audio controls autoplay style="width:100%; margin-bottom:20px;" id="sectionAudio">
-          <source src="${stageData.listening.audioUrl}" type="audio/mpeg" />
-        </audio>
-        <div style="text-align:center; margin-top:10px; color:#6b7280;">Playing: Master Audio</div>
-      `;
-    } else {
-      container.innerHTML = studentAudioBarHTML("Listening Audio", stageData.listening.audioUrl);
-      setupStudentAudioControls();
-    }
+    container.innerHTML = audioBarHTML(stageData.listening.audioUrl);
+    setupAudioBarControls(isAdmin);
     currentAudio = document.getElementById('sectionAudio');
     return;
   }
@@ -1275,19 +1265,8 @@ function initializeSequentialAudio() {
       currentAudio = null;
     }
 
-    const label = `Section ${sectionIndex + 1} Audio`;
-
-    if (isAdmin) {
-      container.innerHTML = `
-        <audio controls autoplay style="width:100%; margin-bottom:20px;" id="sectionAudio">
-          <source src="${section.audioUrl}" type="audio/mpeg" />
-        </audio>
-        <div style="text-align:center; margin-top:10px; color:#6b7280;">${label}</div>
-      `;
-    } else {
-      container.innerHTML = studentAudioBarHTML(label, section.audioUrl);
-      setupStudentAudioControls();
-    }
+    container.innerHTML = audioBarHTML(section.audioUrl);
+    setupAudioBarControls(isAdmin);
 
     currentAudio = document.getElementById('sectionAudio');
     currentAudioSection = sectionIndex;
@@ -1300,10 +1279,12 @@ function initializeSequentialAudio() {
   }
 }
 
-function setupStudentAudioControls() {
+function setupAudioBarControls(allowSeek) {
   const audio = document.getElementById("sectionAudio");
-  const playPauseBtn = document.getElementById("studentPlayPauseBtn");
-  const timeDisplay = document.getElementById("studentAudioTime");
+  const playPauseBtn = document.getElementById("audioPlayPauseBtn");
+  const timeCurrent = document.getElementById("audioTimeCurrent");
+  const timeTotal = document.getElementById("audioTimeTotal");
+  const track = document.getElementById("audioProgressTrack");
   const progressFill = document.getElementById("audioProgressFill");
   if (!audio) return;
 
@@ -1316,18 +1297,35 @@ function setupStudentAudioControls() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   }
 
+  audio.addEventListener("loadedmetadata", () => {
+    timeTotal.textContent = fmt(audio.duration);
+  });
+
   audio.addEventListener("timeupdate", () => {
     if (!audio.seeking) lastValidTime = audio.currentTime;
-    timeDisplay.textContent = `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
-    if (progressFill && audio.duration) {
+    timeCurrent.textContent = fmt(audio.currentTime);
+    if (audio.duration) {
+      timeTotal.textContent = fmt(audio.duration);
       progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
     }
   });
 
-  // Block seeking
-  audio.addEventListener("seeking", () => {
-    audio.currentTime = lastValidTime;
-  });
+  if (allowSeek) {
+    // Admins may scrub: click anywhere on the progress line
+    track.classList.add("seekable");
+    track.title = "Click to seek";
+    track.addEventListener("click", (e) => {
+      if (!audio.duration) return;
+      const rect = track.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      audio.currentTime = ratio * audio.duration;
+    });
+  } else {
+    // Students can't rewind or skip ahead
+    audio.addEventListener("seeking", () => {
+      audio.currentTime = lastValidTime;
+    });
+  }
 
   audio.addEventListener("play", () => {
     playPauseBtn.innerHTML = AUDIO_ICON_PAUSE;
