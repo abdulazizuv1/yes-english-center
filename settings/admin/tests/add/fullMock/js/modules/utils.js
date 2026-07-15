@@ -85,7 +85,7 @@ export function generateQuestionHTML(type, questionId) {
         <input type="text" placeholder="Group instruction (optional)" class="group-instruction form-input" style="margin-bottom:.5rem">
         <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text form-input" style="margin-bottom:.5rem">
         <input type="text" placeholder="Postfix (optional)" class="question-postfix form-input" style="margin-bottom:.5rem">
-        <input type="text" placeholder="Correct answer" class="question-answer form-input" style="margin-bottom:.5rem">
+        <input type="text" placeholder="Correct answer — several variants via comma: holiday, holidays" class="question-answer form-input" style="margin-bottom:.5rem">
         <input type="number" placeholder="Word limit (optional)" class="question-word-limit form-input" min="1" max="10"></div>`;
     case 'multiple-choice':
       return `<div class="question-item" data-question-id="${questionId}" data-type="multiple-choice">
@@ -157,8 +157,8 @@ export function generateQuestionHTML(type, questionId) {
               </tr>
             </tbody>
           </table></div>
-          <div class="table-answers"><label>Answers (format: q1=answer1, q2=answer2):</label>
-            <textarea placeholder="q1=theatre, q2=4.30..." class="table-answers-text" rows="3"></textarea></div>
+          <div class="table-answers"><label>Answers (format: q1=answer1, q2=answer2; variants: q3=holiday, holidays):</label>
+            <textarea placeholder="q1=theatre, q2=4.30... (variants: q3=holiday, holidays)" class="table-answers-text" rows="3"></textarea></div>
         </div></div>`;
     case 'text-question':
       return `<div class="question-item" data-question-id="${questionId}" data-type="text-question">

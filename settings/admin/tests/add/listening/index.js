@@ -452,7 +452,7 @@ window.addQuestion = function (sectionNumber, type) {
           <input type="text" placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction">
           <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text">
           <input type="text" placeholder="Postfix (optional)" class="question-postfix">
-          <input type="text" placeholder="Correct answer" class="question-answer">
+          <input type="text" placeholder="Correct answer — several variants via comma: holiday, holidays" class="question-answer">
           <input type="number" placeholder="Word limit (optional)" class="question-word-limit" min="1" max="10">
         </div>
       `;
@@ -575,7 +575,7 @@ window.addQuestion = function (sectionNumber, type) {
             
             <div class="table-answers">
               <label>Answers (format: q1=answer1, q2=answer2):</label>
-              <textarea placeholder="q1=theatre, q2=4.30, q3=station..." class="table-answers-text" rows="3"></textarea>
+              <textarea placeholder="q1=theatre, q2=4.30... (variants: q3=holiday, holidays)" class="table-answers-text" rows="3"></textarea>
             </div>
           </div>
         </div>
@@ -1860,11 +1860,20 @@ function collectTestData() {
           // Parse answers typed against the numbers the admin SAW in the UI
           // and remap them to the final sequential numbers. Unknown keys are a
           // hard error — silently saving them produced ungradable tests before.
+          // "q1=holiday, holidays, q2=beach": a comma segment without "=" is a
+          // variant of the previous answer (both accepted), not a new pair.
           questionData.answer = {};
           if (tableAnswersText) {
-            tableAnswersText.split(',').forEach(pair => {
-              const [rawKey, value] = pair.split('=');
-              if (!rawKey || !value || !value.trim()) return;
+            const answerPairs = [];
+            tableAnswersText.split(',').forEach(seg => {
+              if (seg.includes('=')) answerPairs.push(seg);
+              else if (answerPairs.length) answerPairs[answerPairs.length - 1] += `,${seg}`;
+            });
+            answerPairs.forEach(pair => {
+              const eq = pair.indexOf('=');
+              const rawKey = pair.slice(0, eq);
+              const value = pair.slice(eq + 1);
+              if (!rawKey.trim() || !value.trim()) return;
               const uiKey = String(parseInt(rawKey.trim().replace(/^q/i, ''), 10));
               const finalNumber = uiToFinal[uiKey];
               if (finalNumber === undefined) {

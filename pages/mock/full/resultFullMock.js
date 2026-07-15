@@ -373,6 +373,31 @@ function renderDetailedReadingQuestions() {
   }
 }
 
+// An answer key may list several accepted variants separated by commas:
+// "holiday, holidays" accepts both. A comma directly between digits
+// (6,000) is a thousand separator, not a variant break.
+function splitAnswerVariants(key) {
+  const parts = [];
+  for (const seg of String(key).split(",")) {
+    const prev = parts[parts.length - 1];
+    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
+      parts[parts.length - 1] = `${prev},${seg}`;
+    } else {
+      parts.push(seg);
+    }
+  }
+  return parts.map((v) => v.trim()).filter(Boolean);
+}
+
+// One comma-variant vs the student's answer ("/" alternatives kept)
+function variantMatches(userStr, expStr) {
+  if (expStr.includes("/")) {
+    const alternatives = expStr.split("/").map(alt => alt.trim());
+    return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
+  }
+  return normalizeAnswer(expStr) === normalizeAnswer(userStr);
+}
+
 // Check answer correctness (same logic as in main test)
 function checkAnswerCorrectness(userAns, expected) {
   if (!expected) return false;
@@ -383,28 +408,19 @@ function checkAnswerCorrectness(userAns, expected) {
   // Handle array of expected answers (for reading)
   if (Array.isArray(expected)) {
     const userStr = String(userAns).toLowerCase().trim();
-    return expected.some(exp => {
-      const expStr = String(exp).toLowerCase().trim();
-      if (expStr.includes("/")) {
-        const alternatives = expStr.split("/").map(alt => alt.trim());
-        return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
-      }
-      return normalizeAnswer(expStr) === normalizeAnswer(userStr);
-    });
+    return expected.some(exp =>
+      splitAnswerVariants(exp).some(variant =>
+        variantMatches(userStr, variant.toLowerCase())
+      )
+    );
   }
 
   // Convert to strings for comparison
   const userStr = String(userAns).toLowerCase().trim();
-  const expectedStr = String(expected).toLowerCase().trim();
 
-  // Handle multiple correct answers (separated by "/")
-  if (expectedStr.includes("/")) {
-    const alternatives = expectedStr.split("/").map(alt => alt.trim());
-    return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
-  }
-
-  // Simple string comparison with postfix normalization
-  return normalizeAnswer(userStr) === normalizeAnswer(expectedStr);
+  return splitAnswerVariants(expected).some(variant =>
+    variantMatches(userStr, variant.toLowerCase())
+  );
 }
 
 // Helper function to normalize answers by removing postfixes

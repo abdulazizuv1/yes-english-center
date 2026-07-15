@@ -344,11 +344,20 @@ function extractTableData(el, questionId, startQNum) {
     // Answers — typed against the UI numbers, saved against the final ones.
     // Unknown keys are a hard error: silently saving them used to produce
     // ungradable tables.
+    // "q1=holiday, holidays, q2=beach": a comma segment without "=" is a
+    // variant of the previous answer (both accepted), not a new pair.
     const answersText = el.querySelector('.table-answers-text')?.value?.trim() || "";
     if (answersText) {
-        answersText.split(',').forEach(pair => {
-            const [k, v] = pair.split('=');
-            if (!k || !v || !v.trim()) return;
+        const pairs = [];
+        answersText.split(',').forEach(seg => {
+            if (seg.includes('=')) pairs.push(seg);
+            else if (pairs.length) pairs[pairs.length - 1] += `,${seg}`;
+        });
+        pairs.forEach(pair => {
+            const eq = pair.indexOf('=');
+            const k = pair.slice(0, eq);
+            const v = pair.slice(eq + 1);
+            if (!k.trim() || !v.trim()) return;
             const uiKey = String(parseInt(k.trim().replace(/^q+/i, ''), 10));
             const finalNum = uiToFinal[uiKey];
             if (finalNum === undefined) {

@@ -164,6 +164,22 @@ export function calculateResults() {
   return { answers, correctAnswers, correct, total };
 }
 
+// An answer key may list several accepted variants separated by commas:
+// "holiday, holidays" accepts both. A comma directly between digits
+// (6,000) is a thousand separator, not a variant break.
+export function splitAnswerVariants(key) {
+  const parts = [];
+  for (const seg of String(key).split(",")) {
+    const prev = parts[parts.length - 1];
+    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
+      parts[parts.length - 1] = `${prev},${seg}`;
+    } else {
+      parts.push(seg);
+    }
+  }
+  return parts.map((v) => v.trim()).filter(Boolean);
+}
+
 export function checkAnswerCorrectness(userAns, expected) {
   if (
     !expected ||
@@ -187,7 +203,9 @@ export function checkAnswerCorrectness(userAns, expected) {
   }
 
   const userAnswer = String(userAns).toLowerCase().trim();
-  const expectedAnswers = expected.map((a) => String(a).toLowerCase().trim());
+  const expectedAnswers = expected
+    .flatMap((a) => splitAnswerVariants(a))
+    .map((a) => a.toLowerCase());
 
   return expectedAnswers.some((exp) => {
     if (exp.includes("/")) {

@@ -716,33 +716,49 @@ function checkArrayAnswer(userAnswer, correctAnswer) {
   return userSorted.every((item, index) => item === correctSorted[index]);
 }
 
+// An answer key may list several accepted variants separated by commas:
+// "holiday, holidays" accepts both. A comma directly between digits
+// (6,000) is a thousand separator, not a variant break.
+function splitAnswerVariants(key) {
+  const parts = [];
+  for (const seg of String(key).split(",")) {
+    const prev = parts[parts.length - 1];
+    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
+      parts[parts.length - 1] = `${prev},${seg}`;
+    } else {
+      parts.push(seg);
+    }
+  }
+  return parts.map((v) => v.trim()).filter(Boolean);
+}
+
+// One comma/slash variant vs the student's cleaned answer
+function stringVariantMatches(userClean, correctClean) {
+  if (correctClean.includes('/')) {
+    const alternatives = correctClean.split('/').map(alt => alt.trim());
+    return alternatives.some(alt => userClean === alt);
+  }
+
+  return correctClean === userClean;
+}
+
 function checkStringAnswer(userAnswer, correctAnswer) {
   if (!userAnswer || typeof userAnswer !== 'string') {
     return false;
   }
 
   const userClean = userAnswer.toLowerCase().trim();
-  
+
   if (Array.isArray(correctAnswer)) {
-    return correctAnswer.some(correct => {
-      const correctClean = String(correct).toLowerCase().trim();
-      
-      if (correctClean.includes('/')) {
-        const alternatives = correctClean.split('/').map(alt => alt.trim());
-        return alternatives.some(alt => userClean === alt);
-      }
-      
-      return correctClean === userClean;
-    });
+    return correctAnswer.some(correct =>
+      splitAnswerVariants(correct).some(variant =>
+        stringVariantMatches(userClean, variant.toLowerCase())
+      )
+    );
   } else {
-    const correctClean = String(correctAnswer).toLowerCase().trim();
-     
-    if (correctClean.includes('/')) {
-      const alternatives = correctClean.split('/').map(alt => alt.trim());
-      return alternatives.some(alt => userClean === alt);
-    }
-    
-    return correctClean === userClean;
+    return splitAnswerVariants(correctAnswer).some(variant =>
+      stringVariantMatches(userClean, variant.toLowerCase())
+    );
   }
 }
 

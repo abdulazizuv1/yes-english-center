@@ -3198,9 +3198,11 @@ async function handleFinishTest() {
       correctAnsArray = Array.isArray(q.answer) ? q.answer : [q.answer];
     }
 
+    // "holiday, holidays" in one key means both variants are accepted
     correctAnsArray = correctAnsArray
       .filter((a) => typeof a === "string")
-      .map((a) => a.trim().toLowerCase());
+      .flatMap((a) => splitAnswerVariants(a))
+      .map((a) => a.toLowerCase());
 
     readingCorrectAnswers[qId] = correctAnsArray;
 
@@ -3303,6 +3305,22 @@ function findReadingQuestionByQId(qId) {
   return { answer: [] };
 }
 
+// An answer key may list several accepted variants separated by commas:
+// "holiday, holidays" accepts both. A comma directly between digits
+// (6,000) is a thousand separator, not a variant break.
+function splitAnswerVariants(key) {
+  const parts = [];
+  for (const seg of String(key).split(",")) {
+    const prev = parts[parts.length - 1];
+    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
+      parts[parts.length - 1] = `${prev},${seg}`;
+    } else {
+      parts.push(seg);
+    }
+  }
+  return parts.map((v) => v.trim()).filter(Boolean);
+}
+
 function checkAnswerCorrectness(userAns, expected) {
   if (!expected || expected.length === 0) return false;
 
@@ -3319,9 +3337,9 @@ function checkAnswerCorrectness(userAns, expected) {
         : String(userAns || "")
             .toLowerCase()
             .trim();
-    return expected
-      .map((a) => String(a).toLowerCase().trim())
-      .includes(userStr);
+    return expected.some((a) =>
+      splitAnswerVariants(a).some((v) => v.toLowerCase() === userStr)
+    );
   }
 }
 
