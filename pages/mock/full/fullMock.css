@@ -405,6 +405,12 @@ body {
     color: #1e293b;
 }
 
+/* Reading instructions are set via textContent — keep the typed line breaks.
+   (Listening bands build their own <br> markup, so this stays reading-only.) */
+#reading-questions .group-instruction {
+    white-space: pre-line;
+}
+
 /* Enhanced subheading styles */
 .listening-subheading {
     font-size: 20px !important;

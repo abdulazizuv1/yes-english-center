@@ -994,7 +994,6 @@ function initializeStage(stageName) {
   // Update UI
   updateStageTitle();
   showStageContent(stageName);
-  generateQuestionNav();
   updateStageIndicator();
 
   // Check if user has unlimited time before starting timer
@@ -1021,7 +1020,9 @@ function initializeStage(stageName) {
     }
   });
 
-  // Initialize stage-specific content
+  // Initialize stage-specific content BEFORE building the question nav:
+  // reading nav cell counts come from readingPassageCounts, which is only
+  // filled by assignReadingQuestionIds() inside initializeReading().
   if (stageName === "listening") {
     initializeListening();
   } else if (stageName === "reading") {
@@ -1030,6 +1031,7 @@ function initializeStage(stageName) {
     initializeWriting();
   }
 
+  generateQuestionNav();
   updateQuestionNav();
 }
 
@@ -1064,6 +1066,10 @@ function showStageContent(stageName) {
 // Tracks the last group instruction shown while rendering a section so the
 // same instruction isn't repeated before every question in the group.
 let lastListeningInstruction = null;
+// True from the moment an instruction band renders until the first gradeable
+// item after it — a text/subheading in that window that merely repeats part
+// of the band (same sentence saved in both places) is skipped.
+let listeningInstructionFresh = false;
 
 // Initialize Listening
 function initializeListening() {
@@ -1147,14 +1153,16 @@ function renderListeningSection(index) {
       </div>
   `;
 
-  // Two instruction sources, both supported: the section-level block
-  // (section.instructions — lives OUTSIDE content[]) always renders at the
-  // top when present, and per-item groupInstruction blocks render inline as
-  // the content flows (see renderListeningInstructionFor).
+  // Section-level instructions live OUTSIDE content[] and come in two
+  // shapes: an {heading, details, note} object (add tool) or a plain
+  // groupInstruction string (imported tests). Both render at the top;
+  // per-item groupInstruction blocks then render inline as the content
+  // flows (see renderListeningInstructionFor).
   lastListeningInstruction = null;
+  listeningInstructionFresh = false;
   const content = Array.isArray(section.content) ? section.content : [];
 
-  if (section.instructions) {
+  if (section.instructions && typeof section.instructions === "object") {
     const { heading, details, note } = section.instructions;
     if (heading || details || note) {
       questionList.innerHTML += `
@@ -1168,8 +1176,20 @@ function renderListeningSection(index) {
       lastListeningInstruction = normalizeInstruction(
         [heading, details, note].filter(Boolean).join(" ")
       );
+      listeningInstructionFresh = true;
     }
   }
+
+  [
+    typeof section.instructions === "string" ? section.instructions : "",
+    typeof section.groupInstruction === "string" ? section.groupInstruction : "",
+  ].forEach((text) => {
+    const norm = normalizeInstruction(text);
+    if (!norm || norm === lastListeningInstruction) return;
+    questionList.innerHTML += `<div class="group-instruction">${instructionBlockHTML(text)}</div>`;
+    lastListeningInstruction = norm;
+    listeningInstructionFresh = true;
+  });
 
   content.forEach((item) => renderListeningContentItem(item));
 
@@ -1330,6 +1350,18 @@ function normalizeInstruction(s) {
   return String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+// groupInstruction strings often hold several lines ("Questions 1-10\n\n
+// Write ONE WORD..."). Show the first line bold — it is the "Questions X-Y"
+// range in real papers — and keep the remaining line breaks.
+function instructionBlockHTML(text) {
+  const s = String(text).trim();
+  const nl = s.indexOf("\n");
+  if (nl === -1) return s;
+  const first = s.slice(0, nl).trim();
+  const rest = s.slice(nl + 1).trim().replace(/\n/g, "<br>");
+  return `<strong>${first}</strong><br>${rest}`;
+}
+
 // Renders an item's groupInstruction as an instruction block, but only
 // when it changes — so a run of items sharing one instruction shows it
 // once (real IELTS layout).
@@ -1339,10 +1371,11 @@ function renderListeningInstructionFor(item) {
   const norm = normalizeInstruction(gi);
   if (!norm || norm === lastListeningInstruction) return;
   lastListeningInstruction = norm;
+  listeningInstructionFresh = true;
   const questionList = document.getElementById("listening-questions");
   const div = document.createElement("div");
   div.className = "group-instruction";
-  div.innerHTML = String(gi).replace(/\n/g, "<br>");
+  div.innerHTML = instructionBlockHTML(gi);
   questionList.appendChild(div);
 }
 
@@ -1356,25 +1389,39 @@ function renderListeningContentItem(item, itemIndex) {
   if (item.type) {
     switch (item.type) {
       case "text":
-        questionList.innerHTML += `<p class="listening-text">${
-          item.value || item.text || ""
-        }</p>`;
+      case "subheading": {
+        const value = item.value || item.text || "";
+        // Right after an instruction band, drop a text/subheading whose whole
+        // content is already inside the band (e.g. "Write ONE WORD AND/OR A
+        // NUMBER..." saved both as section groupInstruction and as a
+        // subheading) — otherwise the same sentence prints twice.
+        const norm = normalizeInstruction(value);
+        if (
+          listeningInstructionFresh &&
+          norm.length >= 12 &&
+          lastListeningInstruction &&
+          lastListeningInstruction.includes(norm)
+        ) {
+          break;
+        }
+        questionList.innerHTML +=
+          item.type === "text"
+            ? `<p class="listening-text">${value}</p>`
+            : `<h4 class="listening-subheading">${value}</h4>`;
         break;
-
-      case "subheading":
-        questionList.innerHTML += `<h4 class="listening-subheading">${
-          item.value || item.text || ""
-        }</h4>`;
-        break;
+      }
 
       case "question":
+        listeningInstructionFresh = false;
         renderListeningQuestion(item);
         break;
 
       case "question-group":
+        listeningInstructionFresh = false;
         renderListeningQuestionGroup(item);
         break;
       case "table":
+        listeningInstructionFresh = false;
         renderListeningTable(item);
         break;
     }
