@@ -153,15 +153,21 @@ export function renderGapFillQuestion(question, container) {
 
   let textContent = question.title || question.text || question.value || "";
 
-  textContent = textContent.replace(
-    /_{3,}/g,
-    `<input type="text" value="${
-      listeningState.answersSoFar[qId] || ""
-    }" data-qid="${qId}" class="gap-fill" placeholder="Answer"/>`
-  );
+  // Same look as the full mock: the dark number box sits fused to the input,
+  // right at the blank inside the sentence.
+  const safeVal = String(listeningState.answersSoFar[qId] || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+  const gapHtml = `<span class="gap-inline"><span class="gap-num">${number}</span><input type="text" value="${safeVal}" data-qid="${qId}" class="gap-fill" placeholder=" "/></span>`;
+
+  if (/_{3,}/.test(textContent)) {
+    textContent = textContent.replace(/_{3,}/g, gapHtml);
+  } else {
+    textContent = `${textContent} ${gapHtml}`;
+  }
 
   questionDiv.innerHTML = `
-        <div class="question-number">${number}</div>
         <div class="question-text">${textContent}</div>
     `;
 
@@ -176,7 +182,7 @@ export function renderContentItem(item) {
       renderTextItem(item);
       break;
     case "subheading":
-      questionList.innerHTML += `<h4 style="margin: 20px 0 10px; color: #dc2626; font-weight: 600;">${
+      questionList.innerHTML += `<h4 class="listening-subheading">${
         item.value || item.text
       }</h4>`;
       break;
@@ -204,8 +210,6 @@ export function renderQuestion(question) {
   const questionDiv = document.createElement("div");
   questionDiv.className = "question-item";
   questionDiv.id = qId;
-  questionDiv.style.cssText =
-    "margin: 20px 0; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fafafa;";
 
   const number = qId.replace(/\D/g, "");
 
@@ -223,18 +227,18 @@ export function renderQuestion(question) {
       .sort()
       .map(
         (key) => `
-            <label style="display: block; margin: 8px 0; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+            <label class="radio-option">
                 <input type="radio" name="${qId}" value="${key}" ${
           listeningState.answersSoFar[qId] === key ? "checked" : ""
-        } style="margin-right: 8px;"/> 
-                <strong>${key}.</strong> ${question.options[key]}
+        }/>
+                <span><strong>${key}.</strong> ${question.options[key]}</span>
             </label>
         `
       )
       .join("");
 
     questionDiv.innerHTML = `
-            <div class="question-number" style="display: inline-block; background: #3b82f6; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; margin-right: 10px;">${number}</div>
+            <div class="question-number">${number}</div>
             <div class="question-text">
                 <div style="font-weight: 500; margin-bottom: 10px;">${question.text}</div>
                 <div class="radio-group">${optionsHtml}</div>
@@ -274,14 +278,14 @@ export function renderQuestionGroup(group) {
 
     groupDiv.innerHTML = `
             ${instructionsHtml}
-            <div style="margin: 25px 0; padding: 20px; border: 2px solid #3b82f6; border-radius: 10px; background: #f8fafc;">
+            <div class="multi-select-group">
                 ${
                   group.instructions
-                    ? `<h4 style="color: #dc2626; margin-bottom: 15px;">${group.instructions}</h4>`
+                    ? `<h4>${group.instructions}</h4>`
                     : ""
                 }
-                <p style="font-weight: 600; margin-bottom: 15px;">${group.text}</p>
-                <p style="color: #6b7280; margin-bottom: 15px; font-style: italic;">Select exactly ${questionCount} options:</p>
+                <p class="group-stem">${group.text}</p>
+                <p class="selection-counter">Select exactly ${questionCount} options</p>
                 <div class="checkbox-group">
                     ${Object.keys(group.options || {})
                       .sort()
@@ -318,33 +322,33 @@ export function renderQuestionGroup(group) {
   } else if (group.groupType === "matching") {
     groupDiv.innerHTML = `
             ${instructionsHtml}
-            <div style="margin: 25px 0; padding: 20px; border: 2px solid #10b981; border-radius: 10px; background: #f0fdf4;">
+            <div class="matching-group">
                 ${group.instructions ? `<h4>${group.instructions}</h4>` : ""}
-                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="font-weight: 600; margin-bottom: 15px;">${
+                <div class="matching-options-box">
+                    <p class="group-stem">${
                       group.text || ""
                     }</p>
                     ${Object.keys(group.options || {})
                       .sort()
                       .map(
                         (key) =>
-                          `<p style="margin: 5px 0;"><strong>${key}</strong> ${group.options[key]}</p>`
+                          `<p class="matching-option-row"><strong>${key}</strong> ${group.options[key]}</p>`
                       )
                       .join("")}
                 </div>
                 ${(group.questions || [])
                   .map(
                     (q) => `
-                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 6px;">
-                        <div style="background: #10b981; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; margin-right: 15px;">${q.questionId.replace(
+                    <div class="matching-question">
+                        <div class="question-number">${q.questionId.replace(
                           "q",
                           ""
                         )}</div>
-                        <div style="flex: 1; margin-right: 15px;">${q.text}</div>
+                        <div class="matching-question-text">${q.text}</div>
                         <select data-qid="${q.questionId ||
                           q.QuestionId ||
                           q.qId ||
-                          q.editorId}" style="padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                          q.editorId}" class="matching-select">
                             <option value="">Select...</option>
                             ${Object.keys(group.options || {})
                               .sort()
@@ -382,18 +386,18 @@ export function renderMatchingQuestion(item) {
 
   matchDiv.innerHTML = `
         ${instructionsHtml}
-        <div style="margin: 25px 0; padding: 20px; border: 2px solid #10b981; border-radius: 10px; background: #f0fdf4;">
+        <div class="matching-group">
             ${
               item.title
-                ? `<h4 style="text-align: center; margin-bottom: 20px;">${item.title}</h4>`
+                ? `<h4>${item.title}</h4>`
                 : ""
             }
-            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div class="matching-options-box">
                 ${Object.keys(item.options || {})
                   .sort()
                   .map(
                     (key) =>
-                      `<p style="margin: 5px 0;"><strong>${key}</strong> ${item.options[key]}</p>`
+                      `<p class="matching-option-row"><strong>${key}</strong> ${item.options[key]}</p>`
                   )
                   .join("")}
             </div>
@@ -402,16 +406,16 @@ export function renderMatchingQuestion(item) {
                 (q) => `
                 <div id="${
                   q.questionId
-                }" style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 6px;">
-                    <div style="background: #10b981; color: white; min-width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; margin-right: 15px; font-size: 12px;">${q.questionId.replace(
+                }" class="matching-question">
+                    <div class="question-number">${q.questionId.replace(
                       "q",
                       ""
                     )}</div>
-                    <div style="flex: 1; margin-right: 15px;">${q.text}</div>
+                    <div class="matching-question-text">${q.text}</div>
                     <select data-qid="${q.questionId ||
                       q.QuestionId ||
                       q.qId ||
-                      q.editorId}" style="padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                      q.editorId}" class="matching-select">
                         <option value="">Select...</option>
                         ${Object.keys(item.options || {})
                           .sort()
@@ -468,19 +472,18 @@ export function renderTable(table) {
       const columnKey = col.toLowerCase().replace(/\s+/g, "");
       let content = row[columnKey] || "";
 
-      content = content.replace(/___q(\d+)___/g, (match, num) => {
+      const tableGapHtml = (num) => {
         const qId = `q${num}`;
-        return `<span class="input-with-number"><input type="text" value="${
-          listeningState.answersSoFar[qId] || ""
-        }" data-qid="${qId}" class="gap-fill has-number" /><span class="input-number">${num}</span></span>`;
-      });
+        const safeVal = String(listeningState.answersSoFar[qId] || "")
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+        return `<span class="gap-inline"><span class="gap-num">${num}</span><input type="text" value="${safeVal}" data-qid="${qId}" class="gap-fill" placeholder=" "/></span>`;
+      };
 
-      content = content.replace(/(\d+)_{3,}/g, (match, num) => {
-        const qId = `q${num}`;
-        return `<span class="input-with-number"><input type="text" value="${
-          listeningState.answersSoFar[qId] || ""
-        }" data-qid="${qId}" class="gap-fill has-number" /><span class="input-number">${num}</span></span>`;
-      });
+      content = content.replace(/___q(\d+)___/g, (match, num) => tableGapHtml(num));
+
+      content = content.replace(/(\d+)_{3,}/g, (match, num) => tableGapHtml(num));
 
       tableHtml += `<td style="border: 1px solid #ddd; padding: 8px;">${content}</td>`;
     });
@@ -498,30 +501,30 @@ export function renderLegacyGroup(group, key) {
   if (key === "matching" && group.matchingQuestions) {
     const groupDiv = document.createElement("div");
     groupDiv.innerHTML = `
-            <div style="margin: 25px 0; padding: 20px; border: 2px solid #10b981; border-radius: 10px; background: #f0fdf4;">
+            <div class="matching-group">
                 <h4>${group.heading || ""}</h4>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="font-weight: 600;">${group.question || ""}</p>
+                <div class="matching-options-box">
+                    <p class="group-stem">${group.question || ""}</p>
                     ${Object.keys(group.options || {})
                       .sort()
                       .map(
                         (keyOpt) =>
-                          `<p><strong>${keyOpt}</strong> ${group.options[keyOpt]}</p>`
+                          `<p class="matching-option-row"><strong>${keyOpt}</strong> ${group.options[keyOpt]}</p>`
                       )
                       .join("")}
                 </div>
                 ${group.matchingQuestions
                   .map(
                     (q) => `
-                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 6px;">
-                        <div style="background: #10b981; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; margin-right: 15px;">${q.qId.replace(
+                    <div class="matching-question">
+                        <div class="question-number">${q.qId.replace(
                           "q",
                           ""
                         )}</div>
-                        <div style="flex: 1; margin-right: 15px;">${q.text}</div>
+                        <div class="matching-question-text">${q.text}</div>
                         <select data-qid="${
                           q.qId
-                        }" style="padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                        }" class="matching-select">
                             <option value="">Select...</option>
                             ${Object.keys(group.options || {})
                               .sort()
