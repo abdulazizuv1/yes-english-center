@@ -85,6 +85,8 @@ Three roles stored in Firestore `users` collection: `admin`, `teacher`, `student
 ### Mock Tests (`pages/mock/`)
 Four test types: `reading/`, `listening/`, `writing/`, `full/`. Each is a self-contained HTML/JS/CSS bundle — no build step. Test data loaded from Firestore; results written back. Grading currently happens client-side (known limitation — see `docs/SECURITY.md`).
 
+**Question engine (`pages/mock/engine/`)** — one system for every question type, shared by listening, reading and the full mock. `normalize.js` converts every legacy Firestore shape into canonical kinds (gap, gap-group, choice, multi-select, match, match-group, table, drag-slots, drag-inline, map-labelling); `render.js`/`dnd.js` hold the single renderer per kind; `grade.js` is the one grading path (comma/slash answer variants included). Pages keep only their flow (sections, passages, instruction bands, nav) and pass a small ctx (`engineCtx.js` in each page) for answer storage. To add a question type: add a normalize case, a renderer and a grade case in the engine — all three pages pick it up.
+
 ### React Dashboard (`pages/dashboard/`)
 Separate Vite app with React Router (route-level code splitting via `React.lazy`), Chart.js analytics, and Lucide icons. Firebase config is inlined in `src/firebase.js`. `vite.config.js` builds in place with vendor chunks split; the build script wipes `assets/` first so stale hashed bundles never accumulate.
 

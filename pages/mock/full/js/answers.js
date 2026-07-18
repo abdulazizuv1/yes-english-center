@@ -8,6 +8,8 @@ import { updateQuestionNav } from "./navigation.js";
 export function setupAnswerCapture() {
 
 document.addEventListener("change", (e) => {
+  // Engine-rendered controls (data-qe) manage their own answers
+  if (e.target.dataset && e.target.dataset.qe) return;
   if (e.target.type === "checkbox") {
     const qId = e.target.dataset.qid || e.target.name;
     if (e.target.checked) {
@@ -22,6 +24,8 @@ document.addEventListener("change", (e) => {
 // Event handlers
 document.addEventListener("input", (e) => {
   const input = e.target;
+  // Engine-rendered controls (data-qe) manage their own answers
+  if (input.dataset && input.dataset.qe) return;
   const qId = input.dataset.qid || input.id || input.dataset.questionId;
 
   if (
@@ -38,6 +42,8 @@ document.addEventListener("input", (e) => {
 
 document.addEventListener("change", (e) => {
   const input = e.target;
+  // Engine-rendered controls (data-qe) manage their own answers
+  if (input.dataset && input.dataset.qe) return;
   const qId = input.name || input.dataset.qid || input.id || input.dataset.questionId;
 
   if (

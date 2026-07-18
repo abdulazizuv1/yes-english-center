@@ -38,6 +38,12 @@ export function assignQuestionIds() {
           readingState.orderedQIds.push(slot.qId);
           counter++;
         });
+      } else if (question.type === "map-labelling" && question.questions) {
+        question.questions.forEach((row) => {
+          row.qId = `q${counter}`;
+          readingState.orderedQIds.push(row.qId);
+          counter++;
+        });
       } else if (question.question) {
         question.qId = `q${counter}`;
         readingState.orderedQIds.push(question.qId);

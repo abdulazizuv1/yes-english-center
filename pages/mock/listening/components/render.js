@@ -1,7 +1,22 @@
+// Listening test: section flow and instruction bands. Question rendering
+// itself lives in the shared engine (pages/mock/engine/) — the same
+// renderers the reading test and the full mock use.
 import { listeningState } from "./state.js";
 import { handleAudio } from "./audio.js";
 import { restoreHighlights, saveCurrentHighlights } from "./highlights.js";
 import { updateNavButtons } from "./navigation.js";
+import { engineCtx } from "./engineCtx.js";
+import {
+  repairListeningIds,
+  normalizeListeningItem,
+  normalizeListeningSection,
+  renderItem,
+} from "../../engine/index.js";
+
+// Tracks the last group instruction shown while rendering a section so the
+// same instruction isn't repeated before every question in the group.
+let lastInstruction = null;
+let instructionFresh = false;
 
 export function renderSection(index) {
   if (listeningState.currentSectionIndex !== index) {
@@ -25,6 +40,8 @@ export function renderContent(section, index) {
   const questionList = document.getElementById("question-list");
   if (!questionList) return;
 
+  repairListeningIds(listeningState.sections);
+
   questionList.innerHTML = `
         <div class="section-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h2 style="margin: 0;">Section ${index + 1}: ${
@@ -33,519 +50,94 @@ export function renderContent(section, index) {
         </div>
     `;
 
-  if (section.instructions) {
-    renderInstructions(section.instructions);
+  lastInstruction = null;
+  instructionFresh = false;
+
+  // Section-level instructions (outside content[]): object or string form
+  if (section.instructions && typeof section.instructions === "object") {
+    const { heading, details, note } = section.instructions;
+    if (heading || details || note) {
+      questionList.insertAdjacentHTML(
+        "beforeend",
+        `<div class="group-instruction">${heading ? `<strong>${heading}</strong><br>` : ""}${details || ""}${note ? `<br><em>${note}</em>` : ""}</div>`
+      );
+      lastInstruction = normalizeInstruction([heading, details, note].filter(Boolean).join(" "));
+      instructionFresh = true;
+    }
   }
+  [
+    typeof section.instructions === "string" ? section.instructions : "",
+    typeof section.groupInstruction === "string" ? section.groupInstruction : "",
+  ].forEach((text) => {
+    const norm = normalizeInstruction(text);
+    if (!norm || norm === lastInstruction) return;
+    questionList.insertAdjacentHTML(
+      "beforeend",
+      `<div class="group-instruction">${instructionBlockHTML(text)}</div>`
+    );
+    lastInstruction = norm;
+    instructionFresh = true;
+  });
 
   if (section.content) {
-    let currentGroupInstruction = null;
-    let gapFillContainer = null;
+    section.content.forEach((item) => renderContentItem(item, questionList));
+  } else {
+    // very old flat sections (multiSelect / matching keys, no content[])
+    normalizeListeningSection(section).forEach((normalized) =>
+      renderItem(normalized, questionList, engineCtx)
+    );
+  }
+}
 
-    section.content.forEach((item) => {
-      if (item.groupInstruction) {
-        currentGroupInstruction = item.groupInstruction;
-      }
+function normalizeInstruction(s) {
+  return String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
 
-      if (item.type === "text") {
-        if (gapFillContainer) {
-          questionList.appendChild(gapFillContainer);
-          gapFillContainer = null;
-        }
+function instructionBlockHTML(text) {
+  const s = String(text).trim();
+  const nl = s.indexOf("\n");
+  if (nl === -1) return s;
+  const first = s.slice(0, nl).trim();
+  const rest = s.slice(nl + 1).trim().replace(/\n/g, "<br>");
+  return `<strong>${first}</strong><br>${rest}`;
+}
 
-        if (currentGroupInstruction) {
-          const instructionDiv = document.createElement("div");
-          instructionDiv.className = "group-instruction";
-          instructionDiv.style.cssText =
-            "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0;";
-          instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
-          questionList.appendChild(instructionDiv);
-          currentGroupInstruction = null;
-        }
-
-        renderTextItem(item);
-      } else if (item.type === "question" && item.format === "gap-fill") {
-        if (!gapFillContainer) {
-          if (currentGroupInstruction) {
-            const instructionDiv = document.createElement("div");
-            instructionDiv.className = "group-instruction";
-            instructionDiv.style.cssText =
-              "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6;  border-radius: 0 8px 8px 0;";
-            instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${currentGroupInstruction}</p>`;
-            questionList.appendChild(instructionDiv);
-            currentGroupInstruction = null;
-          }
-
-          gapFillContainer = document.createElement("div");
-          gapFillContainer.className = "gap-fill-group";
-        }
-        renderGapFillQuestion(item, gapFillContainer);
-      } else {
-        if (gapFillContainer) {
-          questionList.appendChild(gapFillContainer);
-          gapFillContainer = null;
-        }
-
-        if (currentGroupInstruction && item.type === "question") {
-          // eslint-disable-next-line no-param-reassign
-          item.groupInstruction = currentGroupInstruction;
-          currentGroupInstruction = null;
-        }
-
-        renderContentItem(item);
-      }
-    });
-
-    if (gapFillContainer) {
-      questionList.appendChild(gapFillContainer);
+function renderContentItem(item, questionList) {
+  // Instruction band ahead of ANY item that carries one, shown once per group
+  const gi = item && item.groupInstruction;
+  if (gi) {
+    const norm = normalizeInstruction(gi);
+    if (norm && norm !== lastInstruction) {
+      lastInstruction = norm;
+      instructionFresh = true;
+      questionList.insertAdjacentHTML(
+        "beforeend",
+        `<div class="group-instruction">${instructionBlockHTML(gi)}</div>`
+      );
     }
-  } else {
-    ["multiSelect", "multiSelect1", "multiSelect2", "matching"].forEach((key) => {
-      if (section[key]) renderLegacyGroup(section[key], key);
-    });
-  }
-}
-
-export function renderInstructions(instructions) {
-  const questionList = document.getElementById("question-list");
-
-  let instructionHtml =
-    '<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">';
-
-  if (instructions.heading) {
-    instructionHtml += `<h4>${instructions.heading}</h4>`;
   }
 
-  if (instructions.details) {
-    instructionHtml += `<p>${instructions.details}</p>`;
-  }
+  if (!item.type) return;
 
-  if (instructions.note) {
-    instructionHtml += `<p><strong>Note:</strong> ${instructions.note}</p>`;
-  }
-
-  instructionHtml += "</div>";
-  questionList.innerHTML += instructionHtml;
-}
-
-export function renderTextItem(item) {
-  const questionList = document.getElementById("question-list");
-  const text = item.value || item.title || item.text || "";
-
-  const container = document.createElement("div");
-  container.className = "question-item text-item";
-
-  if (item.title && !item.value) {
-    container.innerHTML = `<h4 class="text-title">${text}</h4>`;
-  } else {
-    container.innerHTML = `<p class="text-paragraph">${text}</p>`;
-  }
-
-  questionList.appendChild(container);
-}
-
-export function renderGapFillQuestion(question, container) {
-  const qId = question.questionId;
-  const number = qId.replace(/\D/g, "");
-
-  const questionDiv = document.createElement("div");
-  questionDiv.id = qId;
-  questionDiv.className = "question-item gap-fill-item";
-
-  let textContent = question.title || question.text || question.value || "";
-
-  // Same look as the full mock: the dark number box sits fused to the input,
-  // right at the blank inside the sentence.
-  const safeVal = String(listeningState.answersSoFar[qId] || "")
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;");
-  const gapHtml = `<span class="gap-inline"><span class="gap-num">${number}</span><input type="text" value="${safeVal}" data-qid="${qId}" class="gap-fill" placeholder=" "/></span>`;
-
-  if (/_{3,}/.test(textContent)) {
-    textContent = textContent.replace(/_{3,}/g, gapHtml);
-  } else {
-    textContent = `${textContent} ${gapHtml}`;
-  }
-
-  questionDiv.innerHTML = `
-        <div class="question-text">${textContent}</div>
-    `;
-
-  container.appendChild(questionDiv);
-}
-
-export function renderContentItem(item) {
-  const questionList = document.getElementById("question-list");
-
-  switch (item.type) {
-    case "text":
-      renderTextItem(item);
-      break;
-    case "subheading":
-      questionList.innerHTML += `<h4 class="listening-subheading">${
-        item.value || item.text
-      }</h4>`;
-      break;
-    case "question":
-      if (item.format !== "gap-fill") {
-        renderQuestion(item);
-      }
-      break;
-    case "question-group":
-      renderQuestionGroup(item);
-      break;
-    case "table":
-      renderTable(item);
-      break;
-    case "matching":
-      renderMatchingQuestion(item);
-      break;
-    default:
-      break;
-  }
-}
-
-export function renderQuestion(question) {
-  const qId = question.questionId;
-  const questionDiv = document.createElement("div");
-  questionDiv.className = "question-item";
-  questionDiv.id = qId;
-
-  const number = qId.replace(/\D/g, "");
-
-  if (question.groupInstruction) {
-    const instructionDiv = document.createElement("div");
-    instructionDiv.className = "group-instruction";
-    instructionDiv.style.cssText =
-      "background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;";
-    instructionDiv.innerHTML = `<p style="white-space: pre-line; margin: 0;">${question.groupInstruction}</p>`;
-    document.getElementById("question-list").appendChild(instructionDiv);
-  }
-
-  if (question.format === "multiple-choice") {
-    const optionsHtml = Object.keys(question.options || {})
-      .sort()
-      .map(
-        (key) => `
-            <label class="radio-option">
-                <input type="radio" name="${qId}" value="${key}" ${
-          listeningState.answersSoFar[qId] === key ? "checked" : ""
-        }/>
-                <span><strong>${key}.</strong> ${question.options[key]}</span>
-            </label>
-        `
-      )
-      .join("");
-
-    questionDiv.innerHTML = `
-            <div class="question-number">${number}</div>
-            <div class="question-text">
-                <div style="font-weight: 500; margin-bottom: 10px;">${question.text}</div>
-                <div class="radio-group">${optionsHtml}</div>
-            </div>
-        `;
-  }
-
-  document.getElementById("question-list").appendChild(questionDiv);
-}
-
-export function renderQuestionGroup(group) {
-  const questionList = document.getElementById("question-list");
-  const groupDiv = document.createElement("div");
-
-  let instructionsHtml = "";
-  if (group.groupInstruction) {
-    instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
-            <p style="white-space: pre-line;">${group.groupInstruction}</p>
-        </div>`;
-  }
-
-  if (group.groupType === "multi-select") {
-    let questionCount = 0;
-    let questionIds = [];
-
-    if (group.questions && Array.isArray(group.questions)) {
-      questionCount = group.questions.length;
-      questionIds = group.questions.map((q) => q.questionId);
-    } else if (group.questionId && group.questionId.includes("_")) {
-      questionIds = group.questionId.split("_").map((num) => `q${num}`);
-      questionCount = questionIds.length;
+  if (item.type === "text" || item.type === "subheading" || item.type === "title") {
+    const value = item.value || item.text || item.title || "";
+    const norm = normalizeInstruction(value);
+    // Right after an instruction band, drop a text/subheading that merely
+    // repeats part of it — otherwise the same sentence prints twice.
+    if (instructionFresh && norm.length >= 12 && lastInstruction && lastInstruction.includes(norm)) {
+      return;
     }
-
-    // Добавляем ID для контейнера группы, чтобы навигация могла найти его
-    groupDiv.id = `multi-select-group-${group.questionId || questionIds.join("-")}`;
-    groupDiv.setAttribute("data-question-ids", JSON.stringify(questionIds));
-
-    groupDiv.innerHTML = `
-            ${instructionsHtml}
-            <div class="multi-select-group">
-                ${
-                  group.instructions
-                    ? `<h4>${group.instructions}</h4>`
-                    : ""
-                }
-                <p class="group-stem">${group.text}</p>
-                <p class="selection-counter">Select exactly ${questionCount} options</p>
-                <div class="checkbox-group">
-                    ${Object.keys(group.options || {})
-                      .sort()
-                      .map(
-                        (key) => `
-                        <label style="display: block; margin: 8px 0; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; ${
-                          isOptionSelectedInMultiGroup(group, key, questionIds)
-                            ? "background: #dbeafe; border-color: #3b82f6;"
-                            : ""
-                        }">
-                            <input type="checkbox" data-group-id="${
-                              group.questionId
-                            }" data-question-ids="${questionIds.join(",")}" value="${key}" ${
-                          isOptionSelectedInMultiGroup(group, key, questionIds)
-                            ? "checked"
-                            : ""
-                        } style="margin-right: 8px;"/> 
-                            <strong>${key}.</strong> ${group.options[key]}
-                        </label>
-                    `
-                      )
-                      .join("")}
-                </div>
-            </div>
-        `;
-    
-    // Добавляем ID для каждого вопроса в группе для навигации (после innerHTML)
-    questionIds.forEach((qId) => {
-      const questionMarker = document.createElement("div");
-      questionMarker.id = qId;
-      questionMarker.style.display = "none"; // Скрытый маркер для навигации
-      groupDiv.appendChild(questionMarker);
-    });
-  } else if (group.groupType === "matching") {
-    groupDiv.innerHTML = `
-            ${instructionsHtml}
-            <div class="matching-group">
-                ${group.instructions ? `<h4>${group.instructions}</h4>` : ""}
-                <div class="matching-options-box">
-                    <p class="group-stem">${
-                      group.text || ""
-                    }</p>
-                    ${Object.keys(group.options || {})
-                      .sort()
-                      .map(
-                        (key) =>
-                          `<p class="matching-option-row"><strong>${key}</strong> ${group.options[key]}</p>`
-                      )
-                      .join("")}
-                </div>
-                ${(group.questions || [])
-                  .map(
-                    (q) => `
-                    <div class="matching-question">
-                        <div class="question-number">${q.questionId.replace(
-                          "q",
-                          ""
-                        )}</div>
-                        <div class="matching-question-text">${q.text}</div>
-                        <select data-qid="${q.questionId ||
-                          q.QuestionId ||
-                          q.qId ||
-                          q.editorId}" class="matching-select">
-                            <option value="">Select...</option>
-                            ${Object.keys(group.options || {})
-                              .sort()
-                              .map(
-                                (key) =>
-                                  `<option value="${key}" ${
-                                    listeningState.answersSoFar[q.questionId] === key
-                                      ? "selected"
-                                      : ""
-                                  }>${key}</option>`
-                              )
-                              .join("")}
-                        </select>
-                    </div>
-                `
-                  )
-                  .join("")}
-            </div>
-        `;
+    questionList.insertAdjacentHTML(
+      "beforeend",
+      item.type === "text"
+        ? `<p class="listening-text text-paragraph">${value}</p>`
+        : `<h4 class="listening-subheading">${value}</h4>`
+    );
+    return;
   }
 
-  questionList.appendChild(groupDiv);
+  const normalized = normalizeListeningItem(item);
+  if (!normalized) return;
+  if (normalized.kind !== "content") instructionFresh = false;
+  renderItem(normalized, questionList, engineCtx);
 }
-
-export function renderMatchingQuestion(item) {
-  const questionList = document.getElementById("question-list");
-  const matchDiv = document.createElement("div");
-
-  let instructionsHtml = "";
-  if (item.groupInstruction) {
-    instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
-            <p style="white-space: pre-line;">${item.groupInstruction}</p>
-        </div>`;
-  }
-
-  matchDiv.innerHTML = `
-        ${instructionsHtml}
-        <div class="matching-group">
-            ${
-              item.title
-                ? `<h4>${item.title}</h4>`
-                : ""
-            }
-            <div class="matching-options-box">
-                ${Object.keys(item.options || {})
-                  .sort()
-                  .map(
-                    (key) =>
-                      `<p class="matching-option-row"><strong>${key}</strong> ${item.options[key]}</p>`
-                  )
-                  .join("")}
-            </div>
-            ${(item.questions || [])
-              .map(
-                (q) => `
-                <div id="${
-                  q.questionId
-                }" class="matching-question">
-                    <div class="question-number">${q.questionId.replace(
-                      "q",
-                      ""
-                    )}</div>
-                    <div class="matching-question-text">${q.text}</div>
-                    <select data-qid="${q.questionId ||
-                      q.QuestionId ||
-                      q.qId ||
-                      q.editorId}" class="matching-select">
-                        <option value="">Select...</option>
-                        ${Object.keys(item.options || {})
-                          .sort()
-                          .map(
-                            (key) =>
-                              `<option value="${key}" ${
-                                listeningState.answersSoFar[q.questionId] === key
-                                  ? "selected"
-                                  : ""
-                              }>${key}</option>`
-                          )
-                          .join("")}
-                    </select>
-                </div>
-            `
-              )
-              .join("")}
-        </div>
-    `;
-
-  questionList.appendChild(matchDiv);
-}
-
-export function isOptionSelectedInMultiGroup(group, optionKey, questionIds) {
-  return questionIds.some((qId) => {
-    return listeningState.answersSoFar[qId] === optionKey;
-  });
-}
-
-export function renderTable(table) {
-  const questionList = document.getElementById("question-list");
-  const tableDiv = document.createElement("div");
-
-  let instructionsHtml = "";
-  if (table.groupInstruction) {
-    instructionsHtml = `<div class="group-instruction" style="background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
-            <p style="white-space: pre-line;">${table.groupInstruction}</p>
-        </div>`;
-  }
-
-  let tableHtml = `${instructionsHtml}<h4 style="margin-bottom: 15px;">${
-    table.title || ""
-  }</h4><table style="width: 100%; border-collapse: collapse;">`;
-  tableHtml += `<thead><tr>${table.columns
-    .map(
-      (col) =>
-        `<th style="border: 1px solid #ddd; padding: 8px; background: #f8f9fa;">${col}</th>`
-    )
-    .join("")}</tr></thead><tbody>`;
-
-  table.rows.forEach((row) => {
-    tableHtml += "<tr>";
-    table.columns.forEach((col) => {
-      const columnKey = col.toLowerCase().replace(/\s+/g, "");
-      let content = row[columnKey] || "";
-
-      const tableGapHtml = (num) => {
-        const qId = `q${num}`;
-        const safeVal = String(listeningState.answersSoFar[qId] || "")
-          .replace(/&/g, "&amp;")
-          .replace(/"/g, "&quot;")
-          .replace(/</g, "&lt;");
-        return `<span class="gap-inline"><span class="gap-num">${num}</span><input type="text" value="${safeVal}" data-qid="${qId}" class="gap-fill" placeholder=" "/></span>`;
-      };
-
-      content = content.replace(/___q(\d+)___/g, (match, num) => tableGapHtml(num));
-
-      content = content.replace(/(\d+)_{3,}/g, (match, num) => tableGapHtml(num));
-
-      tableHtml += `<td style="border: 1px solid #ddd; padding: 8px;">${content}</td>`;
-    });
-    tableHtml += "</tr>";
-  });
-
-  tableHtml += "</tbody></table>";
-  tableDiv.innerHTML = tableHtml;
-  questionList.appendChild(tableDiv);
-}
-
-export function renderLegacyGroup(group, key) {
-  const questionList = document.getElementById("question-list");
-
-  if (key === "matching" && group.matchingQuestions) {
-    const groupDiv = document.createElement("div");
-    groupDiv.innerHTML = `
-            <div class="matching-group">
-                <h4>${group.heading || ""}</h4>
-                <div class="matching-options-box">
-                    <p class="group-stem">${group.question || ""}</p>
-                    ${Object.keys(group.options || {})
-                      .sort()
-                      .map(
-                        (keyOpt) =>
-                          `<p class="matching-option-row"><strong>${keyOpt}</strong> ${group.options[keyOpt]}</p>`
-                      )
-                      .join("")}
-                </div>
-                ${group.matchingQuestions
-                  .map(
-                    (q) => `
-                    <div class="matching-question">
-                        <div class="question-number">${q.qId.replace(
-                          "q",
-                          ""
-                        )}</div>
-                        <div class="matching-question-text">${q.text}</div>
-                        <select data-qid="${
-                          q.qId
-                        }" class="matching-select">
-                            <option value="">Select...</option>
-                            ${Object.keys(group.options || {})
-                              .sort()
-                              .map(
-                                (keyOpt) =>
-                                  `<option value="${keyOpt}" ${
-                                    listeningState.answersSoFar[q.qId] === keyOpt
-                                      ? "selected"
-                                      : ""
-                                  }>${keyOpt}</option>`
-                              )
-                              .join("")}
-                        </select>
-                    </div>
-                `
-                  )
-                  .join("")}
-            </div>
-        `;
-    questionList.appendChild(groupDiv);
-  }
-}
-
-

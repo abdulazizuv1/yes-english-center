@@ -13,6 +13,8 @@ export function loadSavedAnswers() {
 export function setupAnswerPersistence() {
   document.addEventListener("input", (e) => {
     const target = e.target;
+    // Engine-rendered controls (data-qe) manage their own answers
+    if (target.dataset && target.dataset.qe) return;
     const qId = target.dataset.qid;
     if (target.classList.contains("gap-fill") && qId) {
       listeningState.answersSoFar[qId] = target.value.trim();
@@ -26,6 +28,8 @@ export function setupAnswerPersistence() {
 
   document.addEventListener("change", (e) => {
     const target = e.target;
+    // Engine-rendered controls (data-qe) manage their own answers
+    if (target.dataset && target.dataset.qe) return;
     const qId = target.name || target.dataset.qid;
     const groupId = target.dataset.groupId;
     const questionIds = target.dataset.questionIds;

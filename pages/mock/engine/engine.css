@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Question engine — shared styles for engine-rendered questions.
+   Loaded by the listening test, the reading test and the full mock
+   AFTER each page's own stylesheet. Classic classes (question-item,
+   radio-option, gap-inline, ...) stay styled by the pages; this file
+   only covers what the engine introduces everywhere: drag & drop and
+   map labelling.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── drag & drop: bank of cards ── */
+.dd-question-text { font-weight: 600; font-size: 17px; margin-bottom: 14px; color: #1f2937; }
+.dd-question-title { font-weight: 700; font-size: 18px; margin-bottom: 12px; color: #0f2340; }
+
+.dd-layout { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+
+.dd-items-bank {
+    flex: 1 1 220px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px dashed #94a3b8;
+    border-radius: 8px;
+    min-height: 54px;
+}
+.dd-inline-wrapper .dd-items-bank { flex-direction: row; flex-wrap: wrap; margin-bottom: 16px; }
+
+.dd-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: grab;
+    user-select: none;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+}
+.dd-item:hover { border-color: #2563eb; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18); }
+.dd-item:active { cursor: grabbing; transform: scale(0.98); }
+.dd-item.dd-armed { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
+
+.dd-item-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    background: #0f2340;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 700;
+}
+.dd-item-text { color: #1f2937; }
+
+/* ── slots (cards mode) ── */
+.dd-slots-container { flex: 2 1 340px; display: flex; flex-direction: column; gap: 10px; }
+
+.dd-slot {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: #fff;
+}
+.dd-slot-label { font-size: 16px; color: #1f2937; margin-bottom: 8px; }
+.dd-slot-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    background: #0f2340;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.dd-slot-drop-zone {
+    min-height: 40px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+}
+.dd-slot-drop-zone:empty::after {
+    content: "Drop here";
+    color: #94a3b8;
+    font-size: 13px;
+    padding-left: 6px;
+}
+.dd-placed-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    cursor: grab;
+    font-size: 16px;
+}
+
+/* ── inline mode: gaps inside a paragraph ── */
+.dd-inline-paragraph { font-size: 18px; line-height: 2.2; color: #1f2937; }
+.dd-inline-slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    margin: 0 4px;
+    padding: 2px;
+    border-radius: 6px;
+}
+.dd-inline-slot .dd-slot-drop-zone {
+    display: inline-flex;
+    min-width: 130px;
+    min-height: 32px;
+    padding: 2px 6px;
+}
+.dd-inline-slot .dd-slot-drop-zone:empty::after { content: ""; }
+.dd-inline-slot .dd-placed-item { padding: 2px 8px; font-size: 16px; }
+
+/* ── map / plan / diagram labelling ── */
+.qe-map-title { font-size: 18px; font-weight: 700; color: #0f2340; margin: 16px 0 12px; }
+.qe-map-image { margin-bottom: 18px; }
+.qe-map-image img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .dd-layout { flex-direction: column; }
+    .dd-items-bank { width: 100%; }
+}

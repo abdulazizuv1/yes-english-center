@@ -1,4 +1,13 @@
+// Grading and submission for the listening test — scoring goes through
+// the shared question engine (pages/mock/engine/).
 import { listeningState } from "./state.js";
+import {
+  repairListeningIds,
+  normalizeListeningSection,
+  gradeItems,
+  splitAnswerVariants as engineSplit,
+  textAnswerCorrect,
+} from "../../engine/index.js";
 
 export function createHandleFinish(deps) {
   const { db, auth, collection, addDoc, serverTimestamp } = deps;
@@ -63,163 +72,36 @@ export function createHandleFinish(deps) {
 }
 
 export function calculateResults() {
+  repairListeningIds(listeningState.sections);
+  const items = (listeningState.sections || []).flatMap((s) =>
+    normalizeListeningSection(s)
+  );
+  const graded = gradeItems(items, listeningState.answersSoFar);
+
   const answers = {};
   const correctAnswers = {};
-  let correct = 0;
-  let total = 0;
-
-  listeningState.sections.forEach((section) => {
-    if (section.content) {
-      section.content.forEach((item) => {
-        if (item.type === "question") {
-          const qId = item.questionId;
-          const userAns = listeningState.answersSoFar[qId];
-          const expected = [item.correctAnswer];
-
-          answers[qId] = userAns || null;
-          correctAnswers[qId] = expected;
-
-          const isCorrect = checkAnswerCorrectness(userAns, expected);
-          if (isCorrect) correct++;
-          total++;
-        } else if (item.type === "question-group") {
-          if (
-            item.groupType === "multi-select" &&
-            item.questions &&
-            Array.isArray(item.questions)
-          ) {
-            item.questions.forEach((question) => {
-              const qId = question.questionId;
-              const userAns = listeningState.answersSoFar[qId];
-              const expectedAnswer = question.correctAnswer;
-
-              answers[qId] = userAns || null;
-              correctAnswers[qId] = [expectedAnswer];
-
-              const isCorrect = checkAnswerCorrectness(userAns, [expectedAnswer]);
-              if (isCorrect) correct++;
-              total++;
-            });
-          } else if (item.questions) {
-            item.questions.forEach((q) => {
-              const qId = q.questionId;
-              const userAns = listeningState.answersSoFar[qId];
-              const expected = [q.correctAnswer];
-
-              answers[qId] = userAns || null;
-              correctAnswers[qId] = expected;
-
-              const isCorrect = checkAnswerCorrectness(userAns, expected);
-              if (isCorrect) correct++;
-              total++;
-            });
-          }
-        } else if (item.type === "matching" && item.questions) {
-          item.questions.forEach((q) => {
-            const qId = q.questionId;
-            const userAns = listeningState.answersSoFar[qId];
-            const expected = [q.correctAnswer];
-
-            answers[qId] = userAns || null;
-            correctAnswers[qId] = expected;
-
-            const isCorrect = checkAnswerCorrectness(userAns, expected);
-            if (isCorrect) correct++;
-            total++;
-          });
-        } else if (item.type === "table" && item.answer) {
-          Object.keys(item.answer).forEach((qId) => {
-            const userAns = listeningState.answersSoFar[qId];
-            const expected = [item.answer[qId]];
-
-            answers[qId] = userAns || null;
-            correctAnswers[qId] = expected;
-
-            const isCorrect = checkAnswerCorrectness(userAns, expected);
-            if (isCorrect) correct++;
-            total++;
-          });
-        }
-      });
-    }
-
-    ["multiSelect", "multiSelect1", "multiSelect2", "matching"].forEach((key) => {
-      if (section[key] && section[key].matchingQuestions) {
-        section[key].matchingQuestions.forEach((q) => {
-          const qId = q.qId;
-          const userAns = listeningState.answersSoFar[qId];
-          const expected = [q.correctAnswer];
-
-          answers[qId] = userAns || null;
-          correctAnswers[qId] = expected;
-
-          const isCorrect = checkAnswerCorrectness(userAns, expected);
-          if (isCorrect) correct++;
-          total++;
-        });
-      }
-    });
+  graded.rows.forEach((r) => {
+    answers[r.id] = r.user ?? null;
+    correctAnswers[r.id] = r.expected;
   });
 
-  return { answers, correctAnswers, correct, total };
+  return { answers, correctAnswers, correct: graded.correct, total: graded.total };
 }
 
-// An answer key may list several accepted variants separated by commas:
-// "holiday, holidays" accepts both. A comma directly between digits
-// (6,000) is a thousand separator, not a variant break.
+// Kept for compatibility (result viewer smoke tests import these):
 export function splitAnswerVariants(key) {
-  const parts = [];
-  for (const seg of String(key).split(",")) {
-    const prev = parts[parts.length - 1];
-    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
-      parts[parts.length - 1] = `${prev},${seg}`;
-    } else {
-      parts.push(seg);
-    }
-  }
-  return parts.map((v) => v.trim()).filter(Boolean);
+  return engineSplit(key);
 }
 
 export function checkAnswerCorrectness(userAns, expected) {
-  if (
-    !expected ||
-    expected.length === 0 ||
-    userAns === null ||
-    userAns === undefined
-  ) {
+  if (!expected || expected.length === 0 || userAns === null || userAns === undefined) {
     return false;
   }
-
   if (Array.isArray(userAns)) {
     if (!Array.isArray(expected[0])) return false;
     const userSet = new Set(userAns.map((a) => String(a).toLowerCase().trim()));
-    const expectedSet = new Set(
-      expected[0].map((a) => String(a).toLowerCase().trim())
-    );
-    return (
-      userSet.size === expectedSet.size &&
-      [...userSet].every((x) => expectedSet.has(x))
-    );
+    const expectedSet = new Set(expected[0].map((a) => String(a).toLowerCase().trim()));
+    return userSet.size === expectedSet.size && [...userSet].every((x) => expectedSet.has(x));
   }
-
-  const userAnswer = String(userAns).toLowerCase().trim();
-  const expectedAnswers = expected
-    .flatMap((a) => splitAnswerVariants(a))
-    .map((a) => a.toLowerCase());
-
-  return expectedAnswers.some((exp) => {
-    if (exp.includes("/")) {
-      const alternatives = exp
-        .split("/")
-        .map((alt) => alt.trim().toLowerCase());
-      return alternatives.some((alt) => {
-        const cleanAlt = alt.replace(/[()]/g, "").trim();
-        const cleanUser = userAnswer.replace(/[()]/g, "").trim();
-        return cleanUser === cleanAlt;
-      });
-    }
-    return userAnswer === exp;
-  });
+  return textAnswerCorrect(userAns, expected);
 }
-
-

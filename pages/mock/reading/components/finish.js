@@ -1,33 +1,7 @@
+// Grading and submission for the reading test — scoring goes through the
+// shared question engine (pages/mock/engine/).
 import { readingState } from "./state.js";
-
-function findQuestionByQId(qId) {
-  for (const p of readingState.passages) {
-    for (const q of p.questions) {
-      if (q.qId === qId) return q;
-
-      if (q.type === "question-group" && q.questions) {
-        const subQuestion = q.questions.find((subQ) => subQ.qId === qId);
-        if (subQuestion) {
-          return {
-            ...subQuestion,
-            answer: subQuestion.answer,
-            parentGroup: q,
-          };
-        }
-      }
-
-      if (q.type === "drag_drop" && q.slots) {
-        const slot = q.slots.find((s) => s.qId === qId);
-        if (slot) return { answer: slot.correctId };
-      }
-
-      if (Array.isArray(q.qIds) && q.qIds.includes(qId)) {
-        return { ...q, qId };
-      }
-    }
-  }
-  return { answer: null };
-}
+import { normalizeReadingQuestions, gradeItems } from "../../engine/index.js";
 
 export function createHandleFinish(deps) {
   const { db, auth, collection, addDoc, serverTimestamp } = deps;
@@ -40,43 +14,18 @@ export function createHandleFinish(deps) {
     const loadingModal = document.getElementById("loadingModal");
     loadingModal.style.display = "flex";
 
+    const items = (readingState.passages || []).flatMap((p) =>
+      normalizeReadingQuestions(p.questions)
+    );
+    const graded = gradeItems(items, readingState.answersSoFar);
+
     const answers = {};
     const correctAnswers = {};
-    let correct = 0;
-    let total = 0;
-
-    for (const qId of readingState.orderedQIds) {
-      const q = findQuestionByQId(qId);
-
-      let userAns = readingState.answersSoFar[qId];
-      if (Array.isArray(userAns)) {
-        userAns = userAns[0] || "";
-      }
-      userAns = typeof userAns === "string" ? userAns.trim().toLowerCase() : "";
-
-      answers[qId] = userAns;
-      total++;
-
-      let correctAnsArray = [];
-
-      if (q.correctAnswer) {
-        correctAnsArray = [q.correctAnswer];
-      } else if (typeof q.answer === "object" && !Array.isArray(q.answer)) {
-        const extracted = q.answer[qId];
-        correctAnsArray = Array.isArray(extracted) ? extracted : [extracted];
-      } else {
-        correctAnsArray = Array.isArray(q.answer) ? q.answer : [q.answer];
-      }
-
-      correctAnsArray = correctAnsArray
-        .filter((a) => typeof a === "string")
-        .map((a) => a.trim().toLowerCase());
-
-      correctAnswers[qId] = correctAnsArray;
-
-      const isCorrect = correctAnsArray.includes(userAns);
-      if (isCorrect) correct++;
-    }
+    graded.rows.forEach((r) => {
+      answers[r.id] =
+        typeof r.user === "string" ? r.user.trim().toLowerCase() : r.user ?? "";
+      correctAnswers[r.id] = r.expected.map((a) => String(a).toLowerCase());
+    });
 
     try {
       const user = auth.currentUser;
@@ -88,8 +37,8 @@ export function createHandleFinish(deps) {
         userId: user.uid,
         name: user.email || "unknown",
         testId: readingState.currentTestId,
-        score: correct,
-        total: total,
+        score: graded.correct,
+        total: graded.total,
         answers,
         correctAnswers,
         createdAt: serverTimestamp(),
@@ -110,5 +59,3 @@ export function createHandleFinish(deps) {
     }
   };
 }
-
-
