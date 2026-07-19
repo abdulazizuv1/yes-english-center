@@ -1,0 +1,122 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Question engine — AUTHOR side styles: the shared editor forms used
+   by the add and edit tools (listening / reading / full mock).
+   Loaded after each tool's own stylesheet.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.au-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+.au-item .form-input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+.au-item .form-input:focus { outline: none; border-color: #2563eb; }
+
+.au-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.au-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #0f2340;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.au-item[data-au-kind="drag-slots"] .au-badge,
+.au-item[data-au-kind="drag-inline"] .au-badge,
+.au-item[data-au-kind="map-labelling"] .au-badge { background: #7c3aed; }
+
+.au-remove {
+    border: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+.au-remove:hover { background: #fecaca; }
+
+.au-label {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.au-opt-row, .au-sub-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.au-opt-row .au-opt-label, .au-opt-row .au-dd-id { width: 64px; flex-shrink: 0; margin-bottom: 0; }
+.au-opt-row .form-input, .au-sub-row .form-input { margin-bottom: 0; }
+.au-sub-row .au-sub-answer, .au-sub-row .au-slot-correct { width: 130px; flex-shrink: 0; }
+
+.au-add-row {
+    display: inline-block;
+    margin: 4px 8px 10px 0;
+    padding: 6px 12px;
+    border: 1px dashed #94a3b8;
+    background: #f8fafc;
+    color: #334155;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.au-add-row:hover { border-color: #2563eb; color: #2563eb; }
+.au-btn-row { margin: 6px 0; }
+
+.au-table-wrap { overflow-x: auto; margin-bottom: 8px; }
+.au-table { width: 100%; border-collapse: collapse; }
+.au-table th, .au-table td { border: 1px solid #e2e8f0; padding: 6px; vertical-align: top; }
+.au-table .au-cell { margin-bottom: 0; min-width: 140px; resize: vertical; }
+
+/* "add question" menu */
+.au-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    margin: 10px 0 20px;
+}
+.au-menu button {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #1f2937;
+}
+.au-menu button:hover { border-color: #2563eb; color: #2563eb; }
+.au-menu button.au-new {
+    border-color: #c4b5fd;
+    background: #f5f3ff;
+    color: #6d28d9;
+    font-weight: 600;
+}
+.au-menu button.au-new:hover { border-color: #7c3aed; }

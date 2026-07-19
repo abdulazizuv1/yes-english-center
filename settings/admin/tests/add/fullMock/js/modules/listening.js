@@ -1,5 +1,9 @@
-// listening.js - Full Mock Listening Module
-import { uploadFile } from './firebase.js';
+// listening.js — Full Mock Listening module. Section/audio flow lives
+// here; question forms and collection come from the shared authoring
+// engine (pages/mock/engine/author.js). On save every gradeable entry
+// gets its final sequential q-number, including the new drag & drop and
+// map labelling types.
+import { collectAll } from "/pages/mock/engine/author.js";
 
 export let listeningSectionCount = 0;
 let globalListeningAudioFile = null;
@@ -43,13 +47,6 @@ export function initListeningUI() {
 }
 
 window.listeningLogic = {
-    addQuestion(sectionId, type) {
-        const container = document.getElementById(`listening-questions-${sectionId}`);
-        const qId = window.utils.getUniqueId();
-        container.insertAdjacentHTML('beforeend', window.utils.generateQuestionHTML(type, qId));
-        // After adding, update question numbers in this section
-        window.utils.updateQuestionNumbers(container);
-    },
     removeSection(sectionId) {
         if (confirm("Remove this listening part?")) {
             document.querySelector(`#listening-section-${sectionId}`).remove();
@@ -120,14 +117,14 @@ function addListeningSection() {
             <div>
                 <h4 style="margin-bottom:1rem">Questions</h4>
                 <div class="questions-container" id="listening-questions-${idx}"></div>
-                ${window.utils.generateListeningMenuHTML(idx)}
+                ${window.utils.menuHTML('listening', `listening-questions-${idx}`)}
             </div>
         </div>`;
     document.getElementById('listeningSectionsContainer').insertAdjacentHTML('beforeend', html);
 }
 
 // ===== Data Collection =====
-export async function collectListeningData(testId) {
+export async function collectListeningData() {
     const isSingleAudio = document.querySelector('input[name="listeningAudioType"]:checked').value === 'single';
     let audioMode = isSingleAudio ? 'single' : 'separate';
     let audioUrl = "";
@@ -141,7 +138,7 @@ export async function collectListeningData(testId) {
     const sectionBlocks = document.querySelectorAll('#listeningSectionsContainer .section-block');
     if (sectionBlocks.length === 0) throw new Error("Listening: At least one section must be added.");
 
-    let globalQNum = 1;
+    let n = 1; // global question number across all sections
 
     for (let i = 0; i < sectionBlocks.length; i++) {
         const block = sectionBlocks[i];
@@ -150,8 +147,6 @@ export async function collectListeningData(testId) {
         const details = block.querySelector('.instructions-details').value.trim();
         const note = block.querySelector('.instructions-note').value.trim();
 
-        // Only the title is required now — per-question groupInstruction drives
-        // the on-screen instructions, so section heading/details are optional.
         if (!title) throw new Error(`Listening Part ${i+1}: Title is required.`);
 
         let sectionAudioUrl = "";
@@ -161,274 +156,66 @@ export async function collectListeningData(testId) {
             sectionAudioUrl = { file: input.files[0], type: 'section', index: i+1 };
         }
 
-        const { questions, nextQNum } = extractListeningQuestions(block.querySelector('.questions-container'), globalQNum);
-        globalQNum = nextQNum;
-
-        if (questions.length === 0) throw new Error(`Listening Part ${i+1}: Must contain at least one question.`);
+        const items = collectAll(block.querySelector('.questions-container'), 'listening', `Listening Part ${i+1}, `);
+        if (items.length === 0) throw new Error(`Listening Part ${i+1}: Must contain at least one question.`);
+        n = assignListeningNumbers(items, n);
 
         sections.push({
             sectionNumber: i + 1,
             title, audioUrl: sectionAudioUrl,
             instructions: { heading, details, note },
-            content: questions
+            content: items
         });
     }
 
-    return { id: "listening", title: "Listening Test", duration: 30, audioMode, audioUrl, sections, totalQuestions: globalQNum - 1 };
+    return { id: "listening", title: "Listening Test", duration: 30, audioMode, audioUrl, sections, totalQuestions: n - 1 };
 }
 
-function extractListeningQuestions(container, startQNum) {
-    const items = container.querySelectorAll('.question-item');
-    const result = [];
-    let qNum = startQNum;
-
-    items.forEach(el => {
-        const type = el.dataset.type;
-        const gi = el.querySelector('.group-instruction')?.value?.trim() || "";
-
-        if (type === 'text') {
-            result.push({
-                type: 'text',
-                groupInstruction: gi || null,
-                value: el.querySelector('.question-value')?.value || ""
-            });
-        } else if (type === 'subheading') {
-            result.push({
-                type: 'subheading',
-                groupInstruction: gi || null,
-                value: el.querySelector('.question-value')?.value || ""
-            });
-        } else if (type === 'gap-fill') {
-            result.push({
-                type: 'question', questionId: `q${qNum}`, format: 'gap-fill',
-                groupInstruction: gi || null,
-                text: el.querySelector('.question-text')?.value || "",
-                postfix: el.querySelector('.question-postfix')?.value || "",
-                correctAnswer: el.querySelector('.question-answer')?.value || "",
-                wordLimit: parseInt(el.querySelector('.question-word-limit')?.value) || null
-            });
-            qNum++;
-        } else if (type === 'multiple-choice') {
-            const options = {};
-            el.querySelectorAll('.mc-option-item').forEach(opt => {
-                const letter = opt.querySelector('input[type="radio"]').value;
-                const text = opt.querySelector('.option-text')?.value?.trim() || "";
-                if (text) options[letter] = text;
-            });
-            result.push({
-                type: 'question', questionId: `q${qNum}`, format: 'multiple-choice',
-                groupInstruction: gi || null,
-                text: el.querySelector('.question-text')?.value || "",
-                options,
-                correctAnswer: el.querySelector('input[type="radio"]:checked')?.value || ""
-            });
-            qNum++;
-        } else if (type === 'true-false-notgiven') {
-            result.push({
-                type: 'question', questionId: `q${qNum}`, format: 'true-false-notgiven',
-                groupInstruction: gi || null,
-                text: el.querySelector('.question-text')?.value || "",
-                correctAnswer: el.querySelector('.question-answer')?.value || ""
-            });
-            qNum++;
-        } else if (type === 'table') {
-            const tableData = extractTableData(el, el.dataset.questionId, qNum);
-            result.push(tableData.data);
-            qNum = tableData.nextQNum;
-        } else if (type === 'question-group') {
-            const groupData = extractQuestionGroupData(el, qNum);
-            result.push(groupData.data);
-            qNum = groupData.nextQNum;
-        }
-    });
-
-    return { questions: result, nextQNum: qNum };
-}
-
-function extractTableData(el, questionId, startQNum) {
-    let qNum = startQNum;
-    const data = {
-        type: 'table',
-        title: el.querySelector('.table-title')?.value?.trim() || "",
-        groupInstruction: el.querySelector('.group-instruction')?.value?.trim() || "",
-        columns: [],
-        rows: [],
-        questions: {},
-        answer: {}
-    };
-
-    // Columns
-    el.querySelector(`#header-row-${questionId}`)?.querySelectorAll('.header-input').forEach(h => {
-        const v = h.value.trim(); if (v) data.columns.push(v);
-    });
-
-    // The admin sees UI counter numbers next to table inputs and types the
-    // answer list against them — remember which UI number became which final
-    // question number so the answers can be remapped on save.
-    const uiToFinal = {};
-
-    // The test page turns ONLY the ___qN___ marker into an input, so every
-    // question cell's text must contain exactly that marker with the FINAL
-    // number. Normalise whatever the admin typed (___q7___, 1____, ____) —
-    // or append the marker if the text has no blank at all.
-    const normalizeCellMarker = (content, finalNum) => {
-        const marker = `___q${finalNum}___`;
-        if (/___q\d+___/.test(content)) return content.replace(/___q\d+___/, marker);
-        if (/(?<!_)\d+\s*_{2,}/.test(content)) return content.replace(/(?<!_)\d+\s*_{2,}/, marker);
-        if (/_{2,}/.test(content)) return content.replace(/_{2,}/, marker);
-        return `${content} ${marker}`;
-    };
-
-    const registerGapCell = (inp, ri, ci, colName, appendVal) => {
-        const content = inp.value.trim();
-        if (!content) return appendVal;
-        const ui = parseInt(inp.getAttribute('data-question-number'), 10);
-        if (Number.isFinite(ui)) uiToFinal[String(ui)] = qNum;
-        const normalized = normalizeCellMarker(content, qNum);
-        data.questions[qNum] = { questionId: `q${qNum}`, text: normalized, row: ri, column: ci, columnName: colName };
-        qNum++;
-        return appendVal ? `${appendVal}<br>${normalized}` : normalized;
-    };
-
-    // Rows
-    const tbody = el.querySelector(`#table-body-${questionId}`);
-    if (tbody) {
-        tbody.querySelectorAll('.data-row').forEach((row, ri) => {
-            const rowData = {};
-            row.querySelectorAll('.data-cell').forEach((cell, ci) => {
-                const cellType = cell.querySelector('.cell-type').value;
-                const cc = cell.querySelector('.cell-content');
-                const colName = data.columns[ci]?.toLowerCase().replace(/\s+/g, '') || `col${ci+1}`;
-
-                if (cellType === 'question') {
-                    let val = '';
-                    cc.querySelectorAll('.cell-input[data-question-number]').forEach(inp => {
-                        val = registerGapCell(inp, ri, ci, colName, val);
-                    });
-                    cc.querySelectorAll('.additional-question .cell-input[data-question-number]').forEach(inp => {
-                        val = registerGapCell(inp, ri, ci, colName, val);
-                    });
-                    rowData[colName] = val;
-                } else if (cellType === 'multiple-choice') {
-                    let val = '';
-                    cc.querySelectorAll('.mc-cell-content').forEach(mc => {
-                        const inp = mc.querySelector('.cell-input');
-                        if (inp) {
-                            const txt = inp.value.trim();
-                            const opts = {}; mc.querySelectorAll('.mc-option').forEach(o => {
-                                const l = o.querySelector('.mc-radio')?.value; const t = o.querySelector('.mc-option-text')?.value?.trim();
-                                if (l && t) opts[l] = t;
-                            });
-                            const correct = mc.querySelector('input[type="radio"]:checked')?.value || '';
-                            if (txt) {
-                                if (!correct) throw new Error(`Listening table: multiple-choice question "${txt.slice(0, 40)}" has no correct answer selected.`);
-                                const ui = parseInt(inp.getAttribute('data-question-number'), 10);
-                                if (Number.isFinite(ui)) uiToFinal[String(ui)] = qNum;
-                                val += `Q${qNum}: ${txt}<br>`;
-                                data.questions[qNum] = { questionId: `q${qNum}`, text: txt, format: 'multiple-choice', options: opts, correctAnswer: correct, row: ri, column: ci, columnName: colName };
-                                qNum++;
-                            }
-                        }
-                    });
-                    rowData[colName] = val;
-                } else {
-                    let val = '';
-                    cc.querySelectorAll('.cell-input').forEach(inp => { const v = inp.value.trim(); if (v) { if (val) val += '<br>'; val += v; } });
-                    rowData[colName] = val;
-                }
-            });
-            data.rows.push(rowData);
-        });
-    }
-
-    // Answers — typed against the UI numbers, saved against the final ones.
-    // Unknown keys are a hard error: silently saving them used to produce
-    // ungradable tables.
-    // "q1=holiday, holidays, q2=beach": a comma segment without "=" is a
-    // variant of the previous answer (both accepted), not a new pair.
-    const answersText = el.querySelector('.table-answers-text')?.value?.trim() || "";
-    if (answersText) {
-        const pairs = [];
-        answersText.split(',').forEach(seg => {
-            if (seg.includes('=')) pairs.push(seg);
-            else if (pairs.length) pairs[pairs.length - 1] += `,${seg}`;
-        });
-        pairs.forEach(pair => {
-            const eq = pair.indexOf('=');
-            const k = pair.slice(0, eq);
-            const v = pair.slice(eq + 1);
-            if (!k.trim() || !v.trim()) return;
-            const uiKey = String(parseInt(k.trim().replace(/^q+/i, ''), 10));
-            const finalNum = uiToFinal[uiKey];
-            if (finalNum === undefined) {
-                const valid = Object.keys(uiToFinal).map(n => 'q' + n).join(', ') || 'none';
-                throw new Error(`Listening table: answer key "${k.trim()}" does not match any question in this table. Question numbers here: ${valid}.`);
+// Assigns the final sequential q-numbers to every gradeable entry.
+// Author tables come with per-table local markers (___q1___...), which are
+// remapped to the global sequence together with their answer keys.
+export function assignListeningNumbers(items, start) {
+    let n = start;
+    for (const item of items) {
+        switch (item.type) {
+            case 'question':
+                item.questionId = `q${n++}`;
+                break;
+            case 'question-group': {
+                const startN = n;
+                (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
+                const end = n - 1;
+                item.questionId = end > startN ? `q${startN}_${end}` : `q${startN}`;
+                break;
             }
-            data.answer[`q${finalNum}`] = v.trim();
-        });
-    }
-
-    // Every gap question needs an answer, otherwise the test can't be graded
-    const finalToUi = {};
-    Object.entries(uiToFinal).forEach(([ui, fin]) => { finalToUi[fin] = ui; });
-    Object.entries(data.questions).forEach(([num, q]) => {
-        if (q.format === 'multiple-choice') return;
-        if (!data.answer[`q${num}`]) {
-            const label = finalToUi[num] ? `q${finalToUi[num]}` : `q${num}`;
-            throw new Error(`Listening table: question ${label} has no answer. Add it to the answers field as "${label}=your answer".`);
+            case 'table': {
+                const localToGlobal = {};
+                item.rows.forEach((row) => {
+                    Object.keys(row).forEach((k) => {
+                        if (typeof row[k] !== 'string') return;
+                        row[k] = row[k].replace(/___q(\d+)___/g, (_, local) => {
+                            if (!localToGlobal[local]) localToGlobal[local] = n++;
+                            return `___q${localToGlobal[local]}___`;
+                        });
+                    });
+                });
+                const remapped = {};
+                Object.entries(item.answer || {}).forEach(([k, v]) => {
+                    const local = String(k).replace(/\D/g, '');
+                    if (localToGlobal[local]) remapped[`q${localToGlobal[local]}`] = v;
+                });
+                item.answer = remapped;
+                break;
+            }
+            case 'drag_drop':
+                (item.slots || []).forEach((s) => { s.qId = `q${n++}`; });
+                break;
+            case 'map-labelling':
+                (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
+                break;
+            default:
+                break; // text / subheading
         }
-    });
-
-    return { data, nextQNum: qNum };
-}
-
-function extractQuestionGroupData(el, startQNum) {
-    let qNum = startQNum;
-    const gt = el.querySelector('.group-type')?.value || 'multi-select';
-    const data = {
-        type: 'question-group',
-        groupInstruction: el.querySelector('.group-instruction')?.value?.trim() || "",
-        groupType: gt
-    };
-
-    const start = qNum;
-    if (gt === 'matching') {
-        data.options = {};
-        el.querySelectorAll('.options-list .option-item').forEach(item => {
-            const label = item.querySelector('.option-label')?.value?.trim();
-            const text = item.querySelector('.option-text')?.value?.trim();
-            if (label && text) data.options[label] = text;
-        });
-        data.questions = [];
-        el.querySelectorAll('.group-question-item').forEach(item => {
-            const text = item.querySelector('.group-question-text')?.value?.trim() || "";
-            const answer = item.querySelector('.group-question-answer')?.value?.trim() || "";
-            data.questions.push({ questionId: `q${qNum}`, text, correctAnswer: answer });
-            qNum++;
-        });
-    } else {
-        data.text = el.querySelector('.question-text')?.value?.trim() || "";
-        data.options = {};
-        el.querySelectorAll('.options-list .option-item').forEach(item => {
-            const label = item.querySelector('.option-label')?.value?.trim();
-            const text = item.querySelector('.option-text')?.value?.trim();
-            if (label && text) data.options[label] = text;
-        });
-        const answers = el.querySelector('.group-correct-answers')?.value?.trim() || "";
-        const correctAnswers = answers.split(',').map(a => a.trim()).filter(Boolean);
-        data.correctAnswers = correctAnswers;
-        // Emit one gradeable sub-question per answer letter, with sequential
-        // ids — the test page needs `questions[]` to render and grade the group.
-        data.questions = correctAnswers.map((ans, i) => ({
-            questionId: `q${start + i}`,
-            correctAnswer: ans,
-        }));
-        qNum += correctAnswers.length || 1;
     }
-
-    // Group id spans its sub-questions (e.g. q28_30), matching the test page.
-    const end = qNum - 1;
-    data.questionId = end > start ? `q${start}_${end}` : `q${start}`;
-
-    return { data, nextQNum: qNum };
+    return n;
 }
