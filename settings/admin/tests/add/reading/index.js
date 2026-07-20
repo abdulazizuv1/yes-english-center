@@ -1,3 +1,6 @@
+// Add Reading Test — passage/save flow. Question editor forms and
+// collection live in the shared authoring engine (pages/mock/engine/
+// author.js), the same one the listening and full mock tools use.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -5,14 +8,22 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
-  collection,
   doc,
   getDoc,
   getDocs,
   setDoc,
+  collection,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { firebaseConfig } from "/config.js";
-
+import {
+  authorKinds,
+  editorHTML,
+  collectAll,
+  assignReadingNumbers,
+  setupAuthorForms,
+} from "/pages/mock/engine/author.js";
+import { normalizeReadingQuestions } from "/pages/mock/engine/normalize.js";
+import { gradeItems } from "/pages/mock/engine/grade.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -21,43 +32,28 @@ const db = getFirestore(app);
 let currentUser = null;
 let nextTestNumber = 1;
 let passageCount = 0;
-let questionIdCounter = 0;
-// Store shared options per passage: sharedOptions[passageNumber][type]
-let sharedOptions = {};
+let uid = 0;
 
-// Check if user is admin
+setupAuthorForms();
+
 async function checkAdminAccess() {
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       unsubscribe();
-
       if (!user) {
         alert("🔒 Please login first to access this page");
         window.location.href = "/";
         return;
       }
-
       try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (!userDoc.exists()) {
-          alert("❌ User data not found. Access denied.");
-          window.location.href = "/";
-          return;
-        }
-
-        const userData = userDoc.data();
-        const userRole = userData.role;
-
-        if (userRole !== "admin") {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== "admin") {
           alert("🚫 Access denied. Admin privileges required.");
           window.location.href = "/";
           return;
         }
-
         currentUser = user;
-        resolve({ user, userData });
+        resolve(user);
       } catch (error) {
         console.error("❌ Error checking user role:", error);
         alert("❌ Error verifying admin access. Please try again.");
@@ -67,1436 +63,200 @@ async function checkAdminAccess() {
   });
 }
 
-// Get the next test number
 async function getNextTestNumber() {
   try {
-    const testsRef = collection(db, "readingTests");
-    const testsSnapshot = await getDocs(testsRef);
-
+    const snapshot = await getDocs(collection(db, "readingTests"));
     let maxNumber = 0;
-    testsSnapshot.forEach((docSnapshot) => {
-      const docId = docSnapshot.id;
-      if (docId && docId.startsWith("test-")) {
-        const number = parseInt(docId.replace("test-", ""));
-        if (!isNaN(number) && number > maxNumber) {
-          maxNumber = number;
-        }
-      }
+    snapshot.forEach((docSnap) => {
+      const match = docSnap.id.match(/test-(\d+)/);
+      if (match) maxNumber = Math.max(maxNumber, parseInt(match[1], 10));
     });
-
     nextTestNumber = maxNumber + 1;
-    document.getElementById(
-      "testNumber"
-    ).textContent = `This will be Reading Test ${nextTestNumber}`;
-
-    return nextTestNumber;
-  } catch (error) {
-    console.error("Error getting next test number:", error);
-    return 1;
+    const badge = document.getElementById("testNumber");
+    if (badge) badge.textContent = `Test ${nextTestNumber}`;
+  } catch (e) {
+    console.error("Error getting next test number:", e);
   }
 }
 
-// Add a new passage
+/* ───────────────────────── passages ───────────────────────── */
+
 function addPassage() {
   if (passageCount >= 3) {
     alert("Maximum 3 passages allowed per test");
     return;
   }
-
   passageCount++;
-  const passageNumber = passageCount;
+  const n = passageCount;
 
+  const menuButtons = authorKinds("reading")
+    .map(
+      (k) =>
+        `<button type="button" class="${k.isNew ? "au-new" : ""}" onclick="addAuthorQuestion(${n}, '${k.kind}')">${k.isNew ? "✨ " : "+ "}${k.label}</button>`
+    )
+    .join("");
+
+  const ranges = { 1: "1-13", 2: "14-26", 3: "27-40" };
   const passageHTML = `
-    <div class="passage-container" data-passage="${passageNumber}">
+    <div class="passage-container" data-passage="${n}">
       <div class="passage-header">
-        <div class="passage-title">
-          <span class="passage-number">${passageNumber}</span>
-          Passage ${passageNumber}
-        </div>
-        ${
-          passageCount > 1
-            ? `<button type="button" class="remove-passage-btn" onclick="removePassage(${passageNumber})">Remove Passage</button>`
-            : ""
-        }
+        <div class="passage-title"><span class="passage-number">${n}</span> Passage ${n}</div>
+        ${n > 1 ? `<button type="button" class="remove-passage-btn" onclick="removePassage(${n})">Remove Passage</button>` : ""}
       </div>
-      
+
       <div class="form-group">
         <label>Passage Title *</label>
         <input type="text" class="passage-title-input" placeholder="e.g., The discovery of a baby mammoth" required>
       </div>
-      
+
       <div class="form-group">
         <label>Instructions</label>
-        <input type="text" class="passage-instructions" placeholder="e.g., You should spend about 20 minutes on Questions 1-13" 
-       value="You should spend about 20 minutes on Questions ${getQuestionRange(
-         passageNumber
-       )}">
-        <span class="helper-text">Customize the question numbers for this passage (e.g., Questions 1-13 or Questions 14-26)</span>     
+        <input type="text" class="passage-instructions" value="You should spend about 20 minutes on Questions ${ranges[n] || ""}">
       </div>
-      
+
       <div class="form-group">
         <label>Passage Text *</label>
         <textarea class="passage-text" rows="10" placeholder="Paste or type the full reading passage text here..." required></textarea>
-        <span class="helper-text">This is the main text students will read</span>
       </div>
-      
+
       <div class="questions-section">
-        <div class="questions-header">
-          <span class="questions-title">Questions</span>
-        </div>
-        <div class="questions-container" id="questions${passageNumber}">
-          <!-- Questions will be added here -->
-        </div>
-        <div class="add-question-dropdown" style="margin-top: 10px;">
-          <button type="button" class="add-question-btn" onclick="toggleQuestionMenu(${passageNumber})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
-            Add Question
-          </button>
-          <div class="question-types-menu" id="questionMenu${passageNumber}">
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'text-question')">Text Only (No Question)</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'gap-fill')">Gap Fill</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'true-false-notgiven')">True/False/Not Given</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'yes-no-notgiven')">Yes/No/Not Given</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multiple-choice')">Multiple Choice</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'paragraph-matching')">Paragraph Matching</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'match-person')">Match Person/Feature</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'multi-select')">Multi-Select</div>
-            <div class="question-type-option" onclick="addQuestion(${passageNumber}, 'drag_drop')">Drag & Drop Matching</div>
-          </div>
-        </div>
+        <h4>Questions</h4>
+        <div class="questions-container" id="questions-${n}"></div>
+        <div class="au-menu">${menuButtons}</div>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  document
-    .getElementById("passagesContainer")
-    .insertAdjacentHTML("beforeend", passageHTML);
+  document.getElementById("passagesContainer").insertAdjacentHTML("beforeend", passageHTML);
   updatePassageCount();
-  updateAddPassageButton();
 }
 
-function getQuestionRange(passageNumber) {
-  return `corresponding to this passage`;
-}
-
-window.addDDItem = function(questionId) {
-  const list = document.getElementById(`dd-items-${questionId}`);
-  const rows = list.querySelectorAll('.dd-item-row');
-  const nextLetter = String.fromCharCode(65 + rows.length);
-  const row = document.createElement('div');
-  row.className = 'dd-item-row';
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;';
-  row.innerHTML = `
-    <input type="text" value="${nextLetter}" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
-    <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
-    <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-  `;
-  list.appendChild(row);
+window.addAuthorQuestion = function (passageNumber, kind) {
+  const container = document.getElementById(`questions-${passageNumber}`);
+  container.insertAdjacentHTML("beforeend", editorHTML("reading", kind, `u${uid++}`));
+  container.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
-window.removeDDItem = function(btn) {
-  btn.closest('.dd-item-row').remove();
-};
-
-window.addDDSlot = function(questionId) {
-  const list = document.getElementById(`dd-slots-${questionId}`);
-  const idx = list.querySelectorAll('.dd-slot-row').length;
-  const row = document.createElement('div');
-  row.className = 'dd-slot-row';
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
-  row.innerHTML = `
-    <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {${idx}}:</span>
-    <input type="text" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
-    <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-  `;
-  list.appendChild(row);
-};
-
-window.removeDDSlot = function(btn) {
-  btn.closest('.dd-slot-row').remove();
-};
-
-// Toggle question type menu
-window.toggleQuestionMenu = function (passageNumber) {
-  const menu = document.getElementById(`questionMenu${passageNumber}`);
-  menu.classList.toggle("show");
-
-  document.addEventListener("click", function closeMenu(e) {
-    if (!e.target.closest(".add-question-dropdown")) {
-      menu.classList.remove("show");
-      document.removeEventListener("click", closeMenu);
-    }
-  });
-};
-
-// Add a question to a passage
-window.addQuestion = function (passageNumber, type) {
-  const container = document.getElementById(`questions${passageNumber}`);
-  const questionId = ++questionIdCounter;
-
-  let questionHTML = "";
-
-  switch (type) {
-    case "gap-fill":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
-        <span class="question-type-badge gap-fill">Gap Fill</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <input type="text" placeholder="Question text (use _____ for gaps)" class="question-text">
-      <input type="text" placeholder="Answer(s) - separate multiple with comma" class="question-answer">
-    </div>
-  `;
-      break;
-    case "text-question":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-type-badge" style="background: #607D8B;">Text/Header</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 1-7\nComplete the notes below...')" class="group-instruction" rows="3"></textarea>
-      <input type="text" placeholder="Title (optional, e.g., 'Chinese silk')" class="question-title">
-      <input type="text" placeholder="Subheading (optional, e.g., 'Early Uses')" class="question-subheading">
-      <input type="text" placeholder="Plain text (optional, e.g., 'Clothing')" class="question-text">
-      <small style="color: #888;">Fill any or all fields - they will appear as headers/text</small>
-    </div>
-  `;
-      break;
-
-    case "true-false-notgiven":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
-        <span class="question-type-badge tfng">True/False/Not Given</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 8-13\nDo the following statements agree with the information given in Reading Passage 1?')" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Statement" class="question-text">
-      <select class="question-answer">
-        <option value="">Select answer</option>
-        <option value="TRUE">TRUE</option>
-        <option value="FALSE">FALSE</option>
-        <option value="NOT GIVEN">NOT GIVEN</option>
-      </select>
-    </div>
-  `;
-      break;
-
-    case "yes-no-notgiven":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
-        <span class="question-type-badge ynng">Yes/No/Not Given</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 31-36\nDo the following statements agree with the claims of the writer?')" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Statement" class="question-text">
-      <select class="question-answer">
-        <option value="">Select answer</option>
-        <option value="YES">YES</option>
-        <option value="NO">NO</option>
-        <option value="NOT GIVEN">NOT GIVEN</option>
-      </select>
-    </div>
-  `;
-      break;
-
-    case "multiple-choice":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>.</span>
-        <span class="question-type-badge mc">Multiple Choice</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 27-30\nChoose the correct letter, A, B, C or D.')" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Question" class="question-text">
-      <div class="mc-options" id="mc-options-${questionId}">
-        <div class="mc-option">
-          <input type="radio" name="mc-answer-${questionId}" value="A">
-          <label>A</label>
-          <input type="text" placeholder="Option A text" class="option-text" data-option="A">
-          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
-        </div>
-        <div class="mc-option">
-          <input type="radio" name="mc-answer-${questionId}" value="B">
-          <label>B</label>
-          <input type="text" placeholder="Option B text" class="option-text" data-option="B">
-          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
-        </div>
-        <div class="mc-option">
-          <input type="radio" name="mc-answer-${questionId}" value="C">
-          <label>C</label>
-          <input type="text" placeholder="Option C text" class="option-text" data-option="C">
-          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
-        </div>
-        <div class="mc-option">
-          <input type="radio" name="mc-answer-${questionId}" value="D">
-          <label>D</label>
-          <input type="text" placeholder="Option D text" class="option-text" data-option="D">
-          <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
-        </div>
-      </div>
-      <button type="button" onclick="addMCOption(${questionId})" style="margin-top: 10px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>
-    </div>
-  `;
-      break;
-
-    case "paragraph-matching":
-      // Initialize passage-specific options if not exists
-      if (!sharedOptions[passageNumber]) {
-        sharedOptions[passageNumber] = {};
-      }
-      if (!sharedOptions[passageNumber]["paragraph-matching"]) {
-        sharedOptions[passageNumber]["paragraph-matching"] = [
-          { label: "A", text: "Paragraph A" },
-          { label: "B", text: "Paragraph B" },
-          { label: "C", text: "Paragraph C" },
-          { label: "D", text: "Paragraph D" },
-          { label: "E", text: "Paragraph E" },
-          { label: "F", text: "Paragraph F" },
-        ];
-      }
-
-      const pmOptions = sharedOptions[passageNumber]["paragraph-matching"];
-      const isFirstPMQuestion = !document.querySelector(`#questions${passageNumber} .question-item[data-type="paragraph-matching"]`);
-
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}">
-      <div class="question-header">
-        <span class="question-type-badge pm">Paragraph Matching</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g., 'Questions 14-18\nReading Passage 2 has six paragraphs...')" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Question/Information to find" class="question-text">
-      <input type="text" placeholder="Correct answer (A, B, C, etc.)" class="question-answer">
-      <div class="options-container">
-        <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
-          Options (shared across all paragraph matching questions in this passage):
-          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'paragraph-matching', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">${isFirstPMQuestion ? 'Edit Options' : 'View Options'}</button>
-        </label>
-        <div class="pm-options" id="pm-options-${questionId}" style="display: none;" data-is-first="${isFirstPMQuestion}">
-          ${pmOptions
-            .map(
-              (opt) => `
-            <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" ${isFirstPMQuestion ? '' : 'readonly'}>
-              <input type="text" value="${opt.text}" class="option-text" data-label="${opt.label}" style="flex: 1;" ${isFirstPMQuestion ? '' : 'readonly'}>
-              ${isFirstPMQuestion ? `<button type="button" onclick="removeOption(this, 'paragraph-matching', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>` : ''}
-            </div>
-          `
-            )
-            .join("")}
-          ${isFirstPMQuestion ? `<button type="button" onclick="addOption(${questionId}, 'paragraph-matching', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>` : ''}
-        </div>
-        <div class="options-preview" id="options-preview-${questionId}">
-          ${pmOptions
-            .map(
-              (opt) =>
-                `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${opt.label}: ${opt.text}</span>`
-            )
-            .join("")}
-        </div>
-      </div>
-    </div>
-  `;
-      break;
-
-    case "match-person":
-      // Initialize passage-specific options if not exists
-      if (!sharedOptions[passageNumber]) {
-        sharedOptions[passageNumber] = {};
-      }
-      if (!sharedOptions[passageNumber]["match-person"]) {
-        sharedOptions[passageNumber]["match-person"] = [
-          { label: "A", text: "" },
-          { label: "B", text: "" },
-        ];
-      }
-
-      const mpOptions = sharedOptions[passageNumber]["match-person"];
-      const isFirstMPQuestion = !document.querySelector(`#questions${passageNumber} .question-item[data-type="match-person"]`);
-
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}" data-passage="${passageNumber}">
-      <div class="question-header">
-        <span class="question-type-badge mp">Match Person/Feature</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, use \n for paragraphs)" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Statement to match" class="question-text">
-      <input type="text" placeholder="Correct answer letter (A, B, C, etc.)" class="question-answer">
-      <div class="options-container">
-        <label style="display: block; margin: 10px 0 5px; font-weight: 600;">
-          Options (shared across all match person questions in this passage):
-          <button type="button" onclick="toggleOptionsEdit(${questionId}, 'match-person', ${passageNumber})" style="margin-left: 10px; padding: 2px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">${isFirstMPQuestion ? 'Edit Options' : 'View Options'}</button>
-        </label>
-        <div class="match-options" id="match-options-${questionId}" style="display: none;" data-is-first="${isFirstMPQuestion}">
-          ${mpOptions
-            .map(
-              (opt) => `
-            <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-              <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" ${isFirstMPQuestion ? '' : 'readonly'}>
-              <input type="text" value="${opt.text}" placeholder="Enter name/text" class="option-text" data-label="${opt.label}" style="flex: 1;" ${isFirstMPQuestion ? '' : 'readonly'}>
-              ${isFirstMPQuestion ? `<button type="button" onclick="removeOption(this, 'match-person', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>` : ''}
-            </div>
-          `
-            )
-            .join("")}
-          ${isFirstMPQuestion ? `<button type="button" onclick="addOption(${questionId}, 'match-person', ${passageNumber})" style="margin-top: 5px; padding: 5px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">+ Add Option</button>` : ''}
-        </div>
-        <div class="options-preview" id="options-preview-${questionId}">
-          ${mpOptions
-            .map(
-              (opt) =>
-                `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${
-                  opt.label
-                }: ${opt.text || "(empty)"}</span>`
-            )
-            .join("")}
-        </div>
-      </div>
-    </div>
-      `;
-      break;
-
-    case "multi-select":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-number" style="margin-right:8px; font-weight:600;">Q<span class="question-index"></span>-<span class="question-index-end"></span>.</span>
-        <span class="question-type-badge" style="background: #FF6B6B;">Multi-Select</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <textarea placeholder="Group instruction (e.g., 'Questions 22 and 23\nChoose TWO letters, A–E.')" class="group-instruction" rows="2" style="min-height:70px;"></textarea>
-        <input type="text" placeholder="Question text" class="multi-select-text" value="">
-      </div>
-      <div class="multi-select-subquestions" id="multi-select-questions-${questionId}" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
-        <div class="multi-select-subquestion" style="padding:10px; background:#f8f9fa; border-radius:6px;">
-          <label style="font-weight:600; display:block; margin-bottom:6px;">Statement 1:</label>
-          <input class="subquestion-answer-input" placeholder="Answer letter" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;" oninput="this.value = this.value.toUpperCase();">
-        </div>
-        <div class="multi-select-subquestion" style="padding:10px; background:#f8f9fa; border-radius:6px;">
-          <label style="font-weight:600; display:block; margin-bottom:6px;">Statement 2:</label>
-          <input class="subquestion-answer-input" placeholder="Answer letter" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;" oninput="this.value = this.value.toUpperCase();">
-        </div>
-      </div>
-      <button type="button" onclick="addMultiSelectSubquestion(${questionId})" style="margin-top: 10px; padding: 6px 14px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">+ Add Sub-question</button>
-      <div class="options-container" style="margin-top: 15px;">
-        <label style="display: block; margin: 10px 0 5px; font-weight: 600;">Options:</label>
-        <div class="multi-select-options-list" id="multi-select-options-${questionId}" style="display:flex; flex-direction:column; gap:8px;">
-          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
-            <input type="text" value="A" class="option-label" style="width: 40px; text-align: center;" readonly>
-            <input type="text" placeholder="Option A text" class="option-text" data-option="A" style="flex: 1;">
-            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
-          </div>
-          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
-            <input type="text" value="B" class="option-label" style="width: 40px; text-align: center;" readonly>
-            <input type="text" placeholder="Option B text" class="option-text" data-option="B" style="flex: 1;">
-            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
-          </div>
-          <div class="option-row" style="display: flex; gap: 10px; align-items:center;">
-            <input type="text" value="C" class="option-label" style="width: 40px; text-align: center;" readonly>
-            <input type="text" placeholder="Option C text" class="option-text" data-option="C" style="flex: 1;">
-            <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 4px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
-          </div>
-        </div>
-        <button type="button" onclick="addMultiSelectOption(${questionId})" style="margin-top: 8px; padding: 6px 14px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">+ Add Option</button>
-      </div>
-    </div>
-  `;
-      // Initialize option dropdowns after HTML is inserted
-      setTimeout(() => {
-        updateMultiSelectOptionDropdowns(questionId);
-      }, 0);
-      break;
-
-    case "drag_drop":
-      questionHTML = `
-    <div class="question-item" data-question-id="${questionId}" data-type="${type}">
-      <div class="question-header">
-        <span class="question-type-badge" style="background: #9C27B0; color: white;">Drag & Drop (Inline)</span>
-        <button type="button" class="remove-btn" onclick="removeQuestion(${questionId})">Remove</button>
-      </div>
-      <textarea placeholder="Group instruction (optional, e.g. 'Questions 33–37\\nDrag the correct phrase...')" class="group-instruction" rows="2"></textarea>
-      <input type="text" placeholder="Title / heading (e.g., Calls by the umpire)" class="dd-title" style="margin-bottom:10px;width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;">
-      <div style="font-weight:600;margin-bottom:4px;">Items (things to drag):</div>
-      <div class="dd-items-list" id="dd-items-${questionId}">
-        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
-          <input type="text" value="A" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
-          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
-          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
-          <input type="text" value="B" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
-          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
-          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-        <div class="dd-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
-          <input type="text" value="C" class="dd-item-id" style="width:40px;text-align:center;" placeholder="ID">
-          <input type="text" placeholder="Item text" class="dd-item-text" style="flex:1;">
-          <button type="button" onclick="removeDDItem(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-      </div>
-      <button type="button" onclick="addDDItem(${questionId})" style="margin-bottom:14px;padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Item</button>
-      <div style="font-weight:600;margin-bottom:4px;">Paragraph text <small style="font-weight:400;color:#888;">(use {0}, {1}, {2}… where gaps should appear)</small></div>
-      <textarea class="dd-inline-text" rows="4" placeholder="Write the full paragraph here. Example: The umpire had to make a {0} call every time a ball crossed the {1}." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;margin-bottom:10px;font-size:13px;"></textarea>
-      <div style="font-weight:600;margin-bottom:4px;">Correct answers <small style="font-weight:400;color:#888;">(one per gap, in order)</small></div>
-      <div class="dd-slots-list" id="dd-slots-${questionId}">
-        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
-          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {0}:</span>
-          <input type="text" placeholder="Correct item ID (e.g., A)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
-          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
-          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {1}:</span>
-          <input type="text" placeholder="Correct item ID (e.g., B)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
-          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-        <div class="dd-slot-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
-          <span style="min-width:65px;font-size:13px;color:#555;font-weight:600;">Gap {2}:</span>
-          <input type="text" placeholder="Correct item ID (e.g., C)" class="dd-slot-correct" style="width:120px;text-align:center;padding:6px;" oninput="this.value=this.value.toUpperCase()">
-          <button type="button" onclick="removeDDSlot(this)" style="padding:2px 10px;background:#ff4444;color:white;border:none;border-radius:3px;cursor:pointer;">×</button>
-        </div>
-      </div>
-      <button type="button" onclick="addDDSlot(${questionId})" style="padding:5px 14px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px;">+ Add Gap</button>
-    </div>
-  `;
-      break;
-  }
-
-  container.insertAdjacentHTML("beforeend", questionHTML);
-  
-  // For multi-select, update question numbers after insertion
-  if (type === "multi-select") {
-    updateQuestionNumbers(passageNumber);
-  }
-
-  // Set up auto-propagation for first matching questions
-  if ((type === "paragraph-matching" || type === "match-person") && 
-      (type === "paragraph-matching" ? isFirstPMQuestion : isFirstMPQuestion)) {
-    setupOptionAutoPropagate(questionId, type, passageNumber);
-  }
-
-  document
-    .getElementById(`questionMenu${passageNumber}`)
-    .classList.remove("show");
-  updateQuestionNumbers(passageNumber);
-};
-
-// Set up auto-propagation for first matching question
-function setupOptionAutoPropagate(questionId, type, passageNumber) {
-  const container = document.getElementById(
-    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-  );
-  
-  if (!container) return;
-  
-  // Add input listeners to all option inputs
-  const optionInputs = container.querySelectorAll('.option-label, .option-text');
-  optionInputs.forEach(input => {
-    input.addEventListener('input', () => {
-      updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
-      updateAllOptionsInPassage(type, passageNumber);
-    });
-  });
-}
-
-// Update shared options from the first question as user types
-function updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber) {
-  const container = document.getElementById(
-    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-  );
-  
-  if (!container) return;
-  
-  const newOptions = [];
-  container.querySelectorAll(".option-row").forEach((row) => {
-    const label = row.querySelector(".option-label").value.trim();
-    const text = row.querySelector(".option-text").value;
-    if (label) {
-      newOptions.push({ label, text });
-    }
-  });
-
-  if (!sharedOptions[passageNumber]) {
-    sharedOptions[passageNumber] = {};
-  }
-  sharedOptions[passageNumber][type] = newOptions;
-}
-
-// Update all matching questions in the same passage
-function updateAllOptionsInPassage(type, passageNumber) {
-  const questions = document.querySelectorAll(
-    `#questions${passageNumber} .question-item[data-type="${type}"]`
-  );
-  
-  questions.forEach((question) => {
-    const questionId = question.dataset.questionId;
-    const container = document.getElementById(
-      `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-    );
-    const previewDiv = document.getElementById(`options-preview-${questionId}`);
-    
-    if (!container || !previewDiv) return;
-    
-    const isFirst = container.dataset.isFirst === "true";
-    const options = sharedOptions[passageNumber]?.[type] || [];
-    
-    // Update options container for non-first questions
-    if (!isFirst) {
-      const optionsHTML = options.map(opt => `
-        <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-          <input type="text" value="${opt.label}" class="option-label" style="width: 40px; text-align: center;" readonly>
-          <input type="text" value="${opt.text}" class="option-text" data-label="${opt.label}" style="flex: 1;" readonly>
-        </div>
-      `).join("");
-      
-      const existingRows = container.querySelectorAll('.option-row');
-      existingRows.forEach(row => row.remove());
-      
-      const addButton = container.querySelector('button[onclick*="addOption"]');
-      if (addButton) {
-        addButton.insertAdjacentHTML('beforebegin', optionsHTML);
-      } else {
-        container.innerHTML = optionsHTML;
-      }
-    }
-    
-    // Update preview
-    previewDiv.innerHTML = options
-      .map(opt => 
-        `<span style="display: inline-block; margin: 2px; padding: 3px 8px; background: #f0f0f0; border-radius: 3px; font-size: 12px;">${opt.label}: ${opt.text || "(empty)"}</span>`
-      )
-      .join("");
-  });
-}
-
-// Toggle options edit view
-window.toggleOptionsEdit = function (questionId, type, passageNumber) {
-  const optionsDiv = document.getElementById(
-    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-  );
-  const previewDiv = document.getElementById(`options-preview-${questionId}`);
-
-  if (optionsDiv.style.display === "none") {
-    optionsDiv.style.display = "block";
-    previewDiv.style.display = "none";
-  } else {
-    updateSharedOptions(questionId, type, passageNumber);
-    optionsDiv.style.display = "none";
-    previewDiv.style.display = "block";
-    updateAllOptionsInPassage(type, passageNumber);
-  }
-};
-
-// Update shared options from inputs
-function updateSharedOptions(questionId, type, passageNumber) {
-  const container = document.getElementById(
-    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-  );
-  
-  if (!container) {
-    // If the specific container is not found, try to find any visible container of this type in the passage
-    const allQuestions = document.querySelectorAll(`#questions${passageNumber} .question-item[data-type="${type}"]`);
-    for (let question of allQuestions) {
-      const qId = question.dataset.questionId;
-      const anyContainer = document.getElementById(
-        `${type === "paragraph-matching" ? "pm" : "match"}-options-${qId}`
-      );
-      if (anyContainer && anyContainer.style.display !== "none") {
-        updateSharedOptionsFromContainer(anyContainer, type, passageNumber);
-        return;
-      }
-    }
-    return;
-  }
-  
-  updateSharedOptionsFromContainer(container, type, passageNumber);
-}
-
-// Helper function to update shared options from a specific container
-function updateSharedOptionsFromContainer(container, type, passageNumber) {
-  const newOptions = [];
-
-  container.querySelectorAll(".option-row").forEach((row) => {
-    const label = row.querySelector(".option-label").value.trim();
-    const text = row.querySelector(".option-text").value.trim();
-    if (label) {
-      newOptions.push({ label, text });
-    }
-  });
-
-  if (!sharedOptions[passageNumber]) {
-    sharedOptions[passageNumber] = {};
-  }
-  sharedOptions[passageNumber][type] = newOptions;
-}
-
-// Update all previews of the same type (deprecated - use updateAllOptionsInPassage instead)
-function updateAllOptionsPreview(type, passageNumber) {
-  // This function is now handled by updateAllOptionsInPassage
-  // Keeping for backward compatibility
-  if (passageNumber) {
-    updateAllOptionsInPassage(type, passageNumber);
-  }
-}
-
-// Add new option
-window.addOption = function (questionId, type, passageNumber) {
-  const container = document.getElementById(
-    `${type === "paragraph-matching" ? "pm" : "match"}-options-${questionId}`
-  );
-  let maxCode = 64;
-  container.querySelectorAll(".option-label").forEach((labelInput) => {
-    const val = labelInput.value.trim();
-    if (val.length === 1) {
-      const code = val.charCodeAt(0);
-      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
-    }
-  });
-  const nextLetter = String.fromCharCode(maxCode + 1);
-
-  const optionHTML = `
-    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-      <input type="text" value="${nextLetter}" class="option-label" style="width: 40px; text-align: center;">
-      <input type="text" placeholder="Enter text" class="option-text" data-label="${nextLetter}" style="flex: 1;">
-      <button type="button" onclick="removeOption(this, '${type}', ${passageNumber})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
-    </div>
-  `;
-
-  const addButton = container.querySelector('button[onclick*="addOption"]');
-  addButton.insertAdjacentHTML("beforebegin", optionHTML);
-  
-  // Set up listeners for newly added inputs
-  const newRow = addButton.previousElementSibling;
-  const newInputs = newRow.querySelectorAll('.option-label, .option-text');
-  newInputs.forEach(input => {
-    input.addEventListener('input', () => {
-      updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
-      updateAllOptionsInPassage(type, passageNumber);
-    });
-  });
-  
-  // Immediately update shared options and propagate
-  updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
-  updateAllOptionsInPassage(type, passageNumber);
-};
-
-// Remove option
-window.removeOption = function (button, type, passageNumber) {
-  const container = button.closest(`[id^="pm-options-"], [id^="match-options-"]`);
-  const questionId = container.id.split('-').pop();
-  
-  button.parentElement.remove();
-  
-  // Update shared options and propagate
-  updateSharedOptionsFromFirstQuestion(questionId, type, passageNumber);
-  updateAllOptionsInPassage(type, passageNumber);
-};
-
-// Add option for Multiple Choice
-window.addMCOption = function (questionId) {
-  const container = document.getElementById(`mc-options-${questionId}`);
-  let maxCode = 64;
-  container.querySelectorAll('input[type="radio"]').forEach((radio) => {
-    const val = radio.value;
-    if (val.length === 1) {
-      const code = val.charCodeAt(0);
-      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
-    }
-  });
-  const nextLetter = String.fromCharCode(maxCode + 1);
-
-  const optionHTML = `
-    <div class="mc-option">
-      <input type="radio" name="mc-answer-${questionId}" value="${nextLetter}">
-      <label>${nextLetter}</label>
-      <input type="text" placeholder="Option ${nextLetter} text" class="option-text" data-option="${nextLetter}">
-      <button type="button" onclick="removeMCOption(this)" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">×</button>
-    </div>
-  `;
-
-  container.insertAdjacentHTML("beforeend", optionHTML);
-};
-
-// Remove option for Multiple Choice
-window.removeMCOption = function (button) {
-  const mcOption = button.closest(".mc-option");
-  const container = mcOption.parentElement;
-  
-  if (container.querySelectorAll(".mc-option").length <= 2) {
-    alert("Multiple choice question must have at least 2 options");
-    return;
-  }
-  
-  if (confirm("Remove this option?")) {
-    mcOption.remove();
-  }
-};
-
-// Multi-select helper functions
-window.addMultiSelectOption = function (questionId) {
-  const container = document.getElementById(`multi-select-options-${questionId}`);
-  let maxCode = 64;
-  container.querySelectorAll(".option-label").forEach((labelInput) => {
-    const val = labelInput.value.trim();
-    if (val.length === 1) {
-      const code = val.charCodeAt(0);
-      if (code > maxCode && code >= 65 && code <= 90) maxCode = code;
-    }
-  });
-  const nextLetter = String.fromCharCode(maxCode + 1);
-
-  const optionHTML = `
-    <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 5px;">
-      <input type="text" value="${nextLetter}" class="option-label" style="width: 40px; text-align: center;" readonly>
-      <input type="text" placeholder="Option ${nextLetter} text" class="option-text" data-option="${nextLetter}" style="flex: 1;">
-      <button type="button" onclick="removeMultiSelectOption(this, ${questionId})" style="padding: 2px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">×</button>
-    </div>
-  `;
-
-  container.insertAdjacentHTML("beforeend", optionHTML);
-  updateMultiSelectOptionDropdowns(questionId);
-};
-
-window.removeMultiSelectOption = function (button, questionId) {
-  const container = document.getElementById(`multi-select-options-${questionId}`);
-  if (container.querySelectorAll(".option-row").length <= 2) {
-    alert("Multi-select question must have at least 2 options");
-    return;
-  }
-  
-  if (confirm("Remove this option?")) {
-    button.parentElement.remove();
-    updateMultiSelectOptionDropdowns(questionId);
-  }
-};
-
-window.updateMultiSelectOptionDropdowns = function (questionId) {
-  const container = document.getElementById(`multi-select-options-${questionId}`);
-  const subQuestionsContainer = document.getElementById(`multi-select-questions-${questionId}`);
-  
-  if (!container || !subQuestionsContainer) return;
-  
-  // No dropdowns now; answers are free text (uppercased via oninput)
-};
-
-window.addMultiSelectSubquestion = function (questionId) {
-  const container = document.getElementById(`multi-select-questions-${questionId}`);
-  const existingSubQuestions = container.querySelectorAll(".multi-select-subquestion").length;
-  const subQuestionHTML = `
-    <div class="multi-select-subquestion" style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-      <label style="font-weight:600; display:block; margin-bottom:6px;">Statement ${existingSubQuestions + 1}:</label>
-      <input class="subquestion-answer-input" placeholder="Answer letter" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" oninput="this.value = this.value.toUpperCase();">
-      <button type="button" onclick="removeMultiSelectSubquestion(this, ${questionId})" style="padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer; margin-top: 5px;">Remove Sub-question</button>
-    </div>
-  `;
-  
-  container.insertAdjacentHTML("beforeend", subQuestionHTML);
-  
-  // Update dropdowns for the new sub-question
-  updateMultiSelectOptionDropdowns(questionId);
-  
-  // Update question numbers
-  const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
-  const passage = questionItem.closest('.passage-container');
-  const passageNumber = parseInt(passage.dataset.passage);
-  updateQuestionNumbers(passageNumber);
-};
-
-window.removeMultiSelectSubquestion = function (button, questionId) {
-  const subQuestion = button.closest(".multi-select-subquestion");
-  const container = subQuestion.parentElement;
-  
-  if (container.querySelectorAll(".multi-select-subquestion").length <= 1) {
-    alert("Multi-select question must have at least 1 sub-question");
-    return;
-  }
-  
-  if (confirm("Remove this sub-question?")) {
-    subQuestion.remove();
-    
-    // Update question numbers
-    const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
-    const passage = questionItem.closest('.passage-container');
-    const passageNumber = parseInt(passage.dataset.passage);
-    updateQuestionNumbers(passageNumber);
-    // relabel statements
-    container.querySelectorAll(".multi-select-subquestion label").forEach((lbl, idx) => {
-      lbl.textContent = `Statement ${idx + 1}:`;
-    });
-  }
-};
-
-// Remove a question
-window.removeQuestion = function (questionId) {
-  const question = document.querySelector(`[data-question-id="${questionId}"]`);
-  if (question && confirm("Are you sure you want to remove this question?")) {
-    const passage = question.closest('.passage-container');
-    const passageNumber = passage ? parseInt(passage.dataset.passage) : null;
-    question.remove();
-    if (passageNumber) updateQuestionNumbers(passageNumber);
-  }
-};
-
-function updateQuestionNumbers(passageNumber) {
-  const items = document.querySelectorAll(`#questions${passageNumber} .question-item`);
-  let counter = 0;
-  items.forEach((item) => {
-    const type = item.dataset.type;
-    const numEl = item.querySelector('.question-index');
-    const numEndEl = item.querySelector('.question-index-end');
-    
-    if (type === "multi-select") {
-      // Multi-select counts as multiple questions based on sub-questions
-      const subQuestions = item.querySelectorAll(".multi-select-subquestion");
-      const subQuestionCount = subQuestions.length;
-      
-      if (numEl && numEndEl && subQuestionCount > 0) {
-        counter++;
-        numEl.textContent = counter;
-        counter += subQuestionCount - 1;
-        numEndEl.textContent = counter;
-      } else if (numEl) {
-        counter++;
-        numEl.textContent = counter;
-        if (numEndEl) {
-          numEndEl.textContent = counter;
-        }
-      }
-    } else if (numEl && type !== "text-question") {
-      counter++;
-      numEl.textContent = counter;
-    }
-  });
-}
-
-// Remove a passage
 window.removePassage = function (passageNumber) {
-  if (
-    confirm(
-      "Are you sure you want to remove this passage and all its questions?"
-    )
-  ) {
-    const passage = document.querySelector(`[data-passage="${passageNumber}"]`);
-    if (passage) {
-      passage.remove();
-      passageCount--;
-      updatePassageCount();
-      updateAddPassageButton();
-      renumberPassages();
-    }
-  }
+  if (!confirm("Remove this passage and all its questions?")) return;
+  document.querySelector(`.passage-container[data-passage="${passageNumber}"]`)?.remove();
+  passageCount--;
+  updatePassageCount();
 };
 
-// Renumber passages after removal
-function renumberPassages() {
-  const passages = document.querySelectorAll(".passage-container");
-  passages.forEach((passage, index) => {
-    const newNumber = index + 1;
-    passage.dataset.passage = newNumber;
-    passage.querySelector(".passage-number").textContent = newNumber;
-    passage.querySelector(
-      ".passage-title"
-    ).childNodes[1].textContent = ` Passage ${newNumber}`;
-
-    const instructionsInput = passage.querySelector(".passage-instructions");
-    if (instructionsInput) {
-      instructionsInput.value = `You should spend about 20 minutes on Questions ${getQuestionRange(
-        newNumber
-      )}`;
-    }
-
-    const questionMenu = passage.querySelector(".question-types-menu");
-    if (questionMenu) {
-      questionMenu.id = `questionMenu${newNumber}`;
-    }
-
-    const questionsContainer = passage.querySelector(".questions-container");
-    if (questionsContainer) {
-      questionsContainer.id = `questions${newNumber}`;
-    }
-
-    const addQuestionBtn = passage.querySelector(".add-question-btn");
-    if (addQuestionBtn) {
-      addQuestionBtn.setAttribute(
-        "onclick",
-        `toggleQuestionMenu(${newNumber})`
-      );
-    }
-
-    const removeBtn = passage.querySelector(".remove-passage-btn");
-    if (removeBtn) {
-      removeBtn.setAttribute("onclick", `removePassage(${newNumber})`);
-    }
-
-    const questionOptions = passage.querySelectorAll(".question-type-option");
-    questionOptions.forEach((option) => {
-      const type = option.textContent.toLowerCase().replace(/[^a-z-]/g, "");
-      option.setAttribute(
-        "onclick",
-        `addQuestion(${newNumber}, '${getQuestionTypeFromText(
-          option.textContent
-        )}')`
-      );
-    });
-  });
-}
-
-// Get question type from text
-function getQuestionTypeFromText(text) {
-  const types = {
-    "Text Only (No Question)": "text-question",
-    "Gap Fill": "gap-fill",
-    "True/False/Not Given": "true-false-notgiven",
-    "Yes/No/Not Given": "yes-no-notgiven",
-    "Multiple Choice": "multiple-choice",
-    "Paragraph Matching": "paragraph-matching",
-    "Match Person/Feature": "match-person",
-    "Drag & Drop Matching": "drag_drop",
-  };
-  return types[text] || "gap-fill";
-}
-
-// Update passage count display
 function updatePassageCount() {
-  document.getElementById("passageCount").textContent = passageCount;
+  const el = document.getElementById("passageCount");
+  if (el) el.textContent = document.querySelectorAll(".passage-container").length;
 }
 
-// Update add passage button state
-function updateAddPassageButton() {
-  const btn = document.getElementById("addPassageBtn");
-  if (passageCount >= 3) {
-    btn.disabled = true;
-    btn.textContent = "Maximum 3 Passages Reached";
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="16"></line>
-        <line x1="8" y1="12" x2="16" y2="12"></line>
-      </svg>
-      Add Passage
-    `;
+window.handleCancel = function (event) {
+  if (event) event.preventDefault();
+  if (confirm("All unsaved progress will be lost. Are you sure you want to cancel?")) {
+    window.location.href = "../index.html";
   }
-}
-
-// Preview the test
-window.previewTest = function () {
-  const previewContent = document.getElementById("previewContent");
-  const passages = document.querySelectorAll(".passage-container");
-
-  if (passages.length === 0) {
-    alert("Please add at least one passage first");
-    return;
-  }
-
-  let previewHTML = "<h3>Test Preview</h3>";
-
-  passages.forEach((passage, index) => {
-    const title =
-      passage.querySelector(".passage-title-input").value || "Untitled Passage";
-    const text =
-      passage.querySelector(".passage-text").value || "No text provided";
-    const questions = Array.from(passage.querySelectorAll(".question-item")).filter(q => q.dataset.type !== 'text-question');
-
-    previewHTML += `
-      <div class="preview-passage">
-        <h3>Passage ${index + 1}: ${title}</h3>
-        <div class="preview-text">${text.substring(0, 200)}...</div>
-        <div class="preview-questions">
-          <strong>Questions:</strong>
-          ${Array.from(questions)
-            .map((q, i) => {
-              const type = q.dataset.type;
-              if (type === "multi-select") {
-                const questionText = q.querySelector(".multi-select-text")?.value || "No question text";
-                const subQuestions = q.querySelectorAll(".multi-select-subquestion");
-                return `
-                <div class="preview-question">
-                  <span class="preview-question-number">Multi-Select:</span>
-                  ${questionText}
-                  <span class="preview-answer">[${subQuestions.length} sub-questions]</span>
-                </div>
-              `;
-              } else {
-                const questionText = q.querySelector(".question-text")?.value || "No question text";
-                return `
-                <div class="preview-question">
-                  <span class="preview-question-number">${i + 1}.</span>
-                  ${questionText}
-                  <span class="preview-answer">[${type.replace(/-/g, " ")}]</span>
-                </div>
-              `;
-              }
-            })
-            .join("")}
-        </div>
-      </div>
-    `;
-  });
-
-  previewContent.innerHTML = previewHTML;
-  document.getElementById("previewModal").style.display = "flex";
 };
 
-// Close preview
-window.closePreview = function () {
-  document.getElementById("previewModal").style.display = "none";
-};
+/* ───────────────────────── collect / preview / submit ───────────────────────── */
 
-// Update all shared options before collecting test data
-function updateAllSharedOptions() {
-  const passages = document.querySelectorAll(".passage-container");
-  
-  passages.forEach((passage) => {
-    const passageNumber = parseInt(passage.dataset.passage);
-    
-    // Update paragraph-matching options for this passage
-    const pmQuestions = passage.querySelectorAll('.question-item[data-type="paragraph-matching"]');
-    if (pmQuestions.length > 0) {
-      // Find the first question's container (which has the master options)
-      for (let question of pmQuestions) {
-        const questionId = question.dataset.questionId;
-        const container = document.getElementById(`pm-options-${questionId}`);
-        if (container && container.dataset.isFirst === "true") {
-          updateSharedOptionsFromContainer(container, "paragraph-matching", passageNumber);
-          break;
-        }
-      }
-    }
-    
-    // Update match-person options for this passage
-    const mpQuestions = passage.querySelectorAll('.question-item[data-type="match-person"]');
-    if (mpQuestions.length > 0) {
-      // Find the first question's container (which has the master options)
-      for (let question of mpQuestions) {
-        const questionId = question.dataset.questionId;
-        const container = document.getElementById(`match-options-${questionId}`);
-        if (container && container.dataset.isFirst === "true") {
-          updateSharedOptionsFromContainer(container, "match-person", passageNumber);
-          break;
-        }
-      }
-    }
-  });
-}
-
-// Collect test data
-// Collect test data
 function collectTestData() {
-  // Update all shared options before collecting data
-  updateAllSharedOptions();
-  
   const passages = [];
-  const passageElements = document.querySelectorAll(".passage-container");
 
-  passageElements.forEach((passageEl) => {
-    const passageNumber = parseInt(passageEl.dataset.passage);
-    const passageData = {
-      title: passageEl.querySelector(".passage-title-input")?.value.trim() || "",
-      instructions: passageEl.querySelector(".passage-instructions")?.value.trim() || "",
-      text: passageEl.querySelector(".passage-text")?.value.trim() || "",
-      questions: [],
-    };
+  document.querySelectorAll(".passage-container").forEach((passageEl, i) => {
+    const title = passageEl.querySelector(".passage-title-input").value.trim();
+    const text = passageEl.querySelector(".passage-text").value.trim();
+    if (!title || !text) throw new Error(`Passage ${i + 1}: title and text are required.`);
 
-    const questionElements = passageEl.querySelectorAll(".question-item");
-    questionElements.forEach((questionEl) => {
-      const type = questionEl.dataset.type;
+    const questions = collectAll(passageEl.querySelector(".questions-container"), "reading", `Passage ${i + 1}, `);
+    if (!questions.length) throw new Error(`Passage ${i + 1}: add at least one question.`);
 
-      let questionData = {
-        type: type,
-      };
-
-      const groupInstruction = questionEl.querySelector(".group-instruction")?.value.trim();
-      if (groupInstruction) {
-        questionData.groupInstruction = groupInstruction;
-      }
-
-      if (type === "text-question") {
-        const title = questionEl.querySelector(".question-title")?.value.trim();
-        const subheading = questionEl.querySelector(".question-subheading")?.value.trim();
-        const text = questionEl.querySelector(".question-text")?.value.trim();
-
-        if (title) questionData.title = title;
-        if (subheading) questionData.subheading = subheading;
-        if (text) questionData.text = text;
-      } else if (type === "multi-select") {
-        questionData.type = "question-group";
-        questionData.groupType = "multi-select";
-        questionData.text = questionEl.querySelector(".multi-select-text")?.value.trim() || "";
-
-        const subQuestions = [];
-        const subQuestionElements = questionEl.querySelectorAll(".multi-select-subquestion");
-        subQuestionElements.forEach((subQEl) => {
-          const subQAnswer = subQEl.querySelector(".subquestion-answer-input")?.value.trim().toUpperCase() || "";
-          subQuestions.push({
-            question: `Statement ${subQuestions.length + 1}`,
-            answer: subQAnswer
-          });
-        });
-        questionData.questions = subQuestions;
-
-        const options = {};
-        questionEl.querySelectorAll(".multi-select-options-list .option-row").forEach((row) => {
-          const label = row.querySelector(".option-label")?.value.trim();
-          const text = row.querySelector(".option-text")?.value.trim();
-          if (label && text) {
-            options[label] = text;
-          }
-        });
-        questionData.options = options;
-      } else if (type === "drag_drop") {
-        questionData.title = questionEl.querySelector(".dd-title")?.value.trim() || "";
-        questionData.inlineText = questionEl.querySelector(".dd-inline-text")?.value.trim() || "";
-        const ddItems = [];
-        questionEl.querySelectorAll(".dd-items-list .dd-item-row").forEach(row => {
-          const id = row.querySelector(".dd-item-id")?.value.trim();
-          const text = row.querySelector(".dd-item-text")?.value.trim();
-          if (id && text) ddItems.push({ id, text });
-        });
-        questionData.items = ddItems;
-        const ddSlots = [];
-        questionEl.querySelectorAll(".dd-slots-list .dd-slot-row").forEach(row => {
-          const correctId = row.querySelector(".dd-slot-correct")?.value.trim().toUpperCase();
-          ddSlots.push({ correctId: correctId || "" });
-        });
-        questionData.slots = ddSlots;
-      } else {
-        const questionText = questionEl.querySelector(".question-text")?.value.trim() || "";
-        questionData.question = questionText;
-
-        if (type === "gap-fill") {
-          const title = questionEl.querySelector(".question-title")?.value.trim();
-          const subheading = questionEl.querySelector(".question-subheading")?.value.trim();
-          if (title) questionData.title = title;
-          if (subheading) questionData.subheading = subheading;
-
-          const answerText = questionEl.querySelector(".question-answer")?.value.trim() || "";
-          questionData.answer = answerText
-            .split(",")
-            .map((a) => a.trim())
-            .filter((a) => a);
-        } else if (type === "multiple-choice") {
-          const selectedAnswer = questionEl.querySelector('input[type="radio"]:checked');
-          questionData.answer = selectedAnswer ? selectedAnswer.value : "";
-          questionData.options = [];
-
-          questionEl.querySelectorAll(".option-text").forEach((optionEl) => {
-            const optionLetter = optionEl.dataset.option;
-            const optionText = optionEl.value.trim();
-            if (optionText) {
-              questionData.options.push({
-                label: optionLetter,
-                text: optionText,
-              });
-            }
-          });
-        } else if (type === "paragraph-matching" || type === "match-person") {
-          questionData.answer = questionEl.querySelector(".question-answer")?.value.trim() || "";
-
-          // Use the passage-specific shared options
-          const passageOptions = sharedOptions[passageNumber]?.[type] || [];
-          questionData.options = passageOptions.map((opt) => ({
-            label: opt.label || "",
-            text: opt.text || "",
-          }));
-        } else {
-          questionData.answer = questionEl.querySelector(".question-answer")?.value.trim() || "";
-        }
-      }
-
-      passageData.questions.push(questionData);
+    passages.push({
+      title,
+      instructions: passageEl.querySelector(".passage-instructions").value.trim(),
+      text,
+      questions,
     });
-
-    passages.push(passageData);
   });
+
+  if (!passages.length) throw new Error("Add at least one passage.");
+
+  // table markers/answers must be saved against the final global numbers
+  assignReadingNumbers(passages);
 
   const accessPin = document.getElementById("accessPin").value.trim();
+  if (accessPin && !/^\d{6}$/.test(accessPin)) {
+    throw new Error("Access PIN must be exactly 6 digits.");
+  }
 
   return {
     testId: `test-${nextTestNumber}`,
-    passages: passages,
+    passages,
     ...(accessPin ? { accessPin } : {}),
     createdAt: new Date().toISOString(),
     createdBy: currentUser?.email || "unknown",
   };
 }
 
-// Validate form
-function validateForm() {
-  const passages = document.querySelectorAll(".passage-container");
-
-  if (passages.length === 0) {
-    alert("Please add at least one passage");
-    return false;
-  }
-
-  for (let passage of passages) {
-    const title = passage.querySelector(".passage-title-input").value.trim();
-    const text = passage.querySelector(".passage-text").value.trim();
-    const questions = passage.querySelectorAll(".question-item");
-
-    if (!title) {
-      alert("Please enter a title for all passages");
-      return false;
+// Count gradeable questions exactly the way the test engine will
+function countQuestions(passages) {
+  const clone = structuredClone(passages);
+  let c = 1;
+  clone.forEach((p) => p.questions.forEach((q) => {
+    if (q.question && q.type !== "drag_drop") q.qId = `q${c++}`;
+    if (q.type === "question-group" && q.questions) q.questions.forEach((s) => { s.qId = `q${c++}`; });
+    if (q.type === "drag_drop" && q.slots) q.slots.forEach((s) => { s.qId = `q${c++}`; });
+    if (q.type === "map-labelling" && q.questions) q.questions.forEach((s) => { s.qId = `q${c++}`; });
+    if (q.type === "table" && q.rows) {
+      const keys = (q.columns || []).slice(1).map((x) => x.toLowerCase());
+      q.rows.forEach((row) => keys.forEach((k) => {
+        if (typeof row[k] === "string") row[k] = row[k].replace(/___q\d+___/g, () => `___q${c++}___`);
+      }));
     }
-
-    if (!text) {
-      alert("Please enter text for all passages");
-      return false;
-    }
-
-    if (questions.length === 0) {
-      alert("Please add at least one question for each passage");
-      return false;
-    }
-
-    for (let question of questions) {
-      const type = question.dataset.type;
-
-      if (type === "text-question") {
-        const groupInstruction = question.querySelector(".group-instruction")?.value.trim();
-        const title = question.querySelector(".question-title")?.value.trim();
-        const subheading = question.querySelector(".question-subheading")?.value.trim();
-        const text = question.querySelector(".question-text")?.value.trim();
-        
-        if (!groupInstruction && !title && !subheading && !text) {
-          alert("Please fill in at least one field for text-only items");
-          return false;
-        }
-        continue;
-      }
-
-      if (type === "multi-select") {
-        const questionText = question.querySelector(".multi-select-text")?.value.trim();
-        if (!questionText) {
-          alert("Please fill in the question text for all multi-select questions");
-          return false;
-        }
-        
-        const subQuestions = question.querySelectorAll(".multi-select-subquestion");
-        if (subQuestions.length === 0) {
-          alert("Multi-select questions must have at least one sub-question");
-          return false;
-        }
-        
-        let hasAllAnswers = true;
-        subQuestions.forEach((subQ, index) => {
-          const answer = subQ.querySelector(".subquestion-answer-input")?.value.trim();
-          if (!answer) {
-            alert(`Please enter an answer for sub-question ${index + 1} in multi-select question`);
-            hasAllAnswers = false;
-          }
-        });
-        if (!hasAllAnswers) return false;
-        
-        const optionRows = question.querySelectorAll(".multi-select-options-list .option-row");
-        if (optionRows.length < 2) {
-          alert("Multi-select questions must have at least 2 options");
-          return false;
-        }
-        
-        let hasAllOptions = true;
-        optionRows.forEach((row, index) => {
-          const text = row.querySelector(".option-text")?.value.trim();
-          if (!text) {
-            alert(`Please fill in text for option ${row.querySelector(".option-label")?.value || index + 1} in multi-select question`);
-            hasAllOptions = false;
-          }
-        });
-        if (!hasAllOptions) return false;
-        
-        continue;
-      }
-
-      const questionText = question
-        .querySelector(".question-text")
-        .value.trim();
-      if (!questionText) {
-        alert("Please fill in all question texts");
-        return false;
-      }
-
-      if (type === "multiple-choice") {
-        const selectedAnswer = question.querySelector(
-          'input[type="radio"]:checked'
-        );
-        if (!selectedAnswer) {
-          alert(
-            "Please select the correct answer for all multiple choice questions"
-          );
-          return false;
-        }
-        
-        const options = question.querySelectorAll(".option-text");
-        let hasEmptyOption = false;
-        options.forEach(opt => {
-          if (!opt.value.trim()) hasEmptyOption = true;
-        });
-        if (hasEmptyOption) {
-          alert("Please fill in all multiple choice options");
-          return false;
-        }
-      } else if (type === "gap-fill") {
-        const answer = question.querySelector(".question-answer").value.trim();
-        if (!answer) {
-          alert("Please provide answers for all gap fill questions");
-          return false;
-        }
-      } else {
-        const answer = question.querySelector(".question-answer").value;
-        if (!answer) {
-          alert("Please provide answers for all questions");
-          return false;
-        }
-      }
-    }
-  }
-
-  return true;
+  }));
+  return gradeItems(clone.flatMap((p) => normalizeReadingQuestions(p.questions)), {}).total;
 }
 
-// Handle form submission
+window.previewTest = function () {
+  const previewContent = document.getElementById("previewContent");
+  try {
+    const data = collectTestData();
+    let html = `<h3>Test Preview — ${countQuestions(data.passages)} questions</h3>`;
+    data.passages.forEach((p, i) => {
+      const kinds = p.questions.map((q) => q.type + (q.groupType ? `/${q.groupType}` : "")).join(", ");
+      html += `<div class="preview-section"><h4>Passage ${i + 1}: ${p.title}</h4><p>${kinds}</p></div>`;
+    });
+    previewContent.innerHTML = html;
+  } catch (e) {
+    previewContent.innerHTML = `<h3>Not ready yet</h3><p style="color:#b91c1c">${e.message}</p>`;
+  }
+  document.getElementById("previewModal").style.display = "flex";
+};
+
+window.closePreview = function () {
+  document.getElementById("previewModal").style.display = "none";
+};
+
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  if (!validateForm()) {
+  let testData;
+  try {
+    testData = collectTestData();
+  } catch (err) {
+    alert(err.message);
     return;
   }
 
   const submitBtn = document.getElementById("submitBtn");
   const submitText = document.getElementById("submitText");
   const loader = document.getElementById("loader");
-
   submitBtn.disabled = true;
   submitText.textContent = "Adding test...";
   loader.style.display = "inline-block";
 
   try {
-    const testData = collectTestData();
+    await setDoc(doc(db, "readingTests", `test-${nextTestNumber}`), testData);
 
-
-    const docId = `test-${nextTestNumber}`;
-    await setDoc(doc(db, "readingTests", docId), testData);
-
-    const successModal = document.getElementById("successModal");
-    const successMessage = document.getElementById("successMessage");
-    successMessage.textContent = `Reading Test ${nextTestNumber} has been added successfully!`;
-    successModal.style.display = "flex";
-
+    document.getElementById("successMessage").textContent = `Reading Test ${nextTestNumber} has been added successfully!`;
+    document.getElementById("successModal").style.display = "flex";
     nextTestNumber++;
   } catch (error) {
     console.error("❌ Error adding test:", error);
@@ -1508,38 +268,31 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Reset form for adding another test
 window.resetForm = function () {
   document.getElementById("successModal").style.display = "none";
-
   document.getElementById("passagesContainer").innerHTML = "";
+  const t = document.getElementById("testTitle");
+  if (t) t.value = "";
   passageCount = 0;
-  questionIdCounter = 0;
-  sharedOptions = {}; // Reset to empty object for passage-specific options
-
   updatePassageCount();
-  updateAddPassageButton();
-
   getNextTestNumber();
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// Initialize page
+/* ───────────────────────── init ───────────────────────── */
+
 document.addEventListener("DOMContentLoaded", async () => {
+  // Harness pages set this flag to exercise the form flow without Firebase
+  if (!window.__AUTHOR_HARNESS) {
+    await checkAdminAccess();
+    await getNextTestNumber();
+  }
 
-  await checkAdminAccess();
-
-  await getNextTestNumber();
-
-  document
-    .getElementById("addPassageBtn")
-    .addEventListener("click", addPassage);
-  document.getElementById("previewBtn").addEventListener("click", previewTest);
-  document
-    .getElementById("readingTestForm")
-    .addEventListener("submit", handleFormSubmit);
+  document.getElementById("addPassageBtn").addEventListener("click", addPassage);
+  document.getElementById("previewBtn").addEventListener("click", window.previewTest);
+  document.getElementById("readingTestForm").addEventListener("submit", handleFormSubmit);
 
   addPassage();
-
 });
+
+export { collectTestData };

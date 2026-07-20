@@ -79,6 +79,17 @@ export function detectKind(item, target) {
   return null;
 }
 
+
+// Admins sometimes type option letters in Cyrillic ("С" for "C") — those
+// answers can never match a student's Latin input. Normalise homoglyphs.
+const HOMOGLYPHS = { "А": "A", "В": "B", "С": "C", "Е": "E", "Н": "H", "К": "K", "М": "M", "О": "O", "Р": "P", "Т": "T", "Х": "X" };
+export function latinizeLetter(letter) {
+  return String(letter || "")
+    .split("")
+    .map((ch) => HOMOGLYPHS[ch] || ch)
+    .join("");
+}
+
 /* ─────────────────────────── form helpers ─────────────────────────── */
 
 const giField = (value) =>
@@ -177,11 +188,11 @@ export function editorHTML(target, kind, uid, prefill = null) {
       const isMatching = p.groupType === "matching" || p.type === "matching";
       const opts = optsList(p.options);
       const subs = (p.questions || []).map((q) => ({
-        text: q.text || "",
-        answer: q.correctAnswer ?? q.correct ?? "",
+        text: q.text || q.question || "",
+        answer: q.correctAnswer ?? q.correct ?? q.answer ?? "",
       }));
       const letters = (p.questions || [])
-        .map((q) => q.correctAnswer)
+        .map((q) => q.correctAnswer ?? q.answer)
         .filter(Boolean)
         .join(",") || (Array.isArray(p.correctAnswers) ? p.correctAnswers.join(",") : "");
       return wrap(kind, uid, `${header(kind)}${giField(gi)}
@@ -211,10 +222,31 @@ export function editorHTML(target, kind, uid, prefill = null) {
 
     case "table": {
       const columns = p.columns && p.columns.length ? p.columns : ["Field", "Information"];
-      const rows = p.rows && p.rows.length ? p.rows : [{}];
       const colKey = (c) => c.toLowerCase().replace(/\s+/g, "");
+      // Saved tables carry GLOBAL question numbers (___q37___); the editor
+      // always works with per-table local numbers (q1..qN) — the save pass
+      // renumbers back to the global sequence. Localize markers + answers.
+      const globalToLocal = {};
+      let localN = 0;
+      const rows = (p.rows && p.rows.length ? p.rows : [{}]).map((row) => {
+        const out = {};
+        Object.entries(row).forEach(([k, v]) => {
+          out[k] =
+            typeof v === "string"
+              ? v.replace(/___(?:reading_)?q(\d+)___/g, (_, g) => {
+                  if (!globalToLocal[g]) globalToLocal[g] = ++localN;
+                  return `___q${globalToLocal[g]}___`;
+                })
+              : v;
+        });
+        return out;
+      });
       const answers = Object.entries(p.answer || {})
-        .map(([k, v]) => `q${String(k).replace(/\D/g, "")}=${v}`)
+        .map(([k, v]) => {
+          const g = String(k).replace(/\D/g, "");
+          const local = globalToLocal[g] || g;
+          return `q${local}=${v}`;
+        })
         .join(", ");
       const bodyRows = rows
         .map((row) => {
@@ -352,20 +384,27 @@ export function collectEditor(el, target, positionLabel = "") {
 
   switch (kind) {
     case "text":
-    case "subheading":
-      return { type: kind, groupInstruction: gi, value: need(val(el, ".au-value"), "text") };
+    case "subheading": {
+      // Empty content blocks exist in older tests — skip them silently
+      const value = val(el, ".au-value");
+      if (!value && !gi) return null;
+      return { type: kind, groupInstruction: gi, value };
+    }
 
     case "text-question": {
       const item = {
         type: "text-question", groupInstruction: gi,
         title: val(el, ".au-title"), subheading: val(el, ".au-subheading"), text: val(el, ".au-text"),
       };
-      if (!item.title && !item.subheading && !item.text) fail("at least one field is required.");
+      // Empty text blocks exist in older tests — skip them silently
+      if (!item.title && !item.subheading && !item.text && !gi) return null;
       return item;
     }
 
     case "gap-fill": {
-      const text = need(val(el, ".au-text"), "question text");
+      // Text may be empty ("31 ____" style rows exist in older tests);
+      // the answer is what makes the question gradeable.
+      const text = val(el, ".au-text");
       const answer = need(val(el, ".au-answer"), "answer");
       const wordLimit = parseInt(val(el, ".au-word-limit"), 10) || null;
       if (target === "listening") {
@@ -379,7 +418,7 @@ export function collectEditor(el, target, positionLabel = "") {
 
     case "multiple-choice": {
       const text = need(val(el, ".au-text"), "question text");
-      const answer = need(val(el, ".au-answer"), "correct letter").toUpperCase();
+      const answer = latinizeLetter(need(val(el, ".au-answer"), "correct letter").toUpperCase());
       if (target === "listening") {
         const options = collectOptionRows(el, true);
         if (!Object.keys(options).length) fail("options are required.");
@@ -407,8 +446,12 @@ export function collectEditor(el, target, positionLabel = "") {
     case "match-purpose": {
       const options = collectOptionRows(el, false);
       if (!options.length) fail("options are required.");
-      const answer = need(val(el, ".au-answer"), "correct letter").toUpperCase();
-      if (!options.some((o) => o.label.toUpperCase() === answer)) fail(`correct letter "${answer}" is not among the options.`);
+      const answer = latinizeLetter(need(val(el, ".au-answer"), "correct letter").toUpperCase());
+      if (!options.some((o) => o.label.toUpperCase() === answer)) {
+        // Older tests share one option list across a group and store a
+        // truncated copy per question — keep them editable.
+        console.warn(`${positionLabel}: answer "${answer}" is not among this question's options.`);
+      }
       return { type: kind, groupInstruction: gi, question: need(val(el, ".au-text"), "question text"), options, answer };
     }
 
@@ -421,20 +464,22 @@ export function collectEditor(el, target, positionLabel = "") {
         const questions = [];
         el.querySelectorAll(".au-subs .au-sub-row").forEach((row) => {
           const text = row.querySelector(".au-sub-text")?.value?.trim();
-          const answer = row.querySelector(".au-sub-answer")?.value?.trim()?.toUpperCase();
+          const answer = latinizeLetter(row.querySelector(".au-sub-answer")?.value?.trim()?.toUpperCase() || "");
           if (!text && !answer) return;
           if (!text || !answer) fail("every matching row needs both a question and an answer.");
-          if (!options[answer]) fail(`matching answer "${answer}" is not among the option letters.`);
+          if (!options[answer]) {
+            console.warn(`${positionLabel}: matching answer "${answer}" is not among the option letters.`);
+          }
           questions.push({ text, correctAnswer: answer });
         });
         if (!questions.length) fail("at least one matching question is required.");
         return { type: "question-group", groupType: "matching", groupInstruction: gi, text: stem, options, questions };
       }
       const letters = need(val(el, ".au-ms-answers"), "correct letters")
-        .split(",").map((a) => a.trim().toUpperCase()).filter(Boolean);
+        .split(",").map((a) => latinizeLetter(a.trim().toUpperCase())).filter(Boolean);
       if (!letters.length) fail("at least one correct letter is required.");
       letters.forEach((a) => {
-        if (!options[a]) fail(`correct letter "${a}" is not among the options.`);
+        if (!options[a]) console.warn(`${positionLabel}: correct letter "${a}" is not among the options.`);
       });
       return {
         type: "question-group", groupType: "multi-select", groupInstruction: gi,
@@ -445,7 +490,7 @@ export function collectEditor(el, target, positionLabel = "") {
 
     case "table": {
       const columns = [...el.querySelectorAll(".au-table-head .au-col")]
-        .map((c) => c.value.trim()).filter(Boolean);
+        .map((c) => c.value.trim());
       if (columns.length < 2) fail("at least two columns are required.");
       const colKey = (c) => c.toLowerCase().replace(/\s+/g, "");
       const rows = [];
@@ -455,12 +500,27 @@ export function collectEditor(el, target, positionLabel = "") {
         const row = {};
         columns.forEach((c, i) => {
           let cell = (cells[i]?.value ?? "").trim().replace(/\n/g, "<br>");
-          // normalise every gap marker style to sequential ___qN___
-          cell = cell.replace(/___q\d+___|(?<!_)\d+\s*_{2,}|_{3,}/g, () => {
+          // Normalise every gap marker style to sequential ___qN___.
+          // Full ___qN___ markers are numbered first (via a sentinel that
+          // never appears in text) so a loose leading digit ("2 ___q2___")
+          // can never swallow part of a marker.
+          cell = cell.replace(/___q\d+___/g, () => {
             gapCount += 1;
-            return `___q${gapCount}___`;
+            return `\u0001${gapCount}\u0001`;
           });
-          row[colKey(c)] = cell;
+          cell = cell.replace(/(?<!_)\d+\s*_{2,}|_{3,}/g, () => {
+            gapCount += 1;
+            return `\u0001${gapCount}\u0001`;
+          });
+          cell = cell.replace(/\u0001(\d+)\u0001/g, (_, n) => `___q${n}___`);
+          if (target === "reading") {
+            // the reading renderer shows row.column first, then
+            // row[column.toLowerCase()] for the remaining columns
+            if (i === 0) row.column = cell;
+            else row[c.toLowerCase() || `col${i}`] = cell;
+          } else {
+            row[colKey(c) || `col${i + 1}`] = cell;
+          }
         });
         if (Object.values(row).some((v) => v !== "")) rows.push(row);
       });
@@ -493,7 +553,7 @@ export function collectEditor(el, target, positionLabel = "") {
       const slots = [];
       el.querySelectorAll(".au-dd-slots .au-sub-row").forEach((row, i) => {
         const label = row.querySelector(".au-slot-label")?.value?.trim() ?? "";
-        const correctId = row.querySelector(".au-slot-correct")?.value?.trim()?.toUpperCase();
+        const correctId = latinizeLetter(row.querySelector(".au-slot-correct")?.value?.trim()?.toUpperCase() || "");
         if (!label && !correctId) return;
         if (!correctId) fail(`slot ${i + 1} has no correct card.`);
         if (!items.some((it) => it.id === correctId)) fail(`slot ${i + 1}: card "${correctId}" is not in the bank.`);
@@ -513,7 +573,7 @@ export function collectEditor(el, target, positionLabel = "") {
       const gapCount = (inlineText.match(/\{(\d+)\}/g) || []).length;
       if (!gapCount) fail("no {0} gaps found in the text.");
       const correct = need(val(el, ".au-inline-correct"), "correct cards list")
-        .split(",").map((a) => a.trim().toUpperCase()).filter(Boolean);
+        .split(",").map((a) => latinizeLetter(a.trim().toUpperCase())).filter(Boolean);
       if (correct.length !== gapCount) fail(`the text has ${gapCount} gaps but ${correct.length} correct cards are listed.`);
       correct.forEach((c) => {
         if (!items.some((it) => it.id === c)) fail(`correct card "${c}" is not in the bank.`);
@@ -531,7 +591,7 @@ export function collectEditor(el, target, positionLabel = "") {
       const questions = [];
       el.querySelectorAll(".au-subs .au-sub-row").forEach((row) => {
         const text = row.querySelector(".au-sub-text")?.value?.trim();
-        const answer = row.querySelector(".au-sub-answer")?.value?.trim()?.toUpperCase();
+        const answer = latinizeLetter(row.querySelector(".au-sub-answer")?.value?.trim()?.toUpperCase() || "");
         if (!text && !answer) return;
         if (!text || !answer) fail("every label needs both a name and a letter.");
         if (!options[answer]) fail(`label letter "${answer}" is not among the locations.`);
@@ -553,7 +613,7 @@ export function collectEditor(el, target, positionLabel = "") {
 function collectDdItems(el, fail) {
   const items = [];
   el.querySelectorAll(".au-dd-items .au-opt-row").forEach((row) => {
-    const id = row.querySelector(".au-dd-id")?.value?.trim()?.toUpperCase();
+    const id = latinizeLetter(row.querySelector(".au-dd-id")?.value?.trim()?.toUpperCase() || "");
     const text = row.querySelector(".au-dd-text")?.value?.trim();
     if (!id && !text) return;
     if (!id || !text) fail("every card needs both a letter and a text.");
@@ -627,7 +687,90 @@ export function setupAuthorForms(root = document) {
 export function collectAll(container, target, labelPrefix = "") {
   const out = [];
   container.querySelectorAll(".au-item").forEach((el, i) => {
-    out.push(collectEditor(el, target, `${labelPrefix}item ${i + 1}`));
+    const item = collectEditor(el, target, `${labelPrefix}item ${i + 1}`);
+    if (item) out.push(item); // empty content blocks collect to null
   });
   return out;
+}
+
+// Reading tests are numbered BY ORDER at render time, so most questions
+// carry no ids in Firestore — but TABLE answer keys must be saved against
+// the final global numbers. Walk every passage in order, renumber table
+// markers from editor-local (q1..qN) to global and remap their answers.
+export function assignReadingNumbers(passages) {
+  let c = 1;
+  passages.forEach((p) => (p.questions || []).forEach((q) => {
+    if (q.question && q.type !== "drag_drop") c++;
+    if (q.type === "question-group" && q.questions) c += q.questions.length;
+    if (q.type === "drag_drop" && q.slots) c += q.slots.length;
+    if (q.type === "map-labelling" && q.questions) c += q.questions.length;
+    if (q.type === "table" && q.rows) {
+      const localToGlobal = {};
+      q.rows.forEach((row) => {
+        Object.keys(row).forEach((k) => {
+          if (typeof row[k] !== "string") return;
+          row[k] = row[k].replace(/___q(\d+)___/g, (_, local) => {
+            if (!localToGlobal[local]) localToGlobal[local] = c++;
+            return `___q${localToGlobal[local]}___`;
+          });
+        });
+      });
+      const remapped = {};
+      Object.entries(q.answer || {}).forEach(([k, v]) => {
+        const local = String(k).replace(/\D/g, "");
+        if (localToGlobal[local]) remapped[`q${localToGlobal[local]}`] = v;
+      });
+      q.answer = remapped;
+    }
+  }));
+  return c - 1;
+}
+
+// Assigns final sequential listening q-numbers to every gradeable entry.
+// Author tables come with per-table local markers (___q1___...), which are
+// remapped to the global sequence together with their answer keys.
+export function assignListeningNumbers(items, start = 1) {
+  let n = start;
+  for (const item of items) {
+    switch (item.type) {
+      case "question":
+        item.questionId = `q${n++}`;
+        break;
+      case "question-group": {
+        const startN = n;
+        (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
+        const end = n - 1;
+        item.questionId = end > startN ? `q${startN}_${end}` : `q${startN}`;
+        break;
+      }
+      case "table": {
+        const localToGlobal = {};
+        item.rows.forEach((row) => {
+          Object.keys(row).forEach((k) => {
+            if (typeof row[k] !== "string") return;
+            row[k] = row[k].replace(/___q(\d+)___/g, (_, local) => {
+              if (!localToGlobal[local]) localToGlobal[local] = n++;
+              return `___q${localToGlobal[local]}___`;
+            });
+          });
+        });
+        const remapped = {};
+        Object.entries(item.answer || {}).forEach(([k, v]) => {
+          const local = String(k).replace(/\D/g, "");
+          if (localToGlobal[local]) remapped[`q${localToGlobal[local]}`] = v;
+        });
+        item.answer = remapped;
+        break;
+      }
+      case "drag_drop":
+        (item.slots || []).forEach((s) => { s.qId = `q${n++}`; });
+        break;
+      case "map-labelling":
+        (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
+        break;
+      default:
+        break; // text / subheading
+    }
+  }
+  return n;
 }

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Full Mock Test - YES English Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/pages/mock/engine/author.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background: #f1f5f9; padding-bottom: 80px; }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: #0f2340; color: #fff;
+            padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .topbar h1 { font-size: 17px; font-weight: 600; }
+        .topbar .actions { display: flex; gap: 10px; }
+        .topbar button {
+            padding: 9px 18px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        #saveBtn { background: #10b981; color: #fff; }
+        #saveBtn:disabled { opacity: .6; cursor: default; }
+        #backBtn { background: rgba(255,255,255,.15); color: #fff; }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 22px 18px; }
+        .stage-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+        .stage-tabs button {
+            flex: 1; padding: 12px; border: 1px solid #cbd5e1; background: #fff;
+            border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: #334155;
+        }
+        .stage-tabs button.active { background: #0f2340; color: #fff; border-color: #0f2340; }
+        .stage-panel { display: none; }
+        .stage-panel.active { display: block; }
+        .block {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 18px; margin-bottom: 16px;
+        }
+        .block h3 { font-size: 16px; color: #0f2340; margin-bottom: 12px; }
+        .block label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin: 10px 0 5px; }
+        .block input[type="text"], .block textarea {
+            width: 100%; padding: 9px 11px; border: 1px solid #cbd5e1;
+            border-radius: 7px; font-size: 14px; font-family: inherit;
+        }
+        .audio-note { font-size: 13px; color: #059669; background: #ecfdf5; padding: 8px 12px; border-radius: 7px; margin-top: 8px; }
+        #loadingContainer { text-align: center; padding: 80px 20px; color: #64748b; }
+        #statusBar { font-size: 13px; color: #cbd5e1; }
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: #0f2340; color: #fff; padding: 12px 22px; border-radius: 10px;
+            font-size: 14px; display: none; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1 id="pageTitle">Edit Full Mock Test</h1>
+        <span id="statusBar"></span>
+        <div class="actions">
+            <button id="backBtn" onclick="location.href='../index.html'">← Back</button>
+            <button id="saveBtn">💾 Save Changes</button>
+        </div>
+    </div>
+
+    <div id="loadingContainer">Loading test…</div>
+
+    <div class="wrap" id="editorWrap" style="display:none">
+        <div class="block">
+            <label>Test Title</label>
+            <input type="text" id="testTitleInput" placeholder="IELTS Full Mock Test N">
+        </div>
+
+        <div class="stage-tabs">
+            <button data-tab="listening" class="active">🎧 Listening</button>
+            <button data-tab="reading">📖 Reading</button>
+            <button data-tab="writing">✍️ Writing</button>
+        </div>
+
+        <div class="stage-panel active" id="panel-listening">
+            <div class="audio-note">🔊 Audio files are kept as they are — replacing audio is done by re-creating the test in the Add tool.</div>
+            <div id="listeningSections"></div>
+        </div>
+
+        <div class="stage-panel" id="panel-reading">
+            <div id="readingPassages"></div>
+        </div>
+
+        <div class="stage-panel" id="panel-writing">
+            <div class="block">
+                <h3>Task 1</h3>
+                <label>Question</label>
+                <textarea id="task1Question" rows="5"></textarea>
+                <label>Image URL (optional)</label>
+                <input type="text" id="task1Image" placeholder="https://firebasestorage.googleapis.com/...">
+            </div>
+            <div class="block">
+                <h3>Task 2</h3>
+                <label>Question</label>
+                <textarea id="task2Question" rows="6"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script type="module" src="index.js"></script>
+</body>
+</html>

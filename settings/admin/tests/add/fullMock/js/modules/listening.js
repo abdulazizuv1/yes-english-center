@@ -3,7 +3,7 @@
 // engine (pages/mock/engine/author.js). On save every gradeable entry
 // gets its final sequential q-number, including the new drag & drop and
 // map labelling types.
-import { collectAll } from "/pages/mock/engine/author.js";
+import { collectAll, assignListeningNumbers } from "/pages/mock/engine/author.js";
 
 export let listeningSectionCount = 0;
 let globalListeningAudioFile = null;
@@ -169,53 +169,4 @@ export async function collectListeningData() {
     }
 
     return { id: "listening", title: "Listening Test", duration: 30, audioMode, audioUrl, sections, totalQuestions: n - 1 };
-}
-
-// Assigns the final sequential q-numbers to every gradeable entry.
-// Author tables come with per-table local markers (___q1___...), which are
-// remapped to the global sequence together with their answer keys.
-export function assignListeningNumbers(items, start) {
-    let n = start;
-    for (const item of items) {
-        switch (item.type) {
-            case 'question':
-                item.questionId = `q${n++}`;
-                break;
-            case 'question-group': {
-                const startN = n;
-                (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
-                const end = n - 1;
-                item.questionId = end > startN ? `q${startN}_${end}` : `q${startN}`;
-                break;
-            }
-            case 'table': {
-                const localToGlobal = {};
-                item.rows.forEach((row) => {
-                    Object.keys(row).forEach((k) => {
-                        if (typeof row[k] !== 'string') return;
-                        row[k] = row[k].replace(/___q(\d+)___/g, (_, local) => {
-                            if (!localToGlobal[local]) localToGlobal[local] = n++;
-                            return `___q${localToGlobal[local]}___`;
-                        });
-                    });
-                });
-                const remapped = {};
-                Object.entries(item.answer || {}).forEach(([k, v]) => {
-                    const local = String(k).replace(/\D/g, '');
-                    if (localToGlobal[local]) remapped[`q${localToGlobal[local]}`] = v;
-                });
-                item.answer = remapped;
-                break;
-            }
-            case 'drag_drop':
-                (item.slots || []).forEach((s) => { s.qId = `q${n++}`; });
-                break;
-            case 'map-labelling':
-                (item.questions || []).forEach((q) => { q.questionId = `q${n++}`; });
-                break;
-            default:
-                break; // text / subheading
-        }
-    }
-    return n;
 }

@@ -3,7 +3,7 @@
 // Reading questions carry no fixed ids in Firestore — the test pages
 // number them by order at render time — so collection just validates
 // and counts.
-import { collectAll } from "/pages/mock/engine/author.js";
+import { collectAll, assignReadingNumbers } from "/pages/mock/engine/author.js";
 import { normalizeReadingQuestions } from "/pages/mock/engine/normalize.js";
 import { gradeItems } from "/pages/mock/engine/grade.js";
 
@@ -94,6 +94,9 @@ export async function collectReadingData() {
 
         passages.push({ title, instructions, text, questions });
     }
+
+    // table markers/answers must be saved against the final global numbers
+    assignReadingNumbers(passages);
 
     return { id: "reading", title: "Reading Test", duration: 60, passages, totalQuestions };
 }
