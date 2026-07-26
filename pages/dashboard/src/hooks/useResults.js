@@ -70,8 +70,34 @@ function byNewest(a, b) {
 const titleCache = new Map(); // "type:testId" -> title string
 
 function fallbackTitle(type, testId) {
-  const num = testId?.match(/\d+/)?.[0] || '';
-  return `${formatType(type)} Test ${num}`.trim();
+  const num = numberFromId(testId) ?? '';
+  return `${formatType(type)} Test ${num}`.toString().trim();
+}
+
+/* ─── Test numbering ───
+   A test's real number is the one in its document id (test-12): it drives
+   the URL, the student's "Test N" label and the order tests are meant to be
+   taken in. Titles are admin-typed and unreliable for ordering — listening
+   test-12 is titled "Practice T3" and test-28 "Listening test 29", so
+   sorting by title put test-12 between 2 and 3. */
+export function numberFromId(value) {
+  // last run of digits: "ielts-listening-5" → 5, "test-12" → 12
+  const m = String(value ?? '').match(/(\d+)(?!.*\d)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+export function testNumber(test) {
+  return (
+    numberFromId(test?.id) ??
+    numberFromId(test?.testId) ??
+    numberFromId(test?.title) ??
+    Number.MAX_SAFE_INTEGER // unnumbered tests sort last, never first
+  );
+}
+
+export function byTestNumber(a, b) {
+  const diff = testNumber(a) - testNumber(b);
+  return diff !== 0 ? diff : String(a?.id ?? '').localeCompare(String(b?.id ?? ''));
 }
 
 async function resolveDisplayTitles(results) {
@@ -218,11 +244,7 @@ export function useTests(type) {
         const snap = await getDocs(collection(db, col));
         const arr = [];
         snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-        arr.sort((a, b) => {
-          const an = parseInt((a.testId || a.title || a.id).match(/\d+/)?.[0] || '0');
-          const bn = parseInt((b.testId || b.title || b.id).match(/\d+/)?.[0] || '0');
-          return an - bn;
-        });
+        arr.sort(byTestNumber);
         if (!cancelled) { setTests(arr); setLoading(false); }
       } catch (err) {
         console.error(`Failed to fetch ${type} tests:`, err);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTests, getUserTestResult, convertToIELTS, getBandClass, formatType, getTypeIcon, getTestUrl, getResultUrl } from '../hooks/useResults';
+import { useTests, getUserTestResult, convertToIELTS, getBandClass, formatType, getTypeIcon, getTestUrl, getResultUrl, testNumber } from '../hooks/useResults';
 import { ArrowRight } from 'lucide-react';
 import { TestListSkeleton } from '../components/Skeleton';
 import './TestSection.css';
@@ -32,7 +32,8 @@ function TestCard({ test, type, userId }) {
         }
     };
 
-    const testTitle = test.title || test.name || `${formatType(type)} Test ${test.id ? (test.id.match(/\d+/) ? test.id.match(/\d+/)[0] : '') : ''}`.trim();
+    const num = testNumber(test);
+    const testTitle = test.title || test.name || `${formatType(type)} Test ${Number.isSafeInteger(num) && num !== Number.MAX_SAFE_INTEGER ? num : ''}`.trim();
     const testDesc = test.description || TYPE_MAP[type]?.desc || '';
 
     return (

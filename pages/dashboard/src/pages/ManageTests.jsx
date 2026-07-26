@@ -5,13 +5,14 @@ import { db } from '../firebase';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { ArrowLeft, Trash2, Edit3, ExternalLink, BookOpen, Headphones, PenTool, Search } from 'lucide-react';
 import { ManageTestsSkeleton } from '../components/Skeleton';
+import { byTestNumber, testNumber } from '../hooks/useResults';
 import './ManageTests.css';
 
 const TYPE_CONFIG = {
     listening: { label: 'Listening', icon: Headphones, collection: 'listeningTests', color: '#8b5cf6', editPath: '/settings/admin/tests/edit/listening/editListening/' },
     reading: { label: 'Reading', icon: BookOpen, collection: 'readingTests', color: '#3b82f6', editPath: '/settings/admin/tests/edit/reading/editReading/' },
     writing: { label: 'Writing', icon: PenTool, collection: 'writingTests', color: '#10b981', editPath: '/settings/admin/tests/edit/writing/editWriting/' },
-    fullmock: { label: 'Full Mock', icon: Headphones, collection: 'fullmockTests', color: '#f59e0b' },
+    fullmock: { label: 'Full Mock', icon: Headphones, collection: 'fullmockTests', color: '#f59e0b', editPath: '/settings/admin/tests/edit/fullMock/editor/' },
 };
 
 export default function ManageTests() {
@@ -30,7 +31,9 @@ export default function ManageTests() {
         setLoading(true);
         try {
             const snap = await getDocs(collection(db, config.collection));
-            setTests(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            // Firestore returns docs in lexicographic id order (test-1,
+            // test-10, test-11, test-2...) — order by test number instead.
+            setTests(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort(byTestNumber));
         } catch (err) {
             console.error('Error loading tests:', err);
         } finally {
@@ -104,7 +107,12 @@ export default function ManageTests() {
                                     <Icon size={18} color="#fff" />
                                 </div>
                                 <div className="test-info">
-                                    <h4>{test.title || test.name || `${config.label} Test ${test.id.replace('test-', '')}`}</h4>
+                                    <h4>
+                                        {/* The number comes from the doc id, so a custom title
+                                            like "Practice T3" can't be mistaken for test 3 */}
+                                        <span className="test-num-badge">#{testNumber(test)}</span>
+                                        {getTestName(test)}
+                                    </h4>
                                     {test.description && <p className="test-desc">{test.description}</p>}
                                 </div>
                             </div>

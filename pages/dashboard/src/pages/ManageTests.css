@@ -21,6 +21,11 @@
 .test-icon-sm { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .test-info { flex: 1; min-width: 0; }
 .test-info h4 { font-size: 1rem; color: var(--text-primary); margin: 0 0 0.15rem; }
+.test-num-badge {
+    display: inline-block; margin-right: 0.4rem; padding: 0.1rem 0.4rem;
+    background: #0f2340; color: #fff; border-radius: 5px;
+    font-size: 0.75rem; font-weight: 700; vertical-align: middle;
+}
 .test-desc { font-size: 0.8rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
 
 .test-meta { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
