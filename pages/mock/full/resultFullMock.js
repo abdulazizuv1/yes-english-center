@@ -9,6 +9,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
+import { reviewFromStored, scoreNotice } from "../engine/index.js";
 
 
 const app = initializeApp(firebaseConfig);
@@ -190,274 +191,85 @@ function countWords(text) {
 }
 
 // Render detailed listening questions with full answer display
+/* One breakdown renderer for both stages. Rows come from the engine, so
+   the review agrees with the marks awarded — the old comparison stripped
+   word endings, marking "engine" correct against the key "engines"
+   although no point was given. Row count follows the test (a stage is not
+   always exactly 40 questions). */
+function renderBreakdown(containerId, answers, correctAnswers, label, storedScore) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.warn(`${containerId} container not found`);
+    return;
+  }
+
+  const rows = reviewFromStored(answers || {}, correctAnswers || {});
+  const notice = scoreNotice(storedScore, rows);
+  container.innerHTML = notice ? `<p class="score-notice">${notice}</p>` : "";
+
+  if (!rows.length) {
+    container.innerHTML = `<p class="no-data">No ${label} answers recorded for this attempt.</p>`;
+    return;
+  }
+
+  const ICONS = { correct: "\u2705", incorrect: "\u274C", unanswered: "\u2B55" };
+
+  rows.forEach((row) => {
+    const answerDiv = document.createElement("div");
+    answerDiv.className = `detailed-answer ${row.status}`;
+    answerDiv.innerHTML = `
+      <div class="answer-header">
+        <span class="status-icon">${ICONS[row.status]}</span>
+        <strong>Question ${row.number}</strong>
+      </div>
+      <div class="answer-content">
+        <div class="user-answer">
+          <strong>Your Answer:</strong> ${row.userDisplay || "<i>Not answered</i>"}
+        </div>
+        <div class="correct-answer">
+          <strong>Correct Answer:</strong> ${row.expectedDisplay || "<i>No data</i>"}
+        </div>
+      </div>
+    `;
+    container.appendChild(answerDiv);
+  });
+}
+
 function renderDetailedListeningQuestions() {
-  const container = document.getElementById("listeningQuestions");
-  if (!container) {
-    console.warn("listeningQuestions container not found");
-    return;
-  }
-
-  const listeningAnswers = resultData.listeningAnswers || {};
-  const listeningCorrectAnswers = resultData.listeningCorrectAnswers || {};
-
-  console.log("🎯 Rendering listening questions with data:", {
-    answers: listeningAnswers,
-    correctAnswers: listeningCorrectAnswers
-  });
-
-  // Clear container
-  container.innerHTML = "";
-
-  // Create detailed answers for each question
-  for (let i = 1; i <= 40; i++) {
-    // Try both formats: numeric key and q-prefixed key
-    const userAnswer = listeningAnswers[i] || listeningAnswers[`q${i}`];
-    const correctAnswer = listeningCorrectAnswers[i] || listeningCorrectAnswers[`q${i}`];
-
-    console.log(`🔍 Listening Question ${i}:`, {
-      userAnswer,
-      correctAnswer,
-      allAnswers: listeningAnswers,
-      allCorrectAnswers: listeningCorrectAnswers
-    });
-
-    const answerDiv = document.createElement("div");
-    answerDiv.className = "detailed-answer";
-
-    // Determine status and styling
-    let statusIcon = "";
-    let statusClass = "";
-    let userDisplay = "";
-    let correctDisplay = "";
-
-    if (userAnswer === undefined || userAnswer === null || userAnswer === "") {
-      statusIcon = "⭕";
-      statusClass = "unanswered";
-      userDisplay = "<i>Not answered</i>";
-    } else {
-      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer);
-      if (isCorrect) {
-        statusIcon = "✅";
-        statusClass = "correct";
-      } else {
-        statusIcon = "❌";
-        statusClass = "incorrect";
-      }
-      
-      userDisplay = String(userAnswer);
-    }
-    
-    // Handle correct answer display
-    if (Array.isArray(correctAnswer)) {
-      correctDisplay = correctAnswer.join(", ");
-    } else {
-      correctDisplay = String(correctAnswer || "");
-    }
-
-    answerDiv.classList.add(statusClass);
-
-    answerDiv.innerHTML = `
-      <div class="answer-header">
-        <span class="status-icon">${statusIcon}</span>
-        <strong>Question ${i}</strong>
-      </div>
-      <div class="answer-content">
-        <div class="user-answer">
-          <strong>Your Answer:</strong> ${userDisplay}
-        </div>
-        <div class="correct-answer">
-          <strong>Correct Answer:</strong> ${correctDisplay}
-        </div>
-      </div>
-    `;
-
-    container.appendChild(answerDiv);
-  }
+  renderBreakdown(
+    "listeningQuestions",
+    resultData.listeningAnswers,
+    resultData.listeningCorrectAnswers,
+    "listening",
+    resultData.listeningScore
+  );
 }
 
-// Render detailed reading questions with full answer display
 function renderDetailedReadingQuestions() {
-  const container = document.getElementById("readingQuestions");
-  if (!container) {
-    console.warn("readingQuestions container not found");
-    return;
-  }
-
-  const readingAnswers = resultData.readingAnswers || {};
-  const readingCorrectAnswers = resultData.readingCorrectAnswers || {};
-
-  console.log("🎯 Rendering reading questions with data:", {
-    answers: readingAnswers,
-    correctAnswers: readingCorrectAnswers,
-    answersKeys: Object.keys(readingAnswers || {}),
-    correctAnswersKeys: Object.keys(readingCorrectAnswers || {})
-  });
-
-  // Clear container
-  container.innerHTML = "";
-
-  // Create detailed answers for each question
-  for (let i = 1; i <= 40; i++) {
-    // Try both formats: reading_q prefix and q prefix
-    const readingQId = `reading_q${i}`;
-    const qId = `q${i}`;
-    const userAnswer = readingAnswers[readingQId] || readingAnswers[qId];
-    const correctAnswer = readingCorrectAnswers[readingQId] || readingCorrectAnswers[qId];
-
-    console.log(`🔍 Reading Question ${i}:`, {
-      readingQId,
-      qId,
-      userAnswer,
-      correctAnswer,
-      allAnswers: readingAnswers,
-      allCorrectAnswers: readingCorrectAnswers
-    });
-
-    const answerDiv = document.createElement("div");
-    answerDiv.className = "detailed-answer";
-
-    // Determine status and styling
-    let statusIcon = "";
-    let statusClass = "";
-    let userDisplay = "";
-    let correctDisplay = "";
-
-    if (userAnswer === undefined || userAnswer === null || userAnswer === "") {
-      statusIcon = "⭕";
-      statusClass = "unanswered";
-      userDisplay = "<i>Not answered</i>";
-    } else {
-      const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer);
-      console.log(`🔍 Reading Question ${i} correctness check:`, {
-        userAnswer,
-        correctAnswer,
-        isCorrect
-      });
-      
-      if (isCorrect) {
-        statusIcon = "✅";
-        statusClass = "correct";
-      } else {
-        statusIcon = "❌";
-        statusClass = "incorrect";
-      }
-      
-      userDisplay = String(userAnswer);
-    }
-    
-    // Handle correct answer display
-    if (Array.isArray(correctAnswer)) {
-      correctDisplay = correctAnswer.join(", ");
-    } else {
-      correctDisplay = String(correctAnswer || "");
-    }
-
-    answerDiv.classList.add(statusClass);
-
-    answerDiv.innerHTML = `
-      <div class="answer-header">
-        <span class="status-icon">${statusIcon}</span>
-        <strong>Question ${i}</strong>
-      </div>
-      <div class="answer-content">
-        <div class="user-answer">
-          <strong>Your Answer:</strong> ${userDisplay}
-        </div>
-        <div class="correct-answer">
-          <strong>Correct Answer:</strong> ${correctDisplay}
-        </div>
-      </div>
-    `;
-
-    container.appendChild(answerDiv);
-  }
+  renderBreakdown(
+    "readingQuestions",
+    resultData.readingAnswers,
+    resultData.readingCorrectAnswers,
+    "reading",
+    resultData.readingScore
+  );
 }
+
+
 
 // An answer key may list several accepted variants separated by commas:
 // "holiday, holidays" accepts both. A comma directly between digits
 // (6,000) is a thousand separator, not a variant break.
-function splitAnswerVariants(key) {
-  const parts = [];
-  for (const seg of String(key).split(",")) {
-    const prev = parts[parts.length - 1];
-    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
-      parts[parts.length - 1] = `${prev},${seg}`;
-    } else {
-      parts.push(seg);
-    }
-  }
-  return parts.map((v) => v.trim()).filter(Boolean);
-}
+
 
 // One comma-variant vs the student's answer ("/" alternatives kept)
-function variantMatches(userStr, expStr) {
-  if (expStr.includes("/")) {
-    const alternatives = expStr.split("/").map(alt => alt.trim());
-    return alternatives.some(alt => normalizeAnswer(alt) === normalizeAnswer(userStr));
-  }
-  return normalizeAnswer(expStr) === normalizeAnswer(userStr);
-}
+
 
 // Check answer correctness (same logic as in main test)
-function checkAnswerCorrectness(userAns, expected) {
-  if (!expected) return false;
 
-  // Handle empty user answer
-  if (!userAns || userAns === "") return false;
-
-  // Handle array of expected answers (for reading)
-  if (Array.isArray(expected)) {
-    const userStr = String(userAns).toLowerCase().trim();
-    return expected.some(exp =>
-      splitAnswerVariants(exp).some(variant =>
-        variantMatches(userStr, variant.toLowerCase())
-      )
-    );
-  }
-
-  // Convert to strings for comparison
-  const userStr = String(userAns).toLowerCase().trim();
-
-  return splitAnswerVariants(expected).some(variant =>
-    variantMatches(userStr, variant.toLowerCase())
-  );
-}
 
 // Helper function to normalize answers by removing postfixes
-function normalizeAnswer(answer) {
-  if (!answer || typeof answer !== 'string') return '';
-  
-  let normalized = answer.toLowerCase().trim();
-  
-  // Remove common postfixes/suffixes
-  const postfixes = [
-    /ing\b/g,           // -ing endings
-    /ed\b/g,            // -ed endings  
-    /er\b/g,            // -er endings
-    /est\b/g,           // -est endings
-    /ly\b/g,            // -ly endings
-    /tion\b/g,          // -tion endings
-    /sion\b/g,          // -sion endings
-    /ness\b/g,          // -ness endings
-    /ment\b/g,          // -ment endings
-    /able\b/g,          // -able endings
-    /ible\b/g,          // -ible endings
-    /ful\b/g,           // -ful endings
-    /less\b/g,          // -less endings
-    /'s\b/g,            // possessive 's
-    /s\b/g,             // plural s (be careful with this)
-  ];
-  
-  // Apply postfix removal (but preserve the base word)
-  postfixes.forEach(postfix => {
-    normalized = normalized.replace(postfix, '');
-  });
-  
-  // Clean up extra spaces
-  normalized = normalized.replace(/\s+/g, ' ').trim();
-  
-  return normalized;
-}
+
 
 // Highlight appropriate band score based on overall band
 function highlightBandScore(overallBand) {

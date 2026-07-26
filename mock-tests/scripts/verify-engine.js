@@ -109,6 +109,7 @@ const jsonFiles = (dir) =>
 (async () => {
   const N = await import(`file://${path.join(ROOT, "pages/mock/engine/normalize.js")}`);
   const G = await import(`file://${path.join(ROOT, "pages/mock/engine/grade.js")}`);
+  const R = await import(`file://${path.join(ROOT, "pages/mock/engine/review.js")}`);
 
   console.log("\n═══ standalone listening ═══");
   for (const f of jsonFiles("listeningTests")) {
@@ -146,6 +147,50 @@ const jsonFiles = (dir) =>
       if (unknown.length) fail(`${f} reading: engine does not understand ${[...new Set(unknown)].join(", ")}`);
       else checkTest(`${f} reading`, (R.passages || []).flatMap((p) => N.normalizeReadingQuestions(p.questions)), G);
     }
+  }
+
+
+  /* review layer — what the result pages show */
+  console.log("\n═══ result review ═══");
+  {
+    // rich rows: option letters get their text, every kind produces rows
+    const items = [
+      N.normalizeListeningItem({ type: "question", format: "multiple-choice", questionId: "q1",
+        text: "Why yearly?", options: { A: "save money", B: "free gift" }, correctAnswer: "B" }),
+      N.normalizeListeningItem({ type: "question", format: "gap-fill", questionId: "q2",
+        text: "Date: 1____", correctAnswer: "1990, 1991" }),
+      N.normalizeListeningItem({ type: "drag_drop", questionId: "q3",
+        items: [{ id: "A", text: "trunks" }, { id: "B", text: "leaves" }],
+        slots: [{ qId: "q3", label: "stores water", correctId: "A" }] }),
+      N.normalizeListeningItem({ type: "map-labelling", questionId: "q4",
+        options: { A: "North gate" }, questions: [{ questionId: "q4", text: "Main entrance", correctAnswer: "A" }] }),
+    ].filter(Boolean);
+
+    const rows = R.reviewRows(items, { q1: "B", q2: "holidays", q3: "A", q4: "A" });
+    const check = (label, got, want) => {
+      if (got === want) console.log(`  ✓ ${label}`);
+      else fail(`${label}: got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+    };
+    check("every question kind produces a row", rows.length, 4);
+    check("option letters show their text", rows.find(r => r.id === "q1").userDisplay, "B. free gift");
+    check("drag answers appear in the review", rows.find(r => r.id === "q3").correct, true);
+    check("map labelling appears in the review", rows.find(r => r.id === "q4").correct, true);
+    check("wrong gap marked incorrect", rows.find(r => r.id === "q2").status, "incorrect");
+    check("expected shows both variants", rows.find(r => r.id === "q2").expectedDisplay, "1990 / 1991");
+
+    // stored-only rows (test deleted): same verdicts, no test document
+    const stored = R.reviewFromStored(
+      { q1: "holidays", q2: "", q3: "wrong" },
+      { q1: ["holiday, holidays"], q2: ["beach"], q3: ["right"] }
+    );
+    check("stored fallback: comma variant accepted", stored.find(r => r.id === "q1").status, "correct");
+    check("stored fallback: blank is unanswered", stored.find(r => r.id === "q2").status, "unanswered");
+    check("stored fallback: wrong is incorrect", stored.find(r => r.id === "q3").status, "incorrect");
+
+    const summary = R.reviewSummary(stored);
+    check("summary counts", `${summary.correct}/${summary.incorrect}/${summary.unanswered}`, "1/1/1");
+    check("notice when a recheck differs", R.scoreNotice(3, stored).includes("marked 3"), true);
+    check("no notice when scores agree", R.scoreNotice(1, stored), "");
   }
 
   /* answer-key variants: "holiday, holidays" and "US/American" */

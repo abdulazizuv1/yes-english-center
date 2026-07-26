@@ -9,6 +9,14 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
+import {
+  repairListeningIds,
+  normalizeListeningSection,
+  reviewRows,
+  reviewFromStored,
+  reviewSummary,
+  scoreNotice,
+} from "../engine/index.js";
 
 
 const app = initializeApp(firebaseConfig);
@@ -54,138 +62,13 @@ async function loadTestStructure(testId) {
   }
 }
 
-function getAllQuestions(testStructure) {
-  if (!testStructure || !testStructure.sections) {
-    console.warn("No test structure or sections found");
-    return [];
-  }
-  
-  const allQuestions = [];
-  
-  testStructure.sections.forEach((section, sectionIndex) => {
-    if (!section.content) {
-      // Check for legacy format
-      if (section.questions || section.multiSelect || section.matching) {
-      }
-      return;
-    }
-    
-    section.content.forEach(item => {
-      if (item.type === "question") {
-        allQuestions.push({
-          qId: item.questionId,
-          type: item.format || item.type,
-          correctAnswer: item.correctAnswer,
-          options: item.options,
-          sectionIndex: sectionIndex
-        });
-        
-      } else if (item.type === "question-group") {
-        if (item.groupType === "multi-select" && item.questions) {
-          item.questions.forEach(q => {
-            allQuestions.push({
-              qId: q.questionId,
-              type: "multi-select",
-              correctAnswer: q.correctAnswer,
-              options: item.options,
-              sectionIndex: sectionIndex
-            });
-          });
-        } else if (item.groupType === "matching" && item.questions) {
-          item.questions.forEach(q => {
-            allQuestions.push({
-              qId: q.questionId,
-              type: "matching",
-              correctAnswer: q.correctAnswer,
-              options: item.options,
-              sectionIndex: sectionIndex
-            });
-          });
-        }
-        
-      } else if (item.type === "matching" && item.questions) {
-        // ДОБАВЛЕНО: Обработка прямого типа "matching"
-        item.questions.forEach(q => {
-          allQuestions.push({
-            qId: q.questionId,
-            type: "matching",
-            correctAnswer: q.correctAnswer,
-            options: item.options,
-            sectionIndex: sectionIndex
-          });
-        });
-        
-      } else if (item.type === "table" && item.answer) {
-        // Handle table questions
-        Object.keys(item.answer).forEach(qId => {
-          allQuestions.push({
-            qId: qId,
-            type: "gap-fill",
-            correctAnswer: item.answer[qId],
-            options: null,
-            sectionIndex: sectionIndex
-          });
-        });
-        
-      } else if (item.qId) {
-        // Legacy question format
-        allQuestions.push({
-          qId: item.qId,
-          type: item.type,
-          correctAnswer: item.answer,
-          options: item.options,
-          sectionIndex: sectionIndex
-        });
-      }
-    });
-    
-    // Process legacy groups
-    ["multiSelect", "multiSelect1", "multiSelect2", "matching"].forEach((key) => {
-      if (section[key]) {
-        const group = section[key];
-        
-        if (key === "matching" && group.matchingQuestions) {
-          group.matchingQuestions.forEach(mq => {
-            allQuestions.push({
-              qId: mq.qId,
-              type: "matching",
-              correctAnswer: mq.correct,
-              options: group.options,
-              sectionIndex: sectionIndex
-            });
-          });
-        } else if (["multiSelect", "multiSelect1", "multiSelect2"].includes(key)) {
-          const entries = group.answer || {};
-          for (const questionKey in entries) {
-            if (questionKey.includes('_')) {
-              const questionNumbers = questionKey.split('_');
-              const expectedAnswers = Array.isArray(entries[questionKey]) ? entries[questionKey] : [entries[questionKey]];
-              
-              questionNumbers.forEach((qNum, index) => {
-                allQuestions.push({
-                  qId: `q${qNum}`,
-                  type: "multi-select",
-                  correctAnswer: expectedAnswers.length > index ? expectedAnswers[index] : null,
-                  options: group.options,
-                  sectionIndex: sectionIndex
-                });
-              });
-            } else {
-              allQuestions.push({
-                qId: `q${questionKey}`,
-                type: "multi-select", 
-                correctAnswer: entries[questionKey],
-                options: group.options,
-                sectionIndex: sectionIndex
-              });
-            }
-          }
-        }
-      }
-    });
-  });
-  
-  return allQuestions;
+/* Canonical items for a test, straight from the engine — the same
+   normalizer the test page uses, so every question kind the students can
+   answer (including drag & drop and map labelling) appears in the review. */
+function itemsForTest(testStructure) {
+  const sections = testStructure?.sections || testStructure?.parts?.sections || [];
+  repairListeningIds(sections);
+  return sections.flatMap((section) => normalizeListeningSection(section));
 }
 
 const auth = getAuth();
@@ -254,22 +137,31 @@ async function renderResult(data) {
   const answersDiv = document.getElementById("answers");
 
   try {
-    // Load test structure based on the actual testId from result data
-    const testStructure = await loadTestStructure(data.testId);
-    
-    if (!testStructure) {
-      throw new Error(`Failed to load test structure for testId: ${data.testId}`);
+    // The breakdown comes from the engine's review layer, so it always
+    // agrees with the marks the student was given.
+    // Results outlive tests — a deleted test must not break the review,
+    // so fall back to the answer keys stored with the result itself.
+    let rows;
+    const testStructure = await loadTestStructure(data.testId).catch(() => null);
+    const items = testStructure ? itemsForTest(testStructure) : [];
+    if (items.length) {
+      rows = reviewRows(items, data.answers || {});
+    } else {
+      console.warn(`Test ${data.testId} unavailable — reviewing from the saved answer keys.`);
+      rows = reviewFromStored(data.answers || {}, data.correctAnswers || {});
     }
-    
-    const allQuestions = getAllQuestions(testStructure);
-    
-    if (allQuestions.length === 0) {
-      throw new Error("No questions found in test structure");
+
+    if (!rows.length) {
+      throw new Error("This result has no answer data to review.");
     }
-    
-    // Process results
-    const { userAnswers, correctAnswers, score, total } = processAnswers(data, allQuestions);
-    const accuracy = Math.round((score / total) * 100);
+
+    const summary = reviewSummary(rows);
+    // Lead with the score the attempt was marked with — that is what the
+    // dashboard shows — and flag it if a recheck now differs.
+    const score = typeof data.score === "number" ? data.score : summary.correct;
+    const total = typeof data.total === "number" ? data.total : summary.total;
+    const notice = scoreNotice(data.score, rows);
+    const accuracy = summary.accuracy;
     const ieltsScore = convertToIELTS(score, total);
 
 
@@ -318,89 +210,51 @@ async function renderResult(data) {
       }
     }
 
-    // Calculate answer statistics and section performance
-    let correctCount = 0;
-    let incorrectCount = 0;
-    let unansweredCount = 0;
-    const sectionStats = [0, 0, 0, 0]; // Correct answers per section
+    // Answer breakdown — one row per question, straight from the engine
+    const sectionStats = [0, 0, 0, 0]; // correct answers per section of 10
+    const correctCount = summary.correct;
+    const incorrectCount = summary.incorrect;
+    const unansweredCount = summary.unanswered;
 
-    const sortedKeys = Object.keys(correctAnswers).sort((a, b) => {
-      const aNum = extractQuestionNumber(a);
-      const bNum = extractQuestionNumber(b);
-      return aNum - bNum;
-    });
-
-    // Clear answers div
-    if (answersDiv) answersDiv.innerHTML = "";
-
-    for (const qId of sortedKeys) {
-      try {
-        const userAnswer = userAnswers[qId];
-        const correctAnswer = correctAnswers[qId];
-        const questionData = allQuestions.find(q => q.qId === qId);
-
-        const { userDisplay, isCorrect } = processAnswer(userAnswer, correctAnswer, questionData);
-        const correctDisplay = formatCorrectAnswer(correctAnswer, questionData);
-
-        // Update statistics
-        if (!userAnswer || (Array.isArray(userAnswer) && userAnswer.length === 0) || userAnswer === "") {
-          unansweredCount++;
-        } else if (isCorrect) {
-          correctCount++;
-          // Update section stats (assuming 10 questions per section)
-          const sectionIndex = Math.floor((extractQuestionNumber(qId) - 1) / 10);
-          if (sectionIndex >= 0 && sectionIndex < 4) {
-            sectionStats[sectionIndex]++;
-          }
-        } else {
-          incorrectCount++;
-        }
-
-        if (answersDiv) {
-          const answerDiv = document.createElement("div");
-          answerDiv.className = "answer";
-          answerDiv.dataset.qid = qId;
-
-          let statusIcon = "";
-          let statusClass = "";
-
-          if (!userAnswer || (Array.isArray(userAnswer) && userAnswer.length === 0) || userAnswer === "") {
-            statusIcon = "⭕";
-            statusClass = "unanswered";
-            answerDiv.dataset.filter = "unanswered";
-          } else if (isCorrect) {
-            statusIcon = "✅";
-            statusClass = "correct";
-            answerDiv.dataset.filter = "correct";
-          } else {
-            statusIcon = "❌";
-            statusClass = "incorrect";
-            answerDiv.dataset.filter = "incorrect";
-          }
-
-          answerDiv.classList.add(statusClass);
-
-          answerDiv.innerHTML = `
-            <div class="question-number">
-              <span class="status-icon">${statusIcon}</span>
-              <strong>Question ${formatQuestionId(qId).replace('Question ', '')}</strong>
-            </div>
-            <div class="answer-content">
-              <div class="user-answer">
-                <strong>Your Answer:</strong> ${userDisplay}
-              </div>
-              <div class="correct-answer">
-                <strong>Correct Answer:</strong> ${correctDisplay}
-              </div>
-            </div>
-          `;
-
-          answersDiv.appendChild(answerDiv);
-        }
-      } catch (error) {
-        console.error(`❌ Error processing question ${qId}:`, error);
-      }
+    if (answersDiv) {
+      answersDiv.innerHTML = notice
+        ? `<p class="score-notice">${notice}</p>`
+        : "";
     }
+
+    const ICONS = { correct: "\u2705", incorrect: "\u274C", unanswered: "\u2B55" };
+
+    rows.forEach((row) => {
+      if (row.status === "correct") {
+        const sectionIndex = Math.floor((parseInt(row.number, 10) - 1) / 10);
+        if (sectionIndex >= 0 && sectionIndex < 4) sectionStats[sectionIndex]++;
+      }
+
+      if (!answersDiv) return;
+
+      const answerDiv = document.createElement("div");
+      answerDiv.className = `answer ${row.status}`;
+      answerDiv.dataset.qid = row.id;
+      answerDiv.dataset.filter = row.status;
+
+      answerDiv.innerHTML = `
+        <div class="question-number">
+          <span class="status-icon">${ICONS[row.status]}</span>
+          <strong>Question ${row.number}</strong>
+        </div>
+        <div class="answer-content">
+          ${row.questionText ? `<div class="question-text-review">${row.questionText}</div>` : ""}
+          <div class="user-answer">
+            <strong>Your Answer:</strong> ${row.userDisplay || "<em>Not answered</em>"}
+          </div>
+          <div class="correct-answer">
+            <strong>Correct Answer:</strong> ${row.expectedDisplay || "<em>No data</em>"}
+          </div>
+        </div>
+      `;
+
+      answersDiv.appendChild(answerDiv);
+    });
 
     // Update analysis numbers
     const correctCountEl = document.getElementById('correctCount');
@@ -548,244 +402,31 @@ function highlightBand(selector) {
     }, 500);
   }
 }
-window.debugMatchingProcessing = function() {
-    
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const resultId = urlParams.get("id");
-    
-    if (resultId) {
-        const docRef = doc(db, "resultsListening", resultId);
-        getDoc(docRef).then(docSnap => {
-            if (docSnap.exists()) {
-                const resultData = docSnap.data();
-                
-                loadTestStructure(resultData.testId).then(testStructure => {
-                    
-                    if (testStructure && testStructure.sections) {
-                        testStructure.sections.forEach((section, index) => {
-                            
-                            if (section.content) {
-                                section.content.forEach((item, itemIndex) => {
-                                    if (item.type === "matching") {
-                                        
-                                        if (item.questions) {
-                                            item.questions.forEach(q => {
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                    
-                    const allQuestions = getAllQuestions(testStructure);
-                    
-                    const matchingQuestions = allQuestions.filter(q => q.type === "matching");
-                    
-                }).catch(err => {
-                    console.error("Error loading test structure:", err);
-                });
-            }
-        }).catch(err => {
-            console.error("Error getting result document:", err);
-        });
-    }
-};
 
-function processAnswers(data, allQuestions) {
-  
-  const userAnswers = {};
-  const correctAnswers = {};
-  let score = 0;
-  
-  Object.entries(data.answers || {}).forEach(([qId, answer]) => {
-    userAnswers[qId] = answer;
-  });
-  
-  allQuestions.forEach(question => {
-    const qId = question.qId;
-    const correctAnswer = question.correctAnswer;
-    const userAnswer = userAnswers[qId];
-    
-    correctAnswers[qId] = correctAnswer;
-    
-    const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, question.type);
-    
-    
-    if (isCorrect) score++;
-  });
-  
-  
-  return {
-    userAnswers,
-    correctAnswers,
-    score,
-    total: allQuestions.length
-  };
-}
 
-function checkAnswerCorrectness(userAnswer, correctAnswer, questionType) {
-  if (!correctAnswer) {
-    console.warn("No correct answer provided for comparison");
-    return false;
-  }
-  
-  if (!userAnswer || 
-      userAnswer === "" || 
-      userAnswer === null || 
-      userAnswer === undefined ||
-      (Array.isArray(userAnswer) && userAnswer.length === 0)) {
-    return false;
-  }
-  
-  if (questionType === "matching") {
-    const userClean = String(userAnswer).toUpperCase().trim();
-    const correctClean = String(correctAnswer).toUpperCase().trim();
-    
-    return userClean === correctClean;
-  }
-  
-  if (Array.isArray(correctAnswer)) {
-    if (!Array.isArray(userAnswer)) {
-      return checkArrayAnswer([userAnswer], correctAnswer);
-    }
-    return checkArrayAnswer(userAnswer, correctAnswer);
-  }
-  
-  return checkStringAnswer(userAnswer, correctAnswer);
-}
 
-function extractQuestionNumber(qId) {
-  if (!qId || typeof qId !== 'string') return 0;
-  const matches = qId.match(/\d+/g);
-  if (matches && matches.length > 0) {
-    return parseInt(matches[0]);
-  }
-  return 0;
-}
 
-function formatQuestionId(qId) {
-  if (!qId) return "Question";
-  return qId.toUpperCase().replace(/^Q/, "Question ");
-}
 
-function processAnswer(userAnswer, correctAnswer, questionData) {
-  const questionType = questionData?.type;
-  const options = questionData?.options || {};
-  
-  if (!userAnswer || 
-      (Array.isArray(userAnswer) && userAnswer.length === 0) || 
-      userAnswer === "" || 
-      userAnswer === null || 
-      userAnswer === undefined) {
-    return { userDisplay: "<i>Not answered</i>", isCorrect: false };
-  }
 
-  if (questionType === "matching") {
-    const optionText = options[userAnswer] || '';
-    const userDisplay = userAnswer ? `${userAnswer}. ${optionText}` : "<i>Not answered</i>";
-    const isCorrect = checkAnswerCorrectness(userAnswer, correctAnswer, questionType);
-    
-    return { userDisplay, isCorrect };
-  }
 
-  if (Array.isArray(userAnswer)) {
-    const userDisplay = userAnswer.length > 0 ? userAnswer.join(", ") : "<i>Not answered</i>";
-    const isCorrect = checkArrayAnswer(userAnswer, correctAnswer);
-    return { userDisplay, isCorrect };
-  }
 
-  const userDisplay = String(userAnswer).trim() || "<i>Not answered</i>";
-  const isCorrect = checkStringAnswer(userAnswer, correctAnswer);
-  return { userDisplay, isCorrect };
-}
 
-function checkArrayAnswer(userAnswer, correctAnswer) {
-  if (!Array.isArray(correctAnswer) || correctAnswer.length === 0) {
-    return false;
-  }
 
-  if (!Array.isArray(userAnswer) || userAnswer.length !== correctAnswer.length) {
-    return false;
-  }
 
-  const userSorted = userAnswer.map(a => String(a).toLowerCase().trim()).sort();
-  const correctSorted = correctAnswer.map(a => String(a).toLowerCase().trim()).sort();
-  
-  return userSorted.every((item, index) => item === correctSorted[index]);
-}
+
+
 
 // An answer key may list several accepted variants separated by commas:
 // "holiday, holidays" accepts both. A comma directly between digits
 // (6,000) is a thousand separator, not a variant break.
-function splitAnswerVariants(key) {
-  const parts = [];
-  for (const seg of String(key).split(",")) {
-    const prev = parts[parts.length - 1];
-    if (prev !== undefined && /\d$/.test(prev) && /^\d/.test(seg)) {
-      parts[parts.length - 1] = `${prev},${seg}`;
-    } else {
-      parts.push(seg);
-    }
-  }
-  return parts.map((v) => v.trim()).filter(Boolean);
-}
+
 
 // One comma/slash variant vs the student's cleaned answer
-function stringVariantMatches(userClean, correctClean) {
-  if (correctClean.includes('/')) {
-    const alternatives = correctClean.split('/').map(alt => alt.trim());
-    return alternatives.some(alt => userClean === alt);
-  }
 
-  return correctClean === userClean;
-}
 
-function checkStringAnswer(userAnswer, correctAnswer) {
-  if (!userAnswer || typeof userAnswer !== 'string') {
-    return false;
-  }
 
-  const userClean = userAnswer.toLowerCase().trim();
 
-  if (Array.isArray(correctAnswer)) {
-    return correctAnswer.some(correct =>
-      splitAnswerVariants(correct).some(variant =>
-        stringVariantMatches(userClean, variant.toLowerCase())
-      )
-    );
-  } else {
-    return splitAnswerVariants(correctAnswer).some(variant =>
-      stringVariantMatches(userClean, variant.toLowerCase())
-    );
-  }
-}
 
-function formatCorrectAnswer(correctAnswer, questionData) {
-  if (!correctAnswer) {
-    return "<i>No data</i>";
-  }
-
-  const questionType = questionData?.type;
-  const options = questionData?.options || {};
-  
-  if (questionType === "matching") {
-    const optionText = options[correctAnswer] || '';
-    return correctAnswer ? `${correctAnswer}. ${optionText}` : "<i>No data</i>";
-  }
-
-  if (Array.isArray(correctAnswer)) {
-    return correctAnswer.length > 0 ? correctAnswer.join(" / ") : "<i>No data</i>";
-  }
-
-  const answerStr = String(correctAnswer);
-  if (answerStr.includes('/')) {
-    return answerStr.split('/').join(' / ');
-  }
-
-  return answerStr;
-}
 
 function convertToIELTS(score, total) {
   if (score >= 39) return "9.0";

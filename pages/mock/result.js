@@ -9,6 +9,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
+import { reviewFromStored, reviewSummary, scoreNotice } from "./engine/index.js";
 
 
 const app = initializeApp(firebaseConfig);
@@ -115,69 +116,44 @@ function renderResult(data) {
     resultBadge.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
   }
 
-  // Calculate answer statistics
-  let correctCount = 0;
-  let incorrectCount = 0;
-  let unansweredCount = 0;
+  // Answer breakdown — the engine decides correctness, so the review
+  // always agrees with the marks the student was given (an exact string
+  // compare used to show "holidays" as wrong against the key
+  // "holiday, holidays" even though the point was awarded).
+  const rows = reviewFromStored(data.answers || {}, data.correctAnswers || {});
+  const summary = reviewSummary(rows);
+  const correctCount = summary.correct;
+  const incorrectCount = summary.incorrect;
+  const unansweredCount = summary.unanswered;
 
-  const sortedKeys = answerKeys.sort((a, b) => {
-    const aNum = parseInt(a.replace("q", ""));
-    const bNum = parseInt(b.replace("q", ""));
-    return aNum - bNum;
-  });
+  const notice = scoreNotice(data.score, rows);
+  answersDiv.innerHTML = notice ? `<p class="score-notice">${notice}</p>` : "";
 
-  // Clear answers div
-  answersDiv.innerHTML = "";
+  const ICONS = { correct: "\u2705", incorrect: "\u274C", unanswered: "\u2B55" };
 
-  for (const qId of sortedKeys) {
-    const userAns = (data.answers?.[qId] || "").toString().trim().toLowerCase();
-    const correctAnsArray = (data.correctAnswers?.[qId] || []).map((a) =>
-      a.toString().toLowerCase().trim()
-    );
-
+  rows.forEach((row) => {
     const answerDiv = document.createElement("div");
-    answerDiv.className = "answer";
-    answerDiv.dataset.qid = qId;
-
-    let statusIcon = "";
-    let statusClass = "";
-
-    if (!userAns || userAns === "null" || userAns === "undefined") {
-      unansweredCount++;
-      statusIcon = "⭕";
-      statusClass = "unanswered";
-      answerDiv.dataset.filter = "unanswered";
-    } else if (correctAnsArray.includes(userAns)) {
-      correctCount++;
-      statusIcon = "✅";
-      statusClass = "correct";
-      answerDiv.dataset.filter = "correct";
-    } else {
-      incorrectCount++;
-      statusIcon = "❌";
-      statusClass = "incorrect";
-      answerDiv.dataset.filter = "incorrect";
-    }
-
-    answerDiv.classList.add(statusClass);
+    answerDiv.className = `answer ${row.status}`;
+    answerDiv.dataset.qid = row.id;
+    answerDiv.dataset.filter = row.status;
 
     answerDiv.innerHTML = `
       <div class="question-number">
-        <span class="status-icon">${statusIcon}</span>
-        <strong>Question ${qId.toUpperCase().replace('Q', '')}</strong>
+        <span class="status-icon">${ICONS[row.status]}</span>
+        <strong>Question ${row.number}</strong>
       </div>
       <div class="answer-content">
         <div class="user-answer">
-          <strong>Your Answer:</strong> ${userAns || "<em>Not answered</em>"}
+          <strong>Your Answer:</strong> ${row.userDisplay || "<em>Not answered</em>"}
         </div>
         <div class="correct-answer">
-          <strong>Correct Answer:</strong> ${correctAnsArray.join(" / ") || "<em>No data</em>"}
+          <strong>Correct Answer:</strong> ${row.expectedDisplay || "<em>No data</em>"}
         </div>
       </div>
     `;
 
     answersDiv.appendChild(answerDiv);
-  }
+  });
 
   // Update analysis numbers
   document.getElementById('correctCount').textContent = correctCount;

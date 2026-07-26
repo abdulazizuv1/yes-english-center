@@ -15,3 +15,11 @@ export {
 } from "./normalize.js";
 export { splitAnswerVariants, textAnswerCorrect, gradeItem, gradeItems } from "./grade.js";
 export { renderItem, gapInlineHTML } from "./render.js";
+export {
+  reviewRows,
+  reviewFromStored,
+  reviewSummary,
+  scoreNotice,
+  formatExpected,
+  answerLabel,
+} from "./review.js";
