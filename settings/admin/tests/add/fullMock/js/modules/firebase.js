@@ -19,6 +19,7 @@ import {
   getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { firebaseConfig } from "/config.js";
+import { findNextTestSlot } from "/settings/admin/tests/shared/nextTestSlot.js";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -61,21 +62,9 @@ export async function checkAdminAccess() {
 // Get the next Full Mock Test number
 export async function getNextFullMockTestNumber() {
   try {
-    const testsRef = collection(db, "fullmockTests");
-    const testsSnapshot = await getDocs(testsRef);
-
-    let maxNumber = 0;
-    testsSnapshot.forEach((docSnapshot) => {
-      const docId = docSnapshot.id;
-      if (docId && docId.startsWith("test-")) {
-        const number = parseInt(docId.replace("test-", ""));
-        if (!isNaN(number) && number > maxNumber) {
-          maxNumber = number;
-        }
-      }
-    });
-
-    return maxNumber + 1;
+    // Fills a hole left by a deleted test when no results reference it
+    const slot = await findNextTestSlot(db, "fullmockTests", "resultFullmock");
+    return slot.number;
   } catch (error) {
     console.error("Error getting next mock test number:", error);
     return 1;

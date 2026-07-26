@@ -10,9 +10,7 @@ import {
   getFirestore,
   doc,
   getDoc,
-  getDocs,
   setDoc,
-  collection,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getStorage,
@@ -28,6 +26,7 @@ import {
   assignListeningNumbers,
   setupAuthorForms,
 } from "/pages/mock/engine/author.js";
+import { findNextTestSlot, slotLabel } from "/settings/admin/tests/shared/nextTestSlot.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -73,15 +72,11 @@ async function checkAdminAccess() {
 
 async function getNextTestNumber() {
   try {
-    const snapshot = await getDocs(collection(db, "listeningTests"));
-    let maxNumber = 0;
-    snapshot.forEach((docSnap) => {
-      const match = docSnap.id.match(/test-(\d+)/);
-      if (match) maxNumber = Math.max(maxNumber, parseInt(match[1], 10));
-    });
-    nextTestNumber = maxNumber + 1;
+    // Fills a hole left by a deleted test when no results reference it
+    const slot = await findNextTestSlot(db, "listeningTests", "resultsListening");
+    nextTestNumber = slot.number;
     const badge = document.getElementById("testNumber");
-    if (badge) badge.textContent = `Test ${nextTestNumber}`;
+    if (badge) badge.textContent = slotLabel(slot);
     // Prefill the title with the number this test will actually be saved
     // under. Typing a different number here is what made "Listening test
     // 24" end up in document test-23 — the student then clicked "24" and

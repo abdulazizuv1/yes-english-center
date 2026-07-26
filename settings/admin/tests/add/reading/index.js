@@ -10,9 +10,7 @@ import {
   getFirestore,
   doc,
   getDoc,
-  getDocs,
   setDoc,
-  collection,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { firebaseConfig } from "/config.js";
 import {
@@ -24,6 +22,7 @@ import {
 } from "/pages/mock/engine/author.js";
 import { normalizeReadingQuestions } from "/pages/mock/engine/normalize.js";
 import { gradeItems } from "/pages/mock/engine/grade.js";
+import { findNextTestSlot, slotLabel } from "/settings/admin/tests/shared/nextTestSlot.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -65,15 +64,11 @@ async function checkAdminAccess() {
 
 async function getNextTestNumber() {
   try {
-    const snapshot = await getDocs(collection(db, "readingTests"));
-    let maxNumber = 0;
-    snapshot.forEach((docSnap) => {
-      const match = docSnap.id.match(/test-(\d+)/);
-      if (match) maxNumber = Math.max(maxNumber, parseInt(match[1], 10));
-    });
-    nextTestNumber = maxNumber + 1;
+    // Fills a hole left by a deleted test when no results reference it
+    const slot = await findNextTestSlot(db, "readingTests", "resultsReading");
+    nextTestNumber = slot.number;
     const badge = document.getElementById("testNumber");
-    if (badge) badge.textContent = `Test ${nextTestNumber}`;
+    if (badge) badge.textContent = slotLabel(slot);
   } catch (e) {
     console.error("Error getting next test number:", e);
   }

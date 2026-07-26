@@ -21,6 +21,7 @@ import {
   getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { firebaseConfig } from "/config.js";
+import { findNextTestSlot, slotLabel } from "/settings/admin/tests/shared/nextTestSlot.js";
 
 
 const app = initializeApp(firebaseConfig);
@@ -76,34 +77,11 @@ async function checkAdminAccess() {
 // Get the next test number
 async function getNextTestNumber() {
   try {
-    const testsRef = collection(db, "writingTests");
-    const testsSnapshot = await getDocs(testsRef);
-
-    let maxNumber = 0;
-    testsSnapshot.forEach((docSnapshot) => {
-      // Проверяем ID документа
-      const docId = docSnapshot.id;
-      if (docId && docId.startsWith("test-")) {
-        const number = parseInt(docId.replace("test-", ""));
-        if (!isNaN(number) && number > maxNumber) {
-          maxNumber = number;
-        }
-      }
-      // Также проверяем testId как запасной вариант
-      const testId = docSnapshot.data().testId;
-      if (testId && testId.startsWith("test-")) {
-        const number = parseInt(testId.replace("test-", ""));
-        if (!isNaN(number) && number > maxNumber) {
-          maxNumber = number;
-        }
-      }
-    });
-
-    nextTestNumber = maxNumber + 1;
-    document.getElementById(
-      "testNumber"
-    ).textContent = `This will be Test ${nextTestNumber}`;
-
+    // Fills a hole left by a deleted test when no results reference it
+    const slot = await findNextTestSlot(db, "writingTests", "resultsWriting");
+    nextTestNumber = slot.number;
+    document.getElementById("testNumber").textContent =
+      `This will be ${slotLabel(slot)}`;
     return nextTestNumber;
   } catch (error) {
     console.error("Error getting next test number:", error);
