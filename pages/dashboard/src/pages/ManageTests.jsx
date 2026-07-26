@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { ArrowLeft, Trash2, Edit3, ExternalLink, BookOpen, Headphones, PenTool, Search } from 'lucide-react';
 import { ManageTestsSkeleton } from '../components/Skeleton';
-import { byTestNumber, testNumber } from '../hooks/useResults';
+import { byTestNumber, testNumber, displayTestName } from '../hooks/useResults';
 import './ManageTests.css';
 
 const TYPE_CONFIG = {
@@ -61,7 +61,7 @@ export default function ManageTests() {
 
     if (!isAdmin) return <Navigate to="/" replace />;
 
-    const getTestName = (t) => t.title || t.name || `${config.label} Test ${t.id.replace('test-', '')}`;
+    const getTestName = (t) => displayTestName(t, type);
 
     const filteredTests = tests.filter(t =>
         getTestName(t).toLowerCase().includes(searchQuery.toLowerCase())

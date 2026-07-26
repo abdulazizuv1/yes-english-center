@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nextTarget = await getNextFullMockTestNumber();
         testId = `test-${nextTarget}`;
         document.getElementById('testNumberBadge').textContent = `Test ID: ${testId}`;
+        // Prefill the title with the number this test is saved under, so a
+        // typed-in number can't disagree with the id the links use.
+        const titleInput = document.getElementById('testTitle');
+        if (titleInput && !titleInput.value.trim()) {
+            titleInput.value = `IELTS Full Mock Test ${nextTarget}`;
+        }
 
         // Init modules
         initListeningUI();

@@ -82,6 +82,14 @@ async function getNextTestNumber() {
     nextTestNumber = maxNumber + 1;
     const badge = document.getElementById("testNumber");
     if (badge) badge.textContent = `Test ${nextTestNumber}`;
+    // Prefill the title with the number this test will actually be saved
+    // under. Typing a different number here is what made "Listening test
+    // 24" end up in document test-23 — the student then clicked "24" and
+    // landed on 23. The admin can still edit the text.
+    const titleInput = document.getElementById("testTitle");
+    if (titleInput && !titleInput.value.trim()) {
+      titleInput.value = `IELTS Listening Test ${nextTestNumber}`;
+    }
   } catch (e) {
     console.error("Error getting next test number:", e);
   }

@@ -100,6 +100,21 @@ export function byTestNumber(a, b) {
   return diff !== 0 ? diff : String(a?.id ?? '').localeCompare(String(b?.id ?? ''));
 }
 
+/* The name shown for a test. Whatever number the student reads has to be
+   the test they land on, and links go by document id — so a title
+   carrying a *different* number ("Listening test 24" stored in test-23)
+   is replaced by the canonical name. A title with no number of its own
+   ("MOCK OFFICIAL") is a real name and is kept. */
+export function displayTestName(test, type) {
+  const num = testNumber(test);
+  const canonical = `${formatType(type)} Test ${num === Number.MAX_SAFE_INTEGER ? '' : num}`.trim();
+  const raw = String(test?.title || test?.name || '').trim();
+  if (!raw) return canonical;
+  const titleNum = numberFromId(raw);
+  if (titleNum === null || titleNum === num) return raw;
+  return canonical;
+}
+
 async function resolveDisplayTitles(results) {
   // reading/fullmock always use the numeric fallback — no fetch needed
   results.forEach(r => {
@@ -124,7 +139,7 @@ async function resolveDisplayTitles(results) {
     try {
       const snap = await getDoc(doc(db, TEST_COLLECTIONS[type], testId));
       const data = snap.exists() ? snap.data() : null;
-      titleCache.set(key, data?.title || data?.name || fallbackTitle(type, testId));
+      titleCache.set(key, displayTestName({ id: testId, ...(data || {}) }, type));
     } catch (err) {
       console.error(`Failed to fetch ${type} test title for ${testId}:`, err);
       titleCache.set(key, fallbackTitle(type, testId));
