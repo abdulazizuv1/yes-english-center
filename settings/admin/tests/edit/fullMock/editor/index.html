@@ -50,6 +50,28 @@
             background: #0f2340; color: #fff; padding: 12px 22px; border-radius: 10px;
             font-size: 14px; display: none; z-index: 100;
         }
+        .pin-block h3 { display: flex; align-items: center; gap: 10px; }
+        .pin-badge {
+            display: none; padding: 3px 10px; background: #fef3c7; color: #92400e;
+            border: 1px solid #fde68a; border-radius: 999px; font-size: 12px; font-weight: 700;
+        }
+        .pin-help { font-size: 13px; color: #64748b; margin: 6px 0 12px; }
+        .pin-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .pin-row input {
+            width: 170px; letter-spacing: 5px; text-align: center;
+            font-size: 16px; font-weight: 600;
+        }
+        .pin-row button {
+            padding: 9px 16px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        .pin-row button:disabled { opacity: .6; cursor: default; }
+        .pin-save { background: #0f2340; color: #fff; }
+        .pin-remove { background: #fee2e2; color: #b91c1c; }
+        .pin-remove:hover { background: #fecaca; }
+        .pin-status { margin-top: 10px; font-size: 13px; }
+        .pin-status.pin-active { color: #b45309; }
+        .pin-status.pin-none { color: #059669; }
     </style>
 </head>
 <body>
@@ -68,6 +90,17 @@
         <div class="block">
             <label>Test Title</label>
             <input type="text" id="testTitleInput" placeholder="IELTS Full Mock Test N">
+        </div>
+
+        <div class="block pin-block">
+            <h3>🔒 Access PIN <span id="pinBadge" class="pin-badge"></span></h3>
+            <p class="pin-help">A 6-digit PIN students must enter to open this test. Remove it to make the test open to everyone.</p>
+            <div class="pin-row">
+                <input type="text" id="accessPinInput" maxlength="6" inputmode="numeric" placeholder="6-digit PIN">
+                <button type="button" id="savePinBtn" class="pin-save">Save PIN</button>
+                <button type="button" id="removePinBtn" class="pin-remove" style="display:none">Remove PIN</button>
+            </div>
+            <p class="pin-status" id="pinStatus"></p>
         </div>
 
         <div class="stage-tabs">

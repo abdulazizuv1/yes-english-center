@@ -5,7 +5,7 @@
 // Audio files are kept as saved; only questions/texts are edited here.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { firebaseConfig } from "/config.js";
 import {
   authorKinds,
@@ -69,6 +69,7 @@ function renderEditor(data) {
   document.getElementById("editorWrap").style.display = "block";
   document.getElementById("pageTitle").textContent = `Edit ${data.title || testId}`;
   document.getElementById("testTitleInput").value = data.title || "";
+  renderPin(data.accessPin || "");
 
   const listening = (data.stages || []).find((s) => s.id === "listening");
   const reading = (data.stages || []).find((s) => s.id === "reading");
@@ -261,6 +262,67 @@ async function saveTest() {
   }
 }
 
+/* ───────────────────────── access PIN ───────────────────────── */
+
+// The PIN is saved on its own, not with the questions: an admin removing
+// a PIN expects it gone immediately, without also publishing whatever
+// half-finished question edits are on screen.
+function renderPin(pin) {
+  const input = document.getElementById("accessPinInput");
+  const badge = document.getElementById("pinBadge");
+  const status = document.getElementById("pinStatus");
+  const removeBtn = document.getElementById("removePinBtn");
+
+  if (input) input.value = pin || "";
+  if (pin) {
+    if (badge) { badge.textContent = `PIN: ${pin}`; badge.style.display = "inline-block"; }
+    if (status) { status.textContent = `Students must enter ${pin} to open this test.`; status.className = "pin-status pin-active"; }
+    if (removeBtn) removeBtn.style.display = "inline-block";
+  } else {
+    if (badge) badge.style.display = "none";
+    if (status) { status.textContent = "No PIN — anyone with the link can open this test."; status.className = "pin-status pin-none"; }
+    if (removeBtn) removeBtn.style.display = "none";
+  }
+}
+
+async function writePin(pin) {
+  const saveBtn = document.getElementById("savePinBtn");
+  const removeBtn = document.getElementById("removePinBtn");
+  if (saveBtn) saveBtn.disabled = true;
+  if (removeBtn) removeBtn.disabled = true;
+  try {
+    await updateDoc(doc(db, "fullmockTests", testId), {
+      accessPin: pin ? pin : deleteField(),
+    });
+    if (currentTest) {
+      if (pin) currentTest.accessPin = pin;
+      else delete currentTest.accessPin;
+    }
+    renderPin(pin);
+    showToast(pin ? "🔒 PIN saved" : "🔓 PIN removed — the test is now open");
+  } catch (error) {
+    console.error("❌ Error updating PIN:", error);
+    alert(`❌ Could not update the PIN: ${error.message}`);
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+    if (removeBtn) removeBtn.disabled = false;
+  }
+}
+
+window.savePin = function () {
+  const pin = document.getElementById("accessPinInput").value.trim();
+  if (pin && !/^\d{6}$/.test(pin)) {
+    alert("PIN must be exactly 6 digits (numbers only).");
+    return;
+  }
+  writePin(pin);
+};
+
+window.removePin = function () {
+  if (!confirm("Remove the PIN? Anyone with the link will be able to open this test.")) return;
+  writePin("");
+};
+
 function showToast(text) {
   const toast = document.getElementById("toast");
   toast.textContent = text;
@@ -280,6 +342,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
   );
   document.getElementById("saveBtn").addEventListener("click", saveTest);
+  document.getElementById("savePinBtn")?.addEventListener("click", () => window.savePin());
+  document.getElementById("removePinBtn")?.addEventListener("click", () => window.removePin());
+  document.getElementById("accessPinInput")?.addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+  });
 
   if (!window.__AUTHOR_HARNESS) {
     await checkAdminAccess();
