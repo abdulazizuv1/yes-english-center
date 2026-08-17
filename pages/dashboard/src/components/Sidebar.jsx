@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     Home, Headphones, BookOpen, PenTool, FileText,
-    Settings, Shield, LogOut, X, MessageSquare, CalendarCheck
+    Settings, Shield, LogOut, X, MessageSquare, CalendarCheck, Layers
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
     { to: '/reading', icon: BookOpen, label: 'Reading' },
     { to: '/writing', icon: PenTool, label: 'Writing' },
     { to: '/fullmock', icon: FileText, label: 'Full Mock' },
+    { to: '/flashcards', icon: Layers, label: 'Flashcards' },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {

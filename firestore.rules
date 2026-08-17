@@ -128,5 +128,41 @@ service cloud.firestore {
         (resource.data.userId == request.auth.uid || isStaff());
       allow update, delete: if isAdmin();
     }
+
+    // ─── Flashcards ───
+    // A set is either "shared" (published by an admin, everyone studies it)
+    // or "personal" (made by a student for themselves). Students may only
+    // create personal sets owned by themselves; only admins publish shared
+    // ones. The list page queries scope=='shared' and ownerId==uid
+    // separately, so each query on its own satisfies a read condition.
+    match /flashcardSets/{setId} {
+      allow read: if request.auth != null && (
+        resource.data.scope == 'shared' ||
+        resource.data.ownerId == request.auth.uid
+      );
+
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.cards is list
+        && (
+          request.resource.data.scope == 'personal' ||
+          (request.resource.data.scope == 'shared' && isAdmin())
+        );
+
+      // The owner edits their own set; admins can fix or remove any set.
+      // scope cannot be changed by a student — that is how a personal set
+      // would otherwise become visible to everyone.
+      allow update: if request.auth != null && (
+        isAdmin() ||
+        (resource.data.ownerId == request.auth.uid &&
+         request.resource.data.ownerId == resource.data.ownerId &&
+         request.resource.data.scope == resource.data.scope)
+      );
+
+      allow delete: if request.auth != null &&
+        (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
   }
 }

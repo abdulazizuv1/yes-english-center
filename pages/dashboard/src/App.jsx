@@ -15,6 +15,9 @@ const ManageTests = lazy(() => import('./pages/ManageTests'));
 const Feedback = lazy(() => import('./pages/Feedback'));
 const UsersTestResults = lazy(() => import('./pages/UsersTestResults'));
 const DailyPlan = lazy(() => import('./pages/DailyPlan'));
+const Flashcards = lazy(() => import('./pages/Flashcards'));
+const StudySet = lazy(() => import('./pages/StudySet'));
+const EditSet = lazy(() => import('./pages/EditSet'));
 
 export default function App() {
     return (
@@ -31,6 +34,10 @@ export default function App() {
                             <Route path="admin/users" element={<ManageUsers />} />
                             <Route path="admin/tests/:type" element={<ManageTests />} />
                             <Route path="admin/results" element={<UsersTestResults />} />
+                            <Route path="flashcards" element={<Flashcards />} />
+                            <Route path="flashcards/new" element={<EditSet />} />
+                            <Route path="flashcards/:setId" element={<StudySet />} />
+                            <Route path="flashcards/:setId/edit" element={<EditSet />} />
                             <Route path=":type" element={<TestSection />} />
                         </Route>
                     </Routes>

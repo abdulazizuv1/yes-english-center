@@ -1,0 +1,134 @@
+/* ═══ Flashcards — study view ═══
+   Quizlet-style flip card sitting on a small deck. While dragging, the
+   card is positioned by JS (transform written inline); everything here
+   just describes how it looks and how it springs back. */
+@import './Flashcards.css';
+
+.study-page { max-width: 760px; margin: 0 auto; padding: 4px 0 60px; }
+
+.study-top {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.study-title { flex: 1; min-width: 0; }
+.study-title h2 {
+    font-size: 22px; color: var(--text-primary); margin: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.study-title p { font-size: 13.5px; color: var(--text-muted); margin: 2px 0 0; }
+
+/* ─── progress row ─── */
+.study-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: var(--radius); padding: 12px 16px; margin-bottom: 20px;
+}
+.study-progress {
+    flex: 1 1 160px; height: 8px; border-radius: 999px;
+    background: var(--content-bg); overflow: hidden;
+}
+.study-progress-fill {
+    height: 100%; border-radius: 999px;
+    background: var(--gradient); transition: width .3s ease;
+}
+.study-progress-text { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+
+/* ─── the deck ─── */
+.fc-stage {
+    position: relative;
+    perspective: 1600px;
+    margin-bottom: 20px;
+    touch-action: pan-y;      /* let the page scroll vertically, we take horizontal */
+    user-select: none;
+}
+
+.fc-stack {
+    position: absolute; inset: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+}
+.fc-stack-1 { transform: translateY(10px) scale(.975); opacity: .8; }
+.fc-stack-2 { transform: translateY(20px) scale(.95); opacity: .55; }
+
+.fc-card {
+    position: relative;
+    min-height: 340px;
+    cursor: grab;
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    --lean: 0;                /* -1 … +1, set by JS while dragging */
+}
+.fc-card:active { cursor: grabbing; }
+.fc-card.flipped { transform: rotateY(180deg); }
+/* while a throw is in flight the card must not intercept pointers */
+.fc-card.throwing { pointer-events: none; }
+
+.fc-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: 20px; padding: 34px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 14px 34px rgba(15, 35, 64, .14);
+}
+
+.fc-front {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    align-items: center; justify-content: center; text-align: center;
+}
+.fc-term {
+    font-size: 34px; font-weight: 800; line-height: 1.2;
+    color: var(--text-primary); word-break: break-word;
+}
+.fc-hint { margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+
+/* the two verdict stamps fade in as the card is dragged either way */
+.fc-badge {
+    position: absolute; top: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 13px; font-weight: 800; letter-spacing: .4px;
+    border: 2px solid currentColor; opacity: 0;
+    transition: opacity .12s;
+}
+.fc-badge.know { right: 20px; color: var(--success); opacity: max(0, var(--lean)); }
+.fc-badge.learning { left: 20px; color: var(--danger); opacity: max(0, calc(-1 * var(--lean))); }
+
+.fc-back {
+    background: linear-gradient(150deg, var(--sidebar-bg), var(--primary));
+    color: #fff; transform: rotateY(180deg); justify-content: center;
+}
+.fc-back-term { font-size: 21px; font-weight: 800; margin-bottom: 18px; }
+.fc-label {
+    font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase;
+    opacity: .7; font-weight: 700;
+}
+.fc-def { font-size: 19px; margin: 6px 0 20px; line-height: 1.45; }
+.fc-example { font-size: 16.5px; font-style: italic; margin-top: 6px; line-height: 1.5; opacity: .95; }
+.fc-example::before { content: "\201C"; }
+.fc-example::after { content: "\201D"; }
+
+/* ─── nav row ─── */
+.study-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.study-counter { margin: 0 auto; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.study-counter b { color: var(--text-primary); }
+.fc-btn.learn { border-color: var(--success); color: var(--success); }
+.fc-btn.learn.on { background: var(--success); border-color: var(--success); color: #fff; }
+
+.study-help {
+    margin-top: 18px; text-align: center;
+    font-size: 12.5px; color: var(--text-muted);
+}
+.study-help kbd {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-bottom-width: 2px; border-radius: 5px;
+    padding: 1px 6px; margin: 0 3px; font-size: 11px;
+    color: var(--text-secondary); font-family: inherit;
+}
+
+@media (max-width: 640px) {
+    .fc-card { min-height: 300px; }
+    .fc-face { padding: 26px; }
+    .fc-term { font-size: 27px; }
+    .study-title h2 { font-size: 19px; }
+}
