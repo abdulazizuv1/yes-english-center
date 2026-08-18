@@ -120,3 +120,71 @@
     font-weight: 600;
 }
 .au-menu button.au-new:hover { border-color: #7c3aed; }
+
+/* ─── map labelling: mode switch + image upload ─── */
+.au-mode-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.au-mode-btn {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, background .15s, color .15s;
+}
+.au-mode-btn:hover { border-color: #a78bfa; color: #6d28d9; }
+/* the chosen mode lights up */
+.au-mode-btn.on {
+    background: #f5f3ff;
+    border-color: #7c3aed;
+    color: #5b21b6;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, .18);
+}
+
+.au-upload {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.au-upload-btn {
+    padding: 9px 16px;
+    border: 1px dashed #7c3aed;
+    border-radius: 8px;
+    background: #f5f3ff;
+    color: #5b21b6;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+.au-upload-btn:hover { background: #ede9fe; }
+.au-upload-btn:disabled { opacity: .6; cursor: progress; }
+
+.au-upload-status { font-size: 13px; color: #64748b; }
+.au-upload-status.busy { color: #7c3aed; }
+.au-upload-status.ok { color: #15803d; }
+.au-upload-status.error { color: #b91c1c; }
+
+.au-image-preview {
+    flex-basis: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.au-image-preview:empty { display: none; }
+.au-image-preview img {
+    max-width: 260px;
+    max-height: 160px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}

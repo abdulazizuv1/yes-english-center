@@ -117,15 +117,37 @@ function optsList(options) {
   return Object.keys(options).sort().map((label) => ({ label, text: options[label] }));
 }
 
-// Map labelling has two answer modes; switching one swaps which half of
-// the form is live. Inline like the group-type switch above it, so the
-// six add/edit tools need no extra wiring.
+// Map labelling has two answer modes, picked with two buttons; the lit
+// one decides which half of the form is live.
 const MAP_GAP_PH = "Correct answer — variants via comma: canteen, cafeteria";
-const MAP_MODE_TOGGLE =
-  "const i=this.closest('.au-item'),g=this.value==='gap';" +
-  "i.querySelector('.au-map-letters').style.display=g?'none':'';" +
-  "i.querySelector('.au-map-typed').style.display=g?'':'none';" +
-  `i.querySelectorAll('.au-sub-answer').forEach(a=>a.placeholder=g?'${MAP_GAP_PH}':'Letter');`;
+
+export function applyMapMode(item, mode) {
+  const gap = mode === "gap";
+  item.querySelector(".au-map-mode").value = gap ? "gap" : "labels";
+  item.querySelectorAll(".au-mode-btn").forEach((b) =>
+    b.classList.toggle("on", (b.dataset.mode === "gap") === gap)
+  );
+  item.querySelector(".au-map-letters").style.display = gap ? "none" : "";
+  item.querySelector(".au-map-typed").style.display = gap ? "" : "none";
+  item.querySelectorAll(".au-sub-answer").forEach((a) => {
+    a.placeholder = gap ? MAP_GAP_PH : "Letter";
+  });
+}
+
+// The map image is uploaded, not pasted: the button holds the picked
+// file, the hidden input holds the Storage URL the collector reads.
+function imageField(url) {
+  return `<div class="au-upload">
+    <input type="hidden" class="au-image-url" value="${esc(url)}">
+    <input type="file" class="au-image-file" accept="image/*" hidden>
+    <button type="button" class="au-upload-btn">${url ? "Replace image" : "Upload image"}</button>
+    <span class="au-upload-status"></span>
+    <div class="au-image-preview">${url ? imagePreview(url) : ""}</div>
+  </div>`;
+}
+
+const imagePreview = (url) =>
+  `<img src="${esc(url)}" alt="Map"><button type="button" class="au-remove au-image-clear">Remove</button>`;
 
 const addRowBtn = (cls, label) =>
   `<button type="button" class="au-add-row nav-btn secondary" data-add="${cls}">+ ${label}</button>`;
@@ -342,12 +364,15 @@ export function editorHTML(target, kind, uid, prefill = null) {
       const rows = (p.questions || []).map((r) => ({ text: r.text || r.label || "", answer: r.correctAnswer ?? r.answer ?? "" }));
       const isGap = mapAnswerMode(p) === "gap";
       return wrap(kind, uid, `${header(kind)}${giField(gi)}
-        <select class="au-map-mode settings-select form-input" onchange="${MAP_MODE_TOGGLE}">
-          <option value="labels" ${isGap ? "" : "selected"}>Answers are letters on the map (A, B, C…)</option>
-          <option value="gap" ${isGap ? "selected" : ""}>Answers are typed in (gap fill)</option>
-        </select>
+        <label class="au-label">How are the labels answered?</label>
+        <div class="au-mode-switch">
+          <button type="button" class="au-mode-btn ${isGap ? "" : "on"}" data-mode="labels">Letters on the map</button>
+          <button type="button" class="au-mode-btn ${isGap ? "on" : ""}" data-mode="gap">Typed answers</button>
+        </div>
+        <input type="hidden" class="au-map-mode" value="${isGap ? "gap" : "labels"}">
         <input type="text" class="au-title form-input" placeholder="Title (e.g. Plan of the sports centre)" value="${esc(p.title || "")}">
-        <input type="text" class="au-image-url form-input" placeholder="Image URL (upload the plan to Storage and paste the link)" value="${esc(p.imageUrl || "")}">
+        <label class="au-label">Map image</label>
+        ${imageField(p.imageUrl || "")}
         <div class="au-map-letters" style="${isGap ? "display:none" : ""}">
           <label class="au-label">Locations on the map (letters)</label>
           <div class="au-options">${optionRows(opts, { textPh: "Location name (optional)" })}</div>
@@ -659,9 +684,75 @@ function collectDdItems(el, fail) {
 
 /* ───────────── generic add-row handling (one listener per tool) ───────────── */
 
+/* Uploads the map image straight to Firebase Storage. The tools all
+   initialise the Firebase app themselves, so the SDK is pulled in at
+   click time (by then the app exists) and pages that never upload never
+   load it. Version pinned to the one every tool already uses. */
+const FB = "https://www.gstatic.com/firebasejs/10.12.0";
+const MAX_IMAGE_MB = 5;
+
+export async function uploadMapImage(file) {
+  if (!file.type.startsWith("image/")) throw new Error("that file is not an image.");
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024) throw new Error(`the image must be under ${MAX_IMAGE_MB} MB.`);
+  const [{ getApp }, storageSdk] = await Promise.all([
+    import(`${FB}/firebase-app.js`),
+    import(`${FB}/firebase-storage.js`),
+  ]);
+  const { getStorage, ref, uploadBytes, getDownloadURL } = storageSdk;
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `test-images/maps/${Date.now()}_${safe}`;
+  const snapshot = await uploadBytes(ref(getStorage(getApp()), path), file);
+  return getDownloadURL(snapshot.ref);
+}
+
+async function handleImagePick(item, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const status = item.querySelector(".au-upload-status");
+  const button = item.querySelector(".au-upload-btn");
+  status.className = "au-upload-status busy";
+  status.textContent = `Uploading ${file.name}…`;
+  button.disabled = true;
+  try {
+    const url = await uploadMapImage(file);
+    item.querySelector(".au-image-url").value = url;
+    item.querySelector(".au-image-preview").innerHTML = imagePreview(url);
+    button.textContent = "Replace image";
+    status.className = "au-upload-status ok";
+    status.textContent = "Uploaded";
+  } catch (err) {
+    status.className = "au-upload-status error";
+    status.textContent = `Upload failed — ${err.message || err}`;
+  } finally {
+    button.disabled = false;
+    input.value = ""; // picking the same file again must still fire
+  }
+}
+
 // Call once per page: wires every "+ Add ..." button inside author forms.
 export function setupAuthorForms(root = document) {
+  root.addEventListener("change", (e) => {
+    const picker = e.target.closest(".au-image-file");
+    if (picker) handleImagePick(picker.closest(".au-item"), picker);
+  });
+
   root.addEventListener("click", (e) => {
+    const modeBtn = e.target.closest(".au-mode-btn");
+    if (modeBtn) return applyMapMode(modeBtn.closest(".au-item"), modeBtn.dataset.mode);
+
+    const upload = e.target.closest(".au-upload-btn");
+    if (upload) return upload.closest(".au-item").querySelector(".au-image-file").click();
+
+    const clear = e.target.closest(".au-image-clear");
+    if (clear) {
+      const item = clear.closest(".au-item");
+      item.querySelector(".au-image-url").value = "";
+      item.querySelector(".au-image-preview").innerHTML = "";
+      item.querySelector(".au-upload-btn").textContent = "Upload image";
+      item.querySelector(".au-upload-status").textContent = "";
+      return;
+    }
+
     const btn = e.target.closest(".au-add-row");
     if (!btn) return;
     const item = btn.closest(".au-item");
