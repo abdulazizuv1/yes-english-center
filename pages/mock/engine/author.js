@@ -19,6 +19,8 @@
 // normalize.js already reads everything emitted here.
 // ═══════════════════════════════════════════════════════════════════════
 
+import { mapAnswerMode } from "./normalize.js";
+
 const esc = (s) =>
   String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -114,6 +116,16 @@ function optsList(options) {
   if (Array.isArray(options)) return options.map((o) => ({ label: o.label ?? "", text: o.text ?? "" }));
   return Object.keys(options).sort().map((label) => ({ label, text: options[label] }));
 }
+
+// Map labelling has two answer modes; switching one swaps which half of
+// the form is live. Inline like the group-type switch above it, so the
+// six add/edit tools need no extra wiring.
+const MAP_GAP_PH = "Correct answer — variants via comma: canteen, cafeteria";
+const MAP_MODE_TOGGLE =
+  "const i=this.closest('.au-item'),g=this.value==='gap';" +
+  "i.querySelector('.au-map-letters').style.display=g?'none':'';" +
+  "i.querySelector('.au-map-typed').style.display=g?'':'none';" +
+  `i.querySelectorAll('.au-sub-answer').forEach(a=>a.placeholder=g?'${MAP_GAP_PH}':'Letter');`;
 
 const addRowBtn = (cls, label) =>
   `<button type="button" class="au-add-row nav-btn secondary" data-add="${cls}">+ ${label}</button>`;
@@ -328,18 +340,29 @@ export function editorHTML(target, kind, uid, prefill = null) {
     case "map-labelling": {
       const opts = optsList(p.options);
       const rows = (p.questions || []).map((r) => ({ text: r.text || r.label || "", answer: r.correctAnswer ?? r.answer ?? "" }));
+      const isGap = mapAnswerMode(p) === "gap";
       return wrap(kind, uid, `${header(kind)}${giField(gi)}
+        <select class="au-map-mode settings-select form-input" onchange="${MAP_MODE_TOGGLE}">
+          <option value="labels" ${isGap ? "" : "selected"}>Answers are letters on the map (A, B, C…)</option>
+          <option value="gap" ${isGap ? "selected" : ""}>Answers are typed in (gap fill)</option>
+        </select>
         <input type="text" class="au-title form-input" placeholder="Title (e.g. Plan of the sports centre)" value="${esc(p.title || "")}">
         <input type="text" class="au-image-url form-input" placeholder="Image URL (upload the plan to Storage and paste the link)" value="${esc(p.imageUrl || "")}">
-        <label class="au-label">Locations on the map (letters)</label>
-        <div class="au-options">${optionRows(opts, { textPh: "Location name (optional)" })}</div>
-        ${addRowBtn("option", "Add letter")}
+        <div class="au-map-letters" style="${isGap ? "display:none" : ""}">
+          <label class="au-label">Locations on the map (letters)</label>
+          <div class="au-options">${optionRows(opts, { textPh: "Location name (optional)" })}</div>
+          ${addRowBtn("option", "Add letter")}
+        </div>
+        <div class="au-map-typed" style="${isGap ? "" : "display:none"}">
+          <label class="au-label">Word limit for typed answers</label>
+          <input type="number" class="au-map-word-limit form-input" placeholder="Word limit (optional)" min="1" max="10" value="${esc(p.wordLimit || "")}">
+        </div>
         <label class="au-label">Labels to identify (each = one question number)</label>
         <div class="au-subs">${(rows.length ? rows : [{ text: "", answer: "" }])
           .map(
             (r) => `<div class="au-sub-row">
               <input type="text" class="au-sub-text form-input" placeholder="Label (e.g. Main entrance)" value="${esc(r.text)}">
-              <input type="text" class="au-sub-answer form-input" placeholder="Letter" value="${esc(r.answer)}">
+              <input type="text" class="au-sub-answer form-input" placeholder="${isGap ? MAP_GAP_PH : "Letter"}" value="${esc(r.answer)}">
               <button type="button" class="au-remove" onclick="this.parentElement.remove()">×</button>
             </div>`
           )
@@ -586,23 +609,33 @@ export function collectEditor(el, target, positionLabel = "") {
     }
 
     case "map-labelling": {
+      const mode = val(el, ".au-map-mode") === "gap" ? "gap" : "labels";
       const options = collectOptionRows(el, true);
-      if (!Object.keys(options).length) fail("location letters are required.");
+      if (mode === "labels" && !Object.keys(options).length) fail("location letters are required.");
       const questions = [];
       el.querySelectorAll(".au-subs .au-sub-row").forEach((row) => {
         const text = row.querySelector(".au-sub-text")?.value?.trim();
-        const answer = latinizeLetter(row.querySelector(".au-sub-answer")?.value?.trim()?.toUpperCase() || "");
-        if (!text && !answer) return;
-        if (!text || !answer) fail("every label needs both a name and a letter.");
+        const typed = row.querySelector(".au-sub-answer")?.value?.trim() || "";
+        if (!text && !typed) return;
+        if (!text || !typed) fail(`every label needs both a name and ${mode === "gap" ? "an answer" : "a letter"}.`);
+        if (mode === "gap") {
+          questions.push({ text, correctAnswer: typed });
+          return;
+        }
+        const answer = latinizeLetter(typed.toUpperCase());
         if (!options[answer]) fail(`label letter "${answer}" is not among the locations.`);
         questions.push({ text, correctAnswer: answer });
       });
       if (!questions.length) fail("at least one label is required.");
-      return {
-        type: "map-labelling", groupInstruction: gi,
+      const item = {
+        type: "map-labelling", groupInstruction: gi, answerMode: mode,
         title: val(el, ".au-title"), imageUrl: val(el, ".au-image-url"),
-        options, questions,
+        questions,
       };
+      // only the live half is saved, so switching modes leaves nothing behind
+      if (mode === "labels") item.options = options;
+      else item.wordLimit = parseInt(val(el, ".au-map-word-limit"), 10) || null;
+      return item;
     }
 
     default:
@@ -636,11 +669,12 @@ export function setupAuthorForms(root = document) {
     if (add === "option") {
       btn.previousElementSibling?.insertAdjacentHTML?.("beforeend", optionRows([{ label: "", text: "" }]));
     } else if (add === "sub") {
+      const typed = item.querySelector(".au-map-mode")?.value === "gap";
       item.querySelector(".au-subs")?.insertAdjacentHTML(
         "beforeend",
         `<div class="au-sub-row">
           <input type="text" class="au-sub-text form-input" placeholder="Question / statement / label">
-          <input type="text" class="au-sub-answer form-input" placeholder="Answer (A, B...)">
+          <input type="text" class="au-sub-answer form-input" placeholder="${typed ? MAP_GAP_PH : "Answer (A, B...)"}">
           <button type="button" class="au-remove" onclick="this.parentElement.remove()">×</button>
         </div>`
       );

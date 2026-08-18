@@ -279,7 +279,8 @@ function renderTable(item, ctx) {
   return div;
 }
 
-/* ── map-labelling: image + numbered label rows with letter dropdowns ── */
+/* ── map-labelling: image + numbered label rows, answered either by
+      picking a letter off the map or by typing (item.answerMode) ── */
 function renderMapLabelling(item, ctx) {
   const div = el("div", "qe-map-labelling");
   if (item.groupId) div.id = item.groupId;
@@ -288,6 +289,25 @@ function renderMapLabelling(item, ctx) {
     (item.imageUrl
       ? `<div class="qe-map-image"><img src="${esc(item.imageUrl)}" alt="${esc(item.title || "Plan")}" /></div>`
       : "");
+
+  // typed answers: the same numbered box + input the gap fills use
+  if (item.answerMode === "gap") {
+    const blankRe = /(\d+)\s*_+|_+\s*(\d+)|_+/; // first blank marker only
+    item.rows.forEach((r) => {
+      const rowDiv = el("div", "matching-question qe-map-gap");
+      rowDiv.id = r.id;
+      const gap = gapInlineHTML(r.id, r.number, answerOf(ctx, r.id));
+      const text = r.text || "";
+      rowDiv.innerHTML =
+        `<div class="matching-question-text">${
+          blankRe.test(text) ? text.replace(blankRe, gap) : `${text} ${gap}`
+        }</div>`;
+      div.appendChild(rowDiv);
+    });
+    wireTextInputs(div, ctx);
+    return div;
+  }
+
   const letters = item.options.length
     ? item.options
     : [...new Set(item.rows.flatMap((r) => r.answerKey))].sort().map((l) => ({ label: l, text: "" }));

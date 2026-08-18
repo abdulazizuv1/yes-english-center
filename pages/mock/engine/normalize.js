@@ -16,7 +16,8 @@
 //   table          completion table with ___qN___ gaps in cells
 //   drag-slots     drag cards from a bank onto labelled slots
 //   drag-inline    drag words from a bank into {0} gaps inside a text
-//   map-labelling  image + numbered label rows answered with letters
+//   map-labelling  image + numbered label rows, answered with letters
+//                  off the map or typed in (answerMode)
 //
 // IELTS mapping (per ielts.org): both sections share multiple choice,
 // matching, the completion family (note/table/flow-chart/summary/
@@ -399,14 +400,29 @@ export function normalizeDragDrop(q, instruction = q.groupInstruction || null) {
   };
 }
 
-// New type: plan/map/diagram labelling — an image plus numbered label
-// rows answered with option letters (dropdowns, CDT style).
+// Plan/map/diagram labelling — an image plus numbered label rows. The
+// add/edit tools choose how the rows are answered:
+//   "labels"  pick a letter off the map from a dropdown (CDT style)
+//   "gap"     type the answer, exactly like a gap fill
+// Tests saved before that choice existed carry no answerMode, so it is
+// read back from the shape: letters were the only thing they could be.
+export function mapAnswerMode(q) {
+  if (q?.answerMode === "gap" || q?.answerMode === "labels") return q.answerMode;
+  if (optionList(q?.options).length) return "labels";
+  const keys = (q?.questions || []).flatMap((r) => answerKey(r.correctAnswer ?? r.answer));
+  // nothing authored yet (a blank editor form) → letters, the older default
+  if (!keys.length) return "labels";
+  return keys.every((a) => /^[A-Za-z]$/.test(a.trim())) ? "labels" : "gap";
+}
+
 export function normalizeMapLabelling(q, instruction = q.groupInstruction || null) {
   return {
     kind: "map-labelling",
+    answerMode: mapAnswerMode(q),
     groupId: q.questionId || q.qId || null,
     title: q.title || "",
     imageUrl: q.imageUrl || "",
+    wordLimit: q.wordLimit || null,
     options: optionList(q.options),
     rows: (q.questions || []).map((r) => ({
       id: r.questionId || r.qId,

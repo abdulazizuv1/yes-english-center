@@ -193,6 +193,52 @@ const jsonFiles = (dir) =>
     check("no notice when scores agree", R.scoreNotice(1, stored), "");
   }
 
+  /* map labelling: letters off the map, or typed like a gap fill */
+  console.log("\n═══ map labelling modes ═══");
+  {
+    const check = (label, got, want) => {
+      if (got === want) console.log(`  ✓ ${label}`);
+      else fail(`${label}: got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+    };
+    const letters = N.normalizeMapLabelling({
+      type: "map-labelling", answerMode: "labels", questionId: "q1",
+      options: { A: "North gate", B: "Car park" },
+      questions: [{ questionId: "q1", text: "Main entrance", correctAnswer: "B" }],
+    });
+    const typed = N.normalizeMapLabelling({
+      type: "map-labelling", answerMode: "gap", wordLimit: 2,
+      questions: [
+        { questionId: "q2", text: "Cafe", correctAnswer: "canteen, cafeteria" },
+        { questionId: "q3", text: "Sports hall", correctAnswer: "gym" },
+      ],
+    });
+    check("letters mode kept", letters.answerMode, "labels");
+    check("typed mode kept", typed.answerMode, "gap");
+    check("typed mode keeps its word limit", typed.wordLimit, 2);
+    check("every label is one question", G.gradeItem(typed, {}).length, 2);
+
+    const marks = G.gradeItem(letters, { q1: "B" }).concat(
+      G.gradeItem(typed, { q2: "Cafeteria", q3: "pool" })
+    );
+    check("letter answer correct", marks.find((r) => r.id === "q1").correct, true);
+    check("typed variant correct", marks.find((r) => r.id === "q2").correct, true);
+    check("wrong typed answer incorrect", marks.find((r) => r.id === "q3").correct, false);
+
+    const review = R.reviewRows([letters, typed], { q1: "B", q2: "cafeteria", q3: "" });
+    check("letters show their map location", review.find((r) => r.id === "q1").userDisplay, "B. Car park");
+    check("typed expects every variant", review.find((r) => r.id === "q2").expectedDisplay, "canteen / cafeteria");
+    check("blank typed answer is unanswered", review.find((r) => r.id === "q3").status, "unanswered");
+
+    // tests saved before the choice existed carry no answerMode
+    check("legacy letters map reads as letters",
+      N.mapAnswerMode({ options: { A: "gate" }, questions: [{ correctAnswer: "A" }] }), "labels");
+    check("legacy map without options, letter answers",
+      N.mapAnswerMode({ questions: [{ correctAnswer: "A" }] }), "labels");
+    check("word answers with no options read as typed",
+      N.mapAnswerMode({ questions: [{ correctAnswer: "car park" }] }), "gap");
+    check("a blank question defaults to letters", N.mapAnswerMode({}), "labels");
+  }
+
   /* answer-key variants: "holiday, holidays" and "US/American" */
   console.log("\n═══ answer variants ═══");
   const cases = [
