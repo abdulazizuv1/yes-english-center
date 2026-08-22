@@ -5,6 +5,12 @@
 // (question-item, question-number, radio-option, gap-inline, ...), so
 // each page's existing CSS keeps working.
 //
+// Option text is wrapped in .qe-option-text rather than sitting loose in
+// the <label>: the labels are flex rows, and a highlight span dropped
+// straight into a flex row turns the sentence into separate flex items —
+// CSS then discards the whitespace between them, gluing the highlighted
+// word to the one before it. Inside a wrapper it is ordinary inline text.
+//
 // ctx = {
 //   answers,                    // the page's live answers object
 //   onAnswer(qId, value),       // value === undefined → delete
@@ -120,7 +126,7 @@ function renderChoice(item, ctx) {
       return (
         `<label class="radio-option"><input type="radio" name="${item.id}" value="${esc(o.label)}" data-qe="1" ${
           saved === o.label ? "checked" : ""
-        }/> ${label}</label>`
+        }/> <span class="qe-option-text">${label}</span></label>`
       );
     })
     .join("");
@@ -209,7 +215,7 @@ function renderMultiSelect(item, ctx) {
         (o) =>
           `<label class="radio-option"><input type="checkbox" value="${esc(o.label)}" data-qe="1" ${
             selectedNow().includes(o.label) ? "checked" : ""
-          }/> ${o.label}. ${o.text}</label>`
+          }/> <span class="qe-option-text">${o.label}. ${o.text}</span></label>`
       )
       .join("") +
     `</div></div>`;
@@ -352,6 +358,25 @@ function wireTextInputs(root, ctx, sizeClasses = false) {
     });
     input.addEventListener("focus", () => input.classList.add("focused"));
     input.addEventListener("blur", () => input.classList.remove("focused"));
+  });
+}
+
+/* ── repair: option text that predates the .qe-option-text wrapper ──
+   The reading page and the full mock store highlights as saved HTML and
+   re-inject it, so an attempt that was highlighted before the wrapper
+   existed still carries loose text in its flex labels — and still glues
+   the highlighted word to the one before it. Wrapping it on the way back
+   in fixes those attempts too. */
+export function wrapLooseOptionText(root) {
+  root?.querySelectorAll?.(".radio-option").forEach((label) => {
+    if (label.querySelector(".qe-option-text")) return;
+    const span = document.createElement("span");
+    span.className = "qe-option-text";
+    // everything after the input belongs to the option's text
+    [...label.childNodes]
+      .filter((n) => !(n.nodeType === Node.ELEMENT_NODE && n.tagName === "INPUT"))
+      .forEach((n) => span.appendChild(n));
+    label.appendChild(span);
   });
 }
 

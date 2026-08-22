@@ -1,4 +1,5 @@
 import { readingState } from "./state.js";
+import { wrapLooseOptionText } from "../../engine/render.js";
 
 export function cleanupHighlightListeners() {
   readingState.highlightEventListeners.forEach(({ element, type, listener }) => {
@@ -184,6 +185,7 @@ export function restoreHighlights(restoreInputEventListeners) {
 
       setTimeout(() => {
         questionsList.innerHTML = savedHTML;
+        wrapLooseOptionText(questionsList);
 
         // Re-inject fresh multi-select groups to replace any corrupted saved HTML.
         const restoredGroups = Array.from(questionsList.querySelectorAll(".multi-select-options"));

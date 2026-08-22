@@ -3,6 +3,7 @@
 import { state } from "./state.js";
 import { saveState } from "./storage.js";
 import { restoreInputEventListeners } from "./answers.js";
+import { wrapLooseOptionText } from "../../engine/render.js";
 
 // Highlight system functions
 function cleanupHighlightListeners() {
@@ -192,6 +193,7 @@ function restoreHighlights() {
         
         setTimeout(() => {
           questionsList.innerHTML = savedHTML;
+          wrapLooseOptionText(questionsList);
           
           setTimeout(() => {
             restoreInputEventListeners();

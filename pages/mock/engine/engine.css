@@ -201,3 +201,13 @@
     font-size: 14px;
     line-height: 1.5;
 }
+
+/* Option text lives in its own element so that highlighting a word never
+   makes the highlight a flex item of the label. Flex layout drops the
+   whitespace between items, which used to glue a highlighted word to its
+   neighbour ("more valid" → "morevalid"). Inert where the label is not a
+   flex row. */
+.qe-option-text {
+    flex: 1;
+    min-width: 0;
+}
