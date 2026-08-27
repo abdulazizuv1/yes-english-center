@@ -148,3 +148,80 @@ export function saveLearned(setId, learnedSet) {
         console.warn('Could not save flashcard progress:', err);
     }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Bringing words in from somewhere else, and taking them out.
+
+   People arrive with a list they already have: a Quizlet export, two
+   columns from a spreadsheet, or lines they typed themselves. These turn
+   that text into cards and back again. Pure functions, no DOM.
+   ───────────────────────────────────────────────────────────── */
+
+const COLUMN_SEPARATORS = { tab: '\t', comma: ',', dash: ' - ', semicolon: ';' };
+
+/** Guesses how the pasted list separates a word from its meaning. */
+export function detectSeparator(text) {
+    const rows = String(text || '').split(/\r?\n/).filter((r) => r.trim());
+    if (!rows.length) return 'tab';
+    const hits = (needle) => rows.filter((r) => r.includes(needle)).length;
+    if (hits('\t') >= rows.length / 2) return 'tab';
+    if (hits(' - ') >= rows.length / 2) return 'dash';
+    if (hits(';') >= rows.length / 2) return 'semicolon';
+    if (hits(',') >= rows.length / 2) return 'comma';
+    return 'tab';
+}
+
+/**
+ * Pasted text to cards.
+ * @param {string} text        what the person pasted
+ * @param {object} opts        { between: 'auto'|'tab'|'comma'|'dash'|'semicolon'|'custom',
+ *                               customBetween: string,
+ *                               rows: 'newline'|'semicolon'|'custom', customRows: string }
+ */
+export function parseImport(text, opts = {}) {
+    const raw = String(text || '');
+    if (!raw.trim()) return [];
+
+    const rowMode = opts.rows || 'newline';
+    const rowSep = rowMode === 'custom' ? (opts.customRows || '\n')
+        : rowMode === 'semicolon' ? ';'
+            : '\n';
+
+    const betweenMode = opts.between && opts.between !== 'auto' ? opts.between : detectSeparator(raw);
+    const colSep = betweenMode === 'custom'
+        ? (opts.customBetween || '\t')
+        : (COLUMN_SEPARATORS[betweenMode] || '\t');
+
+    const rows = rowSep === '\n' ? raw.split(/\r?\n/) : raw.split(rowSep);
+
+    return rows
+        .map((row) => {
+            const line = row.trim();
+            if (!line) return null;
+            const parts = line.split(colSep);
+            if (parts.length < 2) return null;
+
+            // A tab-separated list is really columns, so a third column is the
+            // example. With any other separator the meaning may well contain
+            // one, so everything after the first separator stays together.
+            const term = parts[0].trim();
+            let definition;
+            let example = '';
+            if (colSep === '\t') {
+                definition = (parts[1] || '').trim();
+                example = parts.slice(2).join(' ').trim();
+            } else {
+                definition = parts.slice(1).join(colSep).trim();
+            }
+            if (!term || !definition) return null;
+            return { term, definition, example };
+        })
+        .filter(Boolean);
+}
+
+/** Cards back to text, in the shape parseImport reads. */
+export function toExportText(cards) {
+    return (cards || [])
+        .map((c) => [c.term, c.definition, c.example].filter(Boolean).join('\t'))
+        .join('\n');
+}

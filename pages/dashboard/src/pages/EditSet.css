@@ -73,3 +73,67 @@
     .editset-row { flex-wrap: wrap; }
     .editset-fields { flex-basis: 100%; }
 }
+
+/* ─── bringing in a list from somewhere else ─── */
+.editset-head-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.editset-tool {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+    background: var(--card-bg); color: var(--text-secondary);
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: border-color .15s, color .15s;
+}
+.editset-tool:hover { border-color: var(--primary); color: var(--primary); }
+
+.editset-import {
+    border: 1px solid var(--primary); border-radius: var(--radius);
+    background: var(--content-bg); padding: 16px; margin-bottom: 18px;
+}
+.editset-import-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.editset-import-head p { margin: 0 0 10px; font-size: 13.5px; color: var(--text-secondary); max-width: 62ch; }
+
+.editset-import-text {
+    width: 100%; box-sizing: border-box; resize: vertical;
+    padding: 12px 14px; border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+    background: var(--card-bg); color: var(--text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.6;
+    outline: none;
+}
+.editset-import-text:focus { border-color: var(--primary); }
+
+.editset-import-opts { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+.editset-import-opts label {
+    display: flex; flex-direction: column; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+}
+.editset-import-opts select {
+    padding: 8px 10px; border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+    background: var(--card-bg); color: var(--text-primary);
+    font-family: inherit; font-size: 13.5px; cursor: pointer;
+}
+
+.editset-import-preview { margin-top: 14px; }
+.editset-import-count { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--success); }
+.editset-import-none { margin: 0; font-size: 13px; color: var(--danger); }
+.editset-import-preview ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.editset-import-preview li {
+    display: flex; gap: 10px; font-size: 13.5px;
+    padding: 8px 10px; background: var(--card-bg);
+    border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+}
+.editset-import-preview li b { color: var(--text-primary); flex-shrink: 0; }
+.editset-import-preview li span {
+    color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.editset-import-add {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 14px;
+    padding: 10px 18px; border: 0; border-radius: var(--radius-sm);
+    background: var(--primary); color: #fff;
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: background .15s;
+}
+.editset-import-add:hover:not(:disabled) { background: var(--primary-dark); }
+.editset-import-add:disabled { opacity: .5; cursor: not-allowed; }

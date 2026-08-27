@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useFlashcardSet, createSet, saveSet, cleanCards } from '../hooks/useFlashcards';
-import { ArrowLeft, Plus, Trash2, Save, Globe, User } from 'lucide-react';
+import { useFlashcardSet, createSet, saveSet, cleanCards, parseImport, detectSeparator, toExportText } from '../hooks/useFlashcards';
+import { ArrowLeft, Plus, Trash2, Save, Globe, User, ClipboardPaste, Copy, X } from 'lucide-react';
 import './EditSet.css';
 
 const blankCard = () => ({ term: '', definition: '', example: '' });
@@ -25,6 +25,12 @@ export default function EditSet() {
     const [cards, setCards] = useState([blankCard(), blankCard(), blankCard()]);
     const [saving, setSaving] = useState(false);
 
+    // bringing in a list somebody already has
+    const [importOpen, setImportOpen] = useState(false);
+    const [importText, setImportText] = useState('');
+    const [between, setBetween] = useState('auto');
+    const [rowsMode, setRowsMode] = useState('newline');
+
     useEffect(() => {
         if (!set) return;
         setTitle(set.title || '');
@@ -37,6 +43,35 @@ export default function EditSet() {
     };
 
     const addCard = () => setCards((prev) => [...prev, blankCard()]);
+
+    const importPreview = parseImport(importText, { between, rows: rowsMode });
+    const detected = between === 'auto' && importText.trim() ? detectSeparator(importText) : null;
+
+    const applyImport = () => {
+        if (!importPreview.length) return;
+        setCards((prev) => {
+            const kept = prev.filter((c) => c.term.trim() || c.definition.trim());
+            return [...kept, ...importPreview];
+        });
+        setImportText('');
+        setImportOpen(false);
+    };
+
+    const copyAll = async () => {
+        const text = toExportText(cleanCards(cards));
+        if (!text) { alert('Nothing to copy yet.'); return; }
+        try {
+            await navigator.clipboard.writeText(text);
+            alert('Copied. Every card is one line: word, a tab, then the meaning.');
+        } catch {
+            const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(title || 'flashcards').replace(/[^\w\s-]/g, '')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    };
     const removeCard = (i) => setCards((prev) => prev.filter((_, idx) => idx !== i));
 
     const handleSave = async () => {
@@ -108,8 +143,84 @@ export default function EditSet() {
             <div className="editset-cards">
                 <div className="editset-cards-head">
                     <h3>Cards</h3>
-                    <span className="editset-ready">{readyCount} ready to study</span>
+                    <div className="editset-head-actions">
+                        <span className="editset-ready">{readyCount} ready to study</span>
+                        <button className="editset-tool" onClick={() => setImportOpen((o) => !o)}>
+                            <ClipboardPaste size={15} /> Import a list
+                        </button>
+                        <button className="editset-tool" onClick={copyAll} title="Copy every card as text">
+                            <Copy size={15} /> Copy all
+                        </button>
+                    </div>
                 </div>
+
+                {importOpen && (
+                    <div className="editset-import">
+                        <div className="editset-import-head">
+                            <p>Paste your words below. One card per line, with the word and its meaning separated.</p>
+                            <button className="fc-icon-btn" onClick={() => setImportOpen(false)} title="Close">
+                                <X size={15} />
+                            </button>
+                        </div>
+
+                        <textarea
+                            className="editset-import-text"
+                            rows="7"
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            placeholder={'academic achievement\tthe success a student reaches\nbroaden your horizons\tto widen what you know'}
+                        />
+
+                        <div className="editset-import-opts">
+                            <label>
+                                Between word and meaning
+                                <select value={between} onChange={(e) => setBetween(e.target.value)}>
+                                    <option value="auto">Work it out for me{detected ? ` (${detected})` : ''}</option>
+                                    <option value="tab">Tab</option>
+                                    <option value="comma">Comma</option>
+                                    <option value="dash">Dash, like word - meaning</option>
+                                    <option value="semicolon">Semicolon</option>
+                                </select>
+                            </label>
+                            <label>
+                                Between cards
+                                <select value={rowsMode} onChange={(e) => setRowsMode(e.target.value)}>
+                                    <option value="newline">A new line</option>
+                                    <option value="semicolon">Semicolon</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        {importText.trim() && (
+                            <div className="editset-import-preview">
+                                {importPreview.length === 0 ? (
+                                    <p className="editset-import-none">
+                                        No cards found yet. Try another separator above.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="editset-import-count">
+                                            {importPreview.length} card{importPreview.length === 1 ? '' : 's'} found. First few:
+                                        </p>
+                                        <ul>
+                                            {importPreview.slice(0, 3).map((c, i) => (
+                                                <li key={i}><b>{c.term}</b> <span>{c.definition}</span></li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        <button
+                            className="editset-import-add"
+                            onClick={applyImport}
+                            disabled={!importPreview.length}
+                        >
+                            <Plus size={16} /> Add {importPreview.length || ''} card{importPreview.length === 1 ? '' : 's'}
+                        </button>
+                    </div>
+                )}
 
                 {cards.map((c, i) => (
                     <div className="editset-row" key={i}>

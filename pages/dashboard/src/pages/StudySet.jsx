@@ -1,44 +1,58 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useFlashcardSet, loadLearned, saveLearned } from '../hooks/useFlashcards';
+import { useFlashcardSet, loadLearned, saveLearned, toExportText } from '../hooks/useFlashcards';
 import {
     ArrowLeft, Shuffle, RotateCcw, Check, X as XIcon,
-    ChevronLeft, ChevronRight, Pencil,
+    ChevronLeft, ChevronRight, Pencil, Download, PartyPopper,
 } from 'lucide-react';
 import './StudySet.css';
 import {
     grabPoint, dragAngle, isThrown, throwDirection, flightTransform, leanAmount,
 } from './swipePhysics';
 
-function SwipeCard({ card, index, flipped, onFlip, onSwipe }) {
+function SwipeCard({ card, deal, flipped, onFlip, onSwipe }) {
     const cardRef = useRef(null);
     const drag = useRef(null);
+    const flippedRef = useRef(flipped);
 
-    // new card → clear whatever transform the previous throw left behind
+    /* The card's transform belongs to JavaScript alone. The flip used to live
+       in a CSS class, and the first tap wrote an inline transform that beat
+       it, so the card never turned over. One owner, one source of truth. */
+    const paint = useCallback((dx, dy, angle, opacity = 1) => {
+        const el = cardRef.current;
+        if (!el) return;
+        const flip = flippedRef.current ? ' rotateY(180deg)' : '';
+        el.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)${flip}`;
+        el.style.opacity = String(opacity);
+        el.style.setProperty('--lean', String(leanAmount(dx)));
+    }, []);
+
+    /* A fresh deal always gets a fresh card, even when the position number
+       happens to repeat (a one-card set advancing onto itself). Without this
+       the thrown card kept its opacity 0 and never came back. */
     useEffect(() => {
         const el = cardRef.current;
         if (!el) return;
         el.style.transition = 'none';
-        el.style.transform = '';
-        el.style.opacity = '';
-        // force a reflow so the next transition starts from this clean state
-        void el.offsetWidth;
-        el.style.transition = '';
+        el.style.opacity = '1';
         el.classList.remove('throwing');
-    }, [index]);
+        drag.current = null;
+        paint(0, 0, 0);
+        void el.offsetWidth;      // let that land before transitions return
+        el.style.transition = '';
+    }, [deal, paint]);
 
-    const paint = (dx, dy, angle, opacity = 1) => {
+    // flipping at rest: repaint through the same channel so it animates
+    useEffect(() => {
+        flippedRef.current = flipped;
         const el = cardRef.current;
-        if (!el) return;
-        el.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
-        el.style.opacity = String(opacity);
-        // tint the card towards green/red as it approaches the threshold
-        el.style.setProperty('--lean', String(leanAmount(dx)));
-    };
+        if (!el || drag.current) return;
+        el.style.transition = '';
+        paint(0, 0, 0);
+    }, [flipped, paint]);
 
     const onPointerDown = (e) => {
-        // let clicks on the buttons inside the card through
-        if (e.target.closest('button')) return;
+        if (e.target.closest('button')) return;   // let buttons inside work
         const el = cardRef.current;
         const rect = el.getBoundingClientRect();
         el.setPointerCapture?.(e.pointerId);
@@ -80,16 +94,14 @@ function SwipeCard({ card, index, flipped, onFlip, onSwipe }) {
         const dx = e.clientX - d.startX;
         const dy = e.clientY - d.startY;
 
-        // a tap (no real movement) flips the card instead
+        // no real movement: this was a tap, so turn the card over
         if (!d.moved) {
             el.style.transition = '';
-            paint(0, 0, 0);
             onFlip();
             return;
         }
 
         if (isThrown(dx, d.vx)) {
-            // keep flying the way it was thrown, spinning about the grab point
             const flight = flightTransform({
                 dx, dy, vx: d.vx, grabY: d.grabY,
                 viewportWidth: window.innerWidth || 1200,
@@ -100,7 +112,6 @@ function SwipeCard({ card, index, flipped, onFlip, onSwipe }) {
             const dir = throwDirection(dx, d.vx);
             setTimeout(() => onSwipe(dir > 0 ? 'right' : 'left'), 260);
         } else {
-            // not far enough — spring back to the deck
             el.style.transition = 'transform .32s cubic-bezier(.2,.8,.3,1), opacity .2s';
             paint(0, 0, 0);
         }
@@ -108,7 +119,7 @@ function SwipeCard({ card, index, flipped, onFlip, onSwipe }) {
 
     return (
         <div
-            className={`fc-card ${flipped ? 'flipped' : ''}`}
+            className="fc-card"
             ref={cardRef}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
@@ -121,7 +132,7 @@ function SwipeCard({ card, index, flipped, onFlip, onSwipe }) {
                 <div className="fc-term">{card.term}</div>
                 <div className="fc-hint">Tap to flip · drag to sort</div>
             </div>
-            <div className="fc-face fc-back">
+            <div className="fc-face fc-card-back">
                 <div className="fc-back-term">{card.term}</div>
                 <div className="fc-label">Meaning</div>
                 <div className="fc-def">{card.definition}</div>
@@ -141,14 +152,11 @@ export default function StudySet() {
     const { set, loading, error } = useFlashcardSet(setId);
 
     const [pos, setPos] = useState(0);
+    const [deal, setDeal] = useState(0);       // counts every card handed over
     const [flipped, setFlipped] = useState(false);
     const [learned, setLearned] = useState(() => loadLearned(setId));
-    // null = the set's own order; an array = a shuffled order of indexes
-    const [order, setOrder] = useState(null);
+    const [order, setOrder] = useState(null);  // null = the set's own order
 
-    // The deck follows the set, so nothing has to be copied into state
-    // when it loads. Card ids stay tied to the original position, which is
-    // what the saved "learned" marks refer to.
     const cards = useMemo(
         () => (set?.cards || []).map((c, i) => ({ ...c, id: i })),
         [set]
@@ -159,14 +167,25 @@ export default function StudySet() {
     );
 
     const total = deck.length;
-    const safePos = total ? Math.min(pos, total - 1) : 0;
-    const card = deck[safePos];
+    const safePos = total ? Math.min(pos, total) : 0;   // total itself = finished
+    const finished = total > 0 && safePos >= total;
+    const card = finished ? null : deck[safePos];
 
+    /* The deck runs to the end and stops there, the way a real stack of cards
+       does. It used to wrap around forever, which on a one-card set meant
+       every button appeared to do nothing at all. */
     const go = useCallback((delta) => {
         if (!total) return;
         setFlipped(false);
-        setPos((p) => (p + delta + total) % total);
+        setDeal((d) => d + 1);
+        setPos((p) => Math.max(0, Math.min(total, p + delta)));
     }, [total]);
+
+    const restart = useCallback(() => {
+        setFlipped(false);
+        setDeal((d) => d + 1);
+        setPos(0);
+    }, []);
 
     const mark = useCallback((cardId, known) => {
         setLearned((prev) => {
@@ -190,8 +209,14 @@ export default function StudySet() {
             [next[i], next[j]] = [next[j], next[i]];
         }
         setOrder(next);
-        setPos(0);
-        setFlipped(false);
+        restart();
+    };
+
+    const practiseUnknown = () => {
+        const missed = cards.map((_, i) => i).filter((i) => !learned.has(i));
+        if (!missed.length) return;
+        setOrder(missed);
+        restart();
     };
 
     const resetProgress = () => {
@@ -199,20 +224,38 @@ export default function StudySet() {
         const empty = new Set();
         setLearned(empty);
         saveLearned(setId, empty);
+        setOrder(null);
+        restart();
     };
 
-    // keyboard: the same shortcuts the practice page in the brief used
+    const exportCards = async () => {
+        const text = toExportText(cards);
+        try {
+            await navigator.clipboard.writeText(text);
+            alert(`Copied ${cards.length} card${cards.length === 1 ? '' : 's'}. Paste them anywhere, or into another set.`);
+        } catch {
+            // clipboard blocked: hand them a file instead
+            const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(set?.title || 'flashcards').replace(/[^\w\s-]/g, '')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    };
+
     useEffect(() => {
         const onKey = (e) => {
-            if (e.target.matches('input, textarea')) return;
+            const t = e.target;
+            if (t instanceof Element && t.closest('input, textarea, select, [contenteditable]')) return;
             if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
             else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-            else if (e.key === ' ') { e.preventDefault(); setFlipped((f) => !f); }
+            else if (e.key === ' ') { e.preventDefault(); if (!finished) setFlipped((f) => !f); }
             else if (e.key === 'Enter' && card) { e.preventDefault(); mark(card.id, !learned.has(card.id)); }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [go, card, mark, learned]);
+    }, [go, card, mark, learned, finished]);
 
     if (loading) return <div className="study-page page-enter"><div className="fc-loading">Loading set…</div></div>;
     if (error || !set) {
@@ -226,6 +269,7 @@ export default function StudySet() {
 
     const knownCount = learned.size;
     const progress = total ? Math.round((knownCount / total) * 100) : 0;
+    const missedCount = cards.length - knownCount;
 
     return (
         <div className="study-page page-enter">
@@ -235,6 +279,9 @@ export default function StudySet() {
                     <h2>{set.title}</h2>
                     {set.description && <p>{set.description}</p>}
                 </div>
+                <button className="fc-icon-btn" onClick={exportCards} title="Copy all cards as text">
+                    <Download size={16} />
+                </button>
                 <Link to={`/flashcards/${setId}/edit`} className="fc-icon-btn" title="Edit set">
                     <Pencil size={16} />
                 </Link>
@@ -244,7 +291,7 @@ export default function StudySet() {
                 <div className="study-progress">
                     <div className="study-progress-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <span className="study-progress-text">{knownCount} / {total} known</span>
+                <span className="study-progress-text">{knownCount} / {cards.length} known</span>
                 <button className="fc-btn" onClick={shuffle}><Shuffle size={15} /> Shuffle</button>
                 <button className="fc-btn" onClick={resetProgress}><RotateCcw size={15} /> Reset</button>
             </div>
@@ -254,6 +301,29 @@ export default function StudySet() {
                     <p>This set has no cards yet.</p>
                     <Link to={`/flashcards/${setId}/edit`} className="fc-new-btn">Add cards</Link>
                 </div>
+            ) : finished ? (
+                <div className="fc-done">
+                    <PartyPopper size={40} strokeWidth={1.5} />
+                    <h3>That is the whole set.</h3>
+                    <p>
+                        You marked <b>{knownCount}</b> of <b>{cards.length}</b> as known
+                        {missedCount > 0
+                            ? `, and ${missedCount} still ${missedCount === 1 ? 'needs' : 'need'} work.`
+                            : '. Nothing left to practise.'}
+                    </p>
+                    <div className="fc-done-actions">
+                        {missedCount > 0 && (
+                            <button className="fc-new-btn" onClick={practiseUnknown}>
+                                Practise the {missedCount} you missed
+                            </button>
+                        )}
+                        <button className="fc-btn" onClick={() => { setOrder(null); restart(); }}>
+                            <RotateCcw size={15} /> Study again
+                        </button>
+                        <Link to="/flashcards" className="fc-btn">All sets</Link>
+                    </div>
+                    <button className="fc-link-btn" onClick={() => go(-1)}>Back to the last card</button>
+                </div>
             ) : (
                 <>
                     <div className="fc-stage">
@@ -261,9 +331,9 @@ export default function StudySet() {
                         <div className="fc-stack fc-stack-2" />
                         <div className="fc-stack fc-stack-1" />
                         <SwipeCard
-                            key={card.id}
+                            key={deal}
                             card={card}
-                            index={safePos}
+                            deal={deal}
                             flipped={flipped}
                             onFlip={() => setFlipped((f) => !f)}
                             onSwipe={handleSwipe}
@@ -271,7 +341,9 @@ export default function StudySet() {
                     </div>
 
                     <div className="study-nav">
-                        <button className="fc-btn" onClick={() => go(-1)}><ChevronLeft size={16} /> Prev</button>
+                        <button className="fc-btn" onClick={() => go(-1)} disabled={safePos === 0}>
+                            <ChevronLeft size={16} /> Prev
+                        </button>
                         <button
                             className={`fc-btn learn ${learned.has(card.id) ? 'on' : ''}`}
                             onClick={() => mark(card.id, !learned.has(card.id))}
@@ -279,7 +351,9 @@ export default function StudySet() {
                             <Check size={16} /> {learned.has(card.id) ? 'Known' : 'Mark known'}
                         </button>
                         <span className="study-counter"><b>{safePos + 1}</b> / {total}</span>
-                        <button className="fc-btn primary" onClick={() => go(1)}>Next <ChevronRight size={16} /></button>
+                        <button className="fc-btn primary" onClick={() => go(1)}>
+                            {safePos === total - 1 ? 'Finish' : 'Next'} <ChevronRight size={16} />
+                        </button>
                     </div>
 
                     <p className="study-help">

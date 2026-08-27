@@ -59,7 +59,6 @@
     --lean: 0;                /* -1 … +1, set by JS while dragging */
 }
 .fc-card:active { cursor: grabbing; }
-.fc-card.flipped { transform: rotateY(180deg); }
 /* while a throw is in flight the card must not intercept pointers */
 .fc-card.throwing { pointer-events: none; }
 
@@ -94,7 +93,7 @@
 .fc-badge.know { right: 20px; color: var(--success); opacity: max(0, var(--lean)); }
 .fc-badge.learning { left: 20px; color: var(--danger); opacity: max(0, calc(-1 * var(--lean))); }
 
-.fc-back {
+.fc-card-back {
     background: linear-gradient(150deg, var(--sidebar-bg), var(--primary));
     color: #fff; transform: rotateY(180deg); justify-content: center;
 }
@@ -132,3 +131,26 @@
     .fc-term { font-size: 27px; }
     .study-title h2 { font-size: 19px; }
 }
+
+/* ─── the end of the deck ─── */
+.fc-done {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 14px; padding: 54px 30px;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 20px; color: var(--primary);
+}
+.fc-done h3 { margin: 0; font-size: 24px; color: var(--text-primary); }
+.fc-done p { margin: 0; color: var(--text-secondary); font-size: 15.5px; max-width: 46ch; }
+.fc-done p b { color: var(--text-primary); }
+.fc-done-actions {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px;
+}
+.fc-link-btn {
+    background: none; border: 0; cursor: pointer; padding: 4px;
+    color: var(--text-muted); font-family: inherit; font-size: 13.5px;
+    text-decoration: underline; text-underline-offset: 3px;
+}
+.fc-link-btn:hover { color: var(--primary); }
+
+.fc-btn:disabled { opacity: .45; cursor: not-allowed; }
+.fc-btn:disabled:hover { border-color: var(--card-border); color: var(--text-secondary); }
