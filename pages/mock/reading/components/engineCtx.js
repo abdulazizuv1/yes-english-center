@@ -1,18 +1,22 @@
-// The reading test's bridge to the shared question engine: answers live
-// on readingState.answersSoFar; every change persists and refreshes nav.
+// The reading test's bridge to the shared question engine. Answers live in
+// the saved session; every change is written to this computer at once and
+// the bottom bar is told to refresh.
 import { readingState } from "./state.js";
-import { saveState } from "./storage.js";
-import { updateQuestionNav } from "./navigation.js";
+import { saveSession } from "./session.js";
+
+const listeners = new Set();
+export const onAnswerChange = (fn) => listeners.add(fn);
 
 export const engineCtx = {
   get answers() {
-    return readingState.answersSoFar;
+    return readingState.session.answers;
   },
   onAnswer(qId, value) {
     if (!qId) return;
-    if (value === undefined) delete readingState.answersSoFar[qId];
-    else readingState.answersSoFar[qId] = value;
-    saveState();
-    updateQuestionNav();
+    const answers = readingState.session.answers;
+    if (value === undefined || value === null || value === "") delete answers[qId];
+    else answers[qId] = value;
+    saveSession();
+    listeners.forEach((fn) => fn(qId));
   },
 };

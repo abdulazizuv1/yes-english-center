@@ -1,166 +1,287 @@
+// Starts the reading test and ties the pieces together.
+//
+// Order matters: the student's saved sitting is loaded before anything is
+// drawn, so every answer, highlight, note and review flag is on the page
+// from the first frame, on the part they were on, with the clock where it
+// was. The test itself is kept on this computer while a sitting is in
+// progress, so a refresh with no internet still opens it.
 import { readingState } from "./state.js";
-import { initializeHighlightSystem, setupWindowHighlightActions, saveCurrentHighlights } from "./highlights.js";
-import { loadSavedState, assignQuestionIds, saveState, clearReadingAnswers } from "./storage.js";
-import { generateQuestionNav, updateQuestionNav, startTimer, setRenderPassageFn } from "./navigation.js";
-import { renderPassage } from "./render.js";
-import { createHandleFinish } from "./finish.js";
-import { createPauseModal, setupTogglePause } from "./pause.js";
+import { numberQuestions, buildItems, partOfQuestion } from "./questions.js";
+import { loadSession, saveSession, saveOnLeave, TEST_DURATION_MS } from "./session.js";
+import { renderPart, questionEl, qIdFromTarget } from "./render.js";
+import { buildFooter, updateFooter } from "./nav.js";
+import { initMarks } from "./marks.js";
+import { startClock } from "./timer.js";
+import { createSubmitter, confirmFinish } from "./submit.js";
+import { initChrome, applySettings } from "./chrome.js";
+import { onAnswerChange } from "./engineCtx.js";
+
+// staff who sit tests without a clock
+const UNTIMED = new Set(["alisher@yescenter.uz"]);
+const TEST_CACHE = (testId) => `ielts-reading:v2:test:${testId}`;
+const LOAD_TIMEOUT_MS = 10000;
+
+function showLoadError(message) {
+  const el = document.getElementById("loadError");
+  el.querySelector("p").textContent = message;
+  el.hidden = false;
+  document.body.classList.remove("loading");
+}
 
 function waitForPin(correctPin) {
   return new Promise((resolve) => {
     const modal = document.getElementById("pinModal");
     const input = document.getElementById("pinInput");
     const error = document.getElementById("pinError");
-    const confirmBtn = document.getElementById("pinConfirmBtn");
-
-    modal.style.display = "flex";
+    modal.hidden = false;
     input.focus();
-
-    function attempt() {
-      const entered = input.value.trim();
-      if (entered === correctPin) {
-        modal.style.display = "none";
+    const attempt = () => {
+      if (input.value.trim() === String(correctPin)) {
+        modal.hidden = true;
         resolve();
       } else {
-        error.style.display = "block";
+        error.hidden = false;
         input.value = "";
         input.focus();
       }
-    }
-
-    confirmBtn.addEventListener("click", attempt);
-    input.addEventListener("keydown", function onKey(e) {
-      if (e.key === "Enter") attempt();
-    });
+    };
+    document.getElementById("pinConfirm").addEventListener("click", attempt);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") attempt(); });
   });
 }
 
-export function initReadingTest(deps) {
-  const { db, auth, doc, getDoc, collection, addDoc, serverTimestamp, onAuthStateChanged } = deps;
-
-  const handleFinish = createHandleFinish({ db, auth, collection, addDoc, serverTimestamp });
-
-  function setupNavButtons() {
-    const backBtn = document.getElementById("backBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const finishBtn = document.getElementById("finishBtn");
-
-    backBtn.addEventListener("click", () => {
-      if (readingState.currentPassageIndex > 0) {
-        saveCurrentHighlights(saveState);
-        readingState.currentPassageIndex--;
-        renderPassage(readingState.currentPassageIndex);
-        updateQuestionNav();
-      }
-    });
-
-    nextBtn.addEventListener("click", () => {
-      if (readingState.currentPassageIndex < readingState.passages.length - 1) {
-        saveCurrentHighlights(saveState);
-        readingState.currentPassageIndex++;
-        renderPassage(readingState.currentPassageIndex);
-        updateQuestionNav();
-      }
-    });
-
-    finishBtn.addEventListener("click", handleFinish);
-  }
-
-  async function loadTest() {
-    const user = await new Promise((resolve) => {
-      const unsub = onAuthStateChanged(auth, (u) => {
-        unsub();
-        resolve(u);
-      });
-    });
-
-    if (!user) {
-      alert("You must be logged in to access the reading test.");
-      window.location.href = "/";
-      return;
-    }
-
-    try {
-      const cssLink = document.querySelector('link[href*="test.css"]');
-      if (cssLink) {
-        const timestamp = new Date().getTime();
-        cssLink.href = `./test.css?v=${timestamp}`;
-      }
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const testId = urlParams.get("testId") || "test-1";
-      readingState.currentTestId = testId;
-      readingState.testStorageKey = `readingTest_${readingState.currentTestId}`;
-      loadSavedState();
-
-
-      const docRef = doc(db, "readingTests", testId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-
-        if (data.accessPin) {
-          await waitForPin(data.accessPin);
-        }
-
-        readingState.passages = data.passages;
-        // Соединяем навигацию с функцией рендера
-        setRenderPassageFn(renderPassage);
-        assignQuestionIds();
-        generateQuestionNav();
-        renderPassage(readingState.currentPassageIndex);
-        updateQuestionNav();
-      } else {
-        document.getElementById("passageText").innerHTML = "Test not found.";
-        console.error("❌ Reading test not found:", testId);
-      }
-    } catch (error) {
-      console.error("❌ Error loading reading test:", error);
-      document.getElementById("passageText").innerHTML =
-        "Error loading test: " + error.message;
-    }
-  }
-
-  window.openReview = function () {
-    alert("Review functionality - showing all answers and flagged questions");
-  };
-
-  function setupTimerAfterLoad() {
-    const display = document.getElementById("time");
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.email === "alisher@yescenter.uz") {
-        readingState.hasUnlimitedTime = true;
-        display.textContent = "∞";
-        display.style.fontSize = "24px";
-      } else {
-        readingState.hasUnlimitedTime = false;
-        startTimer(60 * 60, display, handleFinish);
-      }
-    });
-  }
-
-  window.onload = () => {
-    createPauseModal();
-    const startTimerWithFinish = (duration, display) =>
-      startTimer(duration, display, handleFinish);
-    setupTogglePause(startTimerWithFinish);
-    initializeHighlightSystem();
-    setupWindowHighlightActions(saveState);
-    setupNavButtons();
-
-    loadTest().then(() => {
-      setupTimerAfterLoad();
-      // expose clear button handler
-      window.clearAllAnswers = function () {
-        if (confirm('Clear all answers and highlights for this reading test?')) {
-          clearReadingAnswers();
-          alert('All answers cleared.');
-        }
-      };
-    });
-  };
+function readCachedTest(testId) {
+  try { return JSON.parse(localStorage.getItem(TEST_CACHE(testId)) || "null"); } catch { return null; }
 }
 
+function cacheTest(testId, data) {
+  try { localStorage.setItem(TEST_CACHE(testId), JSON.stringify({ data, cachedAt: Date.now() })); } catch { /* optional */ }
+}
 
+async function fetchTest(deps, testId, hasSitting) {
+  const cached = readCachedTest(testId);
+  // mid-sitting, the copy on this computer wins: it opens with no internet,
+  // and the test cannot shift under the student if someone edits it
+  if (hasSitting && cached?.data) return cached.data;
+  try {
+    const snap = await Promise.race([
+      deps.getDoc(deps.doc(deps.db, "readingTests", testId)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), LOAD_TIMEOUT_MS)),
+    ]);
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    cacheTest(testId, data);
+    return data;
+  } catch (err) {
+    if (cached?.data) return cached.data;
+    throw err;
+  }
+}
+
+export async function initReadingTest(deps) {
+  const { auth, onAuthStateChanged } = deps;
+  document.body.classList.add("loading");
+
+  // signing in is remembered on this computer, so this works offline too
+  const user = await new Promise((resolve) => {
+    const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
+  });
+  if (!user) {
+    alert("You must be logged in to take the reading test.");
+    window.location.href = "/";
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  readingState.testId = params.get("testId") || "test-1";
+  readingState.user = { uid: user.uid, email: user.email || "" };
+  readingState.unlimited = UNTIMED.has(user.email);
+  document.getElementById("candidate").textContent = user.email || "Candidate";
+
+  const hadSitting = !!localStorage.getItem(`ielts-reading:v2:${user.uid}:${readingState.testId}`);
+
+  let data;
+  try {
+    data = await fetchTest(deps, readingState.testId, hadSitting);
+  } catch {
+    showLoadError("The test could not be loaded. Check the internet connection and refresh the page.");
+    return;
+  }
+  if (!data) {
+    showLoadError("This test could not be found.");
+    return;
+  }
+
+  readingState.passages = data.passages || [];
+  readingState.parts = numberQuestions(readingState.passages);
+  readingState.items = buildItems(readingState.passages);
+
+  const session = loadSession(user.uid, readingState.testId);
+  if (session.part >= readingState.parts.length) session.part = 0;
+
+  const submitter = createSubmitter(deps);
+
+  // a sitting already submitted (maybe still waiting for internet) resumes
+  // sending instead of reopening the questions
+  if (session.finished) {
+    document.body.classList.remove("loading");
+    submitter.send();
+    return;
+  }
+
+  if (data.accessPin && !session.pinOk) {
+    document.body.classList.remove("loading");
+    await waitForPin(data.accessPin);
+    session.pinOk = true;
+    saveSession();
+  }
+
+  start(session, submitter);
+}
+
+function start(session, submitter) {
+  if (!session.deadline) {
+    session.startedAt = Date.now();
+    session.deadline = session.startedAt + TEST_DURATION_MS;
+    saveSession();
+  }
+  const zones = {
+    passage: document.getElementById("passagePane"),
+    questions: document.getElementById("questionPane"),
+  };
+  const allQIds = readingState.parts.flatMap((p) => p.qIds);
+  let stopClock = () => {};
+  let shownPart = null;   // nothing drawn yet: there is no scroll position to keep
+
+  const saveScroll = () => {
+    if (shownPart === null) return;
+    session.scroll[shownPart] = {
+      passage: zones.passage.scrollTop,
+      questions: zones.questions.scrollTop,
+    };
+  };
+
+  const markCurrent = () => {
+    document.querySelectorAll(".cd-current").forEach((el) => el.classList.remove("cd-current"));
+    const el = session.current && questionEl(session.current);
+    el?.classList.add("cd-current");
+  };
+
+  const showPart = (index, { restoreScroll = true } = {}) => {
+    saveScroll();
+    session.part = index;
+    renderPart(index, zones);
+    shownPart = index;
+    const pos = session.scroll[index];
+    zones.passage.scrollTop = restoreScroll && pos ? pos.passage : 0;
+    zones.questions.scrollTop = restoreScroll && pos ? pos.questions : 0;
+    if (!session.current || partOfQuestion(readingState.parts, session.current) !== index) {
+      session.current = readingState.parts[index].qIds[0] || null;
+    }
+    saveSession();
+    markCurrent();
+    updateFooter();
+  };
+
+  const goTo = (qId, { focus = true } = {}) => {
+    if (!qId) return;
+    const part = partOfQuestion(readingState.parts, qId);
+    session.current = qId;
+    if (part !== session.part) showPart(part, { restoreScroll: false });
+    saveSession();
+    markCurrent();
+    updateFooter();
+    const el = questionEl(qId);
+    if (el) {
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      if (focus) {
+        const field =
+          el.querySelector(`[data-qid="${qId}"]:not([type="hidden"])`) ||
+          el.querySelector(`input[name="${qId}"]:checked, input[name="${qId}"]`) ||
+          el.querySelector("input, select, textarea");
+        field?.focus({ preventScroll: true });
+      }
+    }
+  };
+
+  const step = (dir) => {
+    const i = allQIds.indexOf(session.current);
+    const next = allQIds[Math.max(0, Math.min(allQIds.length - 1, (i < 0 ? 0 : i) + dir))];
+    goTo(next);
+  };
+
+  // the bottom bar
+  buildFooter({
+    onPart: (index) => {
+      if (index === session.part) return;
+      showPart(index);
+    },
+    onQuestion: (qId) => goTo(qId),
+  });
+  document.getElementById("prevQ").addEventListener("click", () => step(-1));
+  document.getElementById("nextQ").addEventListener("click", () => step(1));
+  document.getElementById("reviewToggle").addEventListener("change", (e) => {
+    const q = session.current;
+    if (!q) return;
+    session.flags = session.flags.filter((f) => f !== q);
+    if (e.target.checked) session.flags.push(q);
+    saveSession();
+    updateFooter();
+  });
+
+  // following the student around the questions
+  const track = (e) => {
+    const q = qIdFromTarget(e.target);
+    if (q && q !== session.current) {
+      session.current = q;
+      saveSession();
+      markCurrent();
+      updateFooter();
+    }
+  };
+  zones.questions.addEventListener("focusin", track);
+  zones.questions.addEventListener("click", track);
+  onAnswerChange((qId) => {
+    if (qId && qId !== session.current && allQIds.includes(qId)) {
+      session.current = qId;
+      markCurrent();
+    }
+    updateFooter();
+  });
+
+  // scroll positions are part of "where I was"
+  let scrollTimer = null;
+  const onScroll = () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { saveScroll(); saveSession(); }, 250);
+  };
+  zones.passage.addEventListener("scroll", onScroll, { passive: true });
+  zones.questions.addEventListener("scroll", onScroll, { passive: true });
+
+  initMarks({ zones, getPart: () => session.part, onChange: () => {} });
+  initChrome();
+  applySettings();
+  saveOnLeave();
+
+  // finishing
+  const finish = async ({ auto = false } = {}) => {
+    if (auto) document.getElementById("finishModal").hidden = true;
+    if (!auto) {
+      const ok = await confirmFinish();
+      if (!ok) return;
+    }
+    stopClock();
+    submitter.finish({ auto });
+  };
+  document.getElementById("finishBtn").addEventListener("click", () => finish());
+
+  showPart(session.part);
+  document.body.classList.remove("loading");
+
+  stopClock = startClock({
+    el: document.getElementById("timeLeft"),
+    getDeadline: () => session.deadline,
+    unlimited: readingState.unlimited,
+    onExpire: () => finish({ auto: true }),
+  });
+}

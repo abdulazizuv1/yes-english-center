@@ -3,114 +3,176 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IELTS Reading Test</title>
-    <!-- CSS с версионированием для предотвращения кэширования -->
-    <link rel="stylesheet" href="./test.css?v=2.0" />
-    <link rel="stylesheet" href="../engine/engine.css" />
+    <title>IELTS Academic Reading</title>
+    <link rel="stylesheet" href="./test.css?v=3.0" />
+    <link rel="stylesheet" href="../engine/engine.css?v=3.0" />
     <link rel="icon" href="/image/logo_copy.png" />
   </head>
-  <body>
-    <!-- Header -->
-    <div class="test-header">
-      <div class="test-title">IELTS Academic Reading</div>
-      <div class="timer-section">
-        <div id="timer">Time left: <span id="time">60:00</span></div>
-        <button class="pause-btn" id="pauseBtn" onclick="togglePause()">
-          Pause
-        </button>
-        <button class="clear-btn" id="clearBtn" onclick="clearAllAnswers()">Clear</button>
-        <button class="review-btn" onclick="openReview()">Review</button>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Passage Panel -->
-      <div class="passage-panel">
-        <div class="passage-title" id="passageTitle">Loading...</div>
-        <div class="passage-instructions" id="passageInstructions">
-          Loading instructions...
+  <body class="ielts loading" data-size="standard" data-contrast="bw">
+    <!-- ═══ header: who is sitting, how long is left, settings ═══ -->
+    <header class="cd-header">
+      <div class="cd-who">
+        <div class="cd-brand">
+          <img src="/image/logo.webp" alt="YES English Center" />
+          <span class="cd-test-name">Academic Reading</span>
         </div>
-        <div class="passage-text" id="passageText">Loading passage...</div>
-      </div>
-
-      <!-- Questions Panel -->
-      <div class="questions-panel">
-        <div id="questionsList">Loading questions...</div>
-      </div>
-    </div>
-
-    <!-- Question Navigation -->
-    <div class="question-nav" id="questionNav">
-      <div class="nav-section">
-        <span class="nav-label">Paragraph 1:</span>
-        <div class="nav-numbers" id="part1Numbers"></div>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">Paragraph 2:</span>
-        <div class="nav-numbers" id="part2Numbers"></div>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">Paragraph 3:</span>
-        <div class="nav-numbers" id="part3Numbers"></div>
-      </div>
-    </div>
-    
-    <!-- Bottom Controls -->
-    <div class="bottom-controls">
-      <button class="control-btn btn-back" id="backBtn" style="display: none">
-        ← Back
-      </button>
-      <div>
-        <button class="control-btn btn-next" id="nextBtn">Next →</button>
-        <button
-          class="control-btn btn-finish"
-          id="finishBtn"
-          style="display: none"
-        >
-          Submit Test
-        </button>
-      </div>
-    </div>
-
-    <!-- Context Menu -->
-    <div class="context-menu" id="contextMenu">
-      <div class="context-menu-item" onclick="highlightSelection()">
-        📝 Highlight
-      </div>
-      <div class="context-menu-item" onclick="removeHighlight()">
-        🗑️ Remove Highlight
-      </div>
-    </div>
-    
-    <!-- PIN Modal -->
-    <div id="pinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:16px; padding:36px 32px; max-width:360px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-        <h3 style="margin:0 0 8px; color:#1e293b; font-size:20px;">Access PIN Required</h3>
-        <p style="margin:0 0 20px; color:#64748b; font-size:14px;">This test is protected. Enter the 6-digit PIN to continue.</p>
-        <input type="text" id="pinInput" maxlength="6" inputmode="numeric" placeholder="• • • • • •"
-          style="width:100%; box-sizing:border-box; padding:14px; border:2px solid #e2e8f0; border-radius:10px; font-size:22px; letter-spacing:8px; text-align:center; outline:none; transition:border-color 0.2s;"
-          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
-        <p id="pinError" style="display:none; color:#ef4444; font-size:13px; margin:8px 0 0;">Incorrect PIN. Please try again.</p>
-        <div style="display:flex; gap:12px; margin-top:20px;">
-          <button onclick="history.back()" style="flex:1; padding:12px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#374151; font-size:15px; cursor:pointer;">Back</button>
-          <button id="pinConfirmBtn" style="flex:1; padding:12px; border:none; border-radius:10px; background:#3b82f6; color:#fff; font-size:15px; font-weight:600; cursor:pointer;">Confirm</button>
+        <div class="cd-candidate">
+          <span class="cd-candidate-label">Candidate</span>
+          <span id="candidate">…</span>
         </div>
       </div>
+
+      <div class="cd-clock">
+        <button type="button" class="cd-timer" id="timeLeft" title="Time remaining"></button>
+        <button type="button" class="cd-showtime" id="showTimer">Show time remaining</button>
+      </div>
+
+      <div class="cd-tools">
+        <span class="cd-net" id="netIcon" role="img" aria-label="Connected" title="Connected">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path class="net-arc" d="M2 8.8a15 15 0 0 1 20 0M5.5 12.4a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="19.5" r="1.4" fill="currentColor"/>
+            <path class="net-cross" d="M3 3l18 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <button type="button" class="cd-menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Settings and help">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="cd-menu" id="menuPanel" hidden>
+          <p class="cd-menu-title">Settings</p>
+          <fieldset>
+            <legend>Text size</legend>
+            <label><input type="radio" name="size" value="standard" /> Standard</label>
+            <label><input type="radio" name="size" value="large" /> Large</label>
+            <label><input type="radio" name="size" value="xlarge" /> Extra large</label>
+          </fieldset>
+          <fieldset>
+            <legend>Colours</legend>
+            <label><input type="radio" name="contrast" value="bw" /> Black on white</label>
+            <label><input type="radio" name="contrast" value="wb" /> White on black</label>
+            <label><input type="radio" name="contrast" value="yb" /> Yellow on black</label>
+          </fieldset>
+          <button type="button" class="cd-menu-action" id="toggleTimer">Hide time remaining</button>
+          <details class="cd-help">
+            <summary>Help</summary>
+            <ul>
+              <li>Click a question number at the bottom to go to it. Use the arrows to move one question at a time.</li>
+              <li>Tick <b>Review</b> to mark the question you are on and come back to it later.</li>
+              <li>Select words in the text, then right-click to <b>Highlight</b> them or add <b>Notes</b>. Right-click a highlight to clear it.</li>
+              <li>Drag the divider in the middle to make the passage or the questions wider.</li>
+              <li>Everything you do is saved on this computer as you go, even without internet.</li>
+              <li>Click <b>✓</b> at the bottom right when you have finished.</li>
+            </ul>
+          </details>
+        </div>
+      </div>
+    </header>
+
+    <div class="cd-status" id="statusBanner" role="status" hidden></div>
+
+    <!-- ═══ which part, which questions ═══ -->
+    <div class="cd-band">
+      <strong id="partTitle">Part 1</strong>
+      <span id="partInstr"></span>
     </div>
 
-    <!-- Loading Modal -->
-    <div class="loading-modal" id="loadingModal">
-      <div class="loading-modal-content">
-        <div class="loading-spinner"></div>
-        <h2>Submitting Your Results</h2>
-        <p>Please wait while we process your test...</p>
+    <!-- ═══ passage | questions ═══ -->
+    <main class="cd-main">
+      <article class="cd-pane cd-passage" id="passagePane" data-zone="passage" tabindex="0" aria-label="Reading passage"></article>
+      <div class="cd-splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="Drag to resize the passage and the questions" tabindex="0">
+        <span class="cd-grip" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+      <section class="cd-pane cd-questions" id="questionPane" data-zone="questions" aria-label="Questions"></section>
+    </main>
+
+    <!-- ═══ the question bar ═══ -->
+    <footer class="cd-footer">
+      <nav class="cd-parts" id="cdParts" aria-label="Questions"></nav>
+      <div class="cd-actions">
+        <label class="cd-review"><input type="checkbox" id="reviewToggle" /> Review</label>
+        <button type="button" class="cd-arrow" id="prevQ" aria-label="Previous question">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="cd-arrow" id="nextQ" aria-label="Next question">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="cd-finish" id="finishBtn" aria-label="Finish test" title="Finish test">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </footer>
+
+    <!-- ═══ right-click on text ═══ -->
+    <div class="cd-ctx" id="markMenu" role="menu" hidden>
+      <button type="button" data-act="highlight" role="menuitem">Highlight</button>
+      <button type="button" data-act="note" role="menuitem">Notes</button>
+      <button type="button" data-act="editnote" role="menuitem">Edit note</button>
+      <button type="button" data-act="clear" role="menuitem">Clear</button>
+      <button type="button" data-act="clearall" role="menuitem">Clear all</button>
+    </div>
+
+    <div class="note-pop" id="notePop" hidden>
+      <textarea rows="4" placeholder="Type your note"></textarea>
+      <div class="note-actions">
+        <button type="button" data-note="delete">Delete</button>
+        <button type="button" data-note="save">Save</button>
       </div>
     </div>
-    
-    <!-- Pause Modal (будет создан через JS) -->
-    
-    <script type="module" src="test.js?v=2.0"></script>
+
+    <!-- ═══ finishing ═══ -->
+    <div class="cd-modal" id="finishModal" hidden>
+      <div class="cd-dialog" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+        <h2 id="finishTitle">Finish the test?</h2>
+        <p data-finish="count"></p>
+        <p class="cd-dialog-extra" data-finish="extra" hidden></p>
+        <p>Once you submit, you cannot change your answers.</p>
+        <div class="cd-dialog-actions">
+          <button type="button" class="cd-btn" data-finish="back">Go back to the test</button>
+          <button type="button" class="cd-btn primary" data-finish="submit">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd-modal" id="sendOverlay" hidden>
+      <div class="cd-dialog" role="alertdialog" aria-modal="true" aria-live="assertive">
+        <span class="cd-spinner" aria-hidden="true"></span>
+        <h2 data-send="title">Submitting your answers</h2>
+        <p data-send="text"></p>
+        <div class="cd-dialog-actions">
+          <button type="button" class="cd-btn primary" data-send="retry" hidden>Try again now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ access PIN ═══ -->
+    <div class="cd-modal" id="pinModal" hidden>
+      <div class="cd-dialog" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+        <h2 id="pinTitle">Access PIN required</h2>
+        <p>This test is protected. Enter the 6-digit PIN your teacher gave you.</p>
+        <input type="text" id="pinInput" class="cd-pin" maxlength="6" inputmode="numeric" autocomplete="off" aria-label="Access PIN" />
+        <p class="cd-error" id="pinError" hidden>Incorrect PIN. Please try again.</p>
+        <div class="cd-dialog-actions">
+          <button type="button" class="cd-btn" onclick="history.back()">Back</button>
+          <button type="button" class="cd-btn primary" id="pinConfirm">Start the test</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd-modal" id="loadError" hidden>
+      <div class="cd-dialog" role="alertdialog" aria-modal="true">
+        <h2>The test did not open</h2>
+        <p></p>
+        <div class="cd-dialog-actions">
+          <button type="button" class="cd-btn primary" onclick="location.reload()">Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd-loading" aria-hidden="true"><span class="cd-spinner"></span> Loading the test…</div>
+
+    <script type="module" src="test.js?v=3.0"></script>
   </body>
 </html>

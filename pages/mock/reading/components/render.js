@@ -1,137 +1,134 @@
-// Reading test: passage flow. Question rendering itself lives in the
-// shared engine (pages/mock/engine/) — the same renderers the listening
-// test and the full mock use, including drag & drop and map labelling.
+// Draws one part: the passage on the left, the questions on the right.
+//
+// Questions are drawn by the shared engine straight from the saved answers,
+// so a radio button, a dropdown or a dragged card appears already chosen.
+// After that the page only ever adds highlight wrappers around text; it
+// never swaps the questions for a stored copy of their HTML.
 import { readingState } from "./state.js";
-import { restoreHighlights } from "./highlights.js";
-import { saveState } from "./storage.js";
-import { updateQuestionNav } from "./navigation.js";
 import { engineCtx } from "./engineCtx.js";
-import { normalizeReadingQuestions, renderItem } from "../../engine/index.js";
+import { renderItem } from "../../engine/index.js";
+import { paintPart } from "./marks.js";
 
-export function forceRenderPassageContent(index) {
-  const passage = readingState.passages[index];
+const esc = (s) =>
+  String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  document.getElementById("passageTitle").textContent = passage.title;
-  document.getElementById("passageInstructions").textContent = passage.instructions;
+// Capitalised key phrases ("ONE WORD ONLY", "NOT GIVEN") are bold in the
+// real test's instructions.
+const boldCaps = (html) =>
+  html.replace(/\b([A-Z]{2,}(?:[ /-]+[A-Z]{2,})*)\b/g, "<strong>$1</strong>");
 
-  const formattedText = passage.text
-    .split("\n\n")
-    .map((p) => `<p>${p.trim()}</p>`)
+/** Instruction text from the test, laid out the way the real test sets it. */
+export function instructionBlock(text) {
+  const box = document.createElement("div");
+  box.className = "cd-instr";
+  const lines = String(text).split("\n").map((l) => l.trimEnd());
+  const legend = /^(TRUE|FALSE|NOT GIVEN|YES|NO)\s{2,}(.+)$/;
+
+  lines.forEach((line, i) => {
+    const t = line.trim();
+    if (!t) return;
+    if (i === 0 && /^Questions?\s+\d+/i.test(t)) {
+      const h = document.createElement("h3");
+      h.className = "cd-qrange";
+      h.textContent = t;
+      box.appendChild(h);
+      return;
+    }
+    const m = t.match(legend);
+    if (m) {
+      const row = document.createElement("div");
+      row.className = "cd-legend";
+      row.innerHTML = `<strong>${esc(m[1])}</strong><span>${esc(m[2])}</span>`;
+      box.appendChild(row);
+      return;
+    }
+    const p = document.createElement("p");
+    p.innerHTML = boldCaps(esc(t));
+    box.appendChild(p);
+  });
+  return box;
+}
+
+function optionsBox(options) {
+  const box = document.createElement("div");
+  box.className = "cd-options-box";
+  box.innerHTML = options
+    .map((o) => `<div class="cd-option-row"><strong>${esc(o.label)}</strong><span>${esc(o.text)}</span></div>`)
     .join("");
-
-  const passageTextEl = document.getElementById("passageText");
-  passageTextEl.innerHTML = formattedText;
+  return box;
 }
 
-// Re-attach input listeners after highlight-restore replaces question HTML.
-export function restoreInputEventListeners() {
-  const inputs = document.querySelectorAll(
-    'input[data-question-id], input[id^="q"], input[id^="input-"], select[id^="q"]'
-  );
-
-  inputs.forEach((input) => {
-    const qId = input.dataset.questionId || input.dataset.qid || input.id.replace("input-", "");
-
-    if (input.type === "text") {
-      input.value = readingState.answersSoFar[qId] || "";
-      if (input.value) {
-        input.classList.add("has-value");
-      }
-
-      input.addEventListener("input", (e) => {
-        readingState.answersSoFar[qId] = e.target.value;
-        saveState();
-        updateQuestionNav();
-
-        if (e.target.value.trim()) {
-          input.classList.add("has-value");
-          const textLength = e.target.value.length;
-          input.classList.remove("input-small", "input-medium", "input-large");
-          if (textLength > 15) {
-            input.classList.add("input-large");
-          } else if (textLength > 8) {
-            input.classList.add("input-medium");
-          } else {
-            input.classList.add("input-small");
-          }
-        } else {
-          input.classList.remove(
-            "has-value",
-            "input-small",
-            "input-medium",
-            "input-large"
-          );
-        }
-      });
-
-      input.addEventListener("focus", () => input.classList.add("focused"));
-      input.addEventListener("blur", () => input.classList.remove("focused"));
-    } else if (input.type === "radio") {
-      if (readingState.answersSoFar[qId] === input.value) {
-        input.checked = true;
-      }
-      input.addEventListener("change", (e) => {
-        readingState.answersSoFar[qId] = e.target.value;
-        saveState();
-        updateQuestionNav();
-      });
-    }
-  });
-
-  const selects = document.querySelectorAll('select[id^="q"]');
-  selects.forEach((select) => {
-    const qId = select.dataset.qid || select.id;
-    select.value = readingState.answersSoFar[qId] || "";
-    select.addEventListener("change", (e) => {
-      readingState.answersSoFar[qId] = e.target.value;
-      saveState();
-      updateQuestionNav();
-    });
-  });
-}
-
-export function renderPassage(index) {
+export function renderPart(index, zones) {
   const passage = readingState.passages[index];
+  const part = readingState.parts[index];
 
-  forceRenderPassageContent(index);
+  document.getElementById("partTitle").textContent = `Part ${index + 1}`;
+  document.getElementById("partInstr").textContent = part.qIds.length
+    ? `Read the text and answer questions ${part.first}–${part.last}.`
+    : "Read the text.";
 
-  const questionsList = document.getElementById("questionsList");
-  questionsList.innerHTML = "";
+  // passage: same splitting the test has always used, so authored markup
+  // (italics, superscripts) keeps rendering
+  const title = passage.title ? `<h2 class="passage-title">${esc(passage.title)}</h2>` : "";
+  zones.passage.innerHTML =
+    title +
+    String(passage.text || "")
+      .split("\n\n")
+      .map((p) => `<p>${p.trim()}</p>`)
+      .join("");
 
+  // questions
+  zones.questions.innerHTML = "";
   let lastInstruction = null;
-  let matchingOptionsShown = false;
-
-  const items = normalizeReadingQuestions(passage.questions);
-
-  items.forEach((item) => {
+  let optionsShown = false;
+  for (const item of readingState.items[index]) {
     if (item.instruction && item.instruction !== lastInstruction) {
-      const instructionDiv = document.createElement("div");
-      instructionDiv.className = "group-instruction";
-      instructionDiv.textContent = item.instruction;
-      questionsList.appendChild(instructionDiv);
+      zones.questions.appendChild(instructionBlock(item.instruction));
       lastInstruction = item.instruction;
-      matchingOptionsShown = false;
+      optionsShown = false;
     }
-
-    if (item.kind === "match" && !matchingOptionsShown && item.options.length > 0) {
-      const optsDiv = document.createElement("div");
-      optsDiv.className = "matching-options-plain";
-      optsDiv.textContent = item.options.map((opt) => `${opt.label}. ${opt.text}`).join("\n");
-      questionsList.appendChild(optsDiv);
-      matchingOptionsShown = true;
+    if (item.kind === "match" && !optionsShown && item.options.length) {
+      zones.questions.appendChild(optionsBox(item.options));
+      optionsShown = true;
     }
+    renderItem(item, zones.questions, engineCtx);
+  }
 
-    renderItem(item, questionsList, engineCtx);
-  });
+  paintPart(index, zones);
+}
 
-  requestAnimationFrame(() => {
-    restoreHighlights(restoreInputEventListeners);
-  });
+/* ───────────── finding questions on the page ───────────── */
 
-  document.getElementById("backBtn").style.display =
-    index > 0 ? "inline-block" : "none";
-  document.getElementById("nextBtn").style.display =
-    index < readingState.passages.length - 1 ? "inline-block" : "none";
-  document.getElementById("finishBtn").style.display =
-    index === readingState.passages.length - 1 ? "inline-block" : "none";
+const QID = /^q\d+$/;
+
+/** The element that holds question `qId` on the current page. */
+export function questionEl(qId) {
+  let el = document.getElementById(qId);
+  if (el && el.style.display === "none") el = el.parentElement;   // multi-select markers
+  if (!el) el = document.querySelector(`[data-qid="${qId}"]`) || document.querySelector(`input[name="${qId}"]`);
+  if (!el) return null;
+  return (
+    el.closest(".question-item, .gap-fill-question, .gap-fill-list-item, .matching-question, .multi-select-group, .dd-slot, .dd-inline-slot, td") ||
+    el
+  );
+}
+
+/** Which question a click or focus landed in. */
+export function qIdFromTarget(target) {
+  if (!(target instanceof Element)) return null;
+  const choice = target.closest('input[type="radio"]');
+  if (choice?.name && QID.test(choice.name)) return choice.name;
+  const withQid = target.closest("[data-qid]");
+  if (withQid && QID.test(withQid.dataset.qid)) return withQid.dataset.qid;
+  const group = target.closest(".multi-select-group");
+  if (group) {
+    const marker = group.querySelector("[id]");
+    if (marker && QID.test(marker.id)) return marker.id;
+  }
+  let node = target;
+  while (node && node !== document.body) {
+    if (node.id && QID.test(node.id)) return node.id;
+    node = node.parentElement;
+  }
+  return null;
 }

@@ -3,9 +3,13 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v4';
-const STATIC_CACHE = 'yes-static-v4';
-const DYNAMIC_CACHE = 'yes-dynamic-v4';
+const CACHE_NAME = 'yes-english-center-v5';
+const STATIC_CACHE = 'yes-static-v5';
+const DYNAMIC_CACHE = 'yes-dynamic-v5';
+// The reading test must reopen after a refresh with no internet, so its own
+// files (and the Firebase SDK it imports) are kept here. Network first:
+// students always get the newest version while online.
+const READING_CACHE = 'yes-reading-v1';
 const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
 // Assets to cache on install
@@ -55,7 +59,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames
           .filter((name) => {
-            return name !== STATIC_CACHE && name !== DYNAMIC_CACHE;
+            return name !== STATIC_CACHE && name !== DYNAMIC_CACHE && name !== READING_CACHE;
           })
           .map((name) => {
             return caches.delete(name);
@@ -65,6 +69,35 @@ self.addEventListener('activate', (event) => {
   );
   return self.clients.claim();
 });
+
+// What the reading test needs to open without internet
+function isReadingAsset(url) {
+  if (url.origin === self.location.origin) {
+    return (
+      url.pathname.startsWith('/pages/mock/reading/') ||
+      url.pathname.startsWith('/pages/mock/engine/') ||
+      url.pathname === '/config.js' ||
+      url.pathname === '/image/logo.webp' ||
+      url.pathname === '/image/logo_copy.png'
+    );
+  }
+  return url.origin === 'https://www.gstatic.com' && url.pathname.startsWith('/firebasejs/');
+}
+
+function networkFirst(request, isNavigation) {
+  return fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(READING_CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
+      }
+      return response;
+    })
+    .catch(() =>
+      // a test page opened with a different ?testId is the same page
+      caches.match(request, { ignoreSearch: isNavigation }).then((hit) => hit || Response.error())
+    );
+}
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
@@ -78,6 +111,12 @@ self.addEventListener('fetch', (event) => {
 
   // Skip unsupported URL schemes (chrome-extension, chrome, etc.)
   if (url.protocol === 'chrome-extension:' || url.protocol === 'chrome:') {
+    return;
+  }
+
+  // The reading test and what it needs to boot, network first
+  if (isReadingAsset(url)) {
+    event.respondWith(networkFirst(request, request.mode === 'navigate'));
     return;
   }
 
