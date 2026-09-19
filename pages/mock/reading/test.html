@@ -59,7 +59,7 @@
             <ul>
               <li>Click a question number at the bottom to go to it. Use the arrows to move one question at a time.</li>
               <li>Tick <b>Review</b> to mark the question you are on and come back to it later.</li>
-              <li>Select words in the text, then right-click to <b>Highlight</b> them or add <b>Notes</b>. Right-click a highlight to clear it.</li>
+              <li>Select words in the passage or the questions and choose <b>Highlight</b> or <b>Note</b>. Click a highlight to clear it or add a note.</li>
               <li>Drag the divider in the middle to make the passage or the questions wider.</li>
               <li>Everything you do is saved on this computer as you go, even without internet.</li>
               <li>Click <b>✓</b> at the bottom right when you have finished.</li>
@@ -105,12 +105,12 @@
       </div>
     </footer>
 
-    <!-- ═══ right-click on text ═══ -->
-    <div class="cd-ctx" id="markMenu" role="menu" hidden>
-      <button type="button" data-act="highlight" role="menuitem">Highlight</button>
-      <button type="button" data-act="note" role="menuitem">Notes</button>
-      <button type="button" data-act="editnote" role="menuitem">Edit note</button>
-      <button type="button" data-act="clear" role="menuitem">Clear</button>
+    <!-- ═══ appears as soon as text is selected (or a highlight is clicked) ═══ -->
+    <div class="cd-ctx" id="markMenu" role="menu" aria-label="Highlight options" hidden>
+      <button type="button" data-act="highlight" role="menuitem"><span class="ctx-swatch" aria-hidden="true"></span>Highlight</button>
+      <button type="button" data-act="note" role="menuitem"><span class="ctx-note" aria-hidden="true"></span>Note</button>
+      <button type="button" data-act="editnote" role="menuitem"><span class="ctx-note" aria-hidden="true"></span>Edit note</button>
+      <button type="button" data-act="clear" role="menuitem"><span class="ctx-clear" aria-hidden="true"></span>Clear highlight</button>
       <button type="button" data-act="clearall" role="menuitem">Clear all</button>
     </div>
 

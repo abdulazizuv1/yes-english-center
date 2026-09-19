@@ -121,11 +121,18 @@ function closeNote() {
   if (noteEl) noteEl.hidden = true;
 }
 
-function place(el, x, y) {
+// Puts a floating box at (x, y) and keeps it on screen. With no room below,
+// it flips above `anchorTop` (the top of the words it belongs to) instead
+// of sliding up over them.
+function place(el, x, y, anchorTop = null) {
   el.hidden = false;
   const w = el.offsetWidth, h = el.offsetHeight;
-  el.style.left = `${Math.min(x, window.innerWidth - w - 8)}px`;
-  el.style.top = `${Math.min(y, window.innerHeight - h - 8)}px`;
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  let top = y;
+  if (top + h > vh - 8 && anchorTop !== null) top = anchorTop - h - 8;
+  el.style.left = `${Math.max(8, Math.min(x, vw - w - 8))}px`;
+  el.style.top = `${Math.max(8, Math.min(top, vh - h - 8))}px`;
 }
 
 function persist(onChange) {
@@ -137,23 +144,68 @@ export function initMarks({ zones, getPart, onChange }) {
   menuEl = document.getElementById("markMenu");
   noteEl = document.getElementById("notePop");
   const noteText = noteEl.querySelector("textarea");
-  let noteFor = null;   // mark id the note editor belongs to
+  const marks = () => readingState.session.marks;
+  let noteFor = null;      // mark id the note editor belongs to
+  let pointerDown = false;
+  let selTimer = null;
 
   const zoneOf = (node) => {
-    const el = node.nodeType === 1 ? node : node.parentElement;
+    const el = node?.nodeType === 1 ? node : node?.parentElement;
     const host = el?.closest("[data-zone]");
     return host ? host.dataset.zone : null;
   };
 
   const newId = () => `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-  const openNote = (id, x, y) => {
-    const mark = readingState.session.marks.find((m) => m.id === id);
+  /** The student's current selection, if it sits inside the passage or the questions. */
+  const selectionInZone = () => {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return null;
+    const range = sel.getRangeAt(0);
+    const zone = zoneOf(range.commonAncestorContainer);
+    if (!zone) return null;
+    const offsets = rangeToOffsets(zones[zone], range);
+    return offsets ? { zone, offsets, range } : null;
+  };
+
+  const overlapping = (zone, { start, end }) => {
+    const part = getPart();
+    return marks()
+      .filter((m) => m.part === part && m.zone === zone && m.start < end && m.end > start)
+      .map((m) => m.id);
+  };
+
+  const sameOffsets = (a, b) => a && b && a.start === b.start && a.end === b.end;
+
+  /** Shows the menu with only the actions that make sense here. */
+  const openMenu = ({ zone, offsets = null, markIds = [], hitId = null }, x, y, anchorTop = null) => {
+    pending = { zone, offsets, markIds, hitId };
+    const hit = hitId && marks().find((m) => m.id === hitId);
+    const show = (act, on) => { menuEl.querySelector(`[data-act="${act}"]`).hidden = !on; };
+    show("highlight", !!offsets);
+    show("note", !!offsets || (hit && hit.note == null));
+    show("editnote", !!(hit && hit.note != null));
+    show("clear", markIds.length > 0);
+    show("clearall", !!hit);
+    place(menuEl, x, y, anchorTop);
+  };
+
+  const openNote = (id, x, y, anchorTop = null) => {
+    const mark = marks().find((m) => m.id === id);
     if (!mark) return;
     noteFor = id;
     noteText.value = mark.note || "";
-    place(noteEl, x, y);
+    place(noteEl, x, y, anchorTop);
     noteText.focus();
+  };
+
+  const piecesOf = (id) => [...document.querySelectorAll(`mark.hl[data-mark="${CSS.escape(id)}"]`)];
+
+  const noteBelow = (id) => {
+    const pieces = piecesOf(id);
+    if (!pieces.length) return;
+    const r = pieces[pieces.length - 1].getBoundingClientRect();
+    openNote(id, r.left, r.bottom + 6, r.top);
   };
 
   const createMark = (withNote) => {
@@ -161,44 +213,101 @@ export function initMarks({ zones, getPart, onChange }) {
     const { zone, offsets } = pending;
     const mark = { id: newId(), part: getPart(), zone, ...offsets };
     if (withNote) mark.note = "";
-    readingState.session.marks.push(mark);
-    const pieces = paintMark(zones[zone], mark);
+    marks().push(mark);
+    paintMark(zones[zone], mark);
     window.getSelection()?.removeAllRanges();
     persist(onChange);
-    if (withNote && pieces.length) {
-      const r = pieces[pieces.length - 1].getBoundingClientRect();
-      openNote(mark.id, r.left, r.bottom + 6);
-    }
+    if (withNote) noteBelow(mark.id);
+  };
+
+  // a note added to a highlight that is already there
+  const addNoteTo = (id) => {
+    const mark = marks().find((m) => m.id === id);
+    if (!mark) return;
+    mark.note = "";
+    const pieces = piecesOf(id);
+    pieces.forEach((el) => el.classList.add("has-note"));
+    pieces[pieces.length - 1]?.classList.add("note-end");
+    persist(onChange);
+    noteBelow(id);
   };
 
   const removeMarks = (ids) => {
     ids.forEach(unpaintMark);
-    readingState.session.marks = readingState.session.marks.filter((m) => !ids.includes(m.id));
+    readingState.session.marks = marks().filter((m) => !ids.includes(m.id));
     persist(onChange);
   };
 
+  const finishNote = (remove = false) => {
+    if (!noteFor) return closeNote();
+    const mark = marks().find((m) => m.id === noteFor);
+    const text = noteText.value.trim();
+    if (mark) {
+      if (remove) removeMarks([mark.id]);
+      else if (!text) {
+        // an empty note is just a highlight
+        delete mark.note;
+        piecesOf(mark.id).forEach((el) => el.classList.remove("has-note", "note-end"));
+        persist(onChange);
+      } else { mark.note = text; persist(onChange); }
+    }
+    noteFor = null;
+    closeNote();
+  };
+
+  /* ── the menu appears as soon as text is selected: no right-click needed ── */
+  const offerForSelection = (x, y) => {
+    const found = selectionInZone();
+    if (!found) return;
+    if (!menuEl.hidden && sameOffsets(pending?.offsets, found.offsets)) return;   // already showing
+    const anchorTop = found.range.getBoundingClientRect().top;
+    if (x == null) {
+      // keyboard or touch selection: put the menu under the end of it
+      const rects = found.range.getClientRects();
+      const last = rects[rects.length - 1] || found.range.getBoundingClientRect();
+      x = last.left;
+      y = last.bottom + 8;
+    }
+    openMenu({ zone: found.zone, offsets: found.offsets, markIds: overlapping(found.zone, found.offsets) }, x, y, anchorTop);
+  };
+
+  document.addEventListener("pointerdown", (e) => {
+    if (menuEl.contains(e.target) || noteEl.contains(e.target)) return;
+    pointerDown = true;
+  }, true);
+
+  document.addEventListener("pointerup", (e) => {
+    pointerDown = false;
+    if (e.button === 2) return;                          // right button: contextmenu handles it
+    if (menuEl.contains(e.target) || noteEl.contains(e.target)) return;
+    if (e.target.closest?.("input, textarea, select")) return;
+    const x = e.clientX, y = e.clientY + 14;
+    // let the browser finish settling the selection (double-click, triple-click)
+    setTimeout(() => offerForSelection(x, y), 0);
+  }, true);
+
+  // keyboard selections, and touch screens where the selection is adjusted
+  // with handles after the finger lifts
+  document.addEventListener("selectionchange", () => {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(() => { if (!pointerDown) offerForSelection(); }, 350);
+  });
+
+  // right-click still works, on a selection or on a highlight
   document.addEventListener("contextmenu", (e) => {
     const t = e.target;
     if (t.closest("input, textarea, select")) return;   // keep paste and spelling menus
     const zone = zoneOf(t);
     if (!zone) return;
-
     const hit = t.closest("mark.hl");
-    const sel = window.getSelection();
-    const range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
-    const offsets = range && !range.collapsed ? rangeToOffsets(zones[zone], range) : null;
-
-    if (!hit && !offsets) return;          // nothing to act on: native menu
+    const found = selectionInZone();
+    if (!hit && !found) return;                         // nothing to act on: the browser's own menu
     e.preventDefault();
-
-    pending = { zone, offsets, markId: hit?.dataset.mark || null };
-    const mark = hit && readingState.session.marks.find((m) => m.id === hit.dataset.mark);
-    menuEl.querySelector('[data-act="highlight"]').hidden = !offsets;
-    menuEl.querySelector('[data-act="note"]').hidden = !offsets;
-    menuEl.querySelector('[data-act="editnote"]').hidden = !(mark && mark.note != null);
-    menuEl.querySelector('[data-act="clear"]').hidden = !hit;
-    menuEl.querySelector('[data-act="clearall"]').hidden = !hit;
-    place(menuEl, e.clientX, e.clientY);
+    if (found) {
+      openMenu({ zone: found.zone, offsets: found.offsets, markIds: overlapping(found.zone, found.offsets) }, e.clientX, e.clientY);
+    } else {
+      openMenu({ zone, markIds: [hit.dataset.mark], hitId: hit.dataset.mark }, e.clientX, e.clientY);
+    }
   });
 
   menuEl.addEventListener("click", (e) => {
@@ -207,54 +316,43 @@ export function initMarks({ zones, getPart, onChange }) {
     e.stopPropagation();
     const act = e.target.closest("[data-act]")?.dataset.act;
     if (!act || !pending) return;
-    const { markId } = pending;
-    const x = parseFloat(menuEl.style.left), y = parseFloat(menuEl.style.top);
+    const { markIds, hitId } = pending;
     if (act === "highlight") createMark(false);
-    else if (act === "note") createMark(true);
-    else if (act === "editnote" && markId) openNote(markId, x, y);
-    else if (act === "clear" && markId) removeMarks([markId]);
+    else if (act === "note") { if (pending.offsets) createMark(true); else if (hitId) addNoteTo(hitId); }
+    else if (act === "editnote" && hitId) noteBelow(hitId);
+    else if (act === "clear" && markIds.length) { removeMarks(markIds); window.getSelection()?.removeAllRanges(); }
     else if (act === "clearall") {
       const part = getPart();
-      removeMarks(readingState.session.marks.filter((m) => m.part === part).map((m) => m.id));
+      removeMarks(marks().filter((m) => m.part === part).map((m) => m.id));
     }
     closeMenu();
   });
 
-  // clicking a noted passage opens its note
   document.addEventListener("click", (e) => {
-    if (menuEl && !menuEl.hidden && !menuEl.contains(e.target)) closeMenu();
-    const noted = e.target.closest("mark.hl.has-note");
-    if (noted && !noteEl.contains(e.target)) {
-      const r = noted.getBoundingClientRect();
-      openNote(noted.dataset.mark, r.left, r.bottom + 6);
+    // the click that ends a drag-selection must not close the menu it opened
+    if (selectionInZone()) return;
+
+    const hit = e.target.closest("mark.hl");
+    // a highlight inside an answer option is just part of the option: let the click choose it
+    if (hit && !e.target.closest("label, input, select, textarea, button")) {
+      const mark = marks().find((m) => m.id === hit.dataset.mark);
+      if (mark?.note != null) {
+        closeMenu();
+        noteBelow(mark.id);
+      } else {
+        openMenu({ zone: zoneOf(hit), markIds: [hit.dataset.mark], hitId: hit.dataset.mark }, e.clientX, e.clientY + 14, hit.getBoundingClientRect().top);
+      }
       return;
     }
-    if (noteEl && !noteEl.hidden && !noteEl.contains(e.target)) finishNote();
+    if (!menuEl.hidden) closeMenu();
+    if (!noteEl.hidden) finishNote(false);
   });
-
-  const finishNote = (remove = false) => {
-    if (!noteFor) return closeNote();
-    const mark = readingState.session.marks.find((m) => m.id === noteFor);
-    const text = noteText.value.trim();
-    if (mark) {
-      if (remove) removeMarks([mark.id]);
-      else if (!text) {
-        // an empty note is just a highlight
-        delete mark.note;
-        document.querySelectorAll(`mark.hl[data-mark="${CSS.escape(mark.id)}"]`)
-          .forEach((el) => el.classList.remove("has-note", "note-end"));
-        persist(onChange);
-      } else { mark.note = text; persist(onChange); }
-    }
-    noteFor = null;
-    closeNote();
-  };
 
   noteEl.addEventListener("click", (e) => e.stopPropagation());
   noteEl.querySelector('[data-note="save"]').addEventListener("click", () => finishNote(false));
   noteEl.querySelector('[data-note="delete"]').addEventListener("click", () => finishNote(true));
   noteText.addEventListener("input", () => {
-    const mark = readingState.session.marks.find((m) => m.id === noteFor);
+    const mark = marks().find((m) => m.id === noteFor);
     if (mark) { mark.note = noteText.value; saveSession(); }   // a typed note survives a refresh too
   });
 
@@ -262,5 +360,6 @@ export function initMarks({ zones, getPart, onChange }) {
     if (e.key === "Escape") { closeMenu(); if (!noteEl.hidden) finishNote(false); }
   });
   window.addEventListener("resize", closeMenu);
-  document.addEventListener("scroll", closeMenu, true);
+  // scrolling a pane moves the text away from the menu; the note box stays
+  document.addEventListener("scroll", () => closeMenu(), true);
 }

@@ -344,20 +344,35 @@ mark.hl.note-end::after {
               linear-gradient(#1a4fa3, #1a4fa3) 50% 65% / 60% 1.5px no-repeat, #fff;
 }
 
+/* a small row of choices that sits right under the selected words */
 .cd-ctx {
   position: fixed; z-index: 80;
-  min-width: 150px; padding: 4px 0;
+  display: flex; align-items: stretch;
+  padding: 3px;
   background: #fff; color: #000;
-  border: 1px solid #8a8a8a; border-radius: 3px;
+  border: 1px solid #8a8a8a; border-radius: 4px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
 }
 .cd-ctx button {
-  display: block; width: 100%;
-  padding: 8px 16px;
-  border: 0; background: transparent; text-align: left;
-  font-size: 15px; color: #000; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 12px;
+  border: 0; border-radius: 3px; background: transparent;
+  font-size: 14px; font-weight: 700; color: #000; cursor: pointer; white-space: nowrap;
 }
+.cd-ctx button + button { border-left: 1px solid #e0e0e0; border-radius: 0 3px 3px 0; }
 .cd-ctx button:hover, .cd-ctx button:focus-visible { background: #e6eefb; }
+.cd-ctx [data-act="clear"], .cd-ctx [data-act="clearall"] { color: #a1261f; }
+.ctx-swatch { width: 14px; height: 14px; border-radius: 2px; background: var(--hl, #fde74c); border: 1px solid #c9b400; }
+.ctx-note {
+  width: 13px; height: 14px; border: 1.5px solid #1a4fa3; border-radius: 1px;
+  background: linear-gradient(#1a4fa3, #1a4fa3) 50% 35% / 60% 1.5px no-repeat,
+              linear-gradient(#1a4fa3, #1a4fa3) 50% 65% / 60% 1.5px no-repeat, #fff;
+}
+.ctx-clear {
+  width: 12px; height: 12px;
+  background: linear-gradient(45deg, transparent 43%, #a1261f 43%, #a1261f 57%, transparent 57%),
+              linear-gradient(-45deg, transparent 43%, #a1261f 43%, #a1261f 57%, transparent 57%);
+}
 
 .note-pop {
   position: fixed; z-index: 81;
