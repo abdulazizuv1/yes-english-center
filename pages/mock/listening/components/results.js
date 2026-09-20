@@ -1,13 +1,13 @@
 // Grading and submission for the listening test — scoring goes through
 // the shared question engine (pages/mock/engine/).
-import { listeningState } from "./state.js";
+import { listeningState } from "./state.js?v=3.2";
 import {
   repairListeningIds,
   normalizeListeningSection,
   gradeItems,
   splitAnswerVariants as engineSplit,
   textAnswerCorrect,
-} from "../../engine/index.js";
+} from "../../engine/index.js?v=3.2";
 
 export function createHandleFinish(deps) {
   const { db, auth, collection, addDoc, serverTimestamp } = deps;

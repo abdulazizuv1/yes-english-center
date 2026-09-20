@@ -1,6 +1,6 @@
 // Writing stage: task rendering, word counts, local draft persistence.
-import { state } from "./state.js";
-import { updateNavigationButtons } from "./navigation.js";
+import { state } from "./state.js?v=3.2";
+import { updateNavigationButtons } from "./navigation.js?v=3.2";
 
 // Initialize Writing
 function initializeWriting() {

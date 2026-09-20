@@ -2,8 +2,8 @@
 // question numbers; the others fold down to "Part 2   3 of 13", as in the
 // real computer-delivered test. Built from each test's own numbering, so a
 // test split 14 / 13 / 13 is no longer drawn as 13 / 13 / 14.
-import { readingState } from "./state.js";
-import { answeredMap } from "./questions.js";
+import { readingState } from "./state.js?v=3.2";
+import { answeredMap } from "./questions.js?v=3.2";
 
 let partsHost = null;
 

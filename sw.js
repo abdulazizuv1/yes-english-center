@@ -9,7 +9,7 @@ const DYNAMIC_CACHE = 'yes-dynamic-v5';
 // The reading test must reopen after a refresh with no internet, so its own
 // files (and the Firebase SDK it imports) are kept here. Network first:
 // students always get the newest version while online.
-const READING_CACHE = 'yes-reading-v1';
+const READING_CACHE = 'yes-reading-v2';
 const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
 // Assets to cache on install
@@ -85,7 +85,10 @@ function isReadingAsset(url) {
 }
 
 function networkFirst(request, isNavigation) {
-  return fetch(request)
+  // `cache: 'reload'` skips the browser's own HTTP cache. Without it this
+  // "network first" could still be handed a stale copy by the cache sitting
+  // underneath it, which is how an old module once reached a new page.
+  return fetch(new Request(request.url, { cache: 'reload', credentials: 'same-origin' }))
     .then((response) => {
       if (response && response.ok) {
         const copy = response.clone();

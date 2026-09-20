@@ -5,7 +5,7 @@
 // nothing. The key includes the student's uid: the centre's computers are
 // shared, and the old key (readingTest_<testId>) handed one student's
 // answers to the next student who opened the same test.
-import { readingState } from "./state.js";
+import { readingState } from "./state.js?v=3.2";
 
 const PREFIX = "ielts-reading:v2";
 export const TEST_DURATION_MS = 60 * 60 * 1000;

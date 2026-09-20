@@ -5,17 +5,17 @@
 // from the first frame, on the part they were on, with the clock where it
 // was. The test itself is kept on this computer while a sitting is in
 // progress, so a refresh with no internet still opens it.
-import { readingState } from "./state.js";
-import { numberQuestions, buildItems, partOfQuestion } from "./questions.js";
-import { loadSession, saveSession, saveOnLeave, TEST_DURATION_MS } from "./session.js";
-import { renderPart, questionEl, qIdFromTarget } from "./render.js";
-import { buildFooter, updateFooter } from "./nav.js";
-import { initMarks } from "./marks.js";
-import { startClock, freezeClock } from "./timer.js";
-import { createSubmitter, confirmFinish } from "./submit.js";
-import { initChrome, applySettings } from "./chrome.js";
-import { onAnswerChange } from "./engineCtx.js";
-import { initStaffControls, isPaused } from "./staff.js";
+import { readingState } from "./state.js?v=3.2";
+import { numberQuestions, buildItems, partOfQuestion } from "./questions.js?v=3.2";
+import { loadSession, saveSession, saveOnLeave, TEST_DURATION_MS } from "./session.js?v=3.2";
+import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.2";
+import { buildFooter, updateFooter } from "./nav.js?v=3.2";
+import { initMarks } from "./marks.js?v=3.2";
+import { startClock, freezeClock } from "./timer.js?v=3.2";
+import { createSubmitter, confirmFinish } from "./submit.js?v=3.2";
+import { initChrome, applySettings } from "./chrome.js?v=3.2";
+import { onAnswerChange } from "./engineCtx.js?v=3.2";
+import { initStaffControls, isPaused } from "./staff.js?v=3.2";
 
 // staff who sit tests without a clock
 const UNTIMED = new Set(["alisher@yescenter.uz"]);

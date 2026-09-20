@@ -1,7 +1,7 @@
-import { listeningState } from "./state.js";
-import { saveCurrentHighlights } from "./highlights.js";
-import { analyzeTestProgress, isAnswerValid } from "./progress.js";
-import { renderSection } from "./render.js";
+import { listeningState } from "./state.js?v=3.2";
+import { saveCurrentHighlights } from "./highlights.js?v=3.2";
+import { analyzeTestProgress, isAnswerValid } from "./progress.js?v=3.2";
+import { renderSection } from "./render.js?v=3.2";
 
 export function generateQuestionNav() {
   [1, 2, 3, 4].forEach((section) => {

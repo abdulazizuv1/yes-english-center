@@ -1,7 +1,7 @@
 // Stage countdown timer and the listening Pause button.
-import { state, stageDurations } from "./state.js";
-import { showStageTransition } from "./stages.js";
-import { handleFinishTest } from "./results.js";
+import { state, stageDurations } from "./state.js?v=3.2";
+import { showStageTransition } from "./stages.js?v=3.2";
+import { handleFinishTest } from "./results.js?v=3.2";
 
 // Pause functionality
 window.togglePause = function () {

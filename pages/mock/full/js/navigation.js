@@ -1,7 +1,7 @@
 // Question-number nav bar, stage/section indicators and bottom buttons state.
-import { state } from "./state.js";
-import { renderListeningSection } from "./listening.js";
-import { renderReadingPassage, readingPassageOfQuestion } from "./reading.js";
+import { state } from "./state.js?v=3.2";
+import { renderListeningSection } from "./listening.js?v=3.2";
+import { renderReadingPassage, readingPassageOfQuestion } from "./reading.js?v=3.2";
 
 // Question navigation functions
 function generateQuestionNav() {

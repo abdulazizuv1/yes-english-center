@@ -17,7 +17,7 @@
 // Every row: { id, number, correct, status, userDisplay, expectedDisplay }
 // status is "correct" | "incorrect" | "unanswered" — what the pages colour.
 // ═══════════════════════════════════════════════════════════════════════
-import { gradeItem, splitAnswerVariants, textAnswerCorrect } from "./grade.js";
+import { gradeItem, splitAnswerVariants, textAnswerCorrect } from "./grade.js?v=3.2";
 
 const numberOf = (id) => String(id ?? "").replace(/\D/g, "");
 

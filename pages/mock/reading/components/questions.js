@@ -5,7 +5,7 @@
 // assignQuestionIds, except that it records which numbers belong to which
 // part (the bottom bar used to assume 13 / 13 / 14 for every test) and
 // starts from nothing each time instead of appending to a global list.
-import { normalizeReadingQuestions, gradeItems } from "../../engine/index.js";
+import { normalizeReadingQuestions, gradeItems } from "../../engine/index.js?v=3.2";
 
 export function numberQuestions(passages) {
   let counter = 1;

@@ -1,8 +1,8 @@
 // Delegated answer capture for every input type + listener restoration
 // after highlight-restore replaces reading question HTML.
-import { state } from "./state.js";
-import { saveState } from "./storage.js";
-import { updateQuestionNav } from "./navigation.js";
+import { state } from "./state.js?v=3.2";
+import { saveState } from "./storage.js?v=3.2";
+import { updateQuestionNav } from "./navigation.js?v=3.2";
 
 // Attach the document-level answer listeners (runs once from the entry).
 export function setupAnswerCapture() {

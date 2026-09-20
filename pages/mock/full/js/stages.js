@@ -1,18 +1,18 @@
 // Stage lifecycle: switching between listening/reading/writing, timers,
 // stage transition modal and the bottom navigation buttons.
-import { state, stageNames, stageDurations } from "./state.js";
-import { auth, onAuthStateChanged } from "./firebase.js";
-import { stopAllAudio } from "./audio.js";
-import { startTimer } from "./timer.js";
-import { initializeListening, renderListeningSection } from "./listening.js";
-import { initializeReading, renderReadingPassage } from "./reading.js";
-import { initializeWriting } from "./writing.js";
+import { state, stageNames, stageDurations } from "./state.js?v=3.2";
+import { auth, onAuthStateChanged } from "./firebase.js?v=3.2";
+import { stopAllAudio } from "./audio.js?v=3.2";
+import { startTimer } from "./timer.js?v=3.2";
+import { initializeListening, renderListeningSection } from "./listening.js?v=3.2";
+import { initializeReading, renderReadingPassage } from "./reading.js?v=3.2";
+import { initializeWriting } from "./writing.js?v=3.2";
 import {
   generateQuestionNav,
   updateQuestionNav,
   updateStageIndicator,
-} from "./navigation.js";
-import { handleFinishTest } from "./results.js";
+} from "./navigation.js?v=3.2";
+import { handleFinishTest } from "./results.js?v=3.2";
 
 // Initialize stage
 function initializeStage(stageName) {

@@ -1,7 +1,7 @@
 // The listening test's bridge to the shared question engine: answers live
 // on listeningState.answersSoFar; every change persists and refreshes nav.
-import { listeningState } from "./state.js";
-import { updateQuestionNav } from "./navigation.js";
+import { listeningState } from "./state.js?v=3.2";
+import { updateQuestionNav } from "./navigation.js?v=3.2";
 
 export const engineCtx = {
   get answers() {

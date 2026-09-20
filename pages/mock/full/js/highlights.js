@@ -12,10 +12,10 @@
 // character) and is painted onto the page the engine has just drawn.
 // The question DOM is never replaced. The system is shared with the
 // standalone reading test — see pages/mock/engine/marks.js.
-import { state } from "./state.js";
-import { saveState } from "./storage.js";
-import { updateQuestionNav } from "./navigation.js";
-import { initMarks, paintMarks } from "../../engine/marks.js";
+import { state } from "./state.js?v=3.2";
+import { saveState } from "./storage.js?v=3.2";
+import { updateQuestionNav } from "./navigation.js?v=3.2";
+import { initMarks, paintMarks } from "../../engine/marks.js?v=3.2";
 
 /** Which passage/section the student is on: marks are saved against it. */
 export function currentPart() {

@@ -1,8 +1,8 @@
 // The reading test's bridge to the shared question engine. Answers live in
 // the saved session; every change is written to this computer at once and
 // the bottom bar is told to refresh.
-import { readingState } from "./state.js";
-import { saveSession } from "./session.js";
+import { readingState } from "./state.js?v=3.2";
+import { saveSession } from "./session.js?v=3.2";
 
 const listeners = new Set();
 export const onAnswerChange = (fn) => listeners.add(fn);

@@ -16,7 +16,7 @@ import {
   reviewFromStored,
   reviewSummary,
   scoreNotice,
-} from "../engine/index.js";
+} from "../engine/index.js?v=3.2";
 
 
 const app = initializeApp(firebaseConfig);

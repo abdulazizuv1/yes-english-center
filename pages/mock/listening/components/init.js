@@ -1,15 +1,15 @@
-import { listeningState } from "./state.js";
-import { saveCurrentHighlights, loadSavedHighlights } from "./highlights.js";
-import { loadSavedAnswers, setupAnswerPersistence, clearListeningAnswers } from "./storage.js";
+import { listeningState } from "./state.js?v=3.2";
+import { saveCurrentHighlights, loadSavedHighlights } from "./highlights.js?v=3.2";
+import { loadSavedAnswers, setupAnswerPersistence, clearListeningAnswers } from "./storage.js?v=3.2";
 import {
   generateQuestionNav,
   updateQuestionNav,
   attachNavButtons,
   setupOpenReview,
-} from "./navigation.js";
-import { renderSection } from "./render.js";
-import { createHandleFinish } from "./results.js";
-import { setupTogglePause, startTimer } from "./pause.js";
+} from "./navigation.js?v=3.2";
+import { renderSection } from "./render.js?v=3.2";
+import { createHandleFinish } from "./results.js?v=3.2";
+import { setupTogglePause, startTimer } from "./pause.js?v=3.2";
 
 function waitForPin(correctPin) {
   return new Promise((resolve) => {

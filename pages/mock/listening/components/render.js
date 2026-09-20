@@ -1,17 +1,17 @@
 // Listening test: section flow and instruction bands. Question rendering
 // itself lives in the shared engine (pages/mock/engine/) — the same
 // renderers the reading test and the full mock use.
-import { listeningState } from "./state.js";
-import { handleAudio } from "./audio.js";
-import { restoreHighlights, saveCurrentHighlights } from "./highlights.js";
-import { updateNavButtons } from "./navigation.js";
-import { engineCtx } from "./engineCtx.js";
+import { listeningState } from "./state.js?v=3.2";
+import { handleAudio } from "./audio.js?v=3.2";
+import { restoreHighlights, saveCurrentHighlights } from "./highlights.js?v=3.2";
+import { updateNavButtons } from "./navigation.js?v=3.2";
+import { engineCtx } from "./engineCtx.js?v=3.2";
 import {
   repairListeningIds,
   normalizeListeningItem,
   normalizeListeningSection,
   renderItem,
-} from "../../engine/index.js";
+} from "../../engine/index.js?v=3.2";
 
 // Tracks the last group instruction shown while rendering a section so the
 // same instruction isn't repeated before every question in the group.
