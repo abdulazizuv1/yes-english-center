@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.webp';
 
 export default function ProtectedRoute({ children }) {
     const { user, loading } = useAuth();
@@ -16,7 +17,7 @@ export default function ProtectedRoute({ children }) {
                 zIndex: 9999,
             }}>
                 <img
-                    src="/image/logo.png"
+                    src={logo}
                     alt="YES English Center"
                     style={{ width: '180px', marginBottom: '28px', opacity: 0.85 }}
                 />

@@ -5,6 +5,7 @@ import {
     Settings, Shield, LogOut, X, MessageSquare, CalendarCheck, Layers
 } from 'lucide-react';
 import './Sidebar.css';
+import logo from '../assets/logo.webp';
 
 const NAV_ITEMS = [
     { to: '/', icon: Home, label: 'Home' },
@@ -27,7 +28,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 <div className="sidebar-header">
                     <div className="sidebar-brand">
                         <div className="brand-icon" style={{ width: '150px', height: '56px', background: 'transparent', padding: '0 8px' }}>
-                           <a href="/"> <img src="/image/logo.png" alt="YES English Center" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /></a>
+                           <a href="/"> <img src={logo} alt="YES English Center" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /></a>
                         </div>
                     </div>
                     <button className="sidebar-close" onClick={onClose}>
