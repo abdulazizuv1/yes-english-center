@@ -121,6 +121,24 @@ button { font-family: inherit; }
 .cd-net .net-cross { display: none; }
 .offline .cd-net { color: #c62828; }
 .offline .cd-net .net-cross { display: inline; }
+/* staff-only controls, shown by init.js when the account is an admin */
+.cd-staff {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 12px;
+  font: inherit; font-size: 14px; font-weight: 600;
+  color: var(--fg); background: transparent;
+  border: 1px solid var(--line-strong); border-radius: 4px;
+  cursor: pointer; white-space: nowrap;
+}
+.cd-staff:hover { background: var(--chrome); }
+.cd-staff[hidden] { display: none; }
+.cd-staff.danger { color: #a3231a; border-color: #a3231a; }
+.ielts[data-contrast="wb"] .cd-staff.danger,
+.ielts[data-contrast="yb"] .cd-staff.danger { color: #ff8a80; border-color: #ff8a80; }
+.cd-staff.danger:hover { background: rgba(163, 35, 26, .08); }
+/* the clock is frozen while paused: say so rather than let it look live */
+.paused .cd-timer { opacity: .55; }
+
 .cd-menu-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px;

@@ -40,7 +40,18 @@ function waitForPin(correctPin) {
   });
 }
 
+// Leaving mid-test loses nothing — answers are kept on this computer —
+// but it is rarely meant, so the browser asks first.
+function warnBeforeLeaving() {
+  window.addEventListener("beforeunload", (e) => {
+    if (!listeningState.sections.length || listeningState.submitted) return;
+    e.preventDefault();
+    e.returnValue = "";     // browsers show their own wording here
+  });
+}
+
 export function initListeningTest(deps) {
+  warnBeforeLeaving();
   const {
     app,
     db,

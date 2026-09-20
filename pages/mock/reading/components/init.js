@@ -11,15 +11,38 @@ import { loadSession, saveSession, saveOnLeave, TEST_DURATION_MS } from "./sessi
 import { renderPart, questionEl, qIdFromTarget } from "./render.js";
 import { buildFooter, updateFooter } from "./nav.js";
 import { initMarks } from "./marks.js";
-import { startClock } from "./timer.js";
+import { startClock, freezeClock } from "./timer.js";
 import { createSubmitter, confirmFinish } from "./submit.js";
 import { initChrome, applySettings } from "./chrome.js";
 import { onAnswerChange } from "./engineCtx.js";
+import { initStaffControls, isPaused } from "./staff.js";
 
 // staff who sit tests without a clock
 const UNTIMED = new Set(["alisher@yescenter.uz"]);
 const TEST_CACHE = (testId) => `ielts-reading:v2:test:${testId}`;
+const ROLE_CACHE = (uid) => `ielts-reading:v2:role:${uid}`;
 const LOAD_TIMEOUT_MS = 10000;
+const ROLE_TIMEOUT_MS = 5000;
+
+// Is this an admin account? The answer is remembered on this computer, so
+// the staff controls are still there when the connection is not. A student
+// account can only ever cache "student", and the rules behind every write
+// are what actually protect the data.
+async function isAdminAccount(deps, uid) {
+  let cached = null;
+  try { cached = localStorage.getItem(ROLE_CACHE(uid)); } catch { /* no storage */ }
+  try {
+    const snap = await Promise.race([
+      deps.getDoc(deps.doc(deps.db, "users", uid)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ROLE_TIMEOUT_MS)),
+    ]);
+    const role = snap.exists() ? snap.data().role || "" : "";
+    try { localStorage.setItem(ROLE_CACHE(uid), role); } catch { /* no storage */ }
+    return role === "admin";
+  } catch {
+    return cached === "admin";
+  }
+}
 
 function showLoadError(message) {
   const el = document.getElementById("loadError");
@@ -96,6 +119,7 @@ export async function initReadingTest(deps) {
   readingState.testId = params.get("testId") || "test-1";
   readingState.user = { uid: user.uid, email: user.email || "" };
   readingState.unlimited = UNTIMED.has(user.email);
+  readingState.isAdmin = await isAdminAccount(deps, user.uid);
   document.getElementById("candidate").textContent = user.email || "Candidate";
 
   const hadSitting = !!localStorage.getItem(`ielts-reading:v2:${user.uid}:${readingState.testId}`);
@@ -275,13 +299,39 @@ function start(session, submitter) {
   };
   document.getElementById("finishBtn").addEventListener("click", () => finish());
 
+  // The clock either runs or stands still at the moment it was paused.
+  const clockEl = document.getElementById("timeLeft");
+  const runClock = () => {
+    stopClock();
+    stopClock = () => {};
+    if (isPaused()) {
+      freezeClock({
+        el: clockEl,
+        remaining: session.deadline - session.pausedAt,
+        unlimited: readingState.unlimited,
+      });
+      return;
+    }
+    stopClock = startClock({
+      el: clockEl,
+      getDeadline: () => session.deadline,
+      unlimited: readingState.unlimited,
+      onExpire: () => finish({ auto: true }),
+    });
+  };
+
+  if (readingState.isAdmin) {
+    initStaffControls({
+      onClock: runClock,
+      onCleared: () => {
+        showPart(session.part, { restoreScroll: false });
+        updateFooter();
+      },
+    });
+  }
+
   showPart(session.part);
   document.body.classList.remove("loading");
 
-  stopClock = startClock({
-    el: document.getElementById("timeLeft"),
-    getDeadline: () => session.deadline,
-    unlimited: readingState.unlimited,
-    onExpire: () => finish({ auto: true }),
-  });
+  if (!readingState.isAdmin) runClock();   // staff controls start it themselves
 }

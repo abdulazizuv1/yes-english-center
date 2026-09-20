@@ -14,6 +14,13 @@ export function formatRemaining(ms) {
   return `${mins} ${mins === 1 ? "minute" : "minutes"} left`;
 }
 
+/** Paints the clock as it stood when the test was paused, and stops there. */
+export function freezeClock({ el, remaining, unlimited }) {
+  if (!el) return;
+  el.classList.remove("flash");
+  el.textContent = unlimited ? "Untimed" : formatRemaining(remaining);
+}
+
 export function startClock({ el, getDeadline, unlimited, onExpire }) {
   if (!el) return () => {};
   if (unlimited) {

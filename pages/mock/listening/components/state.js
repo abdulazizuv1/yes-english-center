@@ -22,6 +22,9 @@ export const listeningState = {
 
   savedHighlights: {},
 
+  // true once the result is on its way: leaving is expected then
+  submitted: false,
+
   // timer interval id
   timerIntervalKey: "listeningTimerInterval",
 };

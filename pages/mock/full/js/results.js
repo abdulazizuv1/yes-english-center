@@ -125,6 +125,7 @@ async function handleFinishTest() {
     });
 
     clearInterval(window.fullMockTimerInterval);
+    state.submitted = true;   // the page may leave now without a warning
     window.location.href = '/';
   } catch (e) {
     console.error("❌ Error saving result:", e);

@@ -12,4 +12,5 @@ export const readingState = {
   items: [],           // engine items per part, normalized once
   session: null,       // see session.js
   unlimited: false,    // staff accounts sit the test without a clock
+  isAdmin: false,      // admin accounts get the pause and clear controls
 };

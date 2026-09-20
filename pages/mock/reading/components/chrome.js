@@ -82,6 +82,14 @@ export function initChrome() {
     banner("store", ok ? "" : "This browser is not saving your answers. Tell your teacher before you continue.");
   });
 
+  /* leaving the page mid-test loses nothing, but it is rarely meant */
+  window.addEventListener("beforeunload", (e) => {
+    const live = readingState.session && !readingState.session.finished;
+    if (!live) return;          // submitted: the page is on its way to the result
+    e.preventDefault();
+    e.returnValue = "";         // browsers show their own wording here
+  });
+
   /* the divider between passage and questions */
   const main = document.querySelector(".cd-main");
   const splitter = document.getElementById("splitter");

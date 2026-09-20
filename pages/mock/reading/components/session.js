@@ -41,6 +41,7 @@ export function newSession(uid, testId, now = Date.now()) {
     split: 0.5,         // passage pane width, as a fraction
     settings: { size: "standard", contrast: "bw" },
     timerHidden: false,
+    pausedAt: null,     // staff paused the clock at this moment
     finished: false,    // true once submitted (sent or still waiting)
     payload: null,      // the result waiting to be sent
     savedAt: now,

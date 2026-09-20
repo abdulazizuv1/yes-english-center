@@ -27,6 +27,9 @@ export const state = {
   // positions, painted onto each render — see js/highlights.js
   marks: [],
 
+  // true once the result is on its way: leaving is expected then
+  submitted: false,
+
   // localStorage key (per test id, set in loadTest)
   testStorageKey: "fullmockTest_temp",
 

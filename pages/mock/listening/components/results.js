@@ -54,6 +54,7 @@ export function createHandleFinish(deps) {
         loadingModal.style.display = "none";
       }
 
+      listeningState.submitted = true;   // leaving is expected now
       window.location.href = `/pages/mock/listening/result/?id=${docRef.id}`;
     } catch (error) {
       console.error("Error saving result:", error);

@@ -10,6 +10,14 @@ import { setupAnswerCapture } from "./js/answers.js";
 setupAnswerCapture();
 setupStageControls();
 
+// Leaving mid-test loses nothing — every answer is on this computer — but
+// it is rarely meant, so the browser asks first.
+window.addEventListener("beforeunload", (e) => {
+  if (!state.testData || state.submitted) return;
+  e.preventDefault();
+  e.returnValue = "";       // browsers show their own wording here
+});
+
 // Authentication check
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
