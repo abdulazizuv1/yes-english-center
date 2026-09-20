@@ -3,7 +3,7 @@
 // renderers the standalone listening and reading tests use, including
 // drag & drop and map labelling.
 import { state } from "./state.js";
-import { saveCurrentHighlights, restoreHighlights } from "./highlights.js";
+import { repaintHighlights } from "./highlights.js";
 import { updateNavigationButtons } from "./navigation.js";
 import { engineCtx } from "./engineCtx.js";
 import { normalizeReadingQuestions, renderItem } from "../../engine/index.js";
@@ -13,17 +13,6 @@ function initializeReading() {
   state.currentPassageIndex = 0;
   assignReadingQuestionIds();
   renderReadingPassage(0);
-
-  // Block default context menu in reading stage
-  const readingStage = document.getElementById("readingStage");
-  if (readingStage) {
-    readingStage.addEventListener("contextmenu", function (e) {
-      // Only prevent if we don't have selected text (let our custom handler deal with it)
-      if (state.selectedText.length === 0) {
-        e.preventDefault();
-      }
-    });
-  }
 }
 
 // The test page numbers reading questions BY ORDER: every gradeable entry
@@ -106,11 +95,7 @@ function readingPassageOfQuestion(n) {
 }
 
 function renderReadingPassage(index) {
-  // Save current highlights before switching
-  if (state.currentPassageIndex !== index) {
-    saveCurrentHighlights();
-    state.currentPassageIndex = index;
-  }
+  state.currentPassageIndex = index;
 
   const passage = state.stageData.reading.passages[index];
 
@@ -164,10 +149,10 @@ function renderReadingPassage(index) {
 
   updateNavigationButtons();
 
-  // Restore highlights after rendering
-  requestAnimationFrame(() => {
-    restoreHighlights();
-  });
+  // Paint this passage's highlights onto what the engine has just drawn.
+  // Straight after rendering, not on a later frame: the questions are
+  // already in place, and nothing here replaces them.
+  repaintHighlights();
 }
 
 export { initializeReading, renderReadingPassage, readingPassageOfQuestion };

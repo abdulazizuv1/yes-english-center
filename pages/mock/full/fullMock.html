@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Full Mock Test</title>
-    <link rel="stylesheet" href="./fullMock.css" />
-    <link rel="stylesheet" href="../engine/engine.css" />
+    <link rel="stylesheet" href="./fullMock.css?v=2" />
+    <link rel="stylesheet" href="../engine/engine.css?v=2" />
     <link rel="icon" href="/image/logo_copy.png" />
   </head>
   <body>
@@ -32,7 +32,7 @@
         </div>
         <!-- Questions (full width) -->
         <div class="listening-questions-panel">
-          <div id="listening-questions">Loading questions...</div>
+          <div id="listening-questions" data-zone="questions">Loading questions...</div>
         </div>
       </div>
 
@@ -44,11 +44,11 @@
           <div class="passage-instructions" id="passageInstructions">
             Instructions
           </div>
-          <div class="passage-text" id="passageText">Passage content...</div>
+          <div class="passage-text" id="passageText" data-zone="passage">Passage content...</div>
         </div>
         <!-- Questions Panel -->
         <div class="questions-panel">
-          <div id="reading-questions">Loading questions...</div>
+          <div id="reading-questions" data-zone="questions">Loading questions...</div>
         </div>
       </div>
 
@@ -170,13 +170,20 @@
       </div>
     </div>
 
-    <!-- Context Menu -->
-    <div class="context-menu" id="contextMenu">
-      <div class="context-menu-item" onclick="highlightSelection()">
-        📝 Highlight
-      </div>
-      <div class="context-menu-item" onclick="removeHighlight()">
-        🗑️ Remove Highlight
+    <!-- Appears as soon as text is selected (or a highlight is clicked) -->
+    <div class="mark-menu" id="markMenu" role="menu" aria-label="Highlight options" hidden>
+      <button type="button" data-act="highlight" role="menuitem"><span class="mm-swatch" aria-hidden="true"></span>Highlight</button>
+      <button type="button" data-act="note" role="menuitem"><span class="mm-note" aria-hidden="true"></span>Note</button>
+      <button type="button" data-act="editnote" role="menuitem"><span class="mm-note" aria-hidden="true"></span>Edit note</button>
+      <button type="button" data-act="clear" role="menuitem"><span class="mm-clear" aria-hidden="true"></span>Clear highlight</button>
+      <button type="button" data-act="clearall" role="menuitem">Clear all</button>
+    </div>
+
+    <div class="note-pop" id="notePop" hidden>
+      <textarea rows="4" placeholder="Type your note"></textarea>
+      <div class="note-actions">
+        <button type="button" data-note="delete">Delete</button>
+        <button type="button" data-note="save">Save</button>
       </div>
     </div>
 
@@ -201,6 +208,6 @@
         <p>Please wait while we process your full mock test...</p>
       </div>
     </div>
-    <script type="module" src="fullMock.js"></script>
+    <script type="module" src="fullMock.js?v=2"></script>
   </body>
 </html>

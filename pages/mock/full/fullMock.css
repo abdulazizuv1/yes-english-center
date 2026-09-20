@@ -993,40 +993,128 @@ body {
     gap: 15px;
 }
 
-/* Context Menu */
-.context-menu {
-    position: absolute;
-    background: white;
+/* ── Highlights and notes (see pages/mock/engine/marks.js) ── */
+.mark-menu {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    min-width: 176px;
+    padding: 6px;
+    background: #fff;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 8px 0;
-    z-index: 10000 !important;
-    display: none;
-    min-width: 150px;
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
 }
 
-.context-menu-item {
-    padding: 8px 16px;
-    cursor: pointer;
+.mark-menu[hidden] { display: none; }
+
+.mark-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    font: inherit;
     font-size: 14px;
-    color: #374151;
-}
-
-.context-menu-item:hover {
-    background: #f3f4f6;
     color: #1f2937;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-/* Highlight functionality */
-.highlighted {
-    background: yellow;
+.mark-menu button:hover { background: #f1f5f9; }
+.mark-menu button[hidden] { display: none; }
+
+.mm-swatch,
+.mm-note,
+.mm-clear {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.2);
+}
+
+.mm-swatch { background: #ffe066; }
+.mm-note { background: #ffe066; border-style: dashed; border-color: #b45309; }
+.mm-clear { background: #fff; }
+
+/* The highlight itself */
+mark.hl {
+    background: #ffe066;
+    color: inherit;
+    padding: 0;
     border-radius: 3px;
-    /* Do not force white-space; inherit from context to avoid reflow */
-    white-space: inherit;
-    /* Ensure multi-line highlights render as one continuous box per line */
+    /* multi-line highlights render as one box per line */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
+}
+
+mark.hl.has-note {
+    background: #ffd43b;
+    box-shadow: inset 0 -2px 0 #b45309;
+}
+
+mark.hl.note-end::after {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 3px;
+    vertical-align: super;
+    background: #b45309;
+    -webkit-mask: radial-gradient(circle at 50% 45%, #000 45%, transparent 46%) no-repeat center/100% 100%;
+    mask: radial-gradient(circle at 50% 45%, #000 45%, transparent 46%) no-repeat center/100% 100%;
+}
+
+.note-pop {
+    position: fixed;
+    z-index: 10001;
+    width: 260px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+}
+
+.note-pop[hidden] { display: none; }
+
+.note-pop textarea {
+    width: 100%;
+    padding: 8px;
+    font: inherit;
+    font-size: 14px;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.note-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.note-actions button {
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    background: #f1f5f9;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.note-actions button[data-note="save"] {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
 }
 
 /* ===== GAP-FILL SPECIFIC STYLES ===== */

@@ -3,7 +3,7 @@
 // the same renderers the standalone listening and reading tests use.
 import { state } from "./state.js";
 import { handleSectionAudio } from "./audio.js";
-import { saveCurrentHighlights, restoreHighlights } from "./highlights.js";
+import { repaintHighlights } from "./highlights.js";
 import { updateNavigationButtons } from "./navigation.js";
 import { engineCtx } from "./engineCtx.js";
 import {
@@ -30,11 +30,7 @@ function initializeListening() {
 }
 
 function renderListeningSection(index) {
-  // Save current highlights before switching
-  if (state.currentSectionIndex !== index) {
-    saveCurrentHighlights();
-    state.currentSectionIndex = index;
-  }
+  state.currentSectionIndex = index;
 
   const section = state.stageData.listening.sections[index];
   if (!section) return;
@@ -95,10 +91,8 @@ function renderListeningSection(index) {
 
   updateNavigationButtons();
 
-  // Restore highlights after rendering
-  setTimeout(() => {
-    restoreHighlights();
-  }, 150);
+  // Paint this section's highlights onto what the engine has just drawn.
+  repaintHighlights();
 }
 
 // Whitespace/case-insensitive comparison so the same instruction typed with

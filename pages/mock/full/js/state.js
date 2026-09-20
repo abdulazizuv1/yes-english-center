@@ -23,15 +23,9 @@ export const state = {
   hasUnlimitedTime: false, // Track if user has unlimited time
   isAdmin: false, // Track if current user is admin
 
-  // Highlight system state
-  savedHighlights: {},
-  selectedText: "",
-  selectedRange: null,
-  highlightEventListeners: [],
-
-  // Passage and question highlights for reading
-  passageHighlights: {},
-  questionHighlights: {},
+  // Highlights and notes: {id, part, zone, start, end, note?} character
+  // positions, painted onto each render — see js/highlights.js
+  marks: [],
 
   // localStorage key (per test id, set in loadTest)
   testStorageKey: "fullmockTest_temp",

@@ -361,25 +361,6 @@ function wireTextInputs(root, ctx, sizeClasses = false) {
   });
 }
 
-/* ── repair: option text that predates the .qe-option-text wrapper ──
-   The reading page and the full mock store highlights as saved HTML and
-   re-inject it, so an attempt that was highlighted before the wrapper
-   existed still carries loose text in its flex labels — and still glues
-   the highlighted word to the one before it. Wrapping it on the way back
-   in fixes those attempts too. */
-export function wrapLooseOptionText(root) {
-  root?.querySelectorAll?.(".radio-option").forEach((label) => {
-    if (label.querySelector(".qe-option-text")) return;
-    const span = document.createElement("span");
-    span.className = "qe-option-text";
-    // everything after the input belongs to the option's text
-    [...label.childNodes]
-      .filter((n) => !(n.nodeType === Node.ELEMENT_NODE && n.tagName === "INPUT"))
-      .forEach((n) => span.appendChild(n));
-    label.appendChild(span);
-  });
-}
-
 /* ── public API ── */
 export function renderItem(item, container, ctx) {
   let node = null;

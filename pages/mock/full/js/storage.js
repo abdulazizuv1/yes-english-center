@@ -2,15 +2,17 @@
 import { state } from "./state.js";
 import { getCurrentRemainingTime } from "./timer.js";
 import { updateQuestionNav } from "./navigation.js";
+import { clearAllHighlights } from "./highlights.js";
 
 function loadSavedState() {
   const saved = localStorage.getItem(state.testStorageKey);
   if (saved) {
     const data = JSON.parse(saved);
     state.answersSoFar = data.answers || {};
-    state.passageHighlights = data.passageHighlights || {};
-    state.questionHighlights = data.questionHighlights || {};
-    state.savedHighlights = data.savedHighlights || {};
+    // Sittings saved by the old version carry highlights as snapshots of
+    // the questions' HTML. They cannot be turned into text positions, so
+    // they are left behind; the answers, which matter, come across.
+    state.marks = Array.isArray(data.marks) ? data.marks : [];
     state.savedStage = data.currentStage || null;
     state.savedTimerRemaining = data.timerRemaining || null;
   }
@@ -19,9 +21,7 @@ function loadSavedState() {
 function saveState() {
   const data = {
     answers: state.answersSoFar,
-    passageHighlights: state.passageHighlights,
-    questionHighlights: state.questionHighlights,
-    savedHighlights: state.savedHighlights,
+    marks: state.marks,
     currentStage: state.currentStage,
     timerRemaining: getCurrentRemainingTime(),
     timestamp: Date.now(),
@@ -34,9 +34,7 @@ function clearAllAnswers() {
   if (!confirm('Clear all answers and highlights for this full mock test?')) return;
 
   state.answersSoFar = {};
-  state.passageHighlights = {};
-  state.questionHighlights = {};
-  state.savedHighlights = {};
+  clearAllHighlights();
 
   try {
     localStorage.removeItem(state.testStorageKey);
@@ -55,13 +53,6 @@ function clearAllAnswers() {
     } else if (el.tagName === 'SELECT') {
       el.selectedIndex = 0;
     }
-  });
-
-  // Remove highlight spans
-  document.querySelectorAll('.highlighted').forEach((node) => {
-    const parent = node.parentNode;
-    while (node.firstChild) parent.insertBefore(node.firstChild, node);
-    node.remove();
   });
 
   // Update UI/navigation
