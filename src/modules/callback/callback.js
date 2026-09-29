@@ -132,11 +132,17 @@ function showNotification(message, success = true) {
     animation: slideInNotif 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     font-family: "Montserrat", sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     background: ${success
       ? "linear-gradient(135deg, #1763e1, #87aaeb)"
       : "linear-gradient(135deg, #e74c3c, #c0392b)"};
   `;
-  notification.textContent = message;
+  notification.setAttribute("role", success ? "status" : "alert");
+  // an icon from the page's sprite, then the message as plain text
+  notification.innerHTML = `<svg class="icon" aria-hidden="true" style="width:20px;height:20px"><use href="#i-${success ? "circle-check" : "circle-alert"}"/></svg><span></span>`;
+  notification.querySelector("span").textContent = message;
 
   document.body.appendChild(notification);
 
@@ -165,14 +171,14 @@ async function handleSubmit() {
     const success = await sendToTelegram(data);
 
     if (success) {
-      showNotification("✅ Заявка успешно отправлена!");
+      showNotification("Заявка успешно отправлена!");
       resetForm();
     } else {
-      showNotification("❌ Ошибка отправки. Попробуйте позже.", false);
+      showNotification("Ошибка отправки. Попробуйте позже.", false);
     }
   } catch (error) {
     console.error("Callback form error:", error);
-    showNotification("❌ Ошибка отправки. Попробуйте позже.", false);
+    showNotification("Ошибка отправки. Попробуйте позже.", false);
   } finally {
     setSubmitLoading(submitBtn, false);
   }

@@ -1,4 +1,124 @@
 window.langArr = {
+    "lng_badge_team": {
+        "en": "Our team",
+        "ru": "Наша команда",
+        "uz": "Bizning jamoa"
+    },
+    "lng_badge_story": {
+        "en": "Our story",
+        "ru": "Наша история",
+        "uz": "Bizning tariximiz"
+    },
+    "lng_badge_results": {
+        "en": "Success stories",
+        "ru": "Истории успеха",
+        "uz": "Muvaffaqiyat hikoyalari"
+    },
+    "lng_badge_feedback": {
+        "en": "Testimonials",
+        "ru": "Отзывы",
+        "uz": "Fikr-mulohazalar"
+    },
+    "lng_badge_start": {
+        "en": "Get started",
+        "ru": "Начните сейчас",
+        "uz": "Hoziroq boshlang"
+    },
+    "lng_hero_badge": {
+        "en": "Up to 8.5 IELTS",
+        "ru": "До 8.5 IELTS",
+        "uz": "IELTS 8.5 gacha"
+    },
+    "lng_hero_start": {
+        "en": "Start learning",
+        "ru": "Начать обучение",
+        "uz": "O'qishni boshlash"
+    },
+    "lng_hero_more": {
+        "en": "Learn more",
+        "ru": "Подробнее",
+        "uz": "Batafsil"
+    },
+    "lng_stat_founded": {
+        "en": "Founded",
+        "ru": "Год основания",
+        "uz": "Tashkil etilgan"
+    },
+    "lng_stat_students": {
+        "en": "Students",
+        "ru": "Студентов",
+        "uz": "O'quvchilar"
+    },
+    "lng_stat_best": {
+        "en": "Highest IELTS",
+        "ru": "Лучший IELTS",
+        "uz": "Eng yuqori IELTS"
+    },
+    "lng_feat_record": {
+        "en": "Record achievement",
+        "ru": "Рекордный результат",
+        "uz": "Rekord natija"
+    },
+    "lng_feat_record_p": {
+        "en": "Our highest IELTS score: 8.5",
+        "ru": "Наш лучший результат IELTS — 8.5",
+        "uz": "Eng yuqori IELTS natijamiz — 8.5"
+    },
+    "lng_feat_teachers": {
+        "en": "Expert teachers",
+        "ru": "Опытные преподаватели",
+        "uz": "Tajribali o'qituvchilar"
+    },
+    "lng_feat_teachers_p": {
+        "en": "Certified and experienced professionals",
+        "ru": "Сертифицированные специалисты с опытом",
+        "uz": "Sertifikatlangan va tajribali mutaxassislar"
+    },
+    "lng_feat_results": {
+        "en": "Proven results",
+        "ru": "Доказанные результаты",
+        "uz": "Isbotlangan natijalar"
+    },
+    "lng_feat_results_p": {
+        "en": "A personal approach for every student",
+        "ru": "Индивидуальный подход к каждому студенту",
+        "uz": "Har bir o'quvchiga individual yondashuv"
+    },
+    "lng_years_exp": {
+        "en": "years of experience",
+        "ru": "лет опыта",
+        "uz": "yillik tajriba"
+    },
+    "lng_chip_consult": {
+        "en": "Free consultation",
+        "ru": "Бесплатная консультация",
+        "uz": "Bepul konsultatsiya"
+    },
+    "lng_chip_schedule": {
+        "en": "Flexible schedules",
+        "ru": "Гибкое расписание",
+        "uz": "Moslashuvchan jadval"
+    },
+    "lng_chip_guidance": {
+        "en": "Expert guidance",
+        "ru": "Поддержка экспертов",
+        "uz": "Mutaxassislar ko'magi"
+    },
+    "lng_available": {
+        "en": "Available 24/7",
+        "ru": "На связи 24/7",
+        "uz": "24/7 aloqadamiz"
+    },
+    "lng_topbar_contact": {
+        "en": "Contact us:",
+        "ru": "Связаться с нами:",
+        "uz": "Biz bilan bog'laning:"
+    },
+    "lng_topbar_cta": {
+        "en": "Book a consultation",
+        "ru": "Запись на консультацию",
+        "uz": "Konsultatsiyaga yozilish"
+    },
     "lng_nav_home": {
         "en": "Home",
         "ru": "Главная",
@@ -42,7 +162,7 @@ window.langArr = {
     "lng_header_sub_text": {
         "en": "Unlock top IELTS & SAT scores with expert instructors",
         "ru": "Достигайте высоких результатов на IELTS и SAT с опытными преподавателями",
-        "uz": "IELTS va SAT dan yuqori ballarga erishing tajribali o'qituvchilar bilan"
+        "uz": "Tajribali o'qituvchilar bilan IELTS va SAT dan yuqori ballarga erishing"
     },
     "lng_header_sub_text2": {
         "en": "Achieve your goals with us!",
@@ -65,9 +185,9 @@ window.langArr = {
         "uz": "Bizning natijalar"
     },
     "lng_results_group": {
-        "en": "Group: IELTS",
-        "ru": "Группа: IELTS",
-        "uz": "Guruh: IELTS"
+        "en": "Group:",
+        "ru": "Группа:",
+        "uz": "Guruh:"
     },
     "lng_feedbacks_title": {
         "en": "Students Feedback",
@@ -75,9 +195,19 @@ window.langArr = {
         "uz": "Talabalar fikrlari"
     },
     "lng_feedbacks_group": {
-        "en": "Group: IELTS",
-        "ru": "Группа: IELTS",
-        "uz": "Guruh: IELTS"
+        "en": "Group:",
+        "ru": "Группа:",
+        "uz": "Guruh:"
+    },
+    "lng_read_more": {
+        "en": "Read more",
+        "ru": "Читать полностью",
+        "uz": "To'liq o'qish"
+    },
+    "lng_show_less": {
+        "en": "Show less",
+        "ru": "Свернуть",
+        "uz": "Yig'ish"
     },
     "lng_feedbacks": {
         "en": "YES Education Center provides excellent English training with professional teachers, interactive lessons, and a supportive environment. Students show real progress in speaking and writing. Highly recommended for IELTS and general English improvement!",
@@ -120,9 +250,9 @@ window.langArr = {
         "uz": "Manzil: Tennis Court, ул. Аэропорт д.1 <br> Ориентир: Напротив, Fergana, Узбекистан"
     },
     "lng_about_us": {
-        "en": "About Us:",
-        "ru": "О нас:",
-        "uz": "Biz haqimizda:"
+        "en": "About us",
+        "ru": "О нас",
+        "uz": "Biz haqimizda"
     },
     "lng_about_us_n_f": {
         "en": "About Us",

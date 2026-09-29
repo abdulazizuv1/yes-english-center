@@ -14,10 +14,31 @@ const swiperInstances = {};
  * Default responsive breakpoints
  */
 const defaultBreakpoints = {
-  0: { slidesPerView: 1, spaceBetween: 20 },
-  769: { slidesPerView: 2, spaceBetween: 25 },
-  1024: { slidesPerView: 3, spaceBetween: 30 },
+  0: { slidesPerView: 1.08, spaceBetween: 16 },
+  640: { slidesPerView: 2, spaceBetween: 20 },
+  1024: { slidesPerView: 3, spaceBetween: 24 },
 };
+
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * The arrows and progress bar that sit under a slider
+ * (the .slider-controls block right after it in index.html).
+ */
+function controlsFor(container) {
+  const controls = container.nextElementSibling;
+  if (!controls || !controls.classList.contains('slider-controls')) return {};
+  return {
+    navigation: {
+      prevEl: controls.querySelector('.slider-prev'),
+      nextEl: controls.querySelector('.slider-next'),
+    },
+    pagination: {
+      el: controls.querySelector('.slider-progress'),
+      type: 'progressbar',
+    },
+  };
+}
 
 /**
  * Create and initialize a Swiper instance
@@ -31,23 +52,24 @@ export function createSwiper(selector, customOptions = {}) {
     return null;
   }
 
-  // Default options
+  // Snaps to whole cards (free-mode used to stop mid-card), rewinds at the
+  // end, and waits while the visitor is reading or hovering.
   const defaultOptions = {
-    slidesPerView: 3,
-    spaceBetween: 30,
-    freeMode: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false,
-    },
-    pagination: {
-      el: ".swiper-pagination",
-      clickable: true,
-    },
-    breakpoints: defaultBreakpoints
+    speed: 650,
+    spaceBetween: 24,
+    grabCursor: true,
+    rewind: true,
+    watchOverflow: true,
+    centerInsufficientSlides: true,
+    keyboard: { enabled: true, onlyInViewport: true },
+    a11y: { enabled: true, prevSlideMessage: 'Previous', nextSlideMessage: 'Next' },
+    autoplay: reduceMotion()
+      ? false
+      : { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true },
+    breakpoints: defaultBreakpoints,
+    ...controlsFor(container),
   };
 
-  // Merge custom options with defaults
   const options = { ...defaultOptions, ...customOptions };
 
   try {
@@ -64,29 +86,15 @@ export function createSwiper(selector, customOptions = {}) {
  * @returns {Swiper|null}
  */
 export function initGroupsSwiper() {
-  return createSwiper(".mySwiper", {
-    slidesPerView: 3,
-    spaceBetween: 30,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false,
-    },
-  });
+  return createSwiper(".mySwiper");
 }
 
 /**
- * Initialize Results Swiper
- * @returns {Swiper|null}
+ * The results no longer use a slider: they scroll continuously (ui/marquee.js).
+ * @returns {null}
  */
 export function initResultsSwiper() {
-  return createSwiper(".mySwiper3", {
-    slidesPerView: 3,
-    spaceBetween: 30,
-    autoplay: {
-      delay: 6000,
-      disableOnInteraction: false,
-    },
-  });
+  return null;
 }
 
 /**
@@ -95,15 +103,12 @@ export function initResultsSwiper() {
  */
 export function initFeedbacksSwiper() {
   return createSwiper(".mySwiper2", {
-    slidesPerView: 2,
-    spaceBetween: 30,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false,
-    },
+    autoplay: reduceMotion()
+      ? false
+      : { delay: 7000, disableOnInteraction: false, pauseOnMouseEnter: true },
     breakpoints: {
-      0: { slidesPerView: 1, spaceBetween: 20 },
-      769: { slidesPerView: 2, spaceBetween: 30 },
+      0: { slidesPerView: 1, spaceBetween: 16 },
+      769: { slidesPerView: 2, spaceBetween: 24 },
     },
   });
 }
@@ -115,7 +120,6 @@ export function initFeedbacksSwiper() {
 export function initAllSwipers() {
   const swipers = {
     groups: initGroupsSwiper(),
-    results: initResultsSwiper(),
     feedbacks: initFeedbacksSwiper(),
   };
 

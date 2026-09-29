@@ -100,5 +100,6 @@ Firestore import/export tooling using the admin SDK + `serviceAccountKey.json` (
 - `functions/index.js` — All backend logic including Claude AI integration (tracked in git; secrets in `functions/.env`)
 - `firestore.rules` — Firestore security rules (source of truth, deploy after editing)
 - `sw.js` — Service Worker for offline caching of static assets (bump cache version when changing cached assets)
+- **Asset versions** — the landing (`index.html` → `style.css`, `lang.js`, `glass-effects.js`, `src/**`) and the mock test pages (`pages/mock/**`) load their CSS and ES modules with a `?v=` token, on the tags *and on every relative `import`*. When you change those files, bump the token everywhere in that tree (and the cache names in `sw.js`): the server sends no `Cache-Control`, so otherwise a browser can pair a new page with an old cached module — that took the reading test down once.
 - `firebase.json` / `.firebaserc` — Firebase project + deploy config
 - `docs/SECURITY.md` — security fixes done, pending manual actions, known gaps

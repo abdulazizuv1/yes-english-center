@@ -29,8 +29,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Optimized font loading - only needed weights -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- AOS - Animate On Scroll Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" crossorigin="anonymous">
@@ -39,7 +39,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" crossorigin="anonymous" />
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260929">
     
     <style>
         /* Предотвращение мигания шрифта */
@@ -82,6 +82,44 @@
     </script>
 </head>
 <body>
+  <!-- Icons: Lucide (ISC licence), drawn in the text colour.
+       Use as <svg class="icon" aria-hidden="true"><use href="#i-NAME"/></svg>.
+       The stroke is set in style.css (.icon), not on the symbols: inside a
+       <use>, an attribute on the symbol would beat the gradient and the
+       per-place stroke widths. -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- brand blue into lavender; user-space units so straight strokes keep their colour -->
+      <linearGradient id="icon-grad" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22">
+        <stop offset="0" stop-color="#1763e1"/>
+        <stop offset="1" stop-color="#764ba2"/>
+      </linearGradient>
+    </defs>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"/><path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"/><path d="M18 9h1.5a1 1 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6 9H4.5a1 1 0 0 1 0-5H6"/></symbol>
+    <symbol id="i-book-open-text" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+    <symbol id="i-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
+    <symbol id="i-message-square-quote" viewBox="0 0 24 24"><path d="M14 14a2 2 0 0 0 2-2V8h-2"/><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M8 14a2 2 0 0 0 2-2V8H8"/></symbol>
+    <symbol id="i-phone-call" viewBox="0 0 24 24"><path d="M13 2a9 9 0 0 1 9 9"/><path d="M13 6a5 5 0 0 1 5 5"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
+    <symbol id="i-presentation" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></symbol>
+    <symbol id="i-trending-up" viewBox="0 0 24 24"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></symbol>
+    <symbol id="i-headset" viewBox="0 0 24 24"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/></symbol>
+    <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></symbol>
+    <symbol id="i-circle-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+  </svg>
   <!-- Skip to content link for accessibility -->
   
   <!-- Dynamic Background -->
@@ -157,7 +195,45 @@
   </div>
 
   <header id="home">
-    <div class="navbar glass-nav">
+    <div class="navbar glass-nav" id="siteHeader">
+      <!-- Top bar: how to reach us, and the quickest way to book.
+           On phones it folds away once the page is scrolled (glass-effects.js).
+           No <nav> in here: the menu scripts look up the first <nav>. -->
+      <div class="topbar">
+        <div class="topbar-clip">
+          <div class="container topbar-inner">
+            <div class="topbar-contact">
+              <span class="topbar-label lng_topbar_contact">Contact us:</span>
+              <a class="topbar-phone" href="tel:+998972717772">
+                <svg class="topbar-phone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" fill="currentColor"/></svg>
+                <span class="topbar-phone-number">+998 (97) 271 77 72</span>
+              </a>
+            </div>
+
+            <div class="topbar-actions">
+              <select class="lang_change topbar-lang" aria-label="Language">
+                <option value="en" selected>EN</option>
+                <option value="ru">RU</option>
+                <option value="uz">UZ</option>
+              </select>
+              <div class="topbar-social">
+                <a class="topbar-social-link" href="https://t.me/yescenteruz" target="_blank" rel="noopener" aria-label="Telegram">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 4.1 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5zM9.2 14l8.5-5.4c.4-.2.7-.1.4.2l-7.3 6.6-.3 3.1z" fill="currentColor"/></svg>
+                </a>
+                <a class="topbar-social-link" href="https://www.instagram.com/yescenteruz/" target="_blank" rel="noopener" aria-label="Instagram">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg>
+                </a>
+              </div>
+              <a class="topbar-cta" href="https://t.me/yescenter_uz" target="_blank" rel="noopener">
+                <svg class="topbar-cta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 4.1 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5zM9.2 14l8.5-5.4c.4-.2.7-.1.4.2l-7.3 6.6-.3 3.1z" fill="currentColor"/></svg>
+                <span class="lng_topbar_cta">Book a consultation</span>
+                <span class="topbar-cta-shine" aria-hidden="true"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="container">
         <nav id="navbar">
           <div class="nav_media">
@@ -179,13 +255,8 @@
             </ul>
           </div>
           
-          <!-- Desktop Controls -->
+          <!-- Desktop Controls (the language switcher lives in the top bar) -->
           <div class="nav_right">
-            <select class="lang_change glass-select">
-              <option value="en" selected>EN</option>
-              <option value="ru">RU</option>
-              <option value="uz">UZ</option>
-            </select>
             <button id="loginBtn" onclick="toggleLogin()" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
             <button id="logoutBtn" onclick="logoutUser()" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
           </div>
@@ -201,7 +272,7 @@
     </div>
     
     <!-- Unified Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu" id="mobileMenu" data-lenis-prevent>
       <div class="mobile-menu-content">
         <ul class="mobile-nav-links">
           <li><a class="lng_nav_home nav-glass-item active" href="#home" onclick="closeMobileMenu()">Home</a></li>
@@ -221,6 +292,21 @@
           </select>
           <button id="mobileLoginBtn" onclick="toggleLogin(); closeMobileMenu();" class="glass-btn-nav lng_nav_btn" aria-label="Open login panel">Login</button>
           <button id="mobileLogoutBtn" onclick="logoutUser(); closeMobileMenu();" class="glass-btn-nav" style="display: none;" aria-label="Logout">Logout</button>
+
+          <!-- on phones the top bar folds away on scroll, so booking and the
+               socials live here too -->
+          <a class="topbar-cta mobile-cta" href="https://t.me/yescenter_uz" target="_blank" rel="noopener">
+            <svg class="topbar-cta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 4.1 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5zM9.2 14l8.5-5.4c.4-.2.7-.1.4.2l-7.3 6.6-.3 3.1z" fill="currentColor"/></svg>
+            <span class="lng_topbar_cta">Book a consultation</span>
+          </a>
+          <div class="mobile-reach">
+            <a class="topbar-social-link" href="https://t.me/yescenteruz" target="_blank" rel="noopener" aria-label="Telegram">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 4.1 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.4-1.5zM9.2 14l8.5-5.4c.4-.2.7-.1.4.2l-7.3 6.6-.3 3.1z" fill="currentColor"/></svg>
+            </a>
+            <a class="topbar-social-link" href="https://www.instagram.com/yescenteruz/" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -229,8 +315,8 @@
       <div class="header_main">
         <div class="header_left">
           <div class="achievement-badge glass-badge" data-aos="fade-down" data-aos-duration="800">
-            <span class="badge-icon">🏆</span>
-            <span class="badge-text">Up To: 8.5 IELTS</span>
+            <span class="badge-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></span>
+            <span class="badge-text lng_hero_badge">Up to 8.5 IELTS</span>
             <div class="badge-shine"></div>
           </div>
           <h2 class="lng_header_title" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">YOUR FUTURE STARTS HERE</h2>
@@ -242,25 +328,27 @@
           <p class="lng_header_sub_text2" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">Join thousands of successful students who achieved their dreams with YES English Center</p>
           <div class="cta-buttons" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
             <a href="#contact" class="btn-primary glass-btn-primary">
-              <span>Start Learning</span>
+              <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>
+              <span class="lng_hero_start">Start learning</span>
               <div class="btn-glow"></div>
             </a>
             <a href="#about-us" class="btn-secondary glass-btn-secondary">
-              <span>Learn More</span>
+              <span class="lng_hero_more">Learn more</span>
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
             </a>
           </div>
           <div class="stats-row" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
             <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="600">
               <div class="stat-number">2015</div>
-              <div class="stat-label">Founded</div>
+              <div class="stat-label lng_stat_founded">Founded</div>
             </div>
             <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="700">
               <div class="stat-number">5000+</div>
-              <div class="stat-label">Students</div>
+              <div class="stat-label lng_stat_students">Students</div>
             </div>
             <div class="stat-item glass-stat" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="800">
               <div class="stat-number">8.5</div>
-              <div class="stat-label">Highest IELTS</div>
+              <div class="stat-label lng_stat_best">Highest IELTS</div>
             </div>
           </div>
         </div>
@@ -269,9 +357,9 @@
             <div class="glass-frame"></div>
             <img src="./image/header_img.webp" alt="English Learning" class="hero-image" fetchpriority="high" width="600" height="400">
             <div class="floating-elements">
-              <div class="floating-item glass-float item-1">📚</div>
-              <div class="floating-item glass-float item-2">🎯</div>
-              <div class="floating-item glass-float item-3">⭐</div>
+              <div class="floating-item glass-float item-1"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-book-open-text"/></svg></div>
+              <div class="floating-item glass-float item-2"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-target"/></svg></div>
+              <div class="floating-item glass-float item-3"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-star"/></svg></div>
             </div>
           </div>
         </div>
@@ -283,7 +371,7 @@
     <section id="groups" class="teachers_page glass-section" aria-labelledby="groups-heading">
       <div class="container">
         <div class="section-header" data-aos="fade-up" data-aos-duration="800">
-          <div class="section-badge glass-badge">👥 Our Team</div>
+          <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg> <span class="lng_badge_team">Our team</span></div>
           <h1 id="groups-heading" class="lng_teacher_title">Meet Our <span class="gradient-text">Expert Groups</span></h1>
           <p class="lng_groups_sub section-subtitle">Experienced teachers dedicated to your success</p>
         </div>
@@ -291,54 +379,54 @@
           <div class="swiper-wrapper">
             <!-- Cards will be dynamically added here by main.js -->
           </div>
-          <div class="swiper-pagination glass-pagination"></div>
+        </div>
+        <div class="slider-controls" aria-label="Groups slider">
+          <button type="button" class="slider-btn slider-prev" aria-label="Previous"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+          <div class="slider-progress"></div>
+          <button type="button" class="slider-btn slider-next" aria-label="Next"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
         </div>
       </div>
     </section>
 
     <section id="about-us" class="about-section">
       <div class="container">
-        <div class="about_us_left">
-          <div class="section-badge glass-badge" data-aos="fade-right" data-aos-duration="800">🎓 Our Story</div>
-          <h1 class="lng_about_us" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">About <span class="gradient-text">YES English Center</span></h1>
-          <p class="lng_about_us_info" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">Founded in 2015, YES English Center has become one of the leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams.</p>
-          <div class="feature-list">
-            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
-              <span class="feature-icon">🏆</span>
-              <div>
-                <h4>Record Achievement</h4>
-                <p>Our highest IELTS score: 8.5</p>
-              </div>
-            </div>
-            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="400">
-              <span class="feature-icon">👨‍🏫</span>
-              <div>
-                <h4>Expert Teachers</h4>
-                <p>Certified and experienced professionals</p>
-              </div>
-            </div>
-            <div class="feature-item glass-feature" data-aos="fade-up" data-aos-duration="600" data-aos-delay="500">
-              <span class="feature-icon">📈</span>
-              <div>
-                <h4>Proven Results</h4>
-                <p>Personalized learning approach</p>
-              </div>
-            </div>
-          </div>
+        <div class="section-header" data-aos="fade-up">
+          <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-graduation-cap"/></svg> <span class="lng_badge_story">Our story</span></div>
+          <h1 class="lng_about_us">About us</h1>
         </div>
-        <div class="about_us_right" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-          <div class="about-image-container glass-image-container">
-            <div class="glass-frame about-frame"></div>
-            <img src="./image/yes_info.jpeg" alt="YES English Center">
-            <div class="about-overlay glass-overlay">
-              <div class="about-stat">
-                <div class="stat-circle">
-                  <span class="stat-big">10+</span>
-                  <span class="stat-small">Years Experience</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="about-bento">
+          <article class="bento-card bento-story" data-aos="fade-up">
+            <p class="lng_about_us_info">Founded in 2015, YES English Center has become one of the leading language institutions in the region. Our center is known for delivering high-quality education, professional teachers, and proven strategies for international exams.</p>
+            <a class="btn-pill btn-pill--dark" href="https://t.me/yescenter_uz" target="_blank" rel="noopener">
+              <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>
+              <span class="lng_topbar_cta">Book a consultation</span>
+            </a>
+          </article>
+          <figure class="bento-card bento-photo" data-aos="fade-up" data-aos-delay="80">
+            <img src="./image/yes_info.jpeg" alt="Students at YES English Center" loading="lazy">
+            <figcaption class="bento-photo-chip">
+              <strong>10+</strong>
+              <span class="lng_years_exp">years of experience</span>
+            </figcaption>
+          </figure>
+          <article class="bento-card bento-feature" data-aos="fade-up" data-aos-delay="0">
+            <span class="bento-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></span>
+            <h3 class="lng_feat_record">Record achievement</h3>
+            <p class="lng_feat_record_p">Our highest IELTS score: 8.5</p>
+            <svg class="icon bento-deco" aria-hidden="true"><use href="#i-trophy"/></svg>
+          </article>
+          <article class="bento-card bento-feature" data-aos="fade-up" data-aos-delay="80">
+            <span class="bento-icon"><svg class="icon" aria-hidden="true"><use href="#i-presentation"/></svg></span>
+            <h3 class="lng_feat_teachers">Expert teachers</h3>
+            <p class="lng_feat_teachers_p">Certified and experienced professionals</p>
+            <svg class="icon bento-deco" aria-hidden="true"><use href="#i-presentation"/></svg>
+          </article>
+          <article class="bento-card bento-feature" data-aos="fade-up" data-aos-delay="160">
+            <span class="bento-icon"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>
+            <h3 class="lng_feat_results">Proven results</h3>
+            <p class="lng_feat_results_p">A personal approach for every student</p>
+            <svg class="icon bento-deco" aria-hidden="true"><use href="#i-trending-up"/></svg>
+          </article>
         </div>
       </div>
     </section>
@@ -346,23 +434,28 @@
     <section id="results" class="achievments_page glass-section">
       <div class="container">
         <div class="section-header" data-aos="fade-up" data-aos-duration="800">
-          <div class="section-badge glass-badge">🌟 Success Stories</div>
+          <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg> <span class="lng_badge_results">Success stories</span></div>
           <h1 class="lng_results_title">Our Outstanding <span class="gradient-text">Results</span></h1>
           <p  class="lng_results_sub section-subtitle">See how our students achieve their goals</p>
         </div>
-        <div class="swiper mySwiper3 glass-swiper" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-          <div class="swiper-wrapper">
-            
-          </div>
-          <div class="swiper-pagination glass-pagination"></div>
-        </div>
+      </div>
+      <!-- Results scroll by continuously; hover a certificate to magnify it,
+           tap or press Enter to open it large (src/modules/ui/marquee.js) -->
+      <div class="results-marquee" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <div class="results-track" role="list" aria-label="Student results"></div>
+      </div>
+      <div class="container results-cta" data-aos="fade-up">
+        <a class="btn-pill btn-pill--dark" href="https://t.me/yescenter_uz" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>
+          <span class="lng_topbar_cta">Book a consultation</span>
+        </a>
       </div>
     </section>
 
     <section id="feedbacks" class="feedback_page">
       <div class="container">
         <div class="section-header" data-aos="fade-up" data-aos-duration="800">
-          <div class="section-badge glass-badge">💬 Testimonials</div>
+          <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-message-square-quote"/></svg> <span class="lng_badge_feedback">Testimonials</span></div>
           <h1 class="lng_feedbacks_title">What Our <span class="gradient-text">Students Say</span></h1>
           <p class="lng_feadback_sub section-subtitle">Real feedback from real students</p>
         </div>
@@ -370,7 +463,11 @@
           <div class="swiper-wrapper">
             
           </div>
-          <div class="swiper-pagination glass-pagination"></div>
+        </div>
+        <div class="slider-controls" aria-label="Feedback slider">
+          <button type="button" class="slider-btn slider-prev" aria-label="Previous"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+          <div class="slider-progress"></div>
+          <button type="button" class="slider-btn slider-next" aria-label="Next"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
         </div>
       </div>
     </section>
@@ -383,34 +480,34 @@
             <div class="glass-frame"></div>
             <img class="con_img" src="./image/con_example.png" alt="Contact YES English Center" loading="lazy" width="500" height="400">
             <div class="contact-badge glass-floating-badge">
-              <span class="badge-icon">📞</span>
-              <span>Available 24/7</span>
+              <span class="badge-icon"><svg class="icon" aria-hidden="true"><use href="#i-headset"/></svg></span>
+              <span class="lng_available">Available 24/7</span>
             </div>
           </div>
         </div>
         <div class="contact_right" data-aos="fade-left" data-aos-duration="1000">
-          <div class="section-badge glass-badge">📞 Get Started</div>
+          <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-phone-call"/></svg> <span class="lng_badge_start">Get started</span></div>
           <h1 class="lng_contact_info" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">Join <span class="gradient-text">YES</span> – one of the <span class="gradient-text">leading</span> English learning centers in the region!</h1>
           <p class="lng_info_sub" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">Ready to transform your English skills? Contact us today and take the first step towards your international success.</p>
           <div class="contact-features" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
             <div class="contact-feature glass-check">
-              <span class="feature-icon">✅</span>
-              <span>Free consultation</span>
+              <span class="feature-icon"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-circle-check"/></svg></span>
+              <span class="lng_chip_consult">Free consultation</span>
             </div>
             <div class="contact-feature glass-check">
-              <span class="feature-icon">✅</span>
-              <span>Flexible schedules</span>
+              <span class="feature-icon"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-circle-check"/></svg></span>
+              <span class="lng_chip_schedule">Flexible schedules</span>
             </div>
             <div class="contact-feature glass-check">
-              <span class="feature-icon">✅</span>
-              <span>Expert guidance</span>
+              <span class="feature-icon"><svg class="icon icon--grad" aria-hidden="true"><use href="#i-circle-check"/></svg></span>
+              <span class="lng_chip_guidance">Expert guidance</span>
             </div>
           </div>
           <a href="tel:+998972717772" class="contact-btn-wrapper" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="400">
-            <button class="lng_contact_btn glass-cta">
+            <button class="glass-cta">
               <span class="btn-content">
-                <span class="btn-icon">📞</span>
-                <span class="btn-text">Call Now!</span>
+                <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span>
+                <span class="btn-text lng_contact_btn">Call Now!</span>
               </span>
               <div class="btn-ripple"></div>
             </button>
@@ -424,7 +521,7 @@
       <div class="container">
         <div class="callback-wrapper glass-morphism" data-aos="fade-up" data-aos-duration="800">
           <div class="callback-header" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
-            <div class="section-badge glass-badge">📝 <span class="lng_callback_badge">Get in Touch</span></div>
+            <div class="section-badge glass-badge"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> <span class="lng_callback_badge">Get in Touch</span></div>
             <h2 class="lng_callback_title">Contact <span class="gradient-text">Us</span></h2>
             <p class="lng_callback_subtitle">Describe your request and we will help you</p>
           </div>
@@ -461,6 +558,17 @@
     </section>
   </main>
 
+  <dialog class="result-lightbox" id="resultLightbox" aria-labelledby="resultLightboxName">
+    <button type="button" class="result-lightbox-close" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <figure class="result-lightbox-figure">
+      <div class="result-lightbox-stage"><img alt=""></div>
+      <figcaption>
+        <strong id="resultLightboxName"></strong>
+        <span class="result-lightbox-meta"></span>
+      </figcaption>
+    </figure>
+  </dialog>
+
   <footer class="glass-footer">
     <div class="footer-glass-bg"></div>
     <div class="container">
@@ -475,14 +583,14 @@
         <h3 class="lng_footer_left_title">Contact Information</h3>
         <div class="contact-info">
           <div class="contact-item glass-contact">
-            <span class="contact-icon">📞</span>
+            <span class="contact-icon"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span>
             <div>
               <p class="contact-label">Call us:</p>
               <a class="lng_con_name" href="tel:+998972717772">+998 (97) 271 77 72</a>
             </div>
           </div>
           <div class="contact-item glass-contact">
-            <span class="contact-icon">📍</span>
+            <span class="contact-icon"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"/></svg></span>
             <div>
               <p class="contact-label">Location:</p>
               <p>город Фергана, ул. А.Навои 72<br>Напротив Теннисного корта</p>
@@ -533,12 +641,13 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
 
-<script src="lang.js" type="module" defer></script>
+<script src="lang.js?v=20260929" type="module" defer></script>
 
-<script src="glass-effects.js" type="module" defer></script>
+<script src="glass-effects.js?v=20260929" type="module" defer></script>
 
-<script type="module" src="src/main.js"></script>
+<script type="module" src="src/main.js?v=20260929"></script>
 
 <!-- Service Worker Registration -->
 <script>
@@ -559,21 +668,21 @@
   // Initialize AOS (Animate On Scroll) after it loads
   if (typeof AOS !== 'undefined') {
     AOS.init({
-      duration: 1000,
+      duration: 700,
       easing: 'ease-out-cubic',
       once: true,
-      offset: 100,
-      delay: 100,
+      offset: 40,
+      delay: 0,
     });
   } else {
     window.addEventListener('load', () => {
       if (typeof AOS !== 'undefined') {
         AOS.init({
-          duration: 1000,
+          duration: 700,
           easing: 'ease-out-cubic',
           once: true,
-          offset: 100,
-          delay: 100,
+          offset: 40,
+          delay: 0,
         });
       }
     });

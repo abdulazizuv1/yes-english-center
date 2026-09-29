@@ -12,10 +12,26 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import * as memoryCache from './data-cache.js';
-import * as indexedDBCache from '../cache/indexeddb.js';
+import * as memoryCache from './data-cache.js?v=20260929';
+import * as indexedDBCache from '../cache/indexeddb.js?v=20260929';
 
 let db = null;
+
+// createdAt is a number (Date.now()) on almost every document, but a Firestore
+// Timestamp on a few old ones — and a plain {seconds, nanoseconds} object once
+// that has been through the IndexedDB cache. Firestore orders the two types
+// apart (every Timestamp above every number), which pinned an old result to
+// the top of the page. Sort by the actual moment instead.
+function createdMillis(value) {
+  if (typeof value === 'number') return value;
+  if (value && typeof value.toMillis === 'function') return value.toMillis();
+  if (value && typeof value.seconds === 'number') return value.seconds * 1000;
+  return 0;
+}
+
+function newestFirst(list) {
+  return [...list].sort((a, b) => createdMillis(b.createdAt) - createdMillis(a.createdAt));
+}
 
 /**
  * Initialize Firebase Firestore
@@ -35,14 +51,14 @@ async function loadDataWithCache(collectionName, cacheKey) {
   // Level 1: Check memory cache
   const memoryCached = memoryCache.get(cacheKey);
   if (memoryCached) {
-    return memoryCached;
+    return newestFirst(memoryCached);
   }
 
-  // Level 2: Check IndexedDB cache
+  // Level 2: Check IndexedDB cache (may still hold a copy in the old order)
   const indexedDBCached = await indexedDBCache.getFromCache(cacheKey);
   if (indexedDBCached) {
     memoryCache.set(cacheKey, indexedDBCached);
-    return indexedDBCached;
+    return newestFirst(indexedDBCached);
   }
 
   // Level 3: Load from Firebase
@@ -53,12 +69,13 @@ async function loadDataWithCache(collectionName, cacheKey) {
   snapshot.forEach((doc) => {
     data.push({ id: doc.id, ...doc.data() });
   });
+  const sorted = newestFirst(data);
 
   // Save to both caches
-  memoryCache.set(cacheKey, data);
-  await indexedDBCache.saveToCache(cacheKey, data);
+  memoryCache.set(cacheKey, sorted);
+  await indexedDBCache.saveToCache(cacheKey, sorted);
 
-  return data;
+  return sorted;
 }
 
 /**

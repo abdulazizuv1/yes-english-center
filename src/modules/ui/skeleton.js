@@ -8,9 +8,9 @@
  * Create a skeleton card element
  * @returns {HTMLElement} Skeleton card element
  */
-function createSkeletonCard() {
+function createSkeletonCard(className = 'swiper-slide skeleton-card') {
   const skeleton = document.createElement('div');
-  skeleton.className = 'swiper-slide skeleton-card';
+  skeleton.className = className;
   skeleton.innerHTML = `
     <div class="skeleton-image"></div>
     <div class="skeleton-text"></div>
@@ -24,7 +24,7 @@ function createSkeletonCard() {
  * @param {string} selector - CSS selector for the wrapper element
  * @param {number} count - Number of skeleton cards to show
  */
-export function showSkeletons(selector, count = 3) {
+export function showSkeletons(selector, count = 3, className) {
   const wrapper = document.querySelector(selector);
   if (!wrapper) {
     return;
@@ -35,7 +35,7 @@ export function showSkeletons(selector, count = 3) {
 
   // Add skeleton cards
   for (let i = 0; i < count; i++) {
-    wrapper.appendChild(createSkeletonCard());
+    wrapper.appendChild(createSkeletonCard(className));
   }
 
 }
@@ -46,12 +46,12 @@ export function showSkeletons(selector, count = 3) {
 export function showAllSkeletons() {
   const sections = [
     { selector: '#groups .swiper-wrapper', count: 3 },
-    { selector: '#results .swiper-wrapper', count: 3 },
+    { selector: '#results .results-track', count: 6, className: 'result-card skeleton-card' },
     { selector: '#feedbacks .swiper-wrapper', count: 2 }
   ];
 
   sections.forEach(section => {
-    showSkeletons(section.selector, section.count);
+    showSkeletons(section.selector, section.count, section.className);
   });
 
 }
@@ -76,7 +76,7 @@ export function hideSkeletons(selector) {
 export function hideAllSkeletons() {
   const selectors = [
     '#groups .swiper-wrapper',
-    '#results .swiper-wrapper',
+    '#results .results-track',
     '#feedbacks .swiper-wrapper'
   ];
 

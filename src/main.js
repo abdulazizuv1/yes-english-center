@@ -6,19 +6,20 @@
 
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { firebaseConfig } from "../config.js";
+import { firebaseConfig } from "../config.js?v=20260929";
 
 // Module imports
-import * as Auth from './modules/auth/auth.js';
-import * as AuthUI from './modules/auth/auth-ui.js';
-import * as DataLoader from './modules/data/data-loader.js';
-import * as UIRenderer from './modules/ui/renderer.js';
-import * as Skeleton from './modules/ui/skeleton.js';
-import * as SwiperConfig from './modules/swiper/swiper-config.js';
-import * as Language from './modules/language/language.js';
-import * as Helpers from './modules/utils/helpers.js';
-import * as Callback from './modules/callback/callback.js';
-import * as Performance from './modules/utils/performance.js';
+import * as Auth from './modules/auth/auth.js?v=20260929';
+import * as AuthUI from './modules/auth/auth-ui.js?v=20260929';
+import * as DataLoader from './modules/data/data-loader.js?v=20260929';
+import * as UIRenderer from './modules/ui/renderer.js?v=20260929';
+import * as Skeleton from './modules/ui/skeleton.js?v=20260929';
+import * as SwiperConfig from './modules/swiper/swiper-config.js?v=20260929';
+import * as Language from './modules/language/language.js?v=20260929';
+import * as Helpers from './modules/utils/helpers.js?v=20260929';
+import * as Callback from './modules/callback/callback.js?v=20260929';
+import * as Performance from './modules/utils/performance.js?v=20260929';
+import * as SmoothScroll from './modules/ui/smooth-scroll.js?v=20260929';
 
 /**
  * Application State
@@ -128,11 +129,9 @@ async function loadAndRenderData() {
       SwiperConfig.updateSwiper(".mySwiper");
     }
 
-    // Render results
+    // Render results (a continuous strip, not a slider)
     if (data.results) {
-      const resultsWrapper = document.querySelector("#results .swiper-wrapper");
-      UIRenderer.renderResults(data.results, resultsWrapper);
-      SwiperConfig.updateSwiper(".mySwiper3");
+      UIRenderer.renderResults(data.results, document.querySelector("#results .results-track"));
     }
 
     // Render feedbacks
@@ -202,6 +201,9 @@ async function startApp() {
 
     // 5. Initialize Callback Form
     Callback.initCallbackForm();
+
+    // 5b. Smooth scrolling (skipped for reduced motion)
+    SmoothScroll.initSmoothScroll();
 
     // 6. Initialize UI
     await initializeUI();

@@ -248,8 +248,11 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// the menu takes over from the links below 1100px (see style.css)
+const MENU_BREAKPOINT = 1100;
+
 window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > MENU_BREAKPOINT) {
         closeMobileMenu();
     }
 });
@@ -403,7 +406,7 @@ let resizeTimeout;
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > MENU_BREAKPOINT) {
             const nav = document.querySelector("nav");
             const navInfo = document.querySelector(".nav_info");
             const navRight = document.querySelector(".nav_right");
@@ -476,8 +479,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // Utility function for smooth scrolling to sections
 window.smoothScrollTo = function(targetId) {
     const target = document.querySelector(targetId);
+    if (target && window.lenis) {
+        window.lenis.scrollTo(target);   // stops under the header via CSS scroll-padding-top
+        return;
+    }
     if (target) {
-        const headerOffset = 80; // Account for fixed navbar
+        // clear the fixed header, whatever height it has right now
+        const header = document.getElementById('siteHeader');
+        const headerOffset = (header ? header.offsetHeight : 80) + 8;
         const elementPosition = target.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -533,3 +542,21 @@ function optimizeGlassEffects() {
 
 // Initialize performance optimizations
 document.addEventListener('DOMContentLoaded', optimizeGlassEffects);
+
+// Fold the header's contact strip away on phones once the page scrolls
+// (style.css only applies .header-condensed at 768px and below).
+(function () {
+    const root = document.documentElement;
+    let ticking = false;
+    const update = () => {
+        root.classList.toggle('header-condensed', window.scrollY > 24);
+        ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(update);
+        }
+    }, { passive: true });
+    update();
+})();

@@ -3,23 +3,27 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v5';
-const STATIC_CACHE = 'yes-static-v5';
-const DYNAMIC_CACHE = 'yes-dynamic-v5';
+const CACHE_NAME = 'yes-english-center-v6';
+const STATIC_CACHE = 'yes-static-v6';
+const DYNAMIC_CACHE = 'yes-dynamic-v6';
 // The reading test must reopen after a refresh with no internet, so its own
 // files (and the Firebase SDK it imports) are kept here. Network first:
 // students always get the newest version while online.
 const READING_CACHE = 'yes-reading-v2';
 const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
+// On the local dev server Vite answers one URL differently depending on who
+// asks: a stylesheet <link> gets CSS, a plain fetch gets a JS module. A copy
+// cached here would be the wrong one (the page came up unstyled), so in
+// development this worker caches nothing and serves nothing.
+const IS_DEV = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
+
 // Assets to cache on install
+// The page's CSS and scripts are loaded with a ?v= version (index.html), so
+// they are cached as the page requests them rather than listed here.
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/style.css',
-  '/lang.js',
-  '/glass-effects.js',
-  '/src/main.js',
   '/image/logo.webp',
   '/image/logo_copy.png',
   '/image/placeholder.svg',
@@ -42,9 +46,15 @@ async function trimCache(cacheName, maxEntries) {
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  if (IS_DEV) {
+    self.skipWaiting();
+    return;
+  }
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((error) => {
+      // cache: 'reload' goes past the browser's HTTP cache to the server
+      const fresh = STATIC_ASSETS.map((url) => new Request(url, { cache: 'reload' }));
+      return cache.addAll(fresh).catch((error) => {
         // Silently fail if some assets can't be cached
       });
     })
@@ -104,6 +114,7 @@ function networkFirst(request, isNavigation) {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  if (IS_DEV) return;
   const { request } = event;
   const url = new URL(request.url);
 
@@ -146,8 +157,10 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      // Otherwise fetch from network
-      return fetch(request)
+      // Otherwise fetch from network: for our own files, check with the
+      // server first so an old copy in the HTTP cache is never stored here
+      const sameOrigin = url.origin === self.location.origin;
+      return fetch(sameOrigin ? new Request(request, { cache: 'no-cache' }) : request)
         .then((response) => {
           // Don't cache non-successful responses
           if (!response || response.status !== 200 || response.type !== 'basic') {
