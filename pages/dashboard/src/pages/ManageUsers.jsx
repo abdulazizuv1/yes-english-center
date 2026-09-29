@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ManageUsersSkeleton } from '../components/Skeleton';
+import ResultsManager from '../components/ResultsManager';
 import './ManageUsers.css';
 
 const storage = getStorage();
@@ -18,19 +19,19 @@ export default function ManageUsers() {
     const { isAdmin } = useAuth();
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
+    const [results, setResults] = useState([]);
+    const [resultsState, setResultsState] = useState({ loading: true, error: '' });
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('users');
     const [searchQuery, setSearchQuery] = useState('');
     const [showCreateUser, setShowCreateUser] = useState(false);
     const [showAddGroup, setShowAddGroup] = useState(false);
-    const [showAddResult, setShowAddResult] = useState(false);
     const [showAddFeedback, setShowAddFeedback] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
 
     // Forms state
     const [newUser, setNewUser] = useState({ email: '', password: '', name: '', username: '', role: 'student' });
     const [newGroup, setNewGroup] = useState({ name: '', photo: null });
-    const [newResult, setNewResult] = useState({ name: '', band: '', group: '', photo: null });
     const [newFeedback, setNewFeedback] = useState({ name: '', group: '', feedback: '' });
 
     const loadUsers = useCallback(async () => {
@@ -51,9 +52,22 @@ export default function ManageUsers() {
         }
     }, []);
 
+    // the landing page's results, listed with their ids so they can be edited
+    const loadResults = useCallback(async () => {
+        setResultsState((s) => ({ ...s, error: '' }));
+        try {
+            const snap = await getDocs(collection(db, 'results'));
+            setResults(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            setResultsState({ loading: false, error: '' });
+        } catch (err) {
+            console.error('Error loading results:', err);
+            setResultsState({ loading: false, error: err.message });
+        }
+    }, []);
+
     useEffect(() => {
-        Promise.all([loadUsers(), loadGroups()]).finally(() => setLoading(false));
-    }, [loadUsers, loadGroups]);
+        Promise.all([loadUsers(), loadGroups(), loadResults()]).finally(() => setLoading(false));
+    }, [loadUsers, loadGroups, loadResults]);
 
     const showMsg = (text, type = 'success') => {
         setMessage({ text, type });
@@ -125,25 +139,6 @@ export default function ManageUsers() {
         }
     };
 
-    const handleAddResult = async (e) => {
-        e.preventDefault();
-        if (!newResult.photo || !newResult.name || !newResult.band || !newResult.group) return showMsg('❌ Fill all fields', 'error');
-        try {
-            const fileRef = storageRef(storage, `results/${Date.now()}_${newResult.photo.name}`);
-            await uploadBytes(fileRef, newResult.photo);
-            const photoURL = await getDownloadURL(fileRef);
-            await addDoc(collection(db, 'results'), {
-                name: newResult.name, band: parseFloat(newResult.band),
-                group: newResult.group, photoURL, createdAt: Date.now(),
-            });
-            showMsg('✅ Result added');
-            setNewResult({ name: '', band: '', group: '', photo: null });
-            setShowAddResult(false);
-        } catch (err) {
-            showMsg(`❌ ${err.message}`, 'error');
-        }
-    };
-
     const handleAddFeedback = async (e) => {
         e.preventDefault();
         if (!newFeedback.name || !newFeedback.group || !newFeedback.feedback) return showMsg('❌ Fill all fields', 'error');
@@ -168,7 +163,7 @@ export default function ManageUsers() {
     const TABS = [
         { key: 'users', label: 'Users', icon: Users, count: users.length },
         { key: 'groups', label: 'Groups', icon: Layers, count: groups.length },
-        { key: 'results', label: 'Results', icon: Award },
+        { key: 'results', label: 'Results', icon: Award, count: resultsState.loading ? null : results.length },
         { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     ];
 
@@ -283,28 +278,14 @@ export default function ManageUsers() {
                     {/* Results Tab */}
                     {activeTab === 'results' && (
                         <div className="tab-content">
-                            <div className="tab-toolbar">
-                                <span />
-                                <button className="action-btn primary" onClick={() => setShowAddResult(!showAddResult)}>
-                                    {showAddResult ? <X size={18} /> : <Plus size={18} />}
-                                    {showAddResult ? 'Cancel' : 'Add Result'}
-                                </button>
-                            </div>
-
-                            {showAddResult && (
-                                <form className="inline-form glass-card" onSubmit={handleAddResult}>
-                                    <h4><Award size={18} /> Add Student Result</h4>
-                                    <div className="form-grid">
-                                        <input placeholder="Student Name" value={newResult.name} onChange={e => setNewResult({ ...newResult, name: e.target.value })} required />
-                                        <input type="number" step="0.5" min="0" max="9" placeholder="IELTS Band" value={newResult.band} onChange={e => setNewResult({ ...newResult, band: e.target.value })} required />
-                                        <input placeholder="Group" value={newResult.group} onChange={e => setNewResult({ ...newResult, group: e.target.value })} required />
-                                        <input type="file" accept="image/*" onChange={e => setNewResult({ ...newResult, photo: e.target.files[0] })} required />
-                                    </div>
-                                    <button type="submit" className="action-btn primary">Add Result</button>
-                                </form>
-                            )}
-
-                            <p className="empty-msg">Use the form above to add student IELTS results to the landing page.</p>
+                            <ResultsManager
+                                results={results}
+                                loading={resultsState.loading}
+                                error={resultsState.error}
+                                reload={loadResults}
+                                groups={groups}
+                                notify={showMsg}
+                            />
                         </div>
                     )}
 
