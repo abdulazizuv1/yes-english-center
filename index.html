@@ -149,6 +149,17 @@
       </div>
     </div>
   </div>
+  <script>
+    // If the page's scripts cannot load (a network or DNS hiccup), what is
+    // already on the page is still worth reading: never leave the loader up
+    // for good. The app hides it itself within a second on a normal load.
+    setTimeout(function () {
+      var loader = document.getElementById('loader');
+      if (!loader) return;
+      loader.classList.add('hidden');
+      setTimeout(function () { loader.remove(); }, 500);
+    }, 8000);
+  </script>
 
   <!-- Login Panel -->
   <div class="login_panel" style="display: none;">

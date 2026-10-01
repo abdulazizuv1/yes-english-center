@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v6';
-const STATIC_CACHE = 'yes-static-v6';
-const DYNAMIC_CACHE = 'yes-dynamic-v6';
+const CACHE_NAME = 'yes-english-center-v7';
+const STATIC_CACHE = 'yes-static-v7';
+const DYNAMIC_CACHE = 'yes-dynamic-v7';
 // The reading test must reopen after a refresh with no internet, so its own
 // files (and the Firebase SDK it imports) are kept here. Network first:
 // students always get the newest version while online.
@@ -188,10 +188,13 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // If network fails and it's a navigation request, return offline page
+          // No network: a page falls back to the saved home page; anything
+          // else fails cleanly (returning nothing here made the browser throw
+          // "Failed to convert value to 'Response'" for every missing file)
           if (request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/index.html').then((page) => page || Response.error());
           }
+          return Response.error();
         });
     })
   );
