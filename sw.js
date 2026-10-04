@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'yes-english-center-v7';
-const STATIC_CACHE = 'yes-static-v7';
-const DYNAMIC_CACHE = 'yes-dynamic-v7';
+const CACHE_NAME = 'yes-english-center-v8';
+const STATIC_CACHE = 'yes-static-v8';
+const DYNAMIC_CACHE = 'yes-dynamic-v8';
 // The reading test must reopen after a refresh with no internet, so its own
 // files (and the Firebase SDK it imports) are kept here. Network first:
 // students always get the newest version while online.

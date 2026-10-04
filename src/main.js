@@ -6,20 +6,20 @@
 
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { firebaseConfig } from "../config.js?v=20260929";
+import { firebaseConfig } from "../config.js?v=20261004";
 
 // Module imports
-import * as Auth from './modules/auth/auth.js?v=20260929';
-import * as AuthUI from './modules/auth/auth-ui.js?v=20260929';
-import * as DataLoader from './modules/data/data-loader.js?v=20260929';
-import * as UIRenderer from './modules/ui/renderer.js?v=20260929';
-import * as Skeleton from './modules/ui/skeleton.js?v=20260929';
-import * as SwiperConfig from './modules/swiper/swiper-config.js?v=20260929';
-import * as Language from './modules/language/language.js?v=20260929';
-import * as Helpers from './modules/utils/helpers.js?v=20260929';
-import * as Callback from './modules/callback/callback.js?v=20260929';
-import * as Performance from './modules/utils/performance.js?v=20260929';
-import * as SmoothScroll from './modules/ui/smooth-scroll.js?v=20260929';
+import * as Auth from './modules/auth/auth.js?v=20261004';
+import * as AuthUI from './modules/auth/auth-ui.js?v=20261004';
+import * as DataLoader from './modules/data/data-loader.js?v=20261004';
+import * as UIRenderer from './modules/ui/renderer.js?v=20261004';
+import * as Skeleton from './modules/ui/skeleton.js?v=20261004';
+import * as SwiperConfig from './modules/swiper/swiper-config.js?v=20261004';
+import * as Language from './modules/language/language.js?v=20261004';
+import * as Helpers from './modules/utils/helpers.js?v=20261004';
+import * as Callback from './modules/callback/callback.js?v=20261004';
+import * as Performance from './modules/utils/performance.js?v=20261004';
+import * as SmoothScroll from './modules/ui/smooth-scroll.js?v=20261004';
 
 /**
  * Application State

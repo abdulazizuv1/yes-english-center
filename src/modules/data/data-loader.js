@@ -12,8 +12,8 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-import * as memoryCache from './data-cache.js?v=20260929';
-import * as indexedDBCache from '../cache/indexeddb.js?v=20260929';
+import * as memoryCache from './data-cache.js?v=20261004';
+import * as indexedDBCache from '../cache/indexeddb.js?v=20261004';
 
 let db = null;
 

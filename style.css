@@ -521,7 +521,7 @@ html {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  height: var(--topbar-h);
+  height: 50px;
 }
 
 .topbar-contact {
@@ -4341,4 +4341,161 @@ html.lenis.lenis-smooth {
    next to the cleaner cards */
 .contact .con_line {
   display: none;
+}
+
+/* ═══════════════ The booking button in the contact strip ═══════════════
+   The one thing in the header the eye should land on. A white pill (the
+   brightest thing on the blue strip) with the Telegram mark on a brand
+   gradient disc, gradient lettering and an arrow. Every few seconds one
+   soft halo and one sweep of light, then stillness: a cue, not a nag.
+   Scoped to the strip; the menu's copy of the button keeps its own look. */
+
+.topbar-actions .topbar-cta {
+  gap: 9px;
+  height: 36px;
+  padding: 0 15px 0 4px;
+  background: #fff;
+  box-shadow:
+    0 6px 18px rgba(13, 30, 90, 0.35),
+    inset 0 -2px 0 rgba(23, 99, 225, 0.08);
+  animation: ctaHalo 5s ease-out 1.5s infinite;
+}
+
+.topbar-cta-badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--brand-grad);
+  box-shadow:
+    0 3px 8px rgba(23, 99, 225, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.topbar-cta-badge .topbar-cta-icon {
+  width: 14px;
+  height: 14px;
+  transform: translateX(-1px);   /* the plane's visual centre sits right of its box */
+}
+
+/* deeper than the brand gradient so the words keep 7:1 contrast on white */
+.topbar-actions .topbar-cta .lng_topbar_cta {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, #1452c4, #5a3db0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.topbar-cta-arrow {
+  width: 15px;
+  height: 15px;
+  color: #5a3db0;
+  stroke-width: 2.4;
+  transition: transform 0.25s ease;
+}
+
+.topbar-actions .topbar-cta:hover {
+  transform: translateY(-1px);
+  animation: none;
+  box-shadow:
+    0 10px 26px rgba(13, 30, 90, 0.42),
+    0 0 0 4px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 0 rgba(23, 99, 225, 0.08);
+}
+
+.topbar-actions .topbar-cta:hover .topbar-cta-arrow {
+  transform: translateX(3px);
+}
+
+.topbar-actions .topbar-cta .topbar-cta-shine {
+  background: linear-gradient(110deg, transparent 35%, rgba(91, 111, 240, 0.24) 50%, transparent 65%);
+  transition: none;
+  animation: ctaSweep 5s ease-in-out 1.5s infinite;
+}
+
+.topbar-actions .topbar-cta:hover .topbar-cta-shine {
+  animation: ctaSweep 0.8s ease-in-out 1;
+}
+
+/* the halo has to reach past the strip's edges, and on desktop the strip
+   never folds away, so it need not clip */
+@media (min-width: 769px) {
+  .topbar-clip {
+    overflow: visible;
+  }
+}
+
+@keyframes ctaHalo {
+  0% {
+    box-shadow:
+      0 6px 18px rgba(13, 30, 90, 0.35),
+      0 0 0 0 rgba(255, 255, 255, 0.7),
+      inset 0 -2px 0 rgba(23, 99, 225, 0.08);
+  }
+  40%, 100% {
+    box-shadow:
+      0 6px 18px rgba(13, 30, 90, 0.35),
+      0 0 0 11px rgba(255, 255, 255, 0),
+      inset 0 -2px 0 rgba(23, 99, 225, 0.08);
+  }
+}
+
+@keyframes ctaSweep {
+  0% { transform: translateX(-120%); }
+  24%, 100% { transform: translateX(120%); }
+}
+
+/* phones: smaller, no arrow, no halo (the folding strip clips it) */
+@media (max-width: 768px) {
+  .topbar-actions .topbar-cta {
+    gap: 7px;
+    height: 30px;
+    padding: 0 12px 0 3px;
+    animation: none;
+  }
+
+  .topbar-cta-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .topbar-cta-badge .topbar-cta-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .topbar-actions .topbar-cta .lng_topbar_cta {
+    font-size: 12px;
+  }
+
+  .topbar-cta-arrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar-actions .topbar-cta,
+  .topbar-actions .topbar-cta .topbar-cta-shine,
+  .topbar-actions .topbar-cta:hover .topbar-cta-shine {
+    animation: none;
+  }
+
+  .topbar-actions .topbar-cta:hover,
+  .topbar-actions .topbar-cta:hover .topbar-cta-arrow {
+    transform: none;
+  }
+}
+
+/* narrow tablets: the phone number says "contact us" on its own, and its
+   label's room keeps the booking button whole in Russian and Uzbek */
+@media (max-width: 900px) {
+  .topbar-label {
+    display: none;
+  }
 }

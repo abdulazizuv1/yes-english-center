@@ -3,8 +3,8 @@
  * Handles rendering of data cards with animations
  * @module ui/renderer
  */
-import { getCurrentLanguage } from '../language/language.js?v=20260929';
-import { mountMarquee } from './marquee.js?v=20260929';
+import { getCurrentLanguage } from '../language/language.js?v=20261004';
+import { mountMarquee } from './marquee.js?v=20261004';
 
 /** Text from Firestore goes into HTML: never let it become markup. */
 function escapeHtml(value) {
