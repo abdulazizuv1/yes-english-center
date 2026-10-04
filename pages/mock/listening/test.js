@@ -12,7 +12,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
-import { initListeningTest } from "./components/init.js?v=3.2";
+import { initListeningTest } from "./components/init.js?v=3.3";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

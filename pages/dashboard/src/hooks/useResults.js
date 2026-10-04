@@ -341,10 +341,12 @@ export function getResultUrl(type, resultId) {
   return urls[type] || '#';
 }
 
-export function getTestUrl(type, testId) {
+// A reading test opens as the timed mock, or with mode 'analyse' untimed
+// (see ReadingModeDialog).
+export function getTestUrl(type, testId, mode) {
   const urls = {
     listening: `/pages/mock/listening/test?testId=${testId}`,
-    reading: `/pages/mock/reading/test?testId=${testId}`,
+    reading: `/pages/mock/reading/test?testId=${testId}${mode === 'analyse' ? '&mode=analyse' : ''}`,
     writing: `/pages/mock/writing/test?testId=${testId}`,
     fullmock: `/pages/mock/full/fullMock?testId=${testId}`,
   };

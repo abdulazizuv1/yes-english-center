@@ -12,9 +12,9 @@ export {
   normalizeMapLabelling,
   questionIdsOf,
   optionList,
-} from "./normalize.js?v=3.2";
-export { splitAnswerVariants, textAnswerCorrect, gradeItem, gradeItems } from "./grade.js?v=3.2";
-export { renderItem, gapInlineHTML } from "./render.js?v=3.2";
+} from "./normalize.js?v=3.3";
+export { splitAnswerVariants, textAnswerCorrect, gradeItem, gradeItems } from "./grade.js?v=3.3";
+export { renderItem, gapInlineHTML } from "./render.js?v=3.3";
 export {
   reviewRows,
   reviewFromStored,
@@ -22,4 +22,4 @@ export {
   scoreNotice,
   formatExpected,
   answerLabel,
-} from "./review.js?v=3.2";
+} from "./review.js?v=3.3";

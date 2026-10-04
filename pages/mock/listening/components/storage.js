@@ -1,5 +1,5 @@
-import { listeningState } from "./state.js?v=3.2";
-import { updateQuestionNav } from "./navigation.js?v=3.2";
+import { listeningState } from "./state.js?v=3.3";
+import { updateQuestionNav } from "./navigation.js?v=3.3";
 
 export function loadSavedAnswers() {
   try {

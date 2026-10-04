@@ -78,6 +78,14 @@ button { font-family: inherit; }
 .ielts[data-contrast="wb"] .cd-brand img,
 .ielts[data-contrast="yb"] .cd-brand img { filter: brightness(0) invert(1); }
 .cd-test-name { font-weight: 700; padding-left: 12px; border-left: 1px solid var(--line); }
+/* analyse mode says so next to the test's name */
+.cd-mode {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--accent); border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 13px; font-weight: 700; white-space: nowrap;
+}
 .cd-candidate { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cd-candidate-label { font-weight: 700; color: var(--fg); margin-right: 6px; }
 
@@ -107,6 +115,8 @@ button { font-family: inherit; }
 .ielts[data-contrast="wb"] .cd-timer.low,
 .ielts[data-contrast="yb"] .cd-timer.low { color: #ff6b6b; }
 .cd-timer.untimed { cursor: default; }
+/* analyse mode: counts up, so the digits must not jostle as they change */
+.cd-timer.stopwatch { cursor: default; font-variant-numeric: tabular-nums; }
 .cd-timer.flash { animation: cd-flash 1s steps(1) 6; }
 @keyframes cd-flash {
   0% { background: #c62828; color: #fff; }
@@ -121,8 +131,9 @@ button { font-family: inherit; }
 .cd-net .net-cross { display: none; }
 .offline .cd-net { color: #c62828; }
 .offline .cd-net .net-cross { display: inline; }
-/* staff-only controls, shown by init.js when the account is an admin */
-.cd-staff {
+/* pause (staff, timed test) and clear all (staff, or anyone in analyse
+   mode), shown by init.js */
+.cd-control {
   display: inline-flex; align-items: center; gap: 6px;
   height: 34px; padding: 0 12px;
   font: inherit; font-size: 14px; font-weight: 600;
@@ -130,12 +141,12 @@ button { font-family: inherit; }
   border: 1px solid var(--line-strong); border-radius: 4px;
   cursor: pointer; white-space: nowrap;
 }
-.cd-staff:hover { background: var(--chrome); }
-.cd-staff[hidden] { display: none; }
-.cd-staff.danger { color: #a3231a; border-color: #a3231a; }
-.ielts[data-contrast="wb"] .cd-staff.danger,
-.ielts[data-contrast="yb"] .cd-staff.danger { color: #ff8a80; border-color: #ff8a80; }
-.cd-staff.danger:hover { background: rgba(163, 35, 26, .08); }
+.cd-control:hover { background: var(--chrome); }
+.cd-control[hidden] { display: none; }
+.cd-control.danger { color: #a3231a; border-color: #a3231a; }
+.ielts[data-contrast="wb"] .cd-control.danger,
+.ielts[data-contrast="yb"] .cd-control.danger { color: #ff8a80; border-color: #ff8a80; }
+.cd-control.danger:hover { background: rgba(163, 35, 26, .08); }
 /* the clock is frozen while paused: say so rather than let it look live */
 .paused .cd-timer { opacity: .55; }
 
@@ -167,6 +178,8 @@ button { font-family: inherit; }
 .cd-help summary { cursor: pointer; font-weight: 700; }
 .cd-help ul { margin: 8px 0 0; padding-left: 18px; font-size: 14px; }
 .cd-help li { margin-bottom: 6px; }
+.cd-help .analyse-only { display: none; }
+.analyse .cd-help .analyse-only { display: list-item; }
 
 .cd-status {
   flex: 0 0 auto;
@@ -501,6 +514,55 @@ mark.hl.note-end::after {
   font-size: 15px; font-weight: 700; cursor: pointer;
 }
 .cd-btn.primary { background: #1a4fa3; border-color: #1a4fa3; color: #fff; }
+.cd-btn.danger { background: #b3261e; border-color: #b3261e; color: #fff; }
+.cd-btn:hover { filter: brightness(.96); }
+.cd-btn.primary:hover, .cd-btn.danger:hover { filter: brightness(1.12); }
+
+/* "Clear everything?" */
+.cd-dialog-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; margin-bottom: 14px;
+  border-radius: 50%;
+  background: #fdecea; color: #b3261e;
+}
+.cd-clear-list {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin: 4px 0 14px; padding: 0;
+  list-style: none;
+}
+.cd-clear-list li {
+  padding: 9px 12px;
+  border: 1px solid #d6d6d6; border-radius: 4px;
+  background: #f7f7f7;
+  font-size: 14px; line-height: 1.3;
+}
+.cd-clear-list b { display: block; font-size: 22px; line-height: 1.15; }
+.cd-clear-list li.none { color: #8a8a8a; }
+
+/* a short "done" message after an action */
+.cd-toast {
+  position: fixed; left: 50%; bottom: 86px; z-index: 120;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 18px;
+  background: #1f1f1f; color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
+  font-size: 15px; font-weight: 700;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.cd-toast::before {
+  content: "";
+  width: 16px; height: 9px; margin-top: -4px;
+  border: solid #7ee2a8; border-width: 0 0 3px 3px;
+  transform: rotate(-45deg);
+}
+.cd-toast.show { animation: cd-toast 2.6s ease forwards; }
+@keyframes cd-toast {
+  0% { opacity: 0; transform: translate(-50%, 10px); }
+  8%, 85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
 .cd-pin {
   width: 100%; margin-top: 6px; padding: 12px;
   font-size: 24px; letter-spacing: 10px; text-align: center;
@@ -542,7 +604,19 @@ body.loading .cd-loading { display: flex; }
   .cd-actions { margin-left: auto; }
 }
 
+/* phones: the header buttons keep their icons, their words go to screen readers */
+@media (max-width: 600px) {
+  .cd-control { padding: 0 9px; }
+  .cd-control-label, .cd-mode-label {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .cd-mode { padding: 4px 6px; }
+  .cd-dialog { padding: 22px 20px 18px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cd-timer.flash { animation: none; background: #c62828; color: #fff; }
+  .cd-toast.show { animation: none; }
   .cd-spinner { animation-duration: 3s; }
 }

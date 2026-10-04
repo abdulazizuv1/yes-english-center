@@ -5,7 +5,7 @@
 // nothing. The key includes the student's uid: the centre's computers are
 // shared, and the old key (readingTest_<testId>) handed one student's
 // answers to the next student who opened the same test.
-import { readingState } from "./state.js?v=3.2";
+import { readingState } from "./state.js?v=3.3";
 
 const PREFIX = "ielts-reading:v2";
 export const TEST_DURATION_MS = 60 * 60 * 1000;
@@ -18,8 +18,13 @@ const LEGACY_WINDOW_MS = 3 * 60 * 60 * 1000;
 
 let storageBroken = false;
 const listeners = new Set();
+let beforeSave = null;
 
-export const sessionKey = (uid, testId) => `${PREFIX}:${uid}:${testId}`;
+// The timed test and analyse mode are separate sittings of the same test:
+// switching mode never hands a running clock's answers to the untimed page,
+// or the other way round. The timed key is the one the page always used.
+export const sessionKey = (uid, testId, mode = readingState.mode) =>
+  mode === "analyse" ? `${PREFIX}:${uid}:${testId}:analyse` : `${PREFIX}:${uid}:${testId}`;
 
 function makeAttemptId(uid, testId) {
   const rand = Math.random().toString(36).slice(2, 8);
@@ -31,7 +36,8 @@ export function newSession(uid, testId, now = Date.now()) {
     v: 2,
     attemptId: makeAttemptId(uid, testId),
     startedAt: null,    // set when the questions first appear
-    deadline: null,     // startedAt + one hour; the clock counts to this
+    deadline: null,     // startedAt + one hour; the clock counts to this (timed test only)
+    elapsed: 0,         // analyse mode: ms spent with the test open, see timer.js
     answers: {},
     flags: [],          // qIds marked for review
     marks: [],          // highlights and notes, see marks.js
@@ -95,6 +101,7 @@ export function saveSession() {
   const s = readingState.session;
   const u = readingState.user;
   if (!s || !u) return false;
+  beforeSave?.(s);
   s.savedAt = Date.now();
   try {
     localStorage.setItem(sessionKey(u.uid, readingState.testId), JSON.stringify(s));
@@ -117,6 +124,11 @@ export function clearSession() {
   const u = readingState.user;
   if (!u) return;
   try { localStorage.removeItem(sessionKey(u.uid, readingState.testId)); } catch { /* gone already */ }
+}
+
+/** Lets the stopwatch bring the sitting up to date just before each write. */
+export function onBeforeSave(fn) {
+  beforeSave = fn;
 }
 
 /** Tells the page when saving starts failing, or works again. */

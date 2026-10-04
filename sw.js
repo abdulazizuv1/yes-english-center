@@ -9,7 +9,7 @@ const DYNAMIC_CACHE = 'yes-dynamic-v8';
 // The reading test must reopen after a refresh with no internet, so its own
 // files (and the Firebase SDK it imports) are kept here. Network first:
 // students always get the newest version while online.
-const READING_CACHE = 'yes-reading-v2';
+const READING_CACHE = 'yes-reading-v3';
 const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
 // On the local dev server Vite answers one URL differently depending on who

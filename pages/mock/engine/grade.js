@@ -7,7 +7,7 @@
 // ("US/American"); a comma directly between digits (6,000) is a thousand
 // separator, not a variant break.
 // ═══════════════════════════════════════════════════════════════════════
-import { questionIdsOf } from "./normalize.js?v=3.2";
+import { questionIdsOf } from "./normalize.js?v=3.3";
 
 export function splitAnswerVariants(key) {
   const parts = [];

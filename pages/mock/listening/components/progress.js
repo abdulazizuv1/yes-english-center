@@ -1,4 +1,4 @@
-import { listeningState } from "./state.js?v=3.2";
+import { listeningState } from "./state.js?v=3.3";
 
 export function isAnswerValid(answer) {
   return (

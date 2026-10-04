@@ -19,7 +19,7 @@
 // control gets its own handler that calls ctx.onAnswer. Text inputs are
 // marked data-qe so pages' delegated handlers can skip them.
 // ═══════════════════════════════════════════════════════════════════════
-import { renderDragSlots, renderDragInline } from "./dnd.js?v=3.2";
+import { renderDragSlots, renderDragInline } from "./dnd.js?v=3.3";
 
 const esc = (s) =>
   String(s ?? "")

@@ -6,6 +6,7 @@
 // from the test document and rebuilt on each load.
 export const readingState = {
   testId: "test-1",
+  mode: "mock",        // "mock": the timed test; "analyse": no time limit, see init.js
   user: null,          // { uid, email, label }
   passages: [],        // the test document's passages, numbered q1..qN
   parts: [],           // [{ index, qIds: [...], first, last }]

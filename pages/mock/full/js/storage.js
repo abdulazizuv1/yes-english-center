@@ -1,8 +1,8 @@
 // localStorage persistence of answers/highlights/timer + the Clear button.
-import { state } from "./state.js?v=3.2";
-import { getCurrentRemainingTime } from "./timer.js?v=3.2";
-import { updateQuestionNav } from "./navigation.js?v=3.2";
-import { clearAllHighlights } from "./highlights.js?v=3.2";
+import { state } from "./state.js?v=3.3";
+import { getCurrentRemainingTime } from "./timer.js?v=3.3";
+import { updateQuestionNav } from "./navigation.js?v=3.3";
+import { clearAllHighlights } from "./highlights.js?v=3.3";
 
 function loadSavedState() {
   const saved = localStorage.getItem(state.testStorageKey);

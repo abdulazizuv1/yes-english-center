@@ -2,8 +2,8 @@
 // settings (both offered by the real computer-delivered test), hiding the
 // clock, the connection indicator, a warning if this browser will not save,
 // and the divider between passage and questions.
-import { readingState } from "./state.js?v=3.2";
-import { saveSession, onStorageHealth } from "./session.js?v=3.2";
+import { readingState } from "./state.js?v=3.3";
+import { saveSession, onStorageHealth } from "./session.js?v=3.3";
 
 const SIZES = ["standard", "large", "xlarge"];
 const CONTRASTS = ["bw", "wb", "yb"];
@@ -17,8 +17,12 @@ export function applySettings() {
 
   document.querySelectorAll('#menuPanel input[name="size"]').forEach((r) => { r.checked = r.value === document.body.dataset.size; });
   document.querySelectorAll('#menuPanel input[name="contrast"]').forEach((r) => { r.checked = r.value === document.body.dataset.contrast; });
+  // analyse mode's clock counts up, so it is "time spent"
+  const what = readingState.mode === "analyse" ? "time spent" : "time remaining";
   const hideBtn = document.getElementById("toggleTimer");
-  if (hideBtn) hideBtn.textContent = timerHidden ? "Show time remaining" : "Hide time remaining";
+  if (hideBtn) hideBtn.textContent = `${timerHidden ? "Show" : "Hide"} ${what}`;
+  const showBtn = document.getElementById("showTimer");
+  if (showBtn) showBtn.textContent = `Show ${what}`;
 }
 
 function banner(kind, message) {

@@ -5,17 +5,25 @@
 // from the first frame, on the part they were on, with the clock where it
 // was. The test itself is kept on this computer while a sitting is in
 // progress, so a refresh with no internet still opens it.
-import { readingState } from "./state.js?v=3.2";
-import { numberQuestions, buildItems, partOfQuestion } from "./questions.js?v=3.2";
-import { loadSession, saveSession, saveOnLeave, TEST_DURATION_MS } from "./session.js?v=3.2";
-import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.2";
-import { buildFooter, updateFooter } from "./nav.js?v=3.2";
-import { initMarks } from "./marks.js?v=3.2";
-import { startClock, freezeClock } from "./timer.js?v=3.2";
-import { createSubmitter, confirmFinish } from "./submit.js?v=3.2";
-import { initChrome, applySettings } from "./chrome.js?v=3.2";
-import { onAnswerChange } from "./engineCtx.js?v=3.2";
-import { initStaffControls, isPaused } from "./staff.js?v=3.2";
+//
+// The dashboard opens the test in one of two modes. The timed test
+// (?mode absent) is the real exam: a one-hour countdown that cannot be
+// stopped, and the answers go in when it runs out. Analyse mode
+// (?mode=analyse) has no time limit: a stopwatch counts up instead, and
+// "Clear all" empties the test to start it again. Both finish the same way
+// and save the same result.
+import { readingState } from "./state.js?v=3.3";
+import { numberQuestions, buildItems, partOfQuestion } from "./questions.js?v=3.3";
+import { loadSession, saveSession, saveOnLeave, sessionKey, TEST_DURATION_MS } from "./session.js?v=3.3";
+import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.3";
+import { buildFooter, updateFooter } from "./nav.js?v=3.3";
+import { initMarks } from "./marks.js?v=3.3";
+import { startClock, freezeClock, startStopwatch } from "./timer.js?v=3.3";
+import { createSubmitter, confirmFinish } from "./submit.js?v=3.3";
+import { initChrome, applySettings } from "./chrome.js?v=3.3";
+import { onAnswerChange } from "./engineCtx.js?v=3.3";
+import { initStaffControls, isPaused } from "./staff.js?v=3.3";
+import { initClear } from "./clear.js?v=3.3";
 
 // staff who sit tests without a clock
 const UNTIMED = new Set(["alisher@yescenter.uz"]);
@@ -117,12 +125,19 @@ export async function initReadingTest(deps) {
 
   const params = new URLSearchParams(window.location.search);
   readingState.testId = params.get("testId") || "test-1";
+  readingState.mode = params.get("mode") === "analyse" ? "analyse" : "mock";
   readingState.user = { uid: user.uid, email: user.email || "" };
   readingState.unlimited = UNTIMED.has(user.email);
   readingState.isAdmin = await isAdminAccount(deps, user.uid);
   document.getElementById("candidate").textContent = user.email || "Candidate";
+  if (readingState.mode === "analyse") {
+    document.body.classList.add("analyse");
+    document.getElementById("modeTag").hidden = false;
+    document.title = "IELTS Academic Reading · Analyse mode";
+  }
 
-  const hadSitting = !!localStorage.getItem(`ielts-reading:v2:${user.uid}:${readingState.testId}`);
+  let hadSitting = false;
+  try { hadSitting = !!localStorage.getItem(sessionKey(user.uid, readingState.testId)); } catch { /* no storage */ }
 
   let data;
   try {
@@ -164,9 +179,10 @@ export async function initReadingTest(deps) {
 }
 
 function start(session, submitter) {
-  if (!session.deadline) {
+  const analyse = readingState.mode === "analyse";
+  if (analyse ? !session.startedAt : !session.deadline) {
     session.startedAt = Date.now();
-    session.deadline = session.startedAt + TEST_DURATION_MS;
+    if (!analyse) session.deadline = session.startedAt + TEST_DURATION_MS;
     saveSession();
   }
   const zones = {
@@ -282,7 +298,7 @@ function start(session, submitter) {
   zones.passage.addEventListener("scroll", onScroll, { passive: true });
   zones.questions.addEventListener("scroll", onScroll, { passive: true });
 
-  initMarks({ zones, getPart: () => session.part, onChange: () => {} });
+  const marksUi = initMarks({ zones, getPart: () => session.part, onChange: () => {} });
   initChrome();
   applySettings();
   saveOnLeave();
@@ -298,6 +314,14 @@ function start(session, submitter) {
     submitter.finish({ auto });
   };
   document.getElementById("finishBtn").addEventListener("click", () => finish());
+
+  // after "Clear all": the same part, empty, from the top
+  const redrawCleared = () => {
+    marksUi?.closeMenu();
+    marksUi?.closeNote();
+    showPart(session.part, { restoreScroll: false });
+    updateFooter();
+  };
 
   // The clock either runs or stands still at the moment it was paused.
   const clockEl = document.getElementById("timeLeft");
@@ -320,18 +344,21 @@ function start(session, submitter) {
     });
   };
 
-  if (readingState.isAdmin) {
-    initStaffControls({
-      onClock: runClock,
-      onCleared: () => {
-        showPart(session.part, { restoreScroll: false });
-        updateFooter();
-      },
+  if (analyse) {
+    // no deadline, nothing to pause: the stopwatch only ever counts up
+    const watch = startStopwatch({ el: clockEl, session, save: saveSession });
+    stopClock = () => watch.stop();
+    initClear({
+      resetsClock: true,
+      onCleared: () => { watch.reset(); redrawCleared(); },
     });
+  } else if (readingState.isAdmin) {
+    initStaffControls({ onClock: runClock });
+    initClear({ onCleared: redrawCleared });
   }
 
   showPart(session.part);
   document.body.classList.remove("loading");
 
-  if (!readingState.isAdmin) runClock();   // staff controls start it themselves
+  if (!analyse && !readingState.isAdmin) runClock();   // staff controls start it themselves
 }

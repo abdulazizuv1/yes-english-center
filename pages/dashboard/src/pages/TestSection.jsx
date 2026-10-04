@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTests, getUserTestResult, getTypeIcon, getTestUrl, getResultUrl, displayTestName } from '../hooks/useResults';
 import { ArrowRight } from 'lucide-react';
 import { TestListSkeleton } from '../components/Skeleton';
+import ReadingModeDialog from '../components/ReadingModeDialog';
 import './TestSection.css';
 
 const TYPE_MAP = {
@@ -15,6 +16,7 @@ const TYPE_MAP = {
 
 function TestCard({ test, type, userId }) {
     const [result, setResult] = useState(undefined); // undefined = loading
+    const [choosing, setChoosing] = useState(false);  // reading: mock or analyse?
 
     useEffect(() => {
         if (!userId || !test.id) return;
@@ -22,6 +24,7 @@ function TestCard({ test, type, userId }) {
     }, [userId, type, test.id]);
 
     const handleTestClick = () => {
+        if (type === 'reading') { setChoosing(true); return; }
         window.location.href = getTestUrl(type, test.id);
     };
 
@@ -35,19 +38,25 @@ function TestCard({ test, type, userId }) {
     const testTitle = displayTestName(test, type);
     const testDesc = test.description || TYPE_MAP[type]?.desc || '';
 
+    // the dialog sits beside the card, not in it: a click inside it must not
+    // reach the card's own click handler
     return (
-        <div className="test-card glass-card" onClick={handleTestClick}>
-            <div className="test-card-header">
-                <span className="test-card-icon">{getTypeIcon(type)}</span>
-                <div className="test-card-info">
-                    <h4>{testTitle}</h4>
-                    <p>{TYPE_MAP[type]?.time}</p>
+        <>
+            <div className="test-card glass-card" onClick={handleTestClick}>
+                <div className="test-card-header">
+                    <span className="test-card-icon">{getTypeIcon(type)}</span>
+                    <div className="test-card-info">
+                        <h4>{testTitle}</h4>
+                        <p>{TYPE_MAP[type]?.time}</p>
+                    </div>
+                    <ArrowRight size={18} className="test-card-arrow" />
                 </div>
-                <ArrowRight size={18} className="test-card-arrow" />
+                {testDesc && <p className="test-card-desc">{testDesc}</p>}
             </div>
-            {testDesc && <p className="test-card-desc">{testDesc}</p>}
-            
-        </div>
+            {choosing && (
+                <ReadingModeDialog test={{ id: test.id, title: testTitle }} onClose={() => setChoosing(false)} />
+            )}
+        </>
     );
 }
 

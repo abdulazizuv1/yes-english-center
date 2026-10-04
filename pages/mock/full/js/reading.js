@@ -2,11 +2,11 @@
 // itself lives in the shared engine (pages/mock/engine/) — the same
 // renderers the standalone listening and reading tests use, including
 // drag & drop and map labelling.
-import { state } from "./state.js?v=3.2";
-import { repaintHighlights } from "./highlights.js?v=3.2";
-import { updateNavigationButtons } from "./navigation.js?v=3.2";
-import { engineCtx } from "./engineCtx.js?v=3.2";
-import { normalizeReadingQuestions, renderItem } from "../../engine/index.js?v=3.2";
+import { state } from "./state.js?v=3.3";
+import { repaintHighlights } from "./highlights.js?v=3.3";
+import { updateNavigationButtons } from "./navigation.js?v=3.3";
+import { engineCtx } from "./engineCtx.js?v=3.3";
+import { normalizeReadingQuestions, renderItem } from "../../engine/index.js?v=3.3";
 
 // Initialize Reading
 function initializeReading() {

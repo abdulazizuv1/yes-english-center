@@ -9,7 +9,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
-import { reviewFromStored, reviewSummary, scoreNotice } from "./engine/index.js?v=3.2";
+import { reviewFromStored, reviewSummary, scoreNotice } from "./engine/index.js?v=3.3";
 
 
 const app = initializeApp(firebaseConfig);

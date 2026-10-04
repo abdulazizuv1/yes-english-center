@@ -4,10 +4,10 @@
 // so a radio button, a dropdown or a dragged card appears already chosen.
 // After that the page only ever adds highlight wrappers around text; it
 // never swaps the questions for a stored copy of their HTML.
-import { readingState } from "./state.js?v=3.2";
-import { engineCtx } from "./engineCtx.js?v=3.2";
-import { renderItem } from "../../engine/index.js?v=3.2";
-import { paintPart } from "./marks.js?v=3.2";
+import { readingState } from "./state.js?v=3.3";
+import { engineCtx } from "./engineCtx.js?v=3.3";
+import { renderItem } from "../../engine/index.js?v=3.3";
+import { paintPart } from "./marks.js?v=3.3";
 
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

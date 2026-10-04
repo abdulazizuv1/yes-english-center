@@ -5,10 +5,10 @@
 // connection returns, even after a refresh. Each sitting has one fixed
 // result id, so sending twice can never create two results, and a
 // second send after a silent success is recognised as already done.
-import { readingState } from "./state.js?v=3.2";
-import { saveSession, clearSession } from "./session.js?v=3.2";
-import { gradeItems } from "../../engine/index.js?v=3.2";
-import { answeredMap } from "./questions.js?v=3.2";
+import { readingState } from "./state.js?v=3.3";
+import { saveSession, clearSession } from "./session.js?v=3.3";
+import { gradeItems } from "../../engine/index.js?v=3.3";
+import { answeredMap } from "./questions.js?v=3.3";
 
 const SEND_TIMEOUT_MS = 15000;
 const RETRY_MS = 15000;
@@ -22,7 +22,10 @@ function withTimeout(promise, ms) {
   ]);
 }
 
-/** Same result shape the result page, the dashboard and the daily plan read. */
+/**
+ * Same result shape the result page, the dashboard and the daily plan read.
+ * A sitting in analyse mode (no time limit) also says so, for the teacher.
+ */
 export function buildPayload() {
   const graded = gradeItems(readingState.items.flat(), readingState.session.answers);
   const answers = {};
@@ -40,6 +43,7 @@ export function buildPayload() {
     total: graded.total,
     answers,
     correctAnswers,
+    ...(readingState.mode === "analyse" ? { mode: "analyse" } : {}),
   };
 }
 
