@@ -1,7 +1,7 @@
 // Stage countdown timer and the listening Pause button.
-import { state, stageDurations } from "./state.js?v=3.3";
-import { showStageTransition } from "./stages.js?v=3.3";
-import { handleFinishTest } from "./results.js?v=3.3";
+import { state, stageDurations } from "./state.js?v=3.4";
+import { showStageTransition } from "./stages.js?v=3.4";
+import { handleFinishTest } from "./results.js?v=3.4";
 
 // Pause functionality
 window.togglePause = function () {
@@ -27,8 +27,10 @@ window.togglePause = function () {
     if (pauseBtn) pauseBtn.textContent = "Pause";
     if (pauseModal) pauseModal.style.display = "none";
 
+    // a paused recording is still where it stopped: just play on. Moving it
+    // back to the saved second set off the seek guard below, which moved it
+    // again, for ever, and the recording froze or started over.
     if (state.currentAudio && state.audioCurrentTime) {
-      state.currentAudio.currentTime = state.audioCurrentTime;
       state.currentAudio.play().catch(console.warn);
     }
     toggleTestInteraction(true);

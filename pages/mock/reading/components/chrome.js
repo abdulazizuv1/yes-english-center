@@ -2,8 +2,8 @@
 // settings (both offered by the real computer-delivered test), hiding the
 // clock, the connection indicator, a warning if this browser will not save,
 // and the divider between passage and questions.
-import { readingState } from "./state.js?v=3.3";
-import { saveSession, onStorageHealth } from "./session.js?v=3.3";
+import { readingState } from "./state.js?v=3.4";
+import { saveSession, onStorageHealth } from "./session.js?v=3.4";
 
 const SIZES = ["standard", "large", "xlarge"];
 const CONTRASTS = ["bw", "wb", "yb"];

@@ -12,18 +12,18 @@
 // (?mode=analyse) has no time limit: a stopwatch counts up instead, and
 // "Clear all" empties the test to start it again. Both finish the same way
 // and save the same result.
-import { readingState } from "./state.js?v=3.3";
-import { numberQuestions, buildItems, partOfQuestion } from "./questions.js?v=3.3";
-import { loadSession, saveSession, saveOnLeave, sessionKey, TEST_DURATION_MS } from "./session.js?v=3.3";
-import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.3";
-import { buildFooter, updateFooter } from "./nav.js?v=3.3";
-import { initMarks } from "./marks.js?v=3.3";
-import { startClock, freezeClock, startStopwatch } from "./timer.js?v=3.3";
-import { createSubmitter, confirmFinish } from "./submit.js?v=3.3";
-import { initChrome, applySettings } from "./chrome.js?v=3.3";
-import { onAnswerChange } from "./engineCtx.js?v=3.3";
-import { initStaffControls, isPaused } from "./staff.js?v=3.3";
-import { initClear } from "./clear.js?v=3.3";
+import { readingState } from "./state.js?v=3.4";
+import { numberQuestions, buildItems, partOfQuestion } from "./questions.js?v=3.4";
+import { loadSession, saveSession, saveOnLeave, sessionKey, TEST_DURATION_MS } from "./session.js?v=3.4";
+import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.4";
+import { buildFooter, updateFooter } from "./nav.js?v=3.4";
+import { initMarks } from "./marks.js?v=3.4";
+import { startClock, freezeClock, startStopwatch } from "./timer.js?v=3.4";
+import { createSubmitter, confirmFinish } from "./submit.js?v=3.4";
+import { initChrome, applySettings } from "./chrome.js?v=3.4";
+import { onAnswerChange } from "./engineCtx.js?v=3.4";
+import { initStaffControls, isPaused } from "./staff.js?v=3.4";
+import { initClear } from "./clear.js?v=3.4";
 
 // staff who sit tests without a clock
 const UNTIMED = new Set(["alisher@yescenter.uz"]);

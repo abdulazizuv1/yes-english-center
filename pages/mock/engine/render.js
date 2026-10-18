@@ -19,7 +19,7 @@
 // control gets its own handler that calls ctx.onAnswer. Text inputs are
 // marked data-qe so pages' delegated handlers can skip them.
 // ═══════════════════════════════════════════════════════════════════════
-import { renderDragSlots, renderDragInline } from "./dnd.js?v=3.3";
+import { renderDragSlots, renderDragInline } from "./dnd.js?v=3.4";
 
 const esc = (s) =>
   String(s ?? "")
@@ -249,12 +249,15 @@ function renderMultiSelect(item, ctx) {
 /* ── table: completion table with marker gaps in cells ── */
 function renderTable(item, ctx) {
   const div = el("div", "table-group qe-table");
-  const re = new RegExp(item.markerRe, "g");
+  // a number typed just before the marker ("1 ___q1___") is the one the gap
+  // box already shows, so it is dropped; any other number stays
+  const re = new RegExp(`(?:\\b(\\d+)[ \\u00a0]*)?(?:${item.markerRe})`, "g");
   const gapify = (content) =>
-    String(content).replace(re, (_, captured) => {
+    String(content).replace(re, (_, typed, captured) => {
       const id = captured.startsWith("q") || captured.startsWith("reading_") ? captured : `q${captured}`;
       const number = String(id).replace(/\D/g, "");
-      return gapInlineHTML(id, number, answerOf(ctx, id));
+      const kept = typed !== undefined && typed !== number ? `${typed} ` : "";
+      return kept + gapInlineHTML(id, number, answerOf(ctx, id));
     });
 
   let html = item.title ? `<h4 style="margin-bottom: 15px;">${item.title}</h4>` : "";

@@ -1,6 +1,6 @@
 // Listening audio: one centred player pill, sequential per-section
 // playback, admin seek / student seek-block.
-import { state } from "./state.js?v=3.3";
+import { state } from "./state.js?v=3.4";
 
 // Функция для полной остановки аудио
 function stopAllAudio() {
@@ -145,9 +145,11 @@ function setupAudioBarControls(allowSeek) {
       audio.currentTime = ratio * audio.duration;
     });
   } else {
-    // Students can't rewind or skip ahead
+    // Students can't rewind or skip ahead. Only a real jump is undone:
+    // putting the time back fires "seeking" once more, at the right second,
+    // and that one must be left alone or the two would loop for ever.
     audio.addEventListener("seeking", () => {
-      audio.currentTime = lastValidTime;
+      if (Math.abs(audio.currentTime - lastValidTime) > 1) audio.currentTime = lastValidTime;
     });
   }
 

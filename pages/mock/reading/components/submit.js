@@ -5,10 +5,10 @@
 // connection returns, even after a refresh. Each sitting has one fixed
 // result id, so sending twice can never create two results, and a
 // second send after a silent success is recognised as already done.
-import { readingState } from "./state.js?v=3.3";
-import { saveSession, clearSession } from "./session.js?v=3.3";
-import { gradeItems } from "../../engine/index.js?v=3.3";
-import { answeredMap } from "./questions.js?v=3.3";
+import { readingState } from "./state.js?v=3.4";
+import { saveSession, clearSession } from "./session.js?v=3.4";
+import { gradeItems } from "../../engine/index.js?v=3.4";
+import { answeredMap } from "./questions.js?v=3.4";
 
 const SEND_TIMEOUT_MS = 15000;
 const RETRY_MS = 15000;

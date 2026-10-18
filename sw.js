@@ -6,10 +6,13 @@
 const CACHE_NAME = 'yes-english-center-v8';
 const STATIC_CACHE = 'yes-static-v8';
 const DYNAMIC_CACHE = 'yes-dynamic-v8';
-// The reading test must reopen after a refresh with no internet, so its own
-// files (and the Firebase SDK it imports) are kept here. Network first:
-// students always get the newest version while online.
-const READING_CACHE = 'yes-reading-v3';
+// The reading and listening tests must reopen after a refresh with no
+// internet, so their own files (and the Firebase SDK they import) are kept
+// here. Network first: students always get the newest version while online.
+const TEST_CACHE = 'yes-tests-v4';
+// The listening test keeps its recordings here itself (audioStore.js);
+// this worker only has to leave that cache alone.
+const LISTENING_AUDIO_CACHE = 'yes-listening-audio-v1';
 const DYNAMIC_CACHE_MAX_ENTRIES = 60;
 
 // On the local dev server Vite answers one URL differently depending on who
@@ -69,7 +72,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames
           .filter((name) => {
-            return name !== STATIC_CACHE && name !== DYNAMIC_CACHE && name !== READING_CACHE;
+            return name !== STATIC_CACHE && name !== DYNAMIC_CACHE && name !== TEST_CACHE && name !== LISTENING_AUDIO_CACHE;
           })
           .map((name) => {
             return caches.delete(name);
@@ -80,11 +83,12 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// What the reading test needs to open without internet
-function isReadingAsset(url) {
+// What the reading and listening tests need to open without internet
+function isTestAsset(url) {
   if (url.origin === self.location.origin) {
     return (
       url.pathname.startsWith('/pages/mock/reading/') ||
+      url.pathname.startsWith('/pages/mock/listening/') ||
       url.pathname.startsWith('/pages/mock/engine/') ||
       url.pathname === '/config.js' ||
       url.pathname === '/image/logo.webp' ||
@@ -102,7 +106,7 @@ function networkFirst(request, isNavigation) {
     .then((response) => {
       if (response && response.ok) {
         const copy = response.clone();
-        caches.open(READING_CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
+        caches.open(TEST_CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
       }
       return response;
     })
@@ -128,8 +132,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // The reading test and what it needs to boot, network first
-  if (isReadingAsset(url)) {
+  // The reading and listening tests and what they need to boot, network first
+  if (isTestAsset(url)) {
     event.respondWith(networkFirst(request, request.mode === 'navigate'));
     return;
   }

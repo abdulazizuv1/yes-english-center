@@ -1,32 +1,19 @@
+// Shared state for one sitting of the listening test.
+//
+// Everything a student produces (answers, highlights, notes, review flags,
+// the part they are on, where the recording is) lives in `session`, and
+// the session is written to this computer's storage on every change. The
+// rest is derived from the test document and rebuilt on each load.
 export const listeningState = {
-  app: null,
-  db: null,
-  auth: null,
-  isAdmin: false,
-
-  sections: [],
-  currentSectionIndex: 0,
-  answersSoFar: {},
-
-  currentAudio: null,
-  currentAudioSection: 0,
-  audioInitialized: false,
-  audioCurrentTime: 0,
-
-  isPaused: false,
-  pausedTime: 0,
-  timerStartTime: null,
-  hasUnlimitedTime: false,
-
-  currentQuestionNumber: 1,
-
-  savedHighlights: {},
-
-  // true once the result is on its way: leaving is expected then
-  submitted: false,
-
-  // timer interval id
-  timerIntervalKey: "listeningTimerInterval",
+  testId: "test-1",
+  mode: "mock",        // "mock": the real exam; "analyse": pause and rewind, see init.js
+  user: null,          // { uid, email }
+  title: "",
+  sections: [],        // the test document's sections (parts)
+  parts: [],           // [{ index, qIds: [...], first, last }]
+  items: [],           // engine items per part, normalized once
+  tracks: [],          // the recording's files in order: [{ url, part }]
+  session: null,       // see session.js
+  unlimited: false,    // staff accounts sit the test without a clock
+  isAdmin: false,      // admin accounts get "Clear all" in the mock
 };
-
-

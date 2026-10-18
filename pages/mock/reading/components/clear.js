@@ -6,9 +6,9 @@
 // test only staff see it, and the clock is left alone. Either way the page
 // asks first, in its own dialog that says exactly what will go, because
 // nothing cleared can be brought back.
-import { readingState } from "./state.js?v=3.3";
-import { saveSession } from "./session.js?v=3.3";
-import { answeredMap } from "./questions.js?v=3.3";
+import { readingState } from "./state.js?v=3.4";
+import { saveSession } from "./session.js?v=3.4";
+import { answeredMap } from "./questions.js?v=3.4";
 
 const TOAST_MS = 2600;
 

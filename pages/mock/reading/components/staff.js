@@ -6,9 +6,9 @@
 // paused, with the same time left, because the clock counts to a deadline
 // and a pause simply moves that deadline later by however long the test
 // stood still.
-import { readingState } from "./state.js?v=3.3";
-import { saveSession } from "./session.js?v=3.3";
-import { formatRemaining } from "./timer.js?v=3.3";
+import { readingState } from "./state.js?v=3.4";
+import { saveSession } from "./session.js?v=3.4";
+import { formatRemaining } from "./timer.js?v=3.4";
 
 export const isPaused = () => !!readingState.session?.pausedAt;
 

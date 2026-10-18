@@ -1,24 +1,22 @@
-// The listening test's bridge to the shared question engine: answers live
-// on listeningState.answersSoFar; every change persists and refreshes nav.
-import { listeningState } from "./state.js?v=3.3";
-import { updateQuestionNav } from "./navigation.js?v=3.3";
+// The listening test's bridge to the shared question engine. Answers live
+// in the saved session; every change is written to this computer at once
+// and the bottom bar is told to refresh.
+import { listeningState } from "./state.js?v=3.4";
+import { saveSession } from "./session.js?v=3.4";
+
+const listeners = new Set();
+export const onAnswerChange = (fn) => listeners.add(fn);
 
 export const engineCtx = {
   get answers() {
-    return listeningState.answersSoFar;
+    return listeningState.session.answers;
   },
   onAnswer(qId, value) {
     if (!qId) return;
-    if (value === undefined) delete listeningState.answersSoFar[qId];
-    else listeningState.answersSoFar[qId] = value;
-    try {
-      localStorage.setItem(
-        "listeningTestAnswers",
-        JSON.stringify(listeningState.answersSoFar)
-      );
-    } catch (e) {
-      console.warn("Failed to persist listening answers", e);
-    }
-    updateQuestionNav();
+    const answers = listeningState.session.answers;
+    if (value === undefined || value === null || value === "") delete answers[qId];
+    else answers[qId] = value;
+    saveSession();
+    listeners.forEach((fn) => fn(qId));
   },
 };

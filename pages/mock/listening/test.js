@@ -3,8 +3,7 @@ import {
   getFirestore,
   doc,
   getDoc,
-  collection,
-  addDoc,
+  setDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
@@ -12,20 +11,23 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
-import { initListeningTest } from "./components/init.js?v=3.3";
+import { initListeningTest } from "./components/init.js?v=3.4";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth();
 
 initListeningTest({
-  app,
-  db,
-  auth,
+  db: getFirestore(app),
+  auth: getAuth(app),
   doc,
   getDoc,
-  collection,
-  addDoc,
+  setDoc,
   serverTimestamp,
   onAuthStateChanged,
 });
+
+// Keeps a copy of this page on the computer so it still opens after a
+// refresh with no internet (see /sw.js). Students who never visited the
+// home page first get it registered here.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {});
+}
