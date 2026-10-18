@@ -4,7 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { useTests, getUserTestResult, getTypeIcon, getTestUrl, getResultUrl, displayTestName } from '../hooks/useResults';
 import { ArrowRight } from 'lucide-react';
 import { TestListSkeleton } from '../components/Skeleton';
-import ReadingModeDialog from '../components/ReadingModeDialog';
+import TestModeDialog from '../components/TestModeDialog';
+
+// tests that open as a mock or in analyse mode
+const HAS_MODES = new Set(['reading', 'listening']);
 import './TestSection.css';
 
 const TYPE_MAP = {
@@ -16,7 +19,7 @@ const TYPE_MAP = {
 
 function TestCard({ test, type, userId }) {
     const [result, setResult] = useState(undefined); // undefined = loading
-    const [choosing, setChoosing] = useState(false);  // reading: mock or analyse?
+    const [choosing, setChoosing] = useState(false);  // mock or analyse?
 
     useEffect(() => {
         if (!userId || !test.id) return;
@@ -24,7 +27,7 @@ function TestCard({ test, type, userId }) {
     }, [userId, type, test.id]);
 
     const handleTestClick = () => {
-        if (type === 'reading') { setChoosing(true); return; }
+        if (HAS_MODES.has(type)) { setChoosing(true); return; }
         window.location.href = getTestUrl(type, test.id);
     };
 
@@ -54,7 +57,7 @@ function TestCard({ test, type, userId }) {
                 {testDesc && <p className="test-card-desc">{testDesc}</p>}
             </div>
             {choosing && (
-                <ReadingModeDialog test={{ id: test.id, title: testTitle }} onClose={() => setChoosing(false)} />
+                <TestModeDialog type={type} test={{ id: test.id, title: testTitle }} onClose={() => setChoosing(false)} />
             )}
         </>
     );

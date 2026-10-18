@@ -8,7 +8,7 @@ import {
     BookOpen, Headphones, PenTool, FileText, BookMarked, SpellCheck,
     RotateCcw, ClipboardCheck, Search, Music, Mic, Moon, X, ExternalLink, Plus, Link2,
 } from 'lucide-react';
-import ReadingModeDialog from '../components/ReadingModeDialog';
+import TestModeDialog from '../components/TestModeDialog';
 import './DailyPlan.css';
 
 const BANDS = [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0];
@@ -245,7 +245,8 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle, onRemove }) {
     const done = task.status === 'done' || auto;
     const meta = TASK_META[task.type] || { label: task.type, icon: FileText };
     const MetaIcon = meta.icon;
-    const [choosing, setChoosing] = useState(false);   // reading: mock or analyse?
+    const [choosing, setChoosing] = useState(false);   // reading/listening: mock or analyse?
+    const hasModes = task.type === 'reading' || task.type === 'listening';
 
     return (
         <div className={`task-row ${done ? 'completed' : ''}`}>
@@ -272,7 +273,7 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle, onRemove }) {
                 </div>
             </div>
 
-            {task.kind === 'site' && !done && task.type === 'reading' && (
+            {task.kind === 'site' && !done && hasModes && (
                 <button
                     type="button"
                     className={`btn-start ${isPrimary ? 'primary' : ''}`}
@@ -281,7 +282,7 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle, onRemove }) {
                     Start <ChevronRight size={15} />
                 </button>
             )}
-            {task.kind === 'site' && !done && task.type !== 'reading' && (
+            {task.kind === 'site' && !done && !hasModes && (
                 <a
                     className={`btn-start ${isPrimary ? 'primary' : ''}`}
                     href={getTestUrl(task.type, task.testId)}
@@ -292,7 +293,8 @@ function TaskRow({ task, isOverdue, isPrimary, onToggle, onRemove }) {
                 </a>
             )}
             {choosing && (
-                <ReadingModeDialog
+                <TestModeDialog
+                    type={task.type}
                     test={{ id: task.testId, title: task.title }}
                     onClose={() => setChoosing(false)}
                     newTab
