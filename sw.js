@@ -9,7 +9,7 @@ const DYNAMIC_CACHE = 'yes-dynamic-v8';
 // The reading and listening tests must reopen after a refresh with no
 // internet, so their own files (and the Firebase SDK they import) are kept
 // here. Network first: students always get the newest version while online.
-const TEST_CACHE = 'yes-tests-v4';
+const TEST_CACHE = 'yes-tests-v5';
 // The listening test keeps its recordings here itself (audioStore.js);
 // this worker only has to leave that cache alone.
 const LISTENING_AUDIO_CACHE = 'yes-listening-audio-v1';

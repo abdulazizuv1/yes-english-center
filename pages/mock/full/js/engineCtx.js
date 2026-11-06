@@ -1,8 +1,8 @@
 // The full mock's bridge to the shared question engine: answers live on
 // state.answersSoFar; every change persists and refreshes the nav.
-import { state } from "./state.js?v=3.4";
-import { saveState } from "./storage.js?v=3.4";
-import { updateQuestionNav } from "./navigation.js?v=3.4";
+import { state } from "./state.js?v=3.5";
+import { saveState } from "./storage.js?v=3.5";
+import { updateQuestionNav } from "./navigation.js?v=3.5";
 
 export const engineCtx = {
   get answers() {

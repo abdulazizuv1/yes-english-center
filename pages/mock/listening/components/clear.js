@@ -6,9 +6,9 @@
 // In the mock only staff see it, to check a test again, and the recording
 // is left alone. Either way the page asks first, in its own dialog that
 // says exactly what will go, because nothing cleared can be brought back.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession } from "./session.js?v=3.4";
-import { answeredMap } from "./questions.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession } from "./session.js?v=3.5";
+import { answeredMap } from "./questions.js?v=3.5";
 
 const TOAST_MS = 2600;
 

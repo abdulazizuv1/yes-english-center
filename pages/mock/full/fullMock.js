@@ -1,11 +1,11 @@
 // Full mock entry: auth, test loading, PIN gate — everything else lives
 // in js/ modules (state, stages, listening, reading, writing, results...).
-import { state } from "./js/state.js?v=3.4";
-import { auth, db, doc, getDoc, onAuthStateChanged } from "./js/firebase.js?v=3.4";
-import { loadSavedState } from "./js/storage.js?v=3.4";
-import { initializeHighlightSystem } from "./js/highlights.js?v=3.4";
-import { initializeStage, setupStageControls } from "./js/stages.js?v=3.4";
-import { setupAnswerCapture } from "./js/answers.js?v=3.4";
+import { state } from "./js/state.js?v=3.5";
+import { auth, db, doc, getDoc, onAuthStateChanged } from "./js/firebase.js?v=3.5";
+import { loadSavedState } from "./js/storage.js?v=3.5";
+import { initializeHighlightSystem } from "./js/highlights.js?v=3.5";
+import { initializeStage, setupStageControls } from "./js/stages.js?v=3.5";
+import { setupAnswerCapture } from "./js/answers.js?v=3.5";
 
 setupAnswerCapture();
 setupStageControls();

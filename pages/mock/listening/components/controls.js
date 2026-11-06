@@ -5,8 +5,8 @@
 // Pausing opens no panel: the test simply stands still. The recording
 // stops, the stopwatch stops and shows a pause sign, and the button reads
 // "Resume"; pressing it carries everything on from the same second.
-import { listeningState } from "./state.js?v=3.4";
-import { position, recordingLength, trackStart, started, SKIP_MS } from "./audio.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { position, recordingLength, trackStart, started, SKIP_MS } from "./audio.js?v=3.5";
 
 const fmt = (ms) => {
   const t = Math.max(0, Math.floor(ms / 1000));

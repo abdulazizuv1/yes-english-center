@@ -5,9 +5,9 @@
 // offsets painted onto whatever the engine has just drawn, so nothing the
 // student can answer is ever replaced. This file only wires that system
 // to this page's session.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession } from "./session.js?v=3.4";
-import { paintMarks, initMarks as initSharedMarks } from "../../engine/marks.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession } from "./session.js?v=3.5";
+import { paintMarks, initMarks as initSharedMarks } from "../../engine/marks.js?v=3.5";
 
 /** Paints every saved mark for this part onto the page. */
 export function paintPart(part, zones) {

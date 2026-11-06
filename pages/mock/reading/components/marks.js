@@ -5,8 +5,8 @@
 // offsets painted onto whatever the engine has just drawn, so nothing
 // the student can answer is ever replaced. This file only wires that
 // system to this page's session.
-import { readingState } from "./state.js?v=3.4";
-import { saveSession } from "./session.js?v=3.4";
+import { readingState } from "./state.js?v=3.5";
+import { saveSession } from "./session.js?v=3.5";
 import {
   textNodesIn,
   rangeToOffsets,
@@ -14,7 +14,7 @@ import {
   unpaintMark,
   paintMarks,
   initMarks as initSharedMarks,
-} from "../../engine/marks.js?v=3.4";
+} from "../../engine/marks.js?v=3.5";
 
 export { textNodesIn, rangeToOffsets, paintMark, unpaintMark };
 

@@ -10,28 +10,45 @@
 // is painted onto the page the engine has just drawn. Nothing the
 // student can answer is ever replaced.
 //
-// A mark is { id, part, zone, start, end, note? } where `part` names the
-// passage or section it belongs to and `zone` names the panel
+// A mark is { id, part, zone, start, end, note?, anchor? } where `part`
+// names the passage or section it belongs to and `zone` names the panel
 // ("passage" / "questions"), taken from a [data-zone] attribute.
+//
+// The cards of a drag and drop move while the student works, so they cannot
+// share the panel's count. Each card's words sit in an element with its own
+// [data-mark-anchor="key"]: a mark made there has `anchor: key`, counts from
+// the start of that card, and travels with the card wherever it is dropped.
 
 // Text that moves or changes while the student works (cards in a drag and
 // drop, the "Selected 1 / 2" counter, dropdown options) is left out of the
-// count, so a saved position always lands on the same words. Page chrome
-// that floats over the text is left out for the same reason.
+// panel's count, so a saved position always lands on the same words. Page
+// chrome that floats over the text is left out for the same reason.
 const SKIP =
   "select, option, button, textarea, input, script, style, " +
   ".selection-counter, .dd-items-bank, .dd-item, .dd-placed-item, " +
   ".dd-slot-drop-zone, .dd-inline-slot, .no-mark, .note-pop, .cd-menu, " +
   ".context-menu, .mark-menu";
 
+const ANCHOR = "[data-mark-anchor]";
+
+/** A drag and drop fires this on its root each time it redraws its cards. */
+export const CARDS_REDRAWN = "qe:cards-redrawn";
+
+const anchorIn = (root, key) =>
+  root?.querySelector(`[data-mark-anchor="${CSS.escape(key)}"]`) || null;
+
+/** The element a mark's offsets count from: its card, or the whole panel. */
+const hostOf = (zone, mark) => (mark.anchor ? anchorIn(zone, mark.anchor) : zone);
+
 export function textNodesIn(zone) {
   const out = [];
   if (!zone) return out;
+  const isCard = zone.matches?.(ANCHOR);   // inside a card, all its words count
   const walker = document.createTreeWalker(zone, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
       const parent = node.parentElement;
-      if (!parent || parent.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+      if (!parent || (!isCard && parent.closest(SKIP))) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });
@@ -109,8 +126,8 @@ export function unpaintMark(id) {
 export function paintMarks(marks, zones, part) {
   for (const mark of marks || []) {
     if (String(mark.part) !== String(part)) continue;
-    const zone = zones[mark.zone];
-    if (zone) paintMark(zone, mark);
+    const host = hostOf(zones[mark.zone], mark);
+    if (host) paintMark(host, mark);
   }
 }
 
@@ -182,14 +199,24 @@ export function initMarks({
     const range = sel.getRangeAt(0);
     const zone = zoneOf(range.commonAncestorContainer);
     if (!zone) return null;
+    // begun on a card: it counts from the card and stops at the card's end
+    // (a triple-click, for one, reports its end somewhere past the words)
+    const startEl = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+    const card = startEl?.closest(ANCHOR);
+    if (card) {
+      const clipped = range.cloneRange();
+      if (!card.contains(range.endContainer)) clipped.setEnd(card, card.childNodes.length);
+      const inCard = rangeToOffsets(card, clipped);
+      return inCard ? { zone, anchor: card.dataset.markAnchor, offsets: inCard, range: clipped } : null;
+    }
     const offsets = rangeToOffsets(zonesNow()[zone], range);
-    return offsets ? { zone, offsets, range } : null;
+    return offsets ? { zone, anchor: null, offsets, range } : null;
   };
 
-  const overlapping = (zone, { start, end }) => {
+  const overlapping = ({ zone, anchor, offsets: { start, end } }) => {
     const part = String(getPart());
     return marks()
-      .filter((m) => String(m.part) === part && m.zone === zone && m.start < end && m.end > start)
+      .filter((m) => String(m.part) === part && m.zone === zone && (m.anchor || null) === anchor && m.start < end && m.end > start)
       .map((m) => m.id);
   };
 
@@ -198,8 +225,8 @@ export function initMarks({
   const persist = () => { save?.(); onChange?.(); };
 
   /** Shows the menu with only the actions that make sense here. */
-  const openMenu = ({ zone, offsets = null, markIds = [], hitId = null }, x, y, anchorTop = null) => {
-    pending = { zone, offsets, markIds, hitId };
+  const openMenu = ({ zone, anchor = null, offsets = null, markIds = [], hitId = null }, x, y, anchorTop = null) => {
+    pending = { zone, anchor, offsets, markIds, hitId };
     const hit = hitId && marks().find((m) => m.id === hitId);
     const show = (act, on) => {
       const btn = menuEl.querySelector(`[data-act="${act}"]`);
@@ -233,11 +260,12 @@ export function initMarks({
 
   const createMark = (withNote) => {
     if (!pending?.offsets) return;
-    const { zone, offsets } = pending;
+    const { zone, anchor, offsets } = pending;
     const mark = { id: newId(), part: getPart(), zone, ...offsets };
+    if (anchor) mark.anchor = anchor;
     if (withNote) mark.note = "";
     marks().push(mark);
-    paintMark(zonesNow()[zone], mark);
+    paintMark(hostOf(zonesNow()[zone], mark), mark);
     window.getSelection()?.removeAllRanges();
     persist();
     if (withNote) noteBelow(mark.id);
@@ -282,7 +310,7 @@ export function initMarks({
   const offerForSelection = (x, y) => {
     const found = selectionInZone();
     if (!found) return;
-    if (!menuEl.hidden && sameOffsets(pending?.offsets, found.offsets)) return;   // already showing
+    if (!menuEl.hidden && pending?.anchor === found.anchor && sameOffsets(pending?.offsets, found.offsets)) return;   // already showing
     const anchorTop = found.range.getBoundingClientRect().top;
     if (x == null) {
       // keyboard or touch selection: put the menu under the end of it
@@ -291,10 +319,7 @@ export function initMarks({
       x = last.left;
       y = last.bottom + 8;
     }
-    openMenu(
-      { zone: found.zone, offsets: found.offsets, markIds: overlapping(found.zone, found.offsets) },
-      x, y, anchorTop
-    );
+    openMenu({ ...found, markIds: overlapping(found) }, x, y, anchorTop);
   };
 
   document.addEventListener("pointerdown", (e) => {
@@ -330,10 +355,7 @@ export function initMarks({
     if (!hit && !found) return;                         // nothing to act on: the browser's own menu
     e.preventDefault();
     if (found) {
-      openMenu(
-        { zone: found.zone, offsets: found.offsets, markIds: overlapping(found.zone, found.offsets) },
-        e.clientX, e.clientY
-      );
+      openMenu({ ...found, markIds: overlapping(found) }, e.clientX, e.clientY);
     } else {
       openMenu({ zone, markIds: [hit.dataset.mark], hitId: hit.dataset.mark }, e.clientX, e.clientY);
     }
@@ -390,6 +412,17 @@ export function initMarks({
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { closeMenu(); if (!noteEl.hidden) finishNote(false); }
+  });
+  // a drag and drop has redrawn its cards: their highlights go back on,
+  // wherever each card now sits
+  document.addEventListener(CARDS_REDRAWN, (e) => {
+    closeMenu();
+    const part = String(getPart());
+    for (const mark of marks()) {
+      if (!mark.anchor || String(mark.part) !== part) continue;
+      const host = anchorIn(e.target, mark.anchor);
+      if (host) paintMark(host, mark);
+    }
   });
   window.addEventListener("resize", closeMenu);
   // scrolling a pane moves the text away from the menu; the note box stays

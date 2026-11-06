@@ -11,7 +11,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "/config.js";
-import { initListeningTest } from "./components/init.js?v=3.4";
+import { initListeningTest } from "./components/init.js?v=3.5";
 
 const app = initializeApp(firebaseConfig);
 

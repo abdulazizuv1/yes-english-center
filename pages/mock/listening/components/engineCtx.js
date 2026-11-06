@@ -1,8 +1,8 @@
 // The listening test's bridge to the shared question engine. Answers live
 // in the saved session; every change is written to this computer at once
 // and the bottom bar is told to refresh.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession } from "./session.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession } from "./session.js?v=3.5";
 
 const listeners = new Set();
 export const onAnswerChange = (fn) => listeners.add(fn);

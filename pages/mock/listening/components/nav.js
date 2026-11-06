@@ -2,8 +2,8 @@
 // question numbers; the others fold down to "Part 2   3 of 10", as in the
 // real computer-delivered test. The part whose recording is playing
 // carries a small speaker.
-import { listeningState } from "./state.js?v=3.4";
-import { answeredMap } from "./questions.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { answeredMap } from "./questions.js?v=3.5";
 
 let partsHost = null;
 

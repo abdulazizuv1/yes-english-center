@@ -6,11 +6,11 @@
 // result id, so sending twice can never create two results (the old page
 // added a new result on every attempt to send), and a second send after a
 // silent success is recognised as already done.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession, clearSession } from "./session.js?v=3.4";
-import { gradeItems } from "../../engine/index.js?v=3.4";
-import { answeredMap } from "./questions.js?v=3.4";
-import { forgetAll } from "./audioStore.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession, clearSession } from "./session.js?v=3.5";
+import { gradeItems } from "../../engine/index.js?v=3.5";
+import { answeredMap } from "./questions.js?v=3.5";
+import { forgetAll } from "./audioStore.js?v=3.5";
 
 const SEND_TIMEOUT_MS = 15000;
 const RETRY_MS = 15000;

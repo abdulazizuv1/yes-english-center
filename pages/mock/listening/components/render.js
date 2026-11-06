@@ -6,10 +6,10 @@
 // chosen. After that the page only adds highlight wrappers around text; it
 // never swaps the questions for a stored copy of their HTML (that is what
 // lost answers on the old page).
-import { listeningState } from "./state.js?v=3.4";
-import { engineCtx } from "./engineCtx.js?v=3.4";
-import { normalizeListeningItem, renderItem } from "../../engine/index.js?v=3.4";
-import { paintPart } from "./marks.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { engineCtx } from "./engineCtx.js?v=3.5";
+import { normalizeListeningItem, renderItem } from "../../engine/index.js?v=3.5";
+import { paintPart } from "./marks.js?v=3.5";
 
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

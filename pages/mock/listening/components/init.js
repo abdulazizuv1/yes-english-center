@@ -16,23 +16,23 @@
 //     and skip ahead; a stopwatch counts the time spent; "Clear all" starts
 //     the test again. No time limit.
 // Both finish the same way and save the same result.
-import { listeningState } from "./state.js?v=3.4";
-import { buildParts, buildTracks, partOfQuestion } from "./questions.js?v=3.4";
-import { loadSession, saveSession, saveOnLeave, sessionKey } from "./session.js?v=3.4";
-import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.4";
-import { buildFooter, updateFooter, markPlayingPart } from "./nav.js?v=3.4";
-import { initMarks } from "./marks.js?v=3.4";
-import { startClock, startStopwatch } from "./timer.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { buildParts, buildTracks, partOfQuestion } from "./questions.js?v=3.5";
+import { loadSession, saveSession, saveOnLeave, sessionKey } from "./session.js?v=3.5";
+import { renderPart, questionEl, qIdFromTarget } from "./render.js?v=3.5";
+import { buildFooter, updateFooter, markPlayingPart } from "./nav.js?v=3.5";
+import { initMarks } from "./marks.js?v=3.5";
+import { startClock, startStopwatch } from "./timer.js?v=3.5";
 import {
   createPlayer, measureTracks, playTestTone, lengthsKnown,
   remaining, recordingLength, recordingOver, started, CHECK_MS,
-} from "./audio.js?v=3.4";
-import { storeAll } from "./audioStore.js?v=3.4";
-import { createSubmitter, confirmFinish } from "./submit.js?v=3.4";
-import { initChrome, applySettings, initVolume, banner } from "./chrome.js?v=3.4";
-import { onAnswerChange } from "./engineCtx.js?v=3.4";
-import { initPlayerControls } from "./controls.js?v=3.4";
-import { initClear } from "./clear.js?v=3.4";
+} from "./audio.js?v=3.5";
+import { storeAll } from "./audioStore.js?v=3.5";
+import { createSubmitter, confirmFinish } from "./submit.js?v=3.5";
+import { initChrome, applySettings, initVolume, banner } from "./chrome.js?v=3.5";
+import { onAnswerChange } from "./engineCtx.js?v=3.5";
+import { initPlayerControls } from "./controls.js?v=3.5";
+import { initClear } from "./clear.js?v=3.5";
 
 // staff who sit tests without a clock
 const UNTIMED = new Set(["alisher@yescenter.uz"]);

@@ -1,13 +1,13 @@
 // Grading and submission: scores listening/reading through the shared
 // question engine, saves to resultFullmock and notifies Telegram.
-import { state } from "./state.js?v=3.4";
-import { auth, db, collection, addDoc, serverTimestamp } from "./firebase.js?v=3.4";
+import { state } from "./state.js?v=3.5";
+import { auth, db, collection, addDoc, serverTimestamp } from "./firebase.js?v=3.5";
 import {
   repairListeningIds,
   normalizeListeningSection,
   normalizeReadingQuestions,
   gradeItems,
-} from "../../engine/index.js?v=3.4";
+} from "../../engine/index.js?v=3.5";
 
 // Finish test
 async function handleFinishTest() {

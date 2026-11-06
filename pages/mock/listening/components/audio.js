@@ -20,9 +20,9 @@
 // The old player pulled the audio back to a saved time whenever it was
 // resumed, and a guard against seeking pulled it back again, for ever:
 // the recording froze or started over. Nothing here fights the player.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession } from "./session.js?v=3.4";
-import { storedUrl } from "./audioStore.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession } from "./session.js?v=3.5";
+import { storedUrl } from "./audioStore.js?v=3.5";
 
 export const GAP_MS = 1000;            // silence between two recording files
 export const CHECK_MS = 2 * 60 * 1000; // mock: time to check answers after the recording

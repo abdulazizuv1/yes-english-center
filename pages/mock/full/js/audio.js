@@ -1,6 +1,6 @@
 // Listening audio: one centred player pill, sequential per-section
 // playback, admin seek / student seek-block.
-import { state } from "./state.js?v=3.4";
+import { state } from "./state.js?v=3.5";
 
 // Функция для полной остановки аудио
 function stopAllAudio() {

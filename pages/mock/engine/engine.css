@@ -37,12 +37,12 @@
     border-radius: 6px;
     cursor: grab;
     user-select: none;
+    -webkit-user-select: none;
     font-size: 16px;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
     transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
 }
 .dd-item:hover { border-color: #2563eb; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18); }
-.dd-item:active { cursor: grabbing; transform: scale(0.98); }
 .dd-item.dd-armed { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
 
 .dd-item-label {
@@ -59,6 +59,27 @@
     font-weight: 700;
 }
 .dd-item-text { color: #1f2937; }
+/* the card moves by its letter, its edge, or by carrying the pointer out of
+   it; its words can be selected and highlighted like any other text */
+.dd-placed-item { user-select: none; -webkit-user-select: none; }
+.dd-item-text { cursor: text; user-select: text; -webkit-user-select: text; }
+
+/* a card being carried */
+.dd-ghost {
+    position: fixed;
+    z-index: 9999;
+    margin: 0;
+    pointer-events: none;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.28);
+    transition: none;
+}
+.dd-drag-source { opacity: 0.35; }
+.dd-slot.dd-over, .dd-items-bank.dd-over { outline: 2px solid var(--accent, #2563eb); outline-offset: 1px; }
+html.dd-dragging, html.dd-dragging * {
+    cursor: grabbing !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
 
 /* ── slots (cards mode) ── */
 .dd-slots-container { flex: 2 1 340px; display: flex; flex-direction: column; gap: 10px; }

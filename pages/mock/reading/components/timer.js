@@ -8,7 +8,7 @@
 //
 // Analyse mode has no deadline: a stopwatch counts up instead, for as long
 // as the student keeps working, and never ends the test.
-import { onBeforeSave } from "./session.js?v=3.4";
+import { onBeforeSave } from "./session.js?v=3.5";
 
 const TEN = 10 * 60 * 1000;
 const FIVE = 5 * 60 * 1000;

@@ -2,8 +2,8 @@
 // settings (both offered by the real computer-delivered test), the volume
 // control, hiding the clock, the connection indicator, and the banners
 // that tell the student something has changed.
-import { listeningState } from "./state.js?v=3.4";
-import { saveSession, onStorageHealth } from "./session.js?v=3.4";
+import { listeningState } from "./state.js?v=3.5";
+import { saveSession, onStorageHealth } from "./session.js?v=3.5";
 
 const SIZES = ["standard", "large", "xlarge"];
 const CONTRASTS = ["bw", "wb", "yb"];

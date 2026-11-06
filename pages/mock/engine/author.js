@@ -19,7 +19,7 @@
 // normalize.js already reads everything emitted here.
 // ═══════════════════════════════════════════════════════════════════════
 
-import { mapAnswerMode } from "./normalize.js?v=3.4";
+import { mapAnswerMode } from "./normalize.js?v=3.5";
 
 const esc = (s) =>
   String(s ?? "")
